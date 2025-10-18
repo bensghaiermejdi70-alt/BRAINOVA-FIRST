@@ -1,0 +1,2457 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌟 Quantum Pac-Man - IA Futuriste</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            box-sizing: border-box;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a3a 30%, #2d1b69 70%, #4c1d95 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Particules quantiques d'arrière-plan */
+        .quantum-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .quantum-particle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: #00ff88;
+            border-radius: 50%;
+            animation: quantumFloat 12s infinite linear;
+            box-shadow: 0 0 10px #00ff88, 0 0 20px #00ff88;
+        }
+
+        @keyframes quantumFloat {
+            0% {
+                transform: translateY(100vh) translateX(0) rotate(0deg) scale(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+                transform: translateY(90vh) translateX(20px) rotate(45deg) scale(1);
+            }
+            50% {
+                transform: translateY(50vh) translateX(-30px) rotate(180deg) scale(1.5);
+            }
+            90% {
+                opacity: 1;
+                transform: translateY(10vh) translateX(40px) rotate(315deg) scale(1);
+            }
+            100% {
+                transform: translateY(-10vh) translateX(80px) rotate(360deg) scale(0);
+                opacity: 0;
+            }
+        }
+
+        /* Grille quantique de fond */
+        .quantum-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(0, 255, 136, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 136, 0.1) 1px, transparent 1px);
+            background-size: 60px 60px;
+            animation: quantumGridMove 25s linear infinite;
+            z-index: 1;
+        }
+
+        @keyframes quantumGridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(60px, 60px); }
+        }
+
+        /* Container principal */
+        .quantum-pacman-container {
+            position: relative;
+            z-index: 10;
+            display: grid;
+            grid-template-columns: 200px 1fr 200px;
+            gap: 15px;
+            min-height: 100vh;
+            padding: 15px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .left-panel, .right-panel {
+            background: linear-gradient(145deg, 
+                rgba(30, 30, 58, 0.95) 0%,
+                rgba(45, 27, 105, 0.95) 50%,
+                rgba(76, 29, 149, 0.95) 100%);
+            backdrop-filter: blur(30px);
+            border-radius: 15px;
+            padding: 15px;
+            height: fit-content;
+            box-shadow: 
+                0 15px 30px rgba(0, 0, 0, 0.7),
+                0 0 60px rgba(0, 255, 136, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(0, 255, 136, 0.5);
+            animation: quantumPanelGlow 4s ease-in-out infinite alternate;
+        }
+
+        .game-panel {
+            background: linear-gradient(145deg, 
+                rgba(30, 30, 58, 0.95) 0%,
+                rgba(45, 27, 105, 0.95) 50%,
+                rgba(76, 29, 149, 0.95) 100%);
+            backdrop-filter: blur(30px);
+            border-radius: 20px;
+            padding: 20px;
+            width: 100%;
+            height: fit-content;
+            box-shadow: 
+                0 25px 50px rgba(0, 0, 0, 0.7),
+                0 0 100px rgba(0, 255, 136, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(0, 255, 136, 0.5);
+            animation: quantumPanelGlow 4s ease-in-out infinite alternate;
+        }
+
+        @keyframes quantumPanelGlow {
+            from { 
+                box-shadow: 
+                    0 25px 50px rgba(0, 0, 0, 0.7),
+                    0 0 100px rgba(0, 255, 136, 0.2),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            }
+            to { 
+                box-shadow: 
+                    0 30px 60px rgba(0, 0, 0, 0.7),
+                    0 0 120px rgba(0, 255, 136, 0.3),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            }
+        }
+
+        /* En-tête du jeu */
+        .quantum-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(0, 255, 136, 0.5);
+        }
+
+        .quantum-title {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .quantum-title h1 {
+            color: #00ff88;
+            margin: 0;
+            font-size: 20px;
+            font-weight: 700;
+            text-shadow: 0 0 30px rgba(0, 255, 136, 0.9);
+            animation: quantumTitlePulse 3s infinite alternate;
+        }
+
+        @keyframes quantumTitlePulse {
+            from { 
+                text-shadow: 0 0 30px rgba(0, 255, 136, 0.9);
+                transform: scale(1);
+            }
+            to { 
+                text-shadow: 0 0 40px rgba(0, 255, 136, 1);
+                transform: scale(1.03);
+            }
+        }
+
+        .quantum-icon {
+            font-size: 32px;
+            animation: quantumIconSpin 6s linear infinite;
+            filter: drop-shadow(0 0 20px #00ff88);
+            color: #fbbf24;
+        }
+
+        @keyframes quantumIconSpin {
+            0% { transform: rotate(0deg) scale(1); }
+            25% { transform: rotate(90deg) scale(1.1); }
+            50% { transform: rotate(180deg) scale(1); }
+            75% { transform: rotate(270deg) scale(1.1); }
+            100% { transform: rotate(360deg) scale(1); }
+        }
+
+        .quantum-badge {
+            background: linear-gradient(45deg, #00ff88, #0099ff, #ff0099, #ffaa00);
+            background-size: 400% 400%;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: bold;
+            animation: quantumBadgeShine 4s ease-in-out infinite;
+            box-shadow: 0 0 25px rgba(0, 255, 136, 0.7);
+        }
+
+        @keyframes quantumBadgeShine {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        /* Sélecteur de langue */
+        .language-selector {
+            background: linear-gradient(145deg, 
+                rgba(30, 30, 58, 0.95) 0%,
+                rgba(45, 27, 105, 0.95) 30%,
+                rgba(76, 29, 149, 0.95) 70%,
+                rgba(139, 92, 246, 0.95) 100%);
+            color: #00ff88;
+            border: 2px solid rgba(0, 255, 136, 0.6);
+            border-radius: 15px;
+            padding: 12px 18px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.3s ease;
+            box-shadow: 
+                0 0 25px rgba(0, 255, 136, 0.5),
+                0 0 40px rgba(139, 92, 246, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            min-width: 160px;
+            max-height: 220px;
+            overflow-y: auto;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.8);
+        }
+
+        .language-selector:hover {
+            background: linear-gradient(145deg, 
+                rgba(0, 255, 136, 0.9) 0%,
+                rgba(0, 153, 255, 0.9) 30%,
+                rgba(139, 92, 246, 0.9) 70%,
+                rgba(255, 0, 153, 0.9) 100%);
+            transform: translateY(-3px);
+            box-shadow: 
+                0 10px 30px rgba(0, 255, 136, 0.7),
+                0 0 50px rgba(139, 92, 246, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            color: white;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+        }
+
+        .language-selector option {
+            background: linear-gradient(145deg, #2d1b69, #4c1d95) !important;
+            color: #00ff88 !important;
+            padding: 10px 15px;
+            font-weight: bold;
+            border: 1px solid rgba(0, 255, 136, 0.4) !important;
+        }
+
+        .language-selector option:hover {
+            background: linear-gradient(145deg, #00ff88, #0099ff) !important;
+            color: white !important;
+        }
+
+        .language-selector option:checked {
+            background: linear-gradient(145deg, #00ff88, #0099ff) !important;
+            color: white !important;
+        }
+
+        .language-selector option:focus {
+            background: linear-gradient(145deg, #8b5cf6, #7c3aed) !important;
+            color: white !important;
+        }
+
+        /* Contrôles de configuration */
+        .config-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 15px;
+            border: 2px solid rgba(0, 255, 136, 0.4);
+        }
+
+        .config-btn {
+            padding: 12px 18px;
+            background: linear-gradient(145deg, #00ff88, #0099ff);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .config-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .config-btn:hover::before {
+            left: 100%;
+        }
+
+        .config-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 255, 136, 0.6);
+            background: linear-gradient(145deg, #00ffaa, #00bbff);
+        }
+
+        .config-btn.active {
+            background: linear-gradient(145deg, #ff0099, #ffaa00);
+            box-shadow: 0 0 25px rgba(255, 0, 153, 0.7);
+        }
+
+        /* Plateau de jeu */
+        .game-board-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .game-board {
+            display: grid;
+            gap: 1px;
+            border: 3px solid rgba(0, 255, 136, 0.8);
+            border-radius: 15px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            box-shadow: 
+                0 0 40px rgba(0, 255, 136, 0.6),
+                inset 0 0 20px rgba(0, 255, 136, 0.2);
+            animation: gameBoardGlow 5s ease-in-out infinite alternate;
+        }
+
+        @keyframes gameBoardGlow {
+            from { 
+                box-shadow: 
+                    0 0 40px rgba(0, 255, 136, 0.6),
+                    inset 0 0 20px rgba(0, 255, 136, 0.2);
+            }
+            to { 
+                box-shadow: 
+                    0 0 60px rgba(0, 255, 136, 0.8),
+                    inset 0 0 30px rgba(0, 255, 136, 0.3);
+            }
+        }
+
+        .game-cell {
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            position: relative;
+            transition: all 0.2s ease;
+            font-size: 28px;
+        }
+
+        .game-cell.wall {
+            background: linear-gradient(145deg, #1e40af, #3730a3);
+            border: 1px solid #00ff88;
+            box-shadow: inset 0 0 10px rgba(0, 255, 136, 0.3);
+        }
+
+        .game-cell.path {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(0, 255, 136, 0.2);
+        }
+
+        .game-cell.dot {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(0, 255, 136, 0.2);
+        }
+
+        .game-cell.dot::after {
+            content: '';
+            width: 10px;
+            height: 10px;
+            background: #fbbf24;
+            border-radius: 50%;
+            box-shadow: 0 0 15px #fbbf24, 0 0 25px #fbbf24;
+            animation: dotPulse 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes dotPulse {
+            from { transform: scale(1); opacity: 0.8; }
+            to { transform: scale(1.3); opacity: 1; }
+        }
+
+        .game-cell.power-dot {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(0, 255, 136, 0.2);
+        }
+
+        .game-cell.power-dot::after {
+            content: '';
+            width: 18px;
+            height: 18px;
+            background: #ff0099;
+            border-radius: 50%;
+            box-shadow: 0 0 20px #ff0099, 0 0 35px #ff0099;
+            animation: powerDotPulse 1s ease-in-out infinite alternate;
+        }
+
+        @keyframes powerDotPulse {
+            from { transform: scale(1); opacity: 0.8; }
+            to { transform: scale(1.5); opacity: 1; }
+        }
+
+        .game-cell.pacman {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(0, 255, 136, 0.2);
+            animation: pacmanGlow 1.5s ease-in-out infinite alternate;
+            position: relative;
+        }
+
+        .pacman-sprite {
+            width: 35px;
+            height: 35px;
+            background: #fbbf24;
+            border-radius: 50%;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 20px #fbbf24, 0 0 30px #fbbf24;
+            animation: pacmanBounce 0.3s ease-in-out infinite alternate;
+        }
+
+        .pacman-sprite::before {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            animation: pacmanMouth 0.6s ease-in-out infinite alternate;
+            z-index: 2;
+            top: 50%;
+            left: 50%;
+        }
+
+        /* Directions de Pac-Man - bouche parfaitement centrée et agrandie */
+        .pacman-right::before {
+            border-left: 20px solid #0f0f23;
+            border-top: 15px solid transparent;
+            border-bottom: 15px solid transparent;
+            transform: translate(-25%, -50%);
+        }
+
+        .pacman-left::before {
+            border-right: 20px solid #0f0f23;
+            border-top: 15px solid transparent;
+            border-bottom: 15px solid transparent;
+            transform: translate(-75%, -50%);
+        }
+
+        .pacman-up::before {
+            border-bottom: 20px solid #0f0f23;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            transform: translate(-50%, -75%);
+        }
+
+        .pacman-down::before {
+            border-top: 20px solid #0f0f23;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            transform: translate(-50%, -25%);
+        }
+
+        @keyframes pacmanGlow {
+            from { box-shadow: 0 0 15px #fbbf24; }
+            to { box-shadow: 0 0 25px #fbbf24, 0 0 35px #fbbf24; }
+        }
+
+        @keyframes pacmanBounce {
+            from { transform: scale(1); }
+            to { transform: scale(1.1); }
+        }
+
+        @keyframes pacmanMouth {
+            0% { 
+                transform: scale(0);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            100% { 
+                transform: scale(1.2);
+                opacity: 1;
+            }
+        }
+
+        /* Animation de manger */
+        .eating-animation {
+            animation: eatPulse 0.3s ease-out;
+        }
+
+        @keyframes eatPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+
+        .game-cell.ghost {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(0, 255, 136, 0.2);
+            animation: ghostGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes ghostGlow {
+            from { box-shadow: 0 0 10px currentColor; }
+            to { box-shadow: 0 0 20px currentColor, 0 0 30px currentColor; }
+        }
+
+        .game-cell.scared-ghost {
+            animation: scaredGhostBlink 0.3s ease-in-out infinite alternate, scaredGhostShake 0.1s ease-in-out infinite;
+        }
+
+        @keyframes scaredGhostBlink {
+            from { opacity: 1; }
+            to { opacity: 0.6; }
+        }
+
+        @keyframes scaredGhostShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-1px); }
+            75% { transform: translateX(1px); }
+        }
+
+        /* Panneau de titre des sections */
+        .panel-title {
+            color: #00ff88;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            text-shadow: 0 0 15px rgba(0, 255, 136, 0.9);
+            border-bottom: 2px solid rgba(0, 255, 136, 0.5);
+            padding-bottom: 10px;
+        }
+
+        /* Contrôles quantiques */
+        .quantum-controls {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .quantum-btn {
+            padding: 12px 16px;
+            background: linear-gradient(145deg, #00ff88, #0099ff);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+
+        .quantum-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .quantum-btn:hover::before {
+            left: 100%;
+        }
+
+        .quantum-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 255, 136, 0.5);
+            background: linear-gradient(145deg, #00ffaa, #00bbff);
+        }
+
+        .quantum-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Boutons spécialisés */
+        .ai-btn {
+            background: linear-gradient(145deg, #8b5cf6, #7c3aed);
+        }
+
+        .ai-btn:hover {
+            background: linear-gradient(145deg, #a78bfa, #8b5cf6);
+        }
+
+        .reset-btn {
+            background: linear-gradient(145deg, #ef4444, #dc2626);
+        }
+
+        .reset-btn:hover {
+            background: linear-gradient(145deg, #f87171, #ef4444);
+        }
+
+        .pause-btn {
+            background: linear-gradient(145deg, #f59e0b, #d97706);
+        }
+
+        .pause-btn:hover {
+            background: linear-gradient(145deg, #fbbf24, #f59e0b);
+        }
+
+        /* Statistiques du jeu */
+        .game-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .stat-item {
+            background: rgba(0, 255, 136, 0.15);
+            padding: 10px;
+            border-radius: 12px;
+            text-align: center;
+            border: 2px solid rgba(0, 255, 136, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 136, 0.3), transparent);
+            animation: statQuantumScan 4s linear infinite;
+        }
+
+        @keyframes statQuantumScan {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .stat-label {
+            display: block;
+            color: #9ca3af;
+            font-size: 10px;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-value {
+            display: block;
+            color: #00ff88;
+            font-size: 16px;
+            font-weight: bold;
+            text-shadow: 0 0 15px rgba(0, 255, 136, 0.9);
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Messages de jeu */
+        .game-message {
+            text-align: center;
+            margin-bottom: 15px;
+            padding: 15px;
+            border-radius: 12px;
+            background: rgba(0, 255, 136, 0.1);
+            border: 2px solid rgba(0, 255, 136, 0.3);
+            color: #00ff88;
+            font-weight: bold;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .quantum-pacman-container {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .left-panel, .right-panel {
+                display: none;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .game-panel {
+                padding: 15px;
+                margin: 10px;
+            }
+            
+            .config-controls {
+                grid-template-columns: 1fr;
+            }
+            
+            .quantum-title h1 {
+                font-size: 18px;
+            }
+            
+            .game-cell {
+                width: 38px;
+                height: 38px;
+                font-size: 22px;
+            }
+            
+            .pacman-sprite {
+                width: 28px;
+                height: 28px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .game-cell {
+                width: 32px;
+                height: 32px;
+                font-size: 18px;
+            }
+            
+            .pacman-sprite {
+                width: 24px;
+                height: 24px;
+            }
+            
+            .game-stats {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Animations de victoire */
+        .victory-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+
+        .victory-content {
+            background: linear-gradient(145deg, rgba(30, 30, 58, 0.95), rgba(76, 29, 149, 0.95));
+            border: 3px solid #00ff88;
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+            max-width: 500px;
+            box-shadow: 0 0 50px rgba(0, 255, 136, 0.7);
+            animation: victoryPulse 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes victoryPulse {
+            from { 
+                box-shadow: 0 0 50px rgba(0, 255, 136, 0.7);
+                transform: scale(1);
+            }
+            to { 
+                box-shadow: 0 0 80px rgba(0, 255, 136, 1);
+                transform: scale(1.05);
+            }
+        }
+
+        .victory-fireworks {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #00ff88;
+            border-radius: 50%;
+            animation: fireworks 3s ease-out infinite;
+        }
+
+        @keyframes fireworks {
+            0% {
+                transform: scale(0) rotate(0deg);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1) rotate(180deg);
+                opacity: 0.8;
+            }
+            100% {
+                transform: scale(2) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Animation de défaite */
+        .defeat-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+
+        .defeat-content {
+            background: linear-gradient(145deg, rgba(139, 69, 19, 0.95), rgba(185, 28, 28, 0.95));
+            border: 3px solid #ef4444;
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+            max-width: 500px;
+            box-shadow: 0 0 50px rgba(239, 68, 68, 0.7);
+            animation: defeatShake 1s ease-in-out infinite;
+        }
+
+        @keyframes defeatShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Particules quantiques d'arrière-plan -->
+    <div class="quantum-particles" id="quantumParticles"></div>
+    
+    <!-- Grille quantique -->
+    <div class="quantum-grid"></div>
+    
+    <!-- Container principal -->
+    <div class="quantum-pacman-container">
+        <!-- Panneau gauche -->
+        <div class="left-panel">
+            <div class="panel-section">
+                <div class="panel-title" id="controlsTitle">🎮 Contrôles Quantiques</div>
+                <div class="quantum-controls">
+                    <button class="quantum-btn pause-btn" onclick="togglePause()" id="pauseBtn">
+                        ⏸️ <span id="pauseText">Pause</span>
+                    </button>
+                    <button class="quantum-btn ai-btn" onclick="toggleAIMode()" id="aiBtn">
+                        🤖 <span id="aiModeText">Mode IA</span>
+                    </button>
+                    <button class="quantum-btn reset-btn" onclick="resetGame()">
+                        🔄 <span id="newGameText">Nouveau Jeu</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <div class="panel-title" id="statsTitle">📊 Statistiques</div>
+                <div class="game-stats">
+                    <div class="stat-item">
+                        <span class="stat-label" id="scoreLabel">Score</span>
+                        <span class="stat-value" id="scoreValue">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label" id="levelLabel">Niveau</span>
+                        <span class="stat-value" id="levelValue">1</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label" id="livesLabel">Vies</span>
+                        <span class="stat-value" id="livesValue">3</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label" id="dotsLabel">Points</span>
+                        <span class="stat-value" id="dotsValue">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panneau central -->
+        <div class="game-panel">
+            <!-- En-tête -->
+            <div class="quantum-header">
+                <div class="quantum-title">
+                    <span class="quantum-icon">🌟</span>
+                    <h1 id="gameTitle">Quantum Pac-Man</h1>
+                    <span class="quantum-badge" id="quantumBadge">🚀 IA FUTURISTE</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 18px;">
+                    <select id="languageSelector" onchange="changeLanguage()" class="language-selector">
+                        <option value="fr">🇫🇷 Français</option>
+                        <option value="en">🇺🇸 English</option>
+                        <option value="ar">🇸🇦 العربية</option>
+                        <option value="es">🇪🇸 Español</option>
+                        <option value="de">🇩🇪 Deutsch</option>
+                        <option value="zh">🇨🇳 中文</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Configuration du jeu -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; padding: 10px; background: rgba(0, 0, 0, 0.3); border-radius: 10px; border: 1px solid rgba(0, 255, 136, 0.3);">
+                <div>
+                    <div style="color: #00ff88; font-size: 11px; font-weight: bold; margin-bottom: 8px; text-align: center;" id="sizeTitle">📏 Taille</div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px;">
+                        <button class="config-btn active" onclick="setBoardSize(8)" id="size8" style="padding: 6px 8px; font-size: 10px;">8×8</button>
+                        <button class="config-btn" onclick="setBoardSize(9)" id="size9" style="padding: 6px 8px; font-size: 10px;">9×9</button>
+                        <button class="config-btn" onclick="setBoardSize(10)" id="size10" style="padding: 6px 8px; font-size: 10px;">10×10</button>
+                        <button class="config-btn" onclick="setBoardSize(11)" id="size11" style="padding: 6px 8px; font-size: 10px;">11×11</button>
+                    </div>
+                </div>
+                <div>
+                    <div style="color: #00ff88; font-size: 11px; font-weight: bold; margin-bottom: 8px; text-align: center;" id="difficultyTitle">⚡ Difficulté</div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 4px;">
+                        <button class="config-btn" onclick="setDifficulty('easy')" id="diffEasy" style="padding: 6px 8px; font-size: 10px;">
+                            <span id="easyText">Facile</span>
+                        </button>
+                        <button class="config-btn" onclick="setDifficulty('normal')" id="diffNormal" style="padding: 6px 8px; font-size: 10px;">
+                            <span id="normalText">Normal</span>
+                        </button>
+                        <button class="config-btn active" onclick="setDifficulty('hard')" id="diffHard" style="padding: 6px 8px; font-size: 10px;">
+                            <span id="hardText">Difficile</span>
+                        </button>
+                        <button class="config-btn" onclick="setDifficulty('expert')" id="diffExpert" style="padding: 6px 8px; font-size: 10px;">
+                            <span id="expertText">Expert</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bouton Pause et Message de bienvenue -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; gap: 20px;">
+                <button onclick="togglePause()" id="gamePauseBtn" style="
+                    padding: 10px 20px;
+                    background: linear-gradient(145deg, #f59e0b, #d97706);
+                    color: white;
+                    border: none;
+                    border-radius: 12px;
+                    font-weight: bold;
+                    font-size: 14px;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    flex-shrink: 0;
+                ">
+                    <span id="pauseIcon">⏸️</span>
+                    <span id="gamePauseText">Pause</span>
+                </button>
+                
+                <!-- Message de jeu -->
+                <div style="
+                    flex: 1;
+                    text-align: center;
+                    padding: 8px 15px;
+                    border-radius: 10px;
+                    background: rgba(0, 255, 136, 0.1);
+                    border: 2px solid rgba(0, 255, 136, 0.3);
+                    color: #00ff88;
+                    font-weight: bold;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    min-height: 35px;
+                    font-size: 13px;
+                    max-width: 300px;
+                " id="gameMessage">
+                    <span id="welcomeMessage">Bienvenue dans Quantum Pac-Man ! Utilisez les flèches pour vous déplacer.</span>
+                </div>
+            </div>
+
+            <!-- Plateau de jeu avec contrôles -->
+            <div style="display: flex; justify-content: center; align-items: flex-start; gap: 30px; margin-bottom: 20px; margin-top: -5px;">
+                <!-- Plateau de jeu -->
+                <div class="game-board-container" style="margin: 0;">
+                    <div class="game-board" id="gameBoard">
+                        <!-- Le plateau sera généré dynamiquement -->
+                    </div>
+                </div>
+                
+                <!-- Contrôles tactiles à droite -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; grid-template-rows: 1fr 1fr 1fr; gap: 8px; width: 180px; height: 180px;">
+                    <div></div>
+                    <button onclick="movePacman('up')" style="
+                        background: linear-gradient(145deg, #00ff88, #0099ff);
+                        border: none;
+                        border-radius: 15px;
+                        color: white;
+                        font-size: 24px;
+                        cursor: pointer;
+                        transition: all 0.2s ease;
+                        box-shadow: 0 4px 15px rgba(0, 255, 136, 0.4);
+                    " onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'">⬆️</button>
+                    <div></div>
+                    
+                    <button onclick="movePacman('left')" style="
+                        background: linear-gradient(145deg, #00ff88, #0099ff);
+                        border: none;
+                        border-radius: 15px;
+                        color: white;
+                        font-size: 24px;
+                        cursor: pointer;
+                        transition: all 0.2s ease;
+                        box-shadow: 0 4px 15px rgba(0, 255, 136, 0.4);
+                    " onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'">⬅️</button>
+                    <div style="
+                        background: rgba(0, 255, 136, 0.2);
+                        border-radius: 50%;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        font-size: 20px;
+                        border: 2px solid rgba(0, 255, 136, 0.5);
+                    ">🎮</div>
+                    <button onclick="movePacman('right')" style="
+                        background: linear-gradient(145deg, #00ff88, #0099ff);
+                        border: none;
+                        border-radius: 15px;
+                        color: white;
+                        font-size: 24px;
+                        cursor: pointer;
+                        transition: all 0.2s ease;
+                        box-shadow: 0 4px 15px rgba(0, 255, 136, 0.4);
+                    " onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'">➡️</button>
+                    
+                    <div></div>
+                    <button onclick="movePacman('down')" style="
+                        background: linear-gradient(145deg, #00ff88, #0099ff);
+                        border: none;
+                        border-radius: 15px;
+                        color: white;
+                        font-size: 24px;
+                        cursor: pointer;
+                        transition: all 0.2s ease;
+                        box-shadow: 0 4px 15px rgba(0, 255, 136, 0.4);
+                    " onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'">⬇️</button>
+                    <div></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panneau droit -->
+        <div class="right-panel">
+            <div class="panel-section">
+                <div class="panel-title" id="instructionsTitle">📖 Instructions</div>
+                <div style="color: #9ca3af; font-size: 12px; line-height: 1.6;">
+                    <p id="instructionsText">
+                        • Utilisez les flèches pour vous déplacer<br>
+                        • Mangez tous les points pour gagner<br>
+                        • Évitez les fantômes<br>
+                        • Les gros points vous donnent des pouvoirs<br>
+                        • L'IA s'adapte à votre niveau
+                    </p>
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <div class="panel-title" id="powerUpsTitle">⚡ Power-Ups</div>
+                <div style="color: #9ca3af; font-size: 12px; line-height: 1.8;">
+                    <div style="margin-bottom: 8px;">
+                        <span style="color: #fbbf24;">●</span> <span id="normalDotText">Point normal (+10)</span>
+                    </div>
+                    <div style="margin-bottom: 8px;">
+                        <span style="color: #ff0099;">●</span> <span id="powerDotText">Super point (+50)</span>
+                    </div>
+                    <div style="margin-bottom: 8px;">
+                        <span style="color: #00ff88;">😱</span> <span id="scaredGhostText">Fantôme effrayé (+100)</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <div class="panel-title" id="aiStatusTitle">🤖 Statut IA</div>
+                <div id="aiStatus" style="color: #00ff88; font-size: 12px; text-align: center; padding: 10px;">
+                    <span id="aiStatusText">IA Quantique Active</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .global-close-btn {
+            position: fixed;
+            top: 14px;
+            right: 14px;
+            z-index: 99999;
+            background: #ff3b3b;
+            color: #fff;
+            border: none;
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            font-size: 22px;
+            cursor: pointer;
+            box-shadow: 0 6px 18px rgba(255,59,59,0.3);
+        }
+        .global-close-btn:hover{ transform: scale(1.05); }
+    </style>
+    <button class="global-close-btn" title="Fermer" aria-label="Fermer" onclick="closePlatform()">✕</button>
+    <script>
+        // Traductions multilingues
+        const translations = {
+            fr: {
+                gameTitle: "Quantum Pac-Man",
+                quantumBadge: "🚀 IA FUTURISTE",
+                controlsTitle: "🎮 Contrôles Quantiques",
+                statsTitle: "📊 Statistiques",
+                sizeTitle: "📏 Taille",
+                difficultyTitle: "⚡ Difficulté",
+                instructionsTitle: "📖 Instructions",
+                powerUpsTitle: "⚡ Power-Ups",
+                aiStatusTitle: "🤖 Statut IA",
+                pauseText: "Pause",
+                resumeText: "Reprendre",
+                aiModeText: "Mode IA",
+                newGameText: "Nouveau Jeu",
+                scoreLabel: "Score",
+                levelLabel: "Niveau",
+                livesLabel: "Vies",
+                dotsLabel: "Points",
+                easyText: "Facile",
+                normalText: "Normal",
+                hardText: "Difficile",
+                expertText: "Expert",
+                welcomeMessage: "Bienvenue dans Quantum Pac-Man ! Utilisez les flèches pour vous déplacer.",
+                instructionsText: "• Utilisez les flèches pour vous déplacer<br>• Mangez tous les points pour gagner<br>• Évitez les fantômes<br>• Les gros points vous donnent des pouvoirs<br>• L'IA s'adapte à votre niveau",
+                normalDotText: "Point normal (+10)",
+                powerDotText: "Super point (+50)",
+                scaredGhostText: "Fantôme effrayé (+100)",
+                enemyEaten: "Fantôme mangé !",
+                enemyCaught: "Attrapé par un fantôme !",
+                aiStatusText: "IA Quantique Active",
+                victoryTitle: "🎉 VICTOIRE ! 🎉",
+                victoryMessage: "Félicitations ! Vous avez terminé le niveau !",
+                defeatTitle: "💀 GAME OVER 💀",
+                defeatMessage: "Vous avez perdu toutes vos vies !",
+                tryAgainText: "Essayer à nouveau",
+                nextLevelText: "Niveau suivant",
+                gamePaused: "Jeu en pause",
+                gameResumed: "Jeu repris",
+                levelComplete: "Niveau terminé !",
+                allDotsEaten: "Tous les points mangés !",
+                ghostCaught: "Attrapé par un fantôme !",
+                powerModeActive: "Mode pouvoir activé !",
+                aiModeEnabled: "Mode IA activé",
+                aiModeDisabled: "Mode IA désactivé"
+            },
+            en: {
+                gameTitle: "Quantum Pac-Man",
+                quantumBadge: "🚀 FUTURISTIC AI",
+                controlsTitle: "🎮 Quantum Controls",
+                statsTitle: "📊 Statistics",
+                sizeTitle: "📏 Size",
+                difficultyTitle: "⚡ Difficulty",
+                instructionsTitle: "📖 Instructions",
+                powerUpsTitle: "⚡ Power-Ups",
+                aiStatusTitle: "🤖 AI Status",
+                pauseText: "Pause",
+                resumeText: "Resume",
+                aiModeText: "AI Mode",
+                newGameText: "New Game",
+                scoreLabel: "Score",
+                levelLabel: "Level",
+                livesLabel: "Lives",
+                dotsLabel: "Dots",
+                easyText: "Easy",
+                normalText: "Normal",
+                hardText: "Hard",
+                expertText: "Expert",
+                welcomeMessage: "Welcome to Quantum Pac-Man! Use arrow keys to move.",
+                instructionsText: "• Use arrow keys to move<br>• Eat all dots to win<br>• Avoid ghosts<br>• Big dots give you power<br>• AI adapts to your level",
+                normalDotText: "Normal dot (+10)",
+                powerDotText: "Power dot (+50)",
+                scaredGhostText: "Scared ghost (+100)",
+                enemyEaten: "Ghost eaten!",
+                enemyCaught: "Caught by ghost!",
+                aiStatusText: "Quantum AI Active",
+                victoryTitle: "🎉 VICTORY! 🎉",
+                victoryMessage: "Congratulations! You completed the level!",
+                defeatTitle: "💀 GAME OVER 💀",
+                defeatMessage: "You lost all your lives!",
+                tryAgainText: "Try Again",
+                nextLevelText: "Next Level",
+                gamePaused: "Game paused",
+                gameResumed: "Game resumed",
+                levelComplete: "Level complete!",
+                allDotsEaten: "All dots eaten!",
+                ghostCaught: "Caught by ghost!",
+                powerModeActive: "Power mode active!",
+                aiModeEnabled: "AI mode enabled",
+                aiModeDisabled: "AI mode disabled"
+            },
+            ar: {
+                gameTitle: "باك مان الكمي",
+                quantumBadge: "🚀 ذكاء مستقبلي",
+                controlsTitle: "🎮 تحكم كمي",
+                statsTitle: "📊 إحصائيات",
+                sizeTitle: "📏 الحجم",
+                difficultyTitle: "⚡ الصعوبة",
+                instructionsTitle: "📖 التعليمات",
+                powerUpsTitle: "⚡ القوى الخاصة",
+                aiStatusTitle: "🤖 حالة الذكاء",
+                pauseText: "إيقاف",
+                resumeText: "استئناف",
+                aiModeText: "وضع الذكاء",
+                newGameText: "لعبة جديدة",
+                scoreLabel: "النقاط",
+                levelLabel: "المستوى",
+                livesLabel: "الأرواح",
+                dotsLabel: "النقاط",
+                easyText: "سهل",
+                normalText: "عادي",
+                hardText: "صعب",
+                expertText: "خبير",
+                welcomeMessage: "مرحباً بك في باك مان الكمي! استخدم الأسهم للحركة.",
+                instructionsText: "• استخدم الأسهم للحركة<br>• كل النقاط للفوز<br>• تجنب الأشباح<br>• النقاط الكبيرة تعطي قوة<br>• الذكاء الاصطناعي يتكيف مع مستواك",
+                normalDotText: "نقطة عادية (+10)",
+                powerDotText: "نقطة قوة (+50)",
+                scaredGhostText: "شبح خائف (+100)",
+                enemyEaten: "تم أكل الشبح!",
+                enemyCaught: "تم الإمساك بك من قبل شبح!",
+                aiStatusText: "الذكاء الكمي نشط",
+                victoryTitle: "🎉 انتصار! 🎉",
+                victoryMessage: "تهانينا! أكملت المستوى!",
+                defeatTitle: "💀 انتهت اللعبة 💀",
+                defeatMessage: "فقدت جميع أرواحك!",
+                tryAgainText: "حاول مرة أخرى",
+                nextLevelText: "المستوى التالي",
+                gamePaused: "اللعبة متوقفة",
+                gameResumed: "تم استئناف اللعبة",
+                levelComplete: "المستوى مكتمل!",
+                allDotsEaten: "تم أكل جميع النقاط!",
+                ghostCaught: "تم الإمساك بك من قبل شبح!",
+                powerModeActive: "وضع القوة نشط!",
+                aiModeEnabled: "تم تفعيل وضع الذكاء",
+                aiModeDisabled: "تم إلغاء وضع الذكاء"
+            },
+            es: {
+                gameTitle: "Quantum Pac-Man",
+                quantumBadge: "🚀 IA FUTURISTA",
+                controlsTitle: "🎮 Controles Cuánticos",
+                statsTitle: "📊 Estadísticas",
+                sizeTitle: "📏 Tamaño",
+                difficultyTitle: "⚡ Dificultad",
+                instructionsTitle: "📖 Instrucciones",
+                powerUpsTitle: "⚡ Potenciadores",
+                aiStatusTitle: "🤖 Estado IA",
+                pauseText: "Pausa",
+                resumeText: "Reanudar",
+                aiModeText: "Modo IA",
+                newGameText: "Nuevo Juego",
+                scoreLabel: "Puntuación",
+                levelLabel: "Nivel",
+                livesLabel: "Vidas",
+                dotsLabel: "Puntos",
+                easyText: "Fácil",
+                normalText: "Normal",
+                hardText: "Difícil",
+                expertText: "Experto",
+                welcomeMessage: "¡Bienvenido a Quantum Pac-Man! Usa las flechas para moverte.",
+                instructionsText: "• Usa las flechas para moverte<br>• Come todos los puntos para ganar<br>• Evita los fantasmas<br>• Los puntos grandes dan poder<br>• La IA se adapta a tu nivel",
+                normalDotText: "Punto normal (+10)",
+                powerDotText: "Punto de poder (+50)",
+                scaredGhostText: "Fantasma asustado (+100)",
+                enemyEaten: "¡Fantasma comido!",
+                enemyCaught: "¡Atrapado por fantasma!",
+                aiStatusText: "IA Cuántica Activa",
+                victoryTitle: "🎉 ¡VICTORIA! 🎉",
+                victoryMessage: "¡Felicidades! ¡Completaste el nivel!",
+                defeatTitle: "💀 GAME OVER 💀",
+                defeatMessage: "¡Perdiste todas tus vidas!",
+                tryAgainText: "Intentar de nuevo",
+                nextLevelText: "Siguiente nivel",
+                gamePaused: "Juego pausado",
+                gameResumed: "Juego reanudado",
+                levelComplete: "¡Nivel completado!",
+                allDotsEaten: "¡Todos los puntos comidos!",
+                ghostCaught: "¡Atrapado por fantasma!",
+                powerModeActive: "¡Modo poder activo!",
+                aiModeEnabled: "Modo IA activado",
+                aiModeDisabled: "Modo IA desactivado"
+            },
+            de: {
+                gameTitle: "Quantum Pac-Man",
+                quantumBadge: "🚀 FUTURISTISCHE KI",
+                controlsTitle: "🎮 Quanten-Steuerung",
+                statsTitle: "📊 Statistiken",
+                sizeTitle: "📏 Größe",
+                difficultyTitle: "⚡ Schwierigkeit",
+                instructionsTitle: "📖 Anweisungen",
+                powerUpsTitle: "⚡ Power-Ups",
+                aiStatusTitle: "🤖 KI-Status",
+                pauseText: "Pause",
+                resumeText: "Fortsetzen",
+                aiModeText: "KI-Modus",
+                newGameText: "Neues Spiel",
+                scoreLabel: "Punkte",
+                levelLabel: "Level",
+                livesLabel: "Leben",
+                dotsLabel: "Punkte",
+                easyText: "Einfach",
+                normalText: "Normal",
+                hardText: "Schwer",
+                expertText: "Experte",
+                welcomeMessage: "Willkommen bei Quantum Pac-Man! Verwende die Pfeiltasten zum Bewegen.",
+                instructionsText: "• Verwende Pfeiltasten zum Bewegen<br>• Iss alle Punkte zum Gewinnen<br>• Vermeide Geister<br>• Große Punkte geben Kraft<br>• KI passt sich deinem Level an",
+                normalDotText: "Normaler Punkt (+10)",
+                powerDotText: "Kraft-Punkt (+50)",
+                scaredGhostText: "Erschreckter Geist (+100)",
+                enemyEaten: "Geist gefressen!",
+                enemyCaught: "Von Geist gefangen!",
+                aiStatusText: "Quanten-KI Aktiv",
+                victoryTitle: "🎉 SIEG! 🎉",
+                victoryMessage: "Glückwunsch! Du hast das Level geschafft!",
+                defeatTitle: "💀 GAME OVER 💀",
+                defeatMessage: "Du hast alle Leben verloren!",
+                tryAgainText: "Nochmal versuchen",
+                nextLevelText: "Nächstes Level",
+                gamePaused: "Spiel pausiert",
+                gameResumed: "Spiel fortgesetzt",
+                levelComplete: "Level abgeschlossen!",
+                allDotsEaten: "Alle Punkte gegessen!",
+                ghostCaught: "Von Geist gefangen!",
+                powerModeActive: "Kraft-Modus aktiv!",
+                aiModeEnabled: "KI-Modus aktiviert",
+                aiModeDisabled: "KI-Modus deaktiviert"
+            },
+            zh: {
+                gameTitle: "量子吃豆人",
+                quantumBadge: "🚀 未来人工智能",
+                controlsTitle: "🎮 量子控制",
+                statsTitle: "📊 统计数据",
+                sizeTitle: "📏 大小",
+                difficultyTitle: "⚡ 难度",
+                instructionsTitle: "📖 说明",
+                powerUpsTitle: "⚡ 能量道具",
+                aiStatusTitle: "🤖 AI状态",
+                pauseText: "暂停",
+                resumeText: "继续",
+                aiModeText: "AI模式",
+                newGameText: "新游戏",
+                scoreLabel: "得分",
+                levelLabel: "等级",
+                livesLabel: "生命",
+                dotsLabel: "点数",
+                easyText: "简单",
+                normalText: "普通",
+                hardText: "困难",
+                expertText: "专家",
+                welcomeMessage: "欢迎来到量子吃豆人！使用方向键移动。",
+                instructionsText: "• 使用方向键移动<br>• 吃掉所有点数获胜<br>• 避开幽灵<br>• 大点数给予力量<br>• AI会适应你的水平",
+                normalDotText: "普通点数 (+10)",
+                powerDotText: "能量点数 (+50)",
+                scaredGhostText: "害怕的幽灵 (+200)",
+                enemyEaten: "幽灵被吃掉！",
+                enemyCaught: "被幽灵抓住！",
+                aiStatusText: "量子AI已启用",
+                victoryTitle: "🎉 胜利！🎉",
+                victoryMessage: "恭喜！你完成了这一关！",
+                defeatTitle: "💀 游戏结束 💀",
+                defeatMessage: "你失去了所有生命！",
+                tryAgainText: "再试一次",
+                nextLevelText: "下一关",
+                gamePaused: "游戏暂停",
+                gameResumed: "游戏继续",
+                levelComplete: "关卡完成！",
+                allDotsEaten: "所有点数已吃完！",
+                ghostCaught: "被幽灵抓住！",
+                powerModeActive: "能量模式激活！",
+                aiModeEnabled: "AI模式已启用",
+                aiModeDisabled: "AI模式已禁用"
+            }
+        };
+
+        function closePlatform(){
+            console.debug('jeux6: closePlatform called');
+            try{
+                if (window.parent && window.parent !== window) {
+                    window.parent.postMessage({ action: 'close', reason: 'user-initiated', source: 'jeux6' }, '*');
+                    return;
+                }
+            }catch(e){}
+            try{
+                if (window.opener && !window.opener.closed) {
+                    try{ window.opener.postMessage({ action: 'child-closed', source: 'jeux6' }, '*'); }catch(e){}
+                    try{ window.close(); }catch(e){}
+                    return;
+                }
+            }catch(e){}
+            try{ window.location.href = '/global_platform.html'; }catch(e){}
+        }
+
+        // État du jeu
+        let gameState = {
+            board: [],
+            boardSize: 8,
+            difficulty: 'hard',
+            currentLanguage: 'fr',
+            pacman: { x: 1, y: 1, direction: 'right' },
+            ghosts: [],
+            score: 0,
+            level: 1,
+            lives: 3,
+            totalDots: 0,
+            eatenDots: 0,
+            isGameActive: false,
+            isPaused: false,
+            aiMode: true,
+            powerMode: false,
+            powerModeTimer: 0,
+            gameLoop: null,
+            ghostMoveTimer: 0,
+            aiMoveTimer: 0,
+            ghostPauseTimer: 0 // Timer pour donner un avantage à Pac-Man
+        };
+
+        // Types de cellules
+        const CELL_TYPES = {
+            WALL: 0,
+            DOT: 1,
+            POWER_DOT: 2,
+            EMPTY: 3,
+            PACMAN: 4,
+            GHOST: 5
+        };
+
+        // Directions
+        const DIRECTIONS = {
+            up: { x: 0, y: -1 },
+            down: { x: 0, y: 1 },
+            left: { x: -1, y: 0 },
+            right: { x: 1, y: 0 }
+        };
+
+        // Créer les particules quantiques
+        function createQuantumParticles() {
+            const container = document.getElementById('quantumParticles');
+            
+            for(let i = 0; i < 30; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'quantum-particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 12 + 's';
+                particle.style.animationDuration = (12 + Math.random() * 6) + 's';
+                container.appendChild(particle);
+            }
+        }
+
+        // Fonction de changement de langue
+        function changeLanguage() {
+            const selector = document.getElementById('languageSelector');
+            const selectedLang = selector.value;
+            gameState.currentLanguage = selectedLang;
+            
+            const t = translations[selectedLang];
+            
+            // Mettre à jour tous les textes
+            document.getElementById('gameTitle').textContent = t.gameTitle;
+            document.getElementById('quantumBadge').textContent = t.quantumBadge;
+            document.getElementById('controlsTitle').textContent = t.controlsTitle;
+            document.getElementById('statsTitle').textContent = t.statsTitle;
+            document.getElementById('sizeTitle').textContent = t.sizeTitle;
+            document.getElementById('difficultyTitle').textContent = t.difficultyTitle;
+            document.getElementById('instructionsTitle').textContent = t.instructionsTitle;
+            document.getElementById('powerUpsTitle').textContent = t.powerUpsTitle;
+            document.getElementById('aiStatusTitle').textContent = t.aiStatusTitle;
+            
+            document.getElementById('pauseText').textContent = gameState.isPaused ? t.resumeText : t.pauseText;
+            document.getElementById('aiModeText').textContent = t.aiModeText;
+            document.getElementById('newGameText').textContent = t.newGameText;
+            
+            // Mettre à jour le bouton pause principal
+            const gamePauseBtn = document.getElementById('gamePauseText');
+            const pauseIcon = document.getElementById('pauseIcon');
+            if(gamePauseBtn && pauseIcon) {
+                gamePauseBtn.textContent = gameState.isPaused ? t.resumeText : t.pauseText;
+                pauseIcon.textContent = gameState.isPaused ? '▶️' : '⏸️';
+            }
+            
+            document.getElementById('scoreLabel').textContent = t.scoreLabel;
+            document.getElementById('levelLabel').textContent = t.levelLabel;
+            document.getElementById('livesLabel').textContent = t.livesLabel;
+            document.getElementById('dotsLabel').textContent = t.dotsLabel;
+            
+            document.getElementById('easyText').textContent = t.easyText;
+            document.getElementById('normalText').textContent = t.normalText;
+            document.getElementById('hardText').textContent = t.hardText;
+            document.getElementById('expertText').textContent = t.expertText;
+            
+            document.getElementById('welcomeMessage').textContent = t.welcomeMessage;
+            document.getElementById('instructionsText').innerHTML = t.instructionsText;
+            document.getElementById('normalDotText').textContent = t.normalDotText;
+            document.getElementById('powerDotText').textContent = t.powerDotText;
+            document.getElementById('scaredGhostText').textContent = t.scaredGhostText;
+            document.getElementById('aiStatusText').textContent = t.aiStatusText;
+            
+            // Mettre à jour le statut IA selon le mode actuel
+            const aiStatusElement = document.getElementById('aiStatusText');
+            if(aiStatusElement) {
+                aiStatusElement.textContent = gameState.aiMode ? t.aiStatusText : t.aiModeDisabled;
+            }
+        }
+
+        // Générer le plateau de jeu
+        function generateBoard() {
+            const size = gameState.boardSize;
+            gameState.board = [];
+            gameState.totalDots = 0;
+            gameState.eatenDots = 0;
+            
+            // Initialiser avec des murs
+            for(let y = 0; y < size; y++) {
+                gameState.board[y] = [];
+                for(let x = 0; x < size; x++) {
+                    gameState.board[y][x] = CELL_TYPES.WALL;
+                }
+            }
+            
+            // Créer des chemins avec l'algorithme de labyrinthe
+            createMaze();
+            
+            // Placer les points
+            placeDots();
+            
+            // Placer Pac-Man dans une position de départ sûre
+            gameState.pacman = { x: 2, y: 2, direction: 'right' };
+            
+            // Placer les fantômes
+            placeGhosts();
+        }
+
+        // Créer un labyrinthe
+        function createMaze() {
+            const size = gameState.boardSize;
+            const totalCells = size * size;
+            const targetEmptyCells = Math.floor(totalCells * 0.8); // 80% des cases doivent être accessibles
+            
+            // Initialiser toutes les cases comme vides d'abord
+            for(let y = 0; y < size; y++) {
+                for(let x = 0; x < size; x++) {
+                    gameState.board[y][x] = CELL_TYPES.EMPTY;
+                }
+            }
+            
+            // Créer des murs stratégiques pour atteindre exactement 80% de cases libres
+            const wallsNeeded = totalCells - targetEmptyCells;
+            let wallsPlaced = 0;
+            
+            // Placer des murs de manière stratégique
+            while(wallsPlaced < wallsNeeded) {
+                const x = Math.floor(Math.random() * size);
+                const y = Math.floor(Math.random() * size);
+                
+                // Ne pas placer de murs sur les bords (pour garder les extrémités libres)
+                if((x === 0 || x === size-1 || y === 0 || y === size-1)) {
+                    continue;
+                }
+                
+                // Ne pas placer de mur sur la position de départ de Pac-Man
+                if(x === 2 && y === 2) {
+                    continue;
+                }
+                
+                // Placer le mur seulement si la case est vide
+                if(gameState.board[y][x] === CELL_TYPES.EMPTY) {
+                    gameState.board[y][x] = CELL_TYPES.WALL;
+                    
+                    // Vérifier que tous les points restent accessibles
+                    if(areAllCellsAccessible()) {
+                        wallsPlaced++;
+                    } else {
+                        // Annuler ce mur s'il rend des zones inaccessibles
+                        gameState.board[y][x] = CELL_TYPES.EMPTY;
+                    }
+                }
+            }
+            
+            // S'assurer que les extrémités sont libres
+            gameState.board[0][0] = CELL_TYPES.EMPTY;
+            gameState.board[0][size-1] = CELL_TYPES.EMPTY;
+            gameState.board[size-1][0] = CELL_TYPES.EMPTY;
+            gameState.board[size-1][size-1] = CELL_TYPES.EMPTY;
+            
+            // S'assurer que les bords ont des chemins
+            for(let i = 0; i < size; i++) {
+                if(Math.random() > 0.7) {
+                    gameState.board[0][i] = CELL_TYPES.EMPTY; // Bord haut
+                    gameState.board[size-1][i] = CELL_TYPES.EMPTY; // Bord bas
+                    gameState.board[i][0] = CELL_TYPES.EMPTY; // Bord gauche
+                    gameState.board[i][size-1] = CELL_TYPES.EMPTY; // Bord droit
+                }
+            }
+        }
+        
+        // Vérifier que toutes les cases vides sont accessibles depuis la position de Pac-Man
+        function areAllCellsAccessible() {
+            const size = gameState.boardSize;
+            const visited = Array(size).fill().map(() => Array(size).fill(false));
+            const queue = [{x: 2, y: 2}]; // Position de départ de Pac-Man
+            visited[2][2] = true;
+            
+            // BFS pour vérifier l'accessibilité
+            while(queue.length > 0) {
+                const {x, y} = queue.shift();
+                
+                // Vérifier les 4 directions
+                const directions = [{x: 0, y: -1}, {x: 0, y: 1}, {x: -1, y: 0}, {x: 1, y: 0}];
+                directions.forEach(dir => {
+                    const newX = x + dir.x;
+                    const newY = y + dir.y;
+                    
+                    if(newX >= 0 && newX < size && newY >= 0 && newY < size &&
+                       !visited[newY][newX] && gameState.board[newY][newX] !== CELL_TYPES.WALL) {
+                        visited[newY][newX] = true;
+                        queue.push({x: newX, y: newY});
+                    }
+                });
+            }
+            
+            // Vérifier que toutes les cases vides sont visitées
+            for(let y = 0; y < size; y++) {
+                for(let x = 0; x < size; x++) {
+                    if(gameState.board[y][x] !== CELL_TYPES.WALL && !visited[y][x]) {
+                        return false;
+                    }
+                }
+            }
+            
+            return true;
+        }
+
+        // Placer les points
+        function placeDots() {
+            const size = gameState.boardSize;
+            
+            for(let y = 0; y < size; y++) {
+                for(let x = 0; x < size; x++) {
+                    if(gameState.board[y][x] === CELL_TYPES.EMPTY) {
+                        // Placer des super points dans les coins
+                        if((x === 1 && y === 1) || 
+                           (x === size-2 && y === 1) || 
+                           (x === 1 && y === size-2) || 
+                           (x === size-2 && y === size-2)) {
+                            gameState.board[y][x] = CELL_TYPES.POWER_DOT;
+                        } else {
+                            gameState.board[y][x] = CELL_TYPES.DOT;
+                        }
+                        gameState.totalDots++;
+                    }
+                }
+            }
+        }
+
+        // Placer les fantômes
+        function placeGhosts() {
+            gameState.ghosts = [];
+            const size = gameState.boardSize;
+            const numGhosts = Math.min(4, Math.floor(size / 3));
+            
+            const ghostColors = ['#ff0066', '#00ff66', '#6600ff', '#ff6600'];
+            const ghostEmojis = ['💀', '☠️', '👹', '😈'];
+            
+            for(let i = 0; i < numGhosts; i++) {
+                let x, y;
+                do {
+                    x = Math.floor(Math.random() * (size - 2)) + 1;
+                    y = Math.floor(Math.random() * (size - 2)) + 1;
+                } while(gameState.board[y][x] === CELL_TYPES.WALL || 
+                        (x === gameState.pacman.x && y === gameState.pacman.y) ||
+                        Math.abs(x - gameState.pacman.x) + Math.abs(y - gameState.pacman.y) < 3);
+                
+                gameState.ghosts.push({
+                    x: x,
+                    y: y,
+                    emoji: ghostEmojis[i],
+                    color: ghostColors[i],
+                    direction: ['up', 'down', 'left', 'right'][Math.floor(Math.random() * 4)],
+                    scared: false,
+                    scaredTimer: 0
+                });
+            }
+        }
+
+        // Créer l'affichage du plateau
+        function createBoardDisplay() {
+            const board = document.getElementById('gameBoard');
+            const size = gameState.boardSize;
+            
+            board.innerHTML = '';
+            board.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
+            board.style.gridTemplateRows = `repeat(${size}, 1fr)`;
+            
+            for(let y = 0; y < size; y++) {
+                for(let x = 0; x < size; x++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'game-cell';
+                    cell.id = `cell-${x}-${y}`;
+                    
+                    const cellType = gameState.board[y][x];
+                    
+                    if(cellType === CELL_TYPES.WALL) {
+                        cell.classList.add('wall');
+                        cell.textContent = '⬛';
+                    } else if(cellType === CELL_TYPES.DOT) {
+                        cell.classList.add('dot');
+                    } else if(cellType === CELL_TYPES.POWER_DOT) {
+                        cell.classList.add('power-dot');
+                    } else {
+                        cell.classList.add('path');
+                    }
+                    
+                    board.appendChild(cell);
+                }
+            }
+            
+            updateDisplay();
+        }
+
+        // Mettre à jour l'affichage
+        function updateDisplay() {
+            const size = gameState.boardSize;
+            
+            // Effacer les positions précédentes
+            document.querySelectorAll('.game-cell').forEach(cell => {
+                cell.classList.remove('pacman', 'ghost', 'scared-ghost');
+                cell.innerHTML = ''; // Vider complètement le contenu
+                
+                if(!cell.classList.contains('wall')) {
+                    const coords = cell.id.split('-');
+                    const x = parseInt(coords[1]);
+                    const y = parseInt(coords[2]);
+                    const cellType = gameState.board[y][x];
+                    
+                    // Réinitialiser les classes
+                    cell.className = 'game-cell';
+                    
+                    if(cellType === CELL_TYPES.DOT) {
+                        cell.classList.add('dot');
+                    } else if(cellType === CELL_TYPES.POWER_DOT) {
+                        cell.classList.add('power-dot');
+                    } else {
+                        cell.classList.add('path');
+                    }
+                }
+            });
+            
+            // Afficher Pac-Man
+            const pacmanCell = document.getElementById(`cell-${gameState.pacman.x}-${gameState.pacman.y}`);
+            if(pacmanCell) {
+                // Réinitialiser les classes de la cellule
+                pacmanCell.className = 'game-cell pacman';
+                
+                // Créer le sprite de Pac-Man avec animation de bouche
+                const pacmanSprite = document.createElement('div');
+                pacmanSprite.className = `pacman-sprite pacman-${gameState.pacman.direction}`;
+                
+                // Pac-Man sans yeux pour un look plus classique
+                
+                pacmanCell.appendChild(pacmanSprite);
+            }
+            
+            // Afficher les fantômes
+            gameState.ghosts.forEach(ghost => {
+                const ghostCell = document.getElementById(`cell-${ghost.x}-${ghost.y}`);
+                if(ghostCell) {
+                    ghostCell.classList.add('ghost');
+                    if(gameState.powerMode && ghost.scared) {
+                        ghostCell.classList.add('scared-ghost');
+                        ghostCell.textContent = '😱';
+                        ghostCell.style.color = '#00aaff';
+                        ghostCell.style.textShadow = '0 0 15px #00aaff';
+                    } else {
+                        ghostCell.textContent = ghost.emoji;
+                        ghostCell.style.color = ghost.color;
+                        ghostCell.style.textShadow = `0 0 15px ${ghost.color}`;
+                    }
+                }
+            });
+            
+            // Mettre à jour les statistiques
+            document.getElementById('scoreValue').textContent = gameState.score;
+            document.getElementById('levelValue').textContent = gameState.level;
+            document.getElementById('livesValue').textContent = gameState.lives;
+            document.getElementById('dotsValue').textContent = `${gameState.eatenDots}/${gameState.totalDots}`;
+        }
+
+        // Trouver la direction vers le point le plus proche
+        function findDirectionToNearestDot() {
+            const pacX = gameState.pacman.x;
+            const pacY = gameState.pacman.y;
+            let nearestDot = null;
+            let minDistance = Infinity;
+            
+            // Chercher le point le plus proche
+            for(let y = 0; y < gameState.boardSize; y++) {
+                for(let x = 0; x < gameState.boardSize; x++) {
+                    if(gameState.board[y][x] === CELL_TYPES.DOT || gameState.board[y][x] === CELL_TYPES.POWER_DOT) {
+                        const distance = Math.abs(x - pacX) + Math.abs(y - pacY);
+                        if(distance < minDistance) {
+                            minDistance = distance;
+                            nearestDot = { x, y };
+                        }
+                    }
+                }
+            }
+            
+            if(!nearestDot) return gameState.pacman.direction;
+            
+            // Déterminer la direction vers le point le plus proche
+            const deltaX = nearestDot.x - pacX;
+            const deltaY = nearestDot.y - pacY;
+            
+            // Prioriser la direction avec la plus grande différence
+            if(Math.abs(deltaX) > Math.abs(deltaY)) {
+                return deltaX > 0 ? 'right' : 'left';
+            } else {
+                return deltaY > 0 ? 'down' : 'up';
+            }
+        }
+
+        // Orienter Pac-Man automatiquement vers les points
+        function orientPacmanTowardsDots() {
+            if(!gameState.isGameActive || gameState.isPaused) return;
+            
+            const newDirection = findDirectionToNearestDot();
+            if(newDirection !== gameState.pacman.direction) {
+                gameState.pacman.direction = newDirection;
+                updateDisplay();
+            }
+        }
+
+        // Déplacer Pac-Man
+        function movePacman(direction) {
+            if(!gameState.isGameActive || gameState.isPaused) return;
+            
+            const newX = gameState.pacman.x + DIRECTIONS[direction].x;
+            const newY = gameState.pacman.y + DIRECTIONS[direction].y;
+            
+            // Vérifier les limites et les murs
+            if(newX < 0 || newX >= gameState.boardSize || 
+               newY < 0 || newY >= gameState.boardSize ||
+               gameState.board[newY][newX] === CELL_TYPES.WALL) {
+                return;
+            }
+            
+            gameState.pacman.x = newX;
+            gameState.pacman.y = newY;
+            
+            // Orienter Pac-Man dans la direction du mouvement
+            gameState.pacman.direction = direction;
+            
+            // Vérifier si Pac-Man mange un point
+            const cellType = gameState.board[newY][newX];
+            if(cellType === CELL_TYPES.DOT) {
+                gameState.score += 10;
+                gameState.eatenDots++;
+                gameState.board[newY][newX] = CELL_TYPES.EMPTY;
+                
+                // Donner un avantage à Pac-Man : ralentir les ennemis temporairement
+                gameState.ghostPauseTimer = 800; // 800ms de pause pour les ennemis
+                
+                // Animation de manger immédiate
+                const pacmanCell = document.getElementById(`cell-${newX}-${newY}`);
+                if(pacmanCell) {
+                    // Supprimer la classe dot pour faire disparaître le point
+                    pacmanCell.classList.remove('dot');
+                    pacmanCell.classList.add('path');
+                    
+                    setTimeout(() => {
+                        const sprite = pacmanCell.querySelector('.pacman-sprite');
+                        if(sprite) {
+                            sprite.classList.add('eating-animation');
+                            setTimeout(() => {
+                                sprite.classList.remove('eating-animation');
+                            }, 300);
+                        }
+                    }, 50);
+                }
+                
+            } else if(cellType === CELL_TYPES.POWER_DOT) {
+                gameState.score += 50;
+                gameState.eatenDots++;
+                gameState.board[newY][newX] = CELL_TYPES.EMPTY;
+                
+                // Donner un gros avantage à Pac-Man : pause plus longue pour les ennemis
+                gameState.ghostPauseTimer = 1500; // 1.5 secondes de pause pour les ennemis
+                
+                // Animation de manger immédiate (plus intense pour les power dots)
+                const pacmanCell = document.getElementById(`cell-${newX}-${newY}`);
+                if(pacmanCell) {
+                    // Supprimer la classe power-dot pour faire disparaître le point
+                    pacmanCell.classList.remove('power-dot');
+                    pacmanCell.classList.add('path');
+                    
+                    setTimeout(() => {
+                        const sprite = pacmanCell.querySelector('.pacman-sprite');
+                        if(sprite) {
+                            sprite.classList.add('eating-animation');
+                            sprite.style.animation = 'eatPulse 0.5s ease-out, pacmanBounce 0.3s ease-in-out infinite alternate';
+                            setTimeout(() => {
+                                sprite.classList.remove('eating-animation');
+                                sprite.style.animation = 'pacmanBounce 0.3s ease-in-out infinite alternate';
+                            }, 500);
+                        }
+                    }, 50);
+                }
+                
+                activatePowerMode();
+            }
+            
+            // Vérifier la victoire
+            if(gameState.eatenDots >= gameState.totalDots) {
+                showVictory();
+                return;
+            }
+            
+            // Vérifier les collisions avec les fantômes
+            checkGhostCollisions();
+            
+            updateDisplay();
+        }
+
+        // Activer le mode pouvoir
+        function activatePowerMode() {
+            gameState.powerMode = true;
+            gameState.powerModeTimer = 10000; // 10 secondes pour avoir le temps de manger les ennemis
+            
+            // Effrayer tous les ennemis
+            gameState.ghosts.forEach(ghost => {
+                ghost.scared = true;
+                ghost.scaredTimer = 10000;
+            });
+            
+            const t = translations[gameState.currentLanguage];
+            showMessage(t.powerModeActive, 2000);
+        }
+
+        // Déplacer les fantômes
+        function moveGhosts() {
+            if(!gameState.isGameActive || gameState.isPaused) return;
+            
+            // Si les ennemis sont en pause (Pac-Man vient de manger), ne pas les déplacer
+            if(gameState.ghostPauseTimer > 0) {
+                return;
+            }
+            
+            gameState.ghosts.forEach(ghost => {
+                // Réduire le timer de peur
+                if(ghost.scared && ghost.scaredTimer > 0) {
+                    ghost.scaredTimer -= 200;
+                    if(ghost.scaredTimer <= 0) {
+                        ghost.scared = false;
+                    }
+                }
+                
+                let newX, newY;
+                
+                if(gameState.aiMode && !ghost.scared) {
+                    // IA pour poursuivre Pac-Man (mais moins agressive)
+                    const moves = getValidMoves(ghost.x, ghost.y);
+                    if(moves.length > 0) {
+                        // 70% de chance de poursuivre, 30% de mouvement aléatoire pour donner plus d'avantage à Pac-Man
+                        if(Math.random() < 0.7) {
+                            // Choisir le mouvement qui rapproche le plus de Pac-Man
+                            let bestMove = moves[0];
+                            let bestDistance = getDistance(bestMove.x, bestMove.y, gameState.pacman.x, gameState.pacman.y);
+                            
+                            moves.forEach(move => {
+                                const distance = getDistance(move.x, move.y, gameState.pacman.x, gameState.pacman.y);
+                                if(distance < bestDistance) {
+                                    bestDistance = distance;
+                                    bestMove = move;
+                                }
+                            });
+                            
+                            newX = bestMove.x;
+                            newY = bestMove.y;
+                        } else {
+                            // Mouvement aléatoire
+                            const randomMove = moves[Math.floor(Math.random() * moves.length)];
+                            newX = randomMove.x;
+                            newY = randomMove.y;
+                        }
+                    } else {
+                        newX = ghost.x;
+                        newY = ghost.y;
+                    }
+                } else {
+                    // Mouvement aléatoire ou fuite si effrayé
+                    const moves = getValidMoves(ghost.x, ghost.y);
+                    if(moves.length > 0) {
+                        if(ghost.scared) {
+                            // Fuir Pac-Man
+                            let bestMove = moves[0];
+                            let bestDistance = getDistance(bestMove.x, bestMove.y, gameState.pacman.x, gameState.pacman.y);
+                            
+                            moves.forEach(move => {
+                                const distance = getDistance(move.x, move.y, gameState.pacman.x, gameState.pacman.y);
+                                if(distance > bestDistance) {
+                                    bestDistance = distance;
+                                    bestMove = move;
+                                }
+                            });
+                            
+                            newX = bestMove.x;
+                            newY = bestMove.y;
+                        } else {
+                            // Mouvement aléatoire
+                            const randomMove = moves[Math.floor(Math.random() * moves.length)];
+                            newX = randomMove.x;
+                            newY = randomMove.y;
+                        }
+                    } else {
+                        newX = ghost.x;
+                        newY = ghost.y;
+                    }
+                }
+                
+                ghost.x = newX;
+                ghost.y = newY;
+            });
+            
+            checkGhostCollisions();
+        }
+
+        // Obtenir les mouvements valides
+        function getValidMoves(x, y) {
+            const moves = [];
+            
+            Object.values(DIRECTIONS).forEach(dir => {
+                const newX = x + dir.x;
+                const newY = y + dir.y;
+                
+                if(newX >= 0 && newX < gameState.boardSize && 
+                   newY >= 0 && newY < gameState.boardSize &&
+                   gameState.board[newY][newX] !== CELL_TYPES.WALL) {
+                    moves.push({ x: newX, y: newY });
+                }
+            });
+            
+            return moves;
+        }
+
+        // Calculer la distance
+        function getDistance(x1, y1, x2, y2) {
+            return Math.abs(x1 - x2) + Math.abs(y1 - y2);
+        }
+
+        // Vérifier les collisions avec les ennemis
+        function checkGhostCollisions() {
+            gameState.ghosts.forEach((ghost, index) => {
+                if(ghost.x === gameState.pacman.x && ghost.y === gameState.pacman.y) {
+                    if(gameState.powerMode && ghost.scared) {
+                        // Pac-Man mange l'ennemi pendant le mode pouvoir
+                        gameState.score += 200;
+                        const t = translations[gameState.currentLanguage];
+                        showMessage(t.enemyEaten, 1500);
+                        
+                        // Respawn de l'ennemi dans un endroit sûr
+                        respawnGhost(index);
+                    } else if(!gameState.powerMode) {
+                        // Pac-Man est attrapé par l'ennemi - Game Over
+                        gameState.lives--;
+                        const t = translations[gameState.currentLanguage];
+                        showMessage(t.enemyCaught, 2000);
+                        
+                        if(gameState.lives <= 0) {
+                            showDefeat();
+                        } else {
+                            // Respawn de Pac-Man à la position de départ
+                            gameState.pacman.x = 2;
+                            gameState.pacman.y = 2;
+                            gameState.pacman.direction = 'right';
+                        }
+                    }
+                }
+            });
+        }
+
+        // Respawn d'un fantôme mangé
+        function respawnGhost(index) {
+            const size = gameState.boardSize;
+            let x, y;
+            
+            // Respawn dans une zone éloignée de Pac-Man
+            do {
+                x = Math.floor(Math.random() * (size - 2)) + 1;
+                y = Math.floor(Math.random() * (size - 2)) + 1;
+            } while(gameState.board[y][x] === CELL_TYPES.WALL || 
+                    (x === gameState.pacman.x && y === gameState.pacman.y) ||
+                    Math.abs(x - gameState.pacman.x) + Math.abs(y - gameState.pacman.y) < 4);
+            
+            gameState.ghosts[index].x = x;
+            gameState.ghosts[index].y = y;
+            gameState.ghosts[index].scared = false;
+            gameState.ghosts[index].scaredTimer = 0;
+            
+            // Petit délai avant que le fantôme redevienne actif
+            setTimeout(() => {
+                if(gameState.ghosts[index]) {
+                    gameState.ghosts[index].justRespawned = false;
+                }
+            }, 1000);
+            
+            gameState.ghosts[index].justRespawned = true;
+        }
+
+        // Afficher un message
+        function showMessage(message, duration = 3000) {
+            const messageElement = document.getElementById('gameMessage');
+            messageElement.textContent = message;
+            
+            if(duration > 0) {
+                setTimeout(() => {
+                    const t = translations[gameState.currentLanguage];
+                    messageElement.textContent = t.welcomeMessage;
+                }, duration);
+            }
+        }
+
+        // Afficher la victoire
+        function showVictory() {
+            gameState.isGameActive = false;
+            clearInterval(gameState.gameLoop);
+            
+            const t = translations[gameState.currentLanguage];
+            
+            // Créer l'animation de victoire
+            const overlay = document.createElement('div');
+            overlay.className = 'victory-animation';
+            
+            const content = document.createElement('div');
+            content.className = 'victory-content';
+            content.innerHTML = `
+                <h2>${t.victoryTitle}</h2>
+                <p style="margin: 20px 0;">${t.victoryMessage}</p>
+                <p style="margin: 10px 0; color: #00ff88;">Score: ${gameState.score}</p>
+                <p style="margin: 10px 0; color: #fbbf24;">Niveau: ${gameState.level}</p>
+                <button onclick="nextLevel()" style="
+                    margin: 20px 10px 10px 10px;
+                    padding: 15px 30px;
+                    background: linear-gradient(145deg, #00ff88, #0099ff);
+                    color: white;
+                    border: none;
+                    border-radius: 15px;
+                    font-size: 16px;
+                    font-weight: bold;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                ">${t.nextLevelText}</button>
+                <button onclick="resetGame()" style="
+                    margin: 10px;
+                    padding: 15px 30px;
+                    background: linear-gradient(145deg, #ef4444, #dc2626);
+                    color: white;
+                    border: none;
+                    border-radius: 15px;
+                    font-size: 16px;
+                    font-weight: bold;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                ">${t.newGameText}</button>
+            `;
+            
+            // Ajouter des feux d'artifice
+            for(let i = 0; i < 20; i++) {
+                const firework = document.createElement('div');
+                firework.className = 'victory-fireworks';
+                firework.style.left = Math.random() * 100 + '%';
+                firework.style.top = Math.random() * 100 + '%';
+                firework.style.animationDelay = Math.random() * 3 + 's';
+                overlay.appendChild(firework);
+            }
+            
+            overlay.appendChild(content);
+            document.body.appendChild(overlay);
+        }
+
+        // Afficher la défaite
+        function showDefeat() {
+            gameState.isGameActive = false;
+            clearInterval(gameState.gameLoop);
+            
+            const t = translations[gameState.currentLanguage];
+            
+            // Créer l'animation de défaite
+            const overlay = document.createElement('div');
+            overlay.className = 'defeat-animation';
+            
+            const content = document.createElement('div');
+            content.className = 'defeat-content';
+            content.innerHTML = `
+                <h2>${t.defeatTitle}</h2>
+                <p style="margin: 20px 0;">${t.defeatMessage}</p>
+                <p style="margin: 10px 0; color: #ef4444;">Score Final: ${gameState.score}</p>
+                <p style="margin: 10px 0; color: #fbbf24;">Niveau Atteint: ${gameState.level}</p>
+                <button onclick="resetGame()" style="
+                    margin: 20px 10px;
+                    padding: 15px 30px;
+                    background: linear-gradient(145deg, #00ff88, #0099ff);
+                    color: white;
+                    border: none;
+                    border-radius: 15px;
+                    font-size: 16px;
+                    font-weight: bold;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                ">${t.tryAgainText}</button>
+            `;
+            
+            overlay.appendChild(content);
+            document.body.appendChild(overlay);
+        }
+
+        // Niveau suivant
+        function nextLevel() {
+            // Fermer l'overlay de victoire
+            const overlay = document.querySelector('.victory-animation');
+            if(overlay) {
+                document.body.removeChild(overlay);
+            }
+            
+            gameState.level++;
+            gameState.lives = Math.min(gameState.lives + 1, 5); // Bonus de vie
+            
+            // Augmenter la difficulté
+            if(gameState.level % 3 === 0) {
+                gameState.boardSize = Math.min(gameState.boardSize + 1, 11);
+            }
+            
+            startGame();
+        }
+
+        // Démarrer le jeu
+        function startGame() {
+            gameState.isGameActive = true;
+            gameState.isPaused = false;
+            gameState.powerMode = false;
+            gameState.powerModeTimer = 0;
+            gameState.ghostPauseTimer = 0;
+            
+            generateBoard();
+            createBoardDisplay();
+            
+            // Démarrer la boucle de jeu
+            if(gameState.gameLoop) {
+                clearInterval(gameState.gameLoop);
+            }
+            
+            gameState.gameLoop = setInterval(() => {
+                if(gameState.isGameActive && !gameState.isPaused) {
+                    gameState.ghostMoveTimer += 200;
+                    
+                    // Réduire le timer de pause des ennemis
+                    if(gameState.ghostPauseTimer > 0) {
+                        gameState.ghostPauseTimer -= 200;
+                    }
+                    
+                    // Déplacer les fantômes selon la difficulté (vitesses réduites)
+                    let ghostMoveInterval;
+                    switch(gameState.difficulty) {
+                        case 'easy': ghostMoveInterval = 1200; break;
+                        case 'normal': ghostMoveInterval = 1000; break;
+                        case 'hard': ghostMoveInterval = 800; break;
+                        case 'expert': ghostMoveInterval = 600; break;
+                    }
+                    
+                    if(gameState.ghostMoveTimer >= ghostMoveInterval) {
+                        moveGhosts();
+                        gameState.ghostMoveTimer = 0;
+                    }
+                    
+                    // Réduire le timer du mode pouvoir
+                    if(gameState.powerMode && gameState.powerModeTimer > 0) {
+                        gameState.powerModeTimer -= 200;
+                        if(gameState.powerModeTimer <= 0) {
+                            gameState.powerMode = false;
+                            gameState.ghosts.forEach(ghost => {
+                                ghost.scared = false;
+                                ghost.scaredTimer = 0;
+                            });
+                        }
+                    }
+                    
+                    // Orienter Pac-Man vers les points automatiquement
+                    orientPacmanTowardsDots();
+                    
+                    updateDisplay();
+                }
+            }, 200);
+            
+            const t = translations[gameState.currentLanguage];
+            showMessage(t.welcomeMessage, 3000);
+        }
+
+        // Fonctions de configuration
+        function setBoardSize(size) {
+            gameState.boardSize = size;
+            
+            // Mettre à jour les boutons
+            document.querySelectorAll('[id^="size"]').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`size${size}`).classList.add('active');
+            
+            if(gameState.isGameActive) {
+                resetGame();
+            }
+        }
+
+        function setDifficulty(difficulty) {
+            gameState.difficulty = difficulty;
+            
+            // Mettre à jour les boutons
+            document.querySelectorAll('[id^="diff"]').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`diff${difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}`).classList.add('active');
+        }
+
+        // Fonctions de contrôle
+        function togglePause() {
+            gameState.isPaused = !gameState.isPaused;
+            const t = translations[gameState.currentLanguage];
+            
+            // Mettre à jour le bouton du panneau gauche
+            const leftPauseBtn = document.getElementById('pauseText');
+            if(leftPauseBtn) {
+                leftPauseBtn.textContent = gameState.isPaused ? t.resumeText : t.pauseText;
+            }
+            
+            // Mettre à jour le bouton principal du jeu
+            const gamePauseBtn = document.getElementById('gamePauseText');
+            const pauseIcon = document.getElementById('pauseIcon');
+            if(gamePauseBtn && pauseIcon) {
+                gamePauseBtn.textContent = gameState.isPaused ? t.resumeText : t.pauseText;
+                pauseIcon.textContent = gameState.isPaused ? '▶️' : '⏸️';
+            }
+            
+            showMessage(gameState.isPaused ? t.gamePaused : t.gameResumed, 1500);
+        }
+
+        function toggleAIMode() {
+            gameState.aiMode = !gameState.aiMode;
+            const t = translations[gameState.currentLanguage];
+            
+            const btn = document.getElementById('aiBtn');
+            const aiStatusElement = document.getElementById('aiStatusText');
+            
+            if(gameState.aiMode) {
+                btn.style.background = 'linear-gradient(145deg, #8b5cf6, #7c3aed)';
+                if(aiStatusElement) aiStatusElement.textContent = t.aiStatusText;
+                showMessage(t.aiModeEnabled, 2000);
+            } else {
+                btn.style.background = 'linear-gradient(145deg, #6b7280, #4b5563)';
+                if(aiStatusElement) aiStatusElement.textContent = t.aiModeDisabled;
+                showMessage(t.aiModeDisabled, 2000);
+            }
+        }
+
+        function resetGame() {
+            // Fermer les overlays
+            const victoryOverlay = document.querySelector('.victory-animation');
+            const defeatOverlay = document.querySelector('.defeat-animation');
+            if(victoryOverlay) document.body.removeChild(victoryOverlay);
+            if(defeatOverlay) document.body.removeChild(defeatOverlay);
+            
+            // Réinitialiser l'état
+            gameState.score = 0;
+            gameState.level = 1;
+            gameState.lives = 3;
+            gameState.isGameActive = false;
+            gameState.isPaused = false;
+            
+            if(gameState.gameLoop) {
+                clearInterval(gameState.gameLoop);
+            }
+            
+            startGame();
+        }
+
+        // Gestion des touches
+        document.addEventListener('keydown', (event) => {
+            if(!gameState.isGameActive || gameState.isPaused) return;
+            
+            switch(event.key) {
+                case 'ArrowUp':
+                    event.preventDefault();
+                    movePacman('up');
+                    break;
+                case 'ArrowDown':
+                    event.preventDefault();
+                    movePacman('down');
+                    break;
+                case 'ArrowLeft':
+                    event.preventDefault();
+                    movePacman('left');
+                    break;
+                case 'ArrowRight':
+                    event.preventDefault();
+                    movePacman('right');
+                    break;
+                case ' ':
+                    event.preventDefault();
+                    togglePause();
+                    break;
+            }
+        });
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            createQuantumParticles();
+            startGame();
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9849fbb4e7627782',t:'MTc1ODc5NzY2My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
