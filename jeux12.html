@@ -1,0 +1,1681 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Poker - Jeu de Poker Futuriste</title>
+    <style>
+        body {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            overflow-x: auto;
+        }
+
+        .quantum-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: radial-gradient(circle at 20% 80%, rgba(0, 255, 255, 0.3) 0%, transparent 50%),
+                        radial-gradient(circle at 80% 20%, rgba(255, 0, 255, 0.3) 0%, transparent 50%),
+                        radial-gradient(circle at 40% 40%, rgba(255, 215, 0, 0.2) 0%, transparent 50%);
+        }
+
+        .quantum-particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: #00ffff;
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+            box-shadow: 0 0 6px #00ffff;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.7; }
+            50% { transform: translateY(-20px) rotate(180deg); opacity: 1; }
+        }
+
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            background: linear-gradient(135deg, rgba(15, 15, 35, 0.95) 0%, rgba(30, 30, 60, 0.95) 100%);
+            border: 3px solid rgba(0, 255, 255, 0.4);
+            border-radius: 25px;
+            backdrop-filter: blur(20px);
+            box-shadow: 
+                0 0 50px rgba(0, 255, 255, 0.3),
+                inset 0 0 50px rgba(0, 255, 255, 0.1);
+            padding: 20px;
+            margin: 20px auto;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .main-container::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #00ffff, #ff00ff, #ffff00, #00ffff);
+            border-radius: 25px;
+            z-index: -1;
+            animation: borderGlow 3s linear infinite;
+        }
+
+        @keyframes borderGlow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, rgba(15, 15, 35, 0.95) 0%, rgba(30, 30, 60, 0.95) 100%);
+            border: 2px solid rgba(0, 255, 255, 0.5);
+            border-radius: 15px;
+            padding: 20px 25px;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 8px 32px rgba(0, 255, 255, 0.2);
+            position: relative;
+            z-index: 10;
+        }
+
+        .game-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            background: linear-gradient(135deg, rgba(15, 15, 35, 0.95) 0%, rgba(30, 30, 60, 0.95) 100%);
+            border: 2px solid rgba(0, 255, 255, 0.5);
+            border-radius: 15px;
+            padding: 20px 25px;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 8px 32px rgba(0, 255, 255, 0.2);
+            position: relative;
+            z-index: 1;
+        }
+
+        .game-mode-selector {
+            display: flex;
+            gap: 15px;
+        }
+
+        .mode-btn {
+            background: linear-gradient(135deg, rgba(30, 30, 60, 0.8) 0%, rgba(60, 60, 90, 0.8) 100%);
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .mode-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: rgba(0, 255, 255, 0.8);
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.5);
+        }
+
+        .mode-btn:hover:not(.active) {
+            border-color: rgba(0, 255, 255, 0.6);
+            background: linear-gradient(135deg, rgba(60, 60, 90, 0.9) 0%, rgba(90, 90, 120, 0.9) 100%);
+        }
+
+        .action-controls {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .game-title {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .game-title h1 {
+            font-size: 28px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #00ffff, #ff00ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 0;
+            text-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
+            letter-spacing: 2px;
+        }
+
+        .game-logo {
+            font-size: 32px;
+            filter: drop-shadow(0 0 20px #00ffff);
+            animation: pulse 3s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .language-selector {
+            position: relative;
+            display: inline-block;
+        }
+
+        .language-dropdown {
+            background: linear-gradient(135deg, rgba(15, 15, 35, 0.95) 0%, rgba(30, 30, 60, 0.95) 100%);
+            border: 2px solid rgba(0, 255, 255, 0.5);
+            border-radius: 8px;
+            color: #00ffff;
+            padding: 6px 10px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(0, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: bold;
+            min-width: 70px;
+            justify-content: space-between;
+        }
+
+        .language-dropdown:hover {
+            border-color: rgba(0, 255, 255, 0.8);
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.1) 0%, rgba(255, 0, 255, 0.1) 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 255, 255, 0.3);
+        }
+
+        .language-options {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            left: auto;
+            min-width: 160px;
+            background: linear-gradient(135deg, rgba(15, 15, 35, 0.98) 0%, rgba(30, 30, 60, 0.98) 100%);
+            border: 2px solid rgba(0, 255, 255, 0.5);
+            border-radius: 15px;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 8px 32px rgba(0, 255, 255, 0.3);
+            z-index: 99999999;
+            margin-top: 8px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+        }
+
+        .language-options.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .language-option {
+            padding: 12px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #ffffff;
+            font-weight: bold;
+            border-bottom: 1px solid rgba(0, 255, 255, 0.1);
+        }
+
+        .language-option:last-child {
+            border-bottom: none;
+            border-radius: 0 0 13px 13px;
+        }
+
+        .language-option:first-child {
+            border-radius: 13px 13px 0 0;
+        }
+
+        .language-option:hover {
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.2) 0%, rgba(255, 0, 255, 0.2) 100%);
+            color: #00ffff;
+            transform: translateX(5px);
+        }
+
+        .language-option.active {
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.3) 0%, rgba(255, 0, 255, 0.3) 100%);
+            color: #00ffff;
+        }
+
+        .game-container {
+            display: grid;
+            grid-template-columns: 250px 1fr 250px;
+            gap: 25px;
+            min-height: 650px;
+            margin-top: 20px;
+        }
+
+        .sidebar {
+            background: linear-gradient(135deg, rgba(15, 15, 35, 0.95) 0%, rgba(30, 30, 60, 0.95) 100%);
+            border: 3px solid rgba(0, 255, 255, 0.4);
+            border-radius: 20px;
+            padding: 20px;
+            backdrop-filter: blur(15px);
+            box-shadow: 
+                0 10px 40px rgba(0, 255, 255, 0.2),
+                inset 0 0 30px rgba(0, 255, 255, 0.05);
+            height: fit-content;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sidebar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00ffff, #ff00ff, #00ffff, transparent);
+            animation: scanLine 2s linear infinite;
+        }
+
+        @keyframes scanLine {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .poker-table {
+            background: linear-gradient(135deg, rgba(15, 15, 35, 0.98) 0%, rgba(30, 30, 60, 0.98) 100%);
+            border: 4px solid rgba(0, 255, 255, 0.6);
+            border-radius: 50%;
+            width: 600px;
+            height: 400px;
+            margin: 0 auto;
+            position: relative;
+            box-shadow: 
+                0 0 60px rgba(0, 255, 255, 0.4),
+                inset 0 0 40px rgba(0, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .table-center {
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.8) 0%, rgba(30, 30, 60, 0.8) 100%);
+            border: 2px solid rgba(255, 215, 0, 0.5);
+            border-radius: 20px;
+            width: 300px;
+            height: 200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
+        }
+
+        .community-cards {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .card {
+            width: 45px;
+            height: 65px;
+            background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
+            border: 2px solid #333;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 5px;
+            font-weight: bold;
+            font-size: 12px;
+            color: #333;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(0, 255, 255, 0.4);
+        }
+
+        .card.red {
+            color: #d63031;
+        }
+
+        .card.black {
+            color: #2d3436;
+        }
+
+        .card-back {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .pot-info {
+            text-align: center;
+            color: #ffd700;
+            font-weight: bold;
+        }
+
+        .pot-amount {
+            font-size: 24px;
+            text-shadow: 0 0 10px #ffd700;
+        }
+
+        .player-seat {
+            position: absolute;
+            width: 120px;
+            height: 80px;
+            background: linear-gradient(135deg, rgba(15, 15, 35, 0.95) 0%, rgba(30, 30, 60, 0.95) 100%);
+            border: 2px solid rgba(0, 255, 255, 0.5);
+            border-radius: 15px;
+            padding: 10px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 20px rgba(0, 255, 255, 0.2);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        .player-seat.active {
+            border-color: #ffd700;
+            box-shadow: 0 0 25px rgba(255, 215, 0, 0.5);
+        }
+
+        .player-seat.ai {
+            border-color: #ff00ff;
+            box-shadow: 0 0 25px rgba(255, 0, 255, 0.3);
+        }
+
+        .player-name {
+            font-weight: bold;
+            color: #00ffff;
+            margin-bottom: 5px;
+        }
+
+        .player-chips {
+            color: #ffd700;
+            font-weight: bold;
+        }
+
+        .player-cards {
+            display: flex;
+            gap: 5px;
+            margin-top: 5px;
+        }
+
+        .player-cards .card {
+            width: 25px;
+            height: 35px;
+            font-size: 8px;
+            padding: 2px;
+        }
+
+        .seat-1 { top: -40px; left: 50%; transform: translateX(-50%); }
+        .seat-2 { top: 20px; right: -60px; }
+        .seat-3 { bottom: 20px; right: -60px; }
+        .seat-4 { bottom: -40px; left: 50%; transform: translateX(-50%); }
+        .seat-5 { bottom: 20px; left: -60px; }
+        .seat-6 { top: 20px; left: -60px; }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .quantum-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .quantum-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        }
+
+        .quantum-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .quantum-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .quantum-btn:hover::before {
+            left: 100%;
+        }
+
+        .action-btn {
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+            color: #1a1a2e;
+        }
+
+        .action-btn:hover:not(:disabled) {
+            background: linear-gradient(135deg, #ffed4e 0%, #ffd700 100%);
+            box-shadow: 0 6px 20px rgba(255, 215, 0, 0.6);
+        }
+
+        .danger-btn {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+        }
+
+        .danger-btn:hover:not(:disabled) {
+            background: linear-gradient(135deg, #ee5a24 0%, #ff6b6b 100%);
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.6);
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #00ffff;
+            margin-bottom: 15px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .player-info {
+            background: rgba(30, 30, 60, 0.8);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            backdrop-filter: blur(5px);
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 10;
+        }
+
+        .player-info:hover {
+            border-color: rgba(0, 255, 255, 0.6);
+            background: rgba(30, 30, 60, 0.9);
+        }
+
+        .player-info.current-player {
+            border-color: #ffd700;
+            background: rgba(255, 215, 0, 0.1);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-weight: bold;
+            color: #ffffff;
+        }
+
+        .bet-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .bet-slider {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.2);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .bet-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00ffff, #ff00ff);
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        }
+
+        .bet-amount {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: #ffd700;
+            margin: 10px 0;
+        }
+
+        .game-message {
+            background: rgba(15, 15, 35, 0.9);
+            border: 2px solid rgba(0, 255, 255, 0.5);
+            border-radius: 15px;
+            padding: 15px;
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+            color: #00ffff;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            margin-bottom: 20px;
+        }
+
+        .hand-strength {
+            background: linear-gradient(135deg, rgba(0, 255, 0, 0.2) 0%, rgba(255, 215, 0, 0.2) 100%);
+            border: 1px solid rgba(0, 255, 0, 0.5);
+            border-radius: 10px;
+            padding: 10px;
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .ai-thinking {
+            animation: thinking 2s ease-in-out infinite;
+        }
+
+        @keyframes thinking {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+
+        @media (max-width: 1200px) {
+            .game-container {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .poker-table {
+                width: 500px;
+                height: 350px;
+            }
+            
+            .sidebar {
+                order: 2;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .poker-table {
+                width: 400px;
+                height: 300px;
+            }
+            
+            .game-title h1 {
+                font-size: 20px;
+            }
+            
+            .controls {
+                gap: 10px;
+            }
+            
+            .quantum-btn {
+                padding: 10px 20px;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="quantum-bg"></div>
+    
+    <div class="main-container">
+        <!-- En-tête du jeu -->
+        <div class="game-header">
+            <div class="game-title">
+                <div class="game-logo">🃏</div>
+                <h1 id="gameTitle">QUANTUM POKER</h1>
+            </div>
+            
+            <div class="language-selector">
+                <div class="language-dropdown" onclick="toggleLanguageDropdown()">
+                    <span id="currentLanguage">🇫🇷 FR</span>
+                    <span style="font-size: 10px;">▼</span>
+                </div>
+                <div class="language-options" id="languageOptions">
+                    <div class="language-option active" onclick="selectLanguage('fr', '🇫🇷 FR')">🇫🇷 Français</div>
+                    <div class="language-option" onclick="selectLanguage('en', '🇬🇧 EN')">🇬🇧 English</div>
+                    <div class="language-option" onclick="selectLanguage('es', '🇪🇸 ES')">🇪🇸 Español</div>
+                    <div class="language-option" onclick="selectLanguage('ar', '🇸🇦 AR')">🇸🇦 العربية</div>
+                    <div class="language-option" onclick="selectLanguage('de', '🇩🇪 DE')">🇩🇪 Deutsch</div>
+                    <div class="language-option" onclick="selectLanguage('zh', '🇨🇳 ZH')">🇨🇳 中文</div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Bloc de contrôles de jeu -->
+        <div class="game-controls">
+            <div class="action-controls">
+                <button class="quantum-btn" onclick="newGame()">🚀 <span id="newGameBtn">Nouvelle Partie</span></button>
+                <button class="quantum-btn action-btn" id="callBtn" onclick="callBet()" disabled>📞 <span id="callBtnText">Suivre</span></button>
+                <button class="quantum-btn action-btn" id="raiseBtn" onclick="raiseBet()" disabled>⬆️ <span id="raiseBtnText">Relancer</span></button>
+                <button class="quantum-btn danger-btn" id="foldBtn" onclick="foldHand()" disabled>❌ <span id="foldBtnText">Se Coucher</span></button>
+                <button class="quantum-btn" onclick="showRules()">📋 <span id="rulesBtn">Règles</span></button>
+            </div>
+        </div>
+
+        <div class="game-container">
+            <!-- Sidebar gauche - Joueurs -->
+            <div class="sidebar">
+                <div class="section-title" id="gameModeTitle">🎮 Mode de Jeu</div>
+                <div class="game-mode-selector" style="margin-bottom: 20px; justify-content: center;">
+                    <button class="quantum-btn mode-btn active" id="aiModeBtn" onclick="selectGameMode('ai')" style="font-size: 12px; padding: 8px 16px;">
+                        🤖 <span id="aiModeText">IA</span>
+                    </button>
+                    <button class="quantum-btn mode-btn" id="humanModeBtn" onclick="selectGameMode('human')" style="font-size: 12px; padding: 8px 16px;">
+                        👥 <span id="humanModeText">4J</span>
+                    </button>
+                </div>
+                
+                <div class="section-title" id="playersTitle">👥 Joueurs</div>
+                <div id="playersContainer"></div>
+                
+                <div class="section-title" id="gameStatsTitle" style="margin-top: 30px;">📊 Statistiques</div>
+                <div class="player-info">
+                    <div class="stat-item">
+                        <span id="handLabel">Main:</span>
+                        <span class="stat-value" id="handValue">1</span>
+                    </div>
+                    <div class="stat-item">
+                        <span id="roundLabel">Manche:</span>
+                        <span class="stat-value" id="roundValue">Pré-Flop</span>
+                    </div>
+                    <div class="stat-item">
+                        <span id="potLabel">Pot:</span>
+                        <span class="stat-value" id="potValue">₹0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Table de poker principale -->
+            <div class="main-board">
+                <div class="game-message" id="gameMessage">
+                    <span>Bienvenue au Quantum Poker! Cliquez sur "Nouvelle Partie" pour commencer.</span>
+                </div>
+
+                <div class="poker-table">
+                    <div class="table-center">
+                        <div class="community-cards" id="communityCards">
+                            <div class="card card-back">🃏</div>
+                            <div class="card card-back">🃏</div>
+                            <div class="card card-back">🃏</div>
+                            <div class="card card-back">🃏</div>
+                            <div class="card card-back">🃏</div>
+                        </div>
+                        <div class="pot-info">
+                            <div id="potLabel2">POT</div>
+                            <div class="pot-amount" id="potAmount">₹0</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Sièges des joueurs -->
+                    <div class="player-seat seat-1" id="seat1">
+                        <div class="player-name">Joueur 1</div>
+                        <div class="player-chips">₹1000</div>
+                        <div class="player-cards">
+                            <div class="card card-back">🃏</div>
+                            <div class="card card-back">🃏</div>
+                        </div>
+                    </div>
+                    
+                    <div class="player-seat seat-2 ai" id="seat2">
+                        <div class="player-name">IA Alpha 🤖</div>
+                        <div class="player-chips">₹1000</div>
+                        <div class="player-cards">
+                            <div class="card card-back">🃏</div>
+                            <div class="card card-back">🃏</div>
+                        </div>
+                    </div>
+                    
+                    <div class="player-seat seat-3" id="seat3" style="display: none;">
+                        <div class="player-name">Joueur 3</div>
+                        <div class="player-chips">₹1000</div>
+                        <div class="player-cards">
+                            <div class="card card-back">🃏</div>
+                            <div class="card card-back">🃏</div>
+                        </div>
+                    </div>
+                    
+                    <div class="player-seat seat-4" id="seat4" style="display: none;">
+                        <div class="player-name">Joueur 4</div>
+                        <div class="player-chips">₹1000</div>
+                        <div class="player-cards">
+                            <div class="card card-back">🃏</div>
+                            <div class="card card-back">🃏</div>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+
+            <!-- Sidebar droite - Actions et IA -->
+            <div class="sidebar">
+                <div class="section-title" id="aiTitle">🤖 IA Quantique</div>
+                <div class="player-info">
+                    <div style="color: #00ffff; font-size: 12px; text-align: center; line-height: 1.4;" id="aiStatusText">
+                        Système IA initialisé<br>
+                        Analyse des probabilités...
+                    </div>
+                </div>
+                
+                <div class="section-title" id="yourCardsTitle" style="margin-top: 30px;">🃏 Vos Cartes</div>
+                <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 20px;" id="playerCards">
+                    <div class="card card-back">🃏</div>
+                    <div class="card card-back">🃏</div>
+                </div>
+                
+                <div class="hand-strength" id="handStrength">
+                    <div style="font-weight: bold; color: #00ff00;">Force de la main</div>
+                    <div id="handStrengthValue">En attente...</div>
+                </div>
+                
+                <div class="section-title" id="betTitle" style="margin-top: 30px;">💰 Mise</div>
+                <div class="bet-controls">
+                    <input type="range" class="bet-slider" id="betSlider" min="0" max="1000" value="0" oninput="updateBetAmount()">
+                    <div class="bet-amount" id="betAmount">₹0</div>
+                    <button class="quantum-btn action-btn" id="betBtn" onclick="placeBet()" disabled>💰 <span id="betBtnText">Miser</span></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .global-close-btn { position: fixed; top: 14px; right: 14px; z-index: 99999; background: #ff3b3b; color: #fff; border: none; width:52px; height:52px; border-radius:50%; font-size:22px; cursor:pointer; box-shadow:0 6px 18px rgba(255,59,59,0.3);} 
+        .global-close-btn:hover{ transform: scale(1.05); }
+    </style>
+    <button class="global-close-btn" title="Fermer" aria-label="Fermer" onclick="closePlatform()">✕</button>
+    <script>
+        function closePlatform(){
+            try{ console.debug('jeux12: closePlatform called'); }catch(e){}
+            try{
+                if(window.parent && window.parent !== window){
+                    window.parent.postMessage({ action: 'close', reason: 'user-initiated', source: 'jeux12' }, '*');
+                    return;
+                }
+            }catch(e){}
+            try{
+                if(window.opener && !window.opener.closed){
+                    try{ window.opener.postMessage({ action: 'child-closed', source: 'jeux12' }, '*'); }catch(e){}
+                    try{ window.close(); }catch(e){}
+                    return;
+                }
+            }catch(e){}
+            try{ window.location.href = '/brainova.html'; }catch(e){}
+        }
+    </script>
+    <script>
+        // État du jeu
+        let gameState = {
+            isPlaying: false,
+            currentPlayer: 0,
+            players: [],
+            deck: [],
+            communityCards: [],
+            pot: 0,
+            currentBet: 0,
+            round: 'preflop', // preflop, flop, turn, river
+            handNumber: 1,
+            currentLanguage: 'fr',
+            playerCards: [],
+            betAmount: 0,
+            gameMode: 'ai' // 'ai' ou 'human'
+        };
+
+        // Traductions
+        const translations = {
+            fr: {
+                gameTitle: 'QUANTUM POKER',
+                gameModeTitle: '🎮 Mode de Jeu',
+                playersTitle: '👥 Joueurs',
+                gameStatsTitle: '📊 Statistiques',
+                aiTitle: '🤖 IA Quantique',
+                yourCardsTitle: '🃏 Vos Cartes',
+                betTitle: '💰 Mise',
+                welcomeMessage: 'Bienvenue au Quantum Poker! Cliquez sur "Nouvelle Partie" pour commencer.',
+                gameStarted: 'Nouvelle partie commencée! À vous de jouer.',
+                handLabel: 'Main',
+                roundLabel: 'Manche',
+                potLabel: 'Pot',
+                newGameBtn: 'Nouvelle Partie',
+                callBtnText: 'Suivre',
+                raiseBtnText: 'Relancer',
+                foldBtnText: 'Se Coucher',
+                rulesBtn: 'Règles',
+                betBtnText: 'Miser',
+                aiModeText: 'IA',
+                humanModeText: '4J',
+                aiStatus: 'Système IA initialisé\nAnalyse des probabilités...',
+                handStrengthWaiting: 'En attente...',
+                chipsLabel: 'Jetons',
+                betLabel: 'Mise',
+                statusLabel: 'Statut',
+                playerName: 'Joueur',
+                aiName: 'IA Alpha 🤖',
+                rounds: {
+                    preflop: 'Pré-Flop',
+                    flop: 'Flop',
+                    turn: 'Turn',
+                    river: 'River'
+                },
+                actions: {
+                    call: 'suit',
+                    raise: 'relance',
+                    fold: 'se couche',
+                    bet: 'mise'
+                }
+            },
+            en: {
+                gameTitle: 'QUANTUM POKER',
+                gameModeTitle: '🎮 Game Mode',
+                playersTitle: '👥 Players',
+                gameStatsTitle: '📊 Statistics',
+                aiTitle: '🤖 Quantum AI',
+                yourCardsTitle: '🃏 Your Cards',
+                betTitle: '💰 Bet',
+                welcomeMessage: 'Welcome to Quantum Poker! Click "New Game" to start.',
+                gameStarted: 'New game started! Your turn to play.',
+                handLabel: 'Hand',
+                roundLabel: 'Round',
+                potLabel: 'Pot',
+                newGameBtn: 'New Game',
+                callBtnText: 'Call',
+                raiseBtnText: 'Raise',
+                foldBtnText: 'Fold',
+                rulesBtn: 'Rules',
+                betBtnText: 'Bet',
+                aiModeText: 'AI',
+                humanModeText: '4P',
+                aiStatus: 'AI System initialized\nProbability analysis...',
+                handStrengthWaiting: 'Waiting...',
+                chipsLabel: 'Chips',
+                betLabel: 'Bet',
+                statusLabel: 'Status',
+                playerName: 'Player',
+                aiName: 'AI Alpha 🤖',
+                rounds: {
+                    preflop: 'Pre-Flop',
+                    flop: 'Flop',
+                    turn: 'Turn',
+                    river: 'River'
+                },
+                actions: {
+                    call: 'calls',
+                    raise: 'raises',
+                    fold: 'folds',
+                    bet: 'bets'
+                }
+            },
+            es: {
+                gameTitle: 'QUANTUM POKER',
+                gameModeTitle: '🎮 Modo de Juego',
+                playersTitle: '👥 Jugadores',
+                gameStatsTitle: '📊 Estadísticas',
+                aiTitle: '🤖 IA Cuántica',
+                yourCardsTitle: '🃏 Tus Cartas',
+                betTitle: '💰 Apuesta',
+                welcomeMessage: '¡Bienvenido al Quantum Poker! Haz clic en "Nueva Partida" para empezar.',
+                gameStarted: '¡Nueva partida iniciada! Tu turno para jugar.',
+                handLabel: 'Mano',
+                roundLabel: 'Ronda',
+                potLabel: 'Bote',
+                newGameBtn: 'Nueva Partida',
+                callBtnText: 'Igualar',
+                raiseBtnText: 'Subir',
+                foldBtnText: 'Retirarse',
+                rulesBtn: 'Reglas',
+                betBtnText: 'Apostar',
+                aiModeText: 'IA',
+                humanModeText: '4J',
+                aiStatus: 'Sistema IA inicializado\nAnálisis de probabilidades...',
+                handStrengthWaiting: 'Esperando...',
+                chipsLabel: 'Fichas',
+                betLabel: 'Apuesta',
+                statusLabel: 'Estado',
+                playerName: 'Jugador',
+                aiName: 'IA Alpha 🤖',
+                rounds: {
+                    preflop: 'Pre-Flop',
+                    flop: 'Flop',
+                    turn: 'Turn',
+                    river: 'River'
+                },
+                actions: {
+                    call: 'iguala',
+                    raise: 'sube',
+                    fold: 'se retira',
+                    bet: 'apuesta'
+                }
+            },
+            ar: {
+                gameTitle: 'بوكر كمومي',
+                gameModeTitle: '🎮 نمط اللعب',
+                playersTitle: '👥 اللاعبون',
+                gameStatsTitle: '📊 الإحصائيات',
+                aiTitle: '🤖 الذكاء الكمومي',
+                yourCardsTitle: '🃏 أوراقك',
+                betTitle: '💰 الرهان',
+                welcomeMessage: 'مرحباً بك في البوكر الكمومي! اضغط على "لعبة جديدة" للبدء.',
+                gameStarted: 'بدأت لعبة جديدة! دورك للعب.',
+                handLabel: 'اليد',
+                roundLabel: 'الجولة',
+                potLabel: 'الوعاء',
+                newGameBtn: 'لعبة جديدة',
+                callBtnText: 'متابعة',
+                raiseBtnText: 'رفع',
+                foldBtnText: 'انسحاب',
+                rulesBtn: 'القواعد',
+                betBtnText: 'رهان',
+                aiModeText: 'ذكي',
+                humanModeText: '4ل',
+                aiStatus: 'تم تهيئة نظام الذكاء الاصطناعي\nتحليل الاحتماليات...',
+                handStrengthWaiting: 'في الانتظار...',
+                chipsLabel: 'رقائق',
+                betLabel: 'رهان',
+                statusLabel: 'الحالة',
+                playerName: 'لاعب',
+                aiName: 'ذكاء ألفا 🤖',
+                rounds: {
+                    preflop: 'ما قبل الفلوب',
+                    flop: 'الفلوب',
+                    turn: 'التيرن',
+                    river: 'الريفر'
+                },
+                actions: {
+                    call: 'يتابع',
+                    raise: 'يرفع',
+                    fold: 'ينسحب',
+                    bet: 'يراهن'
+                }
+            },
+            de: {
+                gameTitle: 'QUANTUM POKER',
+                gameModeTitle: '🎮 Spielmodus',
+                playersTitle: '👥 Spieler',
+                gameStatsTitle: '📊 Statistiken',
+                aiTitle: '🤖 Quanten-KI',
+                yourCardsTitle: '🃏 Ihre Karten',
+                betTitle: '💰 Einsatz',
+                welcomeMessage: 'Willkommen bei Quantum Poker! Klicken Sie auf "Neues Spiel" um zu beginnen.',
+                gameStarted: 'Neues Spiel gestartet! Sie sind dran.',
+                handLabel: 'Hand',
+                roundLabel: 'Runde',
+                potLabel: 'Pot',
+                newGameBtn: 'Neues Spiel',
+                callBtnText: 'Mitgehen',
+                raiseBtnText: 'Erhöhen',
+                foldBtnText: 'Passen',
+                rulesBtn: 'Regeln',
+                betBtnText: 'Setzen',
+                aiModeText: 'KI',
+                humanModeText: '4S',
+                aiStatus: 'KI-System initialisiert\nWahrscheinlichkeitsanalyse...',
+                handStrengthWaiting: 'Warten...',
+                chipsLabel: 'Chips',
+                betLabel: 'Einsatz',
+                statusLabel: 'Status',
+                playerName: 'Spieler',
+                aiName: 'KI Alpha 🤖',
+                rounds: {
+                    preflop: 'Pre-Flop',
+                    flop: 'Flop',
+                    turn: 'Turn',
+                    river: 'River'
+                },
+                actions: {
+                    call: 'geht mit',
+                    raise: 'erhöht',
+                    fold: 'passt',
+                    bet: 'setzt'
+                }
+            },
+            zh: {
+                gameTitle: '量子扑克',
+                gameModeTitle: '🎮 游戏模式',
+                playersTitle: '👥 玩家',
+                gameStatsTitle: '📊 统计',
+                aiTitle: '🤖 量子AI',
+                yourCardsTitle: '🃏 您的牌',
+                betTitle: '💰 下注',
+                welcomeMessage: '欢迎来到量子扑克！点击"新游戏"开始。',
+                gameStarted: '新游戏开始！轮到您了。',
+                handLabel: '手牌',
+                roundLabel: '回合',
+                potLabel: '底池',
+                newGameBtn: '新游戏',
+                callBtnText: '跟注',
+                raiseBtnText: '加注',
+                foldBtnText: '弃牌',
+                rulesBtn: '规则',
+                betBtnText: '下注',
+                aiModeText: 'AI',
+                humanModeText: '4人',
+                aiStatus: 'AI系统已初始化\n概率分析中...',
+                handStrengthWaiting: '等待中...',
+                chipsLabel: '筹码',
+                betLabel: '下注',
+                statusLabel: '状态',
+                playerName: '玩家',
+                aiName: 'AI阿尔法 🤖',
+                rounds: {
+                    preflop: '翻牌前',
+                    flop: '翻牌',
+                    turn: '转牌',
+                    river: '河牌'
+                },
+                actions: {
+                    call: '跟注',
+                    raise: '加注',
+                    fold: '弃牌',
+                    bet: '下注'
+                }
+            }
+        };
+
+        // Créer un jeu de cartes
+        function createDeck() {
+            const suits = ['♠', '♥', '♦', '♣'];
+            const ranks = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+            const deck = [];
+            
+            for (let suit of suits) {
+                for (let rank of ranks) {
+                    deck.push({
+                        rank: rank,
+                        suit: suit,
+                        color: (suit === '♥' || suit === '♦') ? 'red' : 'black'
+                    });
+                }
+            }
+            
+            return shuffleDeck(deck);
+        }
+
+        // Mélanger le jeu
+        function shuffleDeck(deck) {
+            for (let i = deck.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [deck[i], deck[j]] = [deck[j], deck[i]];
+            }
+            return deck;
+        }
+
+        // Créer les particules quantiques
+        function createQuantumParticles() {
+            const bg = document.querySelector('.quantum-bg');
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'quantum-particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particle.style.animationDuration = (Math.random() * 4 + 4) + 's';
+                bg.appendChild(particle);
+            }
+        }
+
+        // Basculer le dropdown de langue
+        function toggleLanguageDropdown() {
+            const options = document.getElementById('languageOptions');
+            options.classList.toggle('show');
+            
+            document.addEventListener('click', function closeDropdown(e) {
+                if (!e.target.closest('.language-selector')) {
+                    options.classList.remove('show');
+                    document.removeEventListener('click', closeDropdown);
+                }
+            });
+        }
+
+        // Sélectionner une langue
+        function selectLanguage(langCode, langText) {
+            gameState.currentLanguage = langCode;
+            
+            document.getElementById('currentLanguage').textContent = langText;
+            
+            document.querySelectorAll('.language-option').forEach(option => {
+                option.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            document.getElementById('languageOptions').classList.remove('show');
+            
+            updateLanguageInterface();
+        }
+
+        // Sélectionner le mode de jeu
+        function selectGameMode(mode) {
+            gameState.gameMode = mode;
+            
+            // Mettre à jour les boutons
+            document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+            if (mode === 'ai') {
+                document.getElementById('aiModeBtn').classList.add('active');
+            } else {
+                document.getElementById('humanModeBtn').classList.add('active');
+            }
+            
+            // Afficher/masquer les sièges selon le mode
+            if (mode === 'ai') {
+                // Mode IA : 1 joueur humain + 1 IA
+                document.getElementById('seat1').style.display = 'block';
+                document.getElementById('seat2').style.display = 'block';
+                document.getElementById('seat3').style.display = 'none';
+                document.getElementById('seat4').style.display = 'none';
+                
+                // Mettre à jour les noms
+                document.querySelector('#seat2 .player-name').textContent = 'IA Alpha 🤖';
+                document.getElementById('seat2').classList.add('ai');
+            } else {
+                // Mode 4 joueurs humains
+                document.getElementById('seat1').style.display = 'block';
+                document.getElementById('seat2').style.display = 'block';
+                document.getElementById('seat3').style.display = 'block';
+                document.getElementById('seat4').style.display = 'block';
+                
+                // Mettre à jour les noms
+                document.querySelector('#seat2 .player-name').textContent = 'Joueur 2';
+                document.getElementById('seat2').classList.remove('ai');
+            }
+            
+            // Réinitialiser le jeu si en cours
+            if (gameState.isPlaying) {
+                newGame();
+            }
+        }
+
+        // Mettre à jour l'interface selon la langue
+        function updateLanguageInterface() {
+            const t = translations[gameState.currentLanguage];
+            
+            document.getElementById('gameTitle').textContent = t.gameTitle;
+            document.getElementById('gameModeTitle').textContent = t.gameModeTitle;
+            document.getElementById('playersTitle').textContent = t.playersTitle;
+            document.getElementById('gameStatsTitle').textContent = t.gameStatsTitle;
+            document.getElementById('aiTitle').textContent = t.aiTitle;
+            document.getElementById('yourCardsTitle').textContent = t.yourCardsTitle;
+            document.getElementById('betTitle').textContent = t.betTitle;
+            
+            document.getElementById('handLabel').textContent = t.handLabel + ':';
+            document.getElementById('roundLabel').textContent = t.roundLabel + ':';
+            document.getElementById('potLabel').textContent = t.potLabel + ':';
+            
+            document.getElementById('newGameBtn').textContent = t.newGameBtn;
+            document.getElementById('callBtnText').textContent = t.callBtnText;
+            document.getElementById('raiseBtnText').textContent = t.raiseBtnText;
+            document.getElementById('foldBtnText').textContent = t.foldBtnText;
+            document.getElementById('rulesBtn').textContent = t.rulesBtn;
+            document.getElementById('betBtnText').textContent = t.betBtnText;
+            document.getElementById('aiModeText').textContent = t.aiModeText;
+            document.getElementById('humanModeText').textContent = t.humanModeText;
+            
+            document.getElementById('aiStatusText').innerHTML = t.aiStatus.replace('\n', '<br>');
+            document.getElementById('handStrengthValue').textContent = t.handStrengthWaiting;
+            
+            if (!gameState.isPlaying) {
+                document.getElementById('gameMessage').innerHTML = `<span>${t.welcomeMessage}</span>`;
+            }
+            
+            updateRoundDisplay();
+        }
+
+        // Initialiser les joueurs
+        function initializePlayers() {
+            const t = translations[gameState.currentLanguage];
+            
+            if (gameState.gameMode === 'ai') {
+                // Mode IA : 1 joueur humain + 1 IA
+                gameState.players = [
+                    { id: 0, name: `${t.playerName} 1`, chips: 1000, cards: [], isAI: false, folded: false, currentBet: 0 },
+                    { id: 1, name: t.aiName, chips: 1000, cards: [], isAI: true, folded: false, currentBet: 0 }
+                ];
+            } else {
+                // Mode 4 joueurs humains
+                gameState.players = [
+                    { id: 0, name: `${t.playerName} 1`, chips: 1000, cards: [], isAI: false, folded: false, currentBet: 0 },
+                    { id: 1, name: `${t.playerName} 2`, chips: 1000, cards: [], isAI: false, folded: false, currentBet: 0 },
+                    { id: 2, name: `${t.playerName} 3`, chips: 1000, cards: [], isAI: false, folded: false, currentBet: 0 },
+                    { id: 3, name: `${t.playerName} 4`, chips: 1000, cards: [], isAI: false, folded: false, currentBet: 0 }
+                ];
+            }
+        }
+
+        // Nouvelle partie
+        function newGame() {
+            gameState.isPlaying = true;
+            gameState.currentPlayer = 0;
+            gameState.pot = 0;
+            gameState.currentBet = 0;
+            gameState.round = 'preflop';
+            gameState.handNumber = 1;
+            gameState.communityCards = [];
+            gameState.betAmount = 0;
+            
+            initializePlayers();
+            gameState.deck = createDeck();
+            
+            // Distribuer les cartes
+            dealCards();
+            
+            // Activer les boutons
+            document.getElementById('callBtn').disabled = false;
+            document.getElementById('raiseBtn').disabled = false;
+            document.getElementById('foldBtn').disabled = false;
+            document.getElementById('betBtn').disabled = false;
+            
+            updateDisplay();
+            
+            const t = translations[gameState.currentLanguage];
+            showMessage(t.gameStarted);
+        }
+
+        // Distribuer les cartes
+        function dealCards() {
+            // Donner 2 cartes à chaque joueur
+            for (let i = 0; i < 2; i++) {
+                for (let player of gameState.players) {
+                    player.cards.push(gameState.deck.pop());
+                }
+            }
+            
+            // Afficher les cartes du joueur humain
+            displayPlayerCards();
+        }
+
+        // Afficher les cartes du joueur
+        function displayPlayerCards() {
+            const playerCardsContainer = document.getElementById('playerCards');
+            playerCardsContainer.innerHTML = '';
+            
+            const humanPlayer = gameState.players[0];
+            humanPlayer.cards.forEach(card => {
+                const cardElement = document.createElement('div');
+                cardElement.className = `card ${card.color}`;
+                cardElement.innerHTML = `
+                    <div>${card.rank}</div>
+                    <div style="font-size: 20px;">${card.suit}</div>
+                    <div style="transform: rotate(180deg);">${card.rank}</div>
+                `;
+                playerCardsContainer.appendChild(cardElement);
+            });
+            
+            // Évaluer la force de la main
+            evaluateHandStrength();
+        }
+
+        // Évaluer la force de la main
+        function evaluateHandStrength() {
+            const humanPlayer = gameState.players[0];
+            const allCards = [...humanPlayer.cards, ...gameState.communityCards];
+            
+            if (allCards.length < 2) return;
+            
+            // Logique simplifiée d'évaluation
+            let strength = 'Carte haute';
+            
+            if (humanPlayer.cards[0].rank === humanPlayer.cards[1].rank) {
+                strength = 'Paire';
+            } else if (humanPlayer.cards[0].suit === humanPlayer.cards[1].suit) {
+                strength = 'Couleur possible';
+            } else if (Math.abs(getCardValue(humanPlayer.cards[0]) - getCardValue(humanPlayer.cards[1])) === 1) {
+                strength = 'Suite possible';
+            }
+            
+            document.getElementById('handStrengthValue').textContent = strength;
+        }
+
+        // Obtenir la valeur numérique d'une carte
+        function getCardValue(card) {
+            if (card.rank === 'A') return 14;
+            if (card.rank === 'K') return 13;
+            if (card.rank === 'Q') return 12;
+            if (card.rank === 'J') return 11;
+            return parseInt(card.rank);
+        }
+
+        // Suivre la mise
+        function callBet() {
+            const player = gameState.players[gameState.currentPlayer];
+            const callAmount = gameState.currentBet - player.currentBet;
+            
+            if (player.chips >= callAmount) {
+                player.chips -= callAmount;
+                player.currentBet = gameState.currentBet;
+                gameState.pot += callAmount;
+                
+                const t = translations[gameState.currentLanguage];
+                showMessage(`${player.name} ${t.actions.call} ₹${callAmount}`);
+                
+                nextPlayer();
+            }
+        }
+
+        // Relancer
+        function raiseBet() {
+            const player = gameState.players[gameState.currentPlayer];
+            const raiseAmount = gameState.betAmount;
+            
+            if (player.chips >= raiseAmount && raiseAmount > gameState.currentBet) {
+                player.chips -= raiseAmount;
+                gameState.pot += raiseAmount;
+                gameState.currentBet = raiseAmount;
+                player.currentBet = raiseAmount;
+                
+                const t = translations[gameState.currentLanguage];
+                showMessage(`${player.name} ${t.actions.raise} à ₹${raiseAmount}`);
+                
+                nextPlayer();
+            }
+        }
+
+        // Se coucher
+        function foldHand() {
+            const player = gameState.players[gameState.currentPlayer];
+            player.folded = true;
+            
+            const t = translations[gameState.currentLanguage];
+            showMessage(`${player.name} ${t.actions.fold}`);
+            
+            nextPlayer();
+        }
+
+        // Miser
+        function placeBet() {
+            const player = gameState.players[gameState.currentPlayer];
+            const betAmount = gameState.betAmount;
+            
+            if (player.chips >= betAmount && betAmount > 0) {
+                player.chips -= betAmount;
+                gameState.pot += betAmount;
+                gameState.currentBet = Math.max(gameState.currentBet, betAmount);
+                player.currentBet = betAmount;
+                
+                const t = translations[gameState.currentLanguage];
+                showMessage(`${player.name} ${t.actions.bet} ₹${betAmount}`);
+                
+                nextPlayer();
+            }
+        }
+
+        // Joueur suivant
+        function nextPlayer() {
+            gameState.currentPlayer = (gameState.currentPlayer + 1) % gameState.players.length;
+            
+            // Vérifier si tous les joueurs ont joué
+            const activePlayers = gameState.players.filter(p => !p.folded);
+            if (activePlayers.length === 1) {
+                endHand();
+                return;
+            }
+            
+            // Si c'est un joueur IA
+            if (gameState.players[gameState.currentPlayer].isAI) {
+                setTimeout(() => {
+                    playAITurn();
+                }, 2000);
+            }
+            
+            updateDisplay();
+        }
+
+        // Jouer le tour de l'IA
+        function playAITurn() {
+            const player = gameState.players[gameState.currentPlayer];
+            const t = translations[gameState.currentLanguage];
+            
+            // Ajouter l'effet de réflexion
+            const seat = document.getElementById(`seat${gameState.currentPlayer + 1}`);
+            seat.classList.add('ai-thinking');
+            
+            setTimeout(() => {
+                seat.classList.remove('ai-thinking');
+                
+                // Logique IA simplifiée
+                const decision = Math.random();
+                
+                if (decision < 0.3) {
+                    // Se coucher
+                    player.folded = true;
+                    showMessage(`${player.name} ${t.actions.fold}`);
+                } else if (decision < 0.7) {
+                    // Suivre
+                    const callAmount = gameState.currentBet - player.currentBet;
+                    if (player.chips >= callAmount) {
+                        player.chips -= callAmount;
+                        player.currentBet = gameState.currentBet;
+                        gameState.pot += callAmount;
+                        showMessage(`${player.name} ${t.actions.call} ₹${callAmount}`);
+                    } else {
+                        player.folded = true;
+                        showMessage(`${player.name} ${t.actions.fold}`);
+                    }
+                } else {
+                    // Relancer
+                    const raiseAmount = Math.floor(Math.random() * 200) + 50;
+                    if (player.chips >= raiseAmount) {
+                        player.chips -= raiseAmount;
+                        gameState.pot += raiseAmount;
+                        gameState.currentBet = Math.max(gameState.currentBet, raiseAmount);
+                        player.currentBet = raiseAmount;
+                        showMessage(`${player.name} ${t.actions.raise} à ₹${raiseAmount}`);
+                    } else {
+                        // Suivre si pas assez de jetons pour relancer
+                        const callAmount = gameState.currentBet - player.currentBet;
+                        if (player.chips >= callAmount) {
+                            player.chips -= callAmount;
+                            player.currentBet = gameState.currentBet;
+                            gameState.pot += callAmount;
+                            showMessage(`${player.name} ${t.actions.call} ₹${callAmount}`);
+                        } else {
+                            player.folded = true;
+                            showMessage(`${player.name} ${t.actions.fold}`);
+                        }
+                    }
+                }
+                
+                nextPlayer();
+            }, 1500);
+        }
+
+        // Terminer la main
+        function endHand() {
+            const activePlayers = gameState.players.filter(p => !p.folded);
+            
+            if (activePlayers.length === 1) {
+                // Un seul joueur reste
+                activePlayers[0].chips += gameState.pot;
+                showMessage(`${activePlayers[0].name} remporte ₹${gameState.pot}!`);
+            } else {
+                // Évaluer les mains (logique simplifiée)
+                const winner = activePlayers[Math.floor(Math.random() * activePlayers.length)];
+                winner.chips += gameState.pot;
+                showMessage(`${winner.name} remporte ₹${gameState.pot}!`);
+            }
+            
+            // Réinitialiser pour la prochaine main
+            setTimeout(() => {
+                gameState.handNumber++;
+                gameState.pot = 0;
+                gameState.currentBet = 0;
+                gameState.round = 'preflop';
+                gameState.communityCards = [];
+                
+                gameState.players.forEach(player => {
+                    player.cards = [];
+                    player.folded = false;
+                    player.currentBet = 0;
+                });
+                
+                if (gameState.players.filter(p => p.chips > 0).length > 1) {
+                    gameState.deck = createDeck();
+                    dealCards();
+                    updateDisplay();
+                    
+                    const t = translations[gameState.currentLanguage];
+                    showMessage(`Main ${gameState.handNumber} - ${t.gameStarted}`);
+                } else {
+                    endGame();
+                }
+            }, 3000);
+        }
+
+        // Terminer le jeu
+        function endGame() {
+            const winner = gameState.players.reduce((prev, current) => 
+                (prev.chips > current.chips) ? prev : current
+            );
+            
+            showMessage(`🏆 ${winner.name} remporte la partie avec ₹${winner.chips}!`);
+            
+            // Désactiver les boutons
+            document.getElementById('callBtn').disabled = true;
+            document.getElementById('raiseBtn').disabled = true;
+            document.getElementById('foldBtn').disabled = true;
+            document.getElementById('betBtn').disabled = true;
+            
+            gameState.isPlaying = false;
+        }
+
+        // Mettre à jour le montant de la mise
+        function updateBetAmount() {
+            const slider = document.getElementById('betSlider');
+            gameState.betAmount = parseInt(slider.value);
+            document.getElementById('betAmount').textContent = `₹${gameState.betAmount}`;
+        }
+
+        // Mettre à jour l'affichage
+        function updateDisplay() {
+            updatePlayersDisplay();
+            updateStatsDisplay();
+            updateRoundDisplay();
+            updatePotDisplay();
+        }
+
+        // Mettre à jour l'affichage des joueurs
+        function updatePlayersDisplay() {
+            const container = document.getElementById('playersContainer');
+            container.innerHTML = '';
+            
+            const t = translations[gameState.currentLanguage];
+            
+            gameState.players.forEach((player, index) => {
+                const playerDiv = document.createElement('div');
+                playerDiv.className = `player-info ${index === gameState.currentPlayer ? 'current-player' : ''}`;
+                
+                // Nom du joueur avec traduction
+                const playerName = player.isAI ? t.aiName : `${t.playerName} ${index + 1}`;
+                
+                playerDiv.innerHTML = `
+                    <div class="player-name">${playerName}</div>
+                    <div class="stat-item">
+                        <span>${t.chipsLabel}:</span>
+                        <span class="stat-value">₹${player.chips}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>${t.betLabel}:</span>
+                        <span class="stat-value">₹${player.currentBet}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>${t.statusLabel}:</span>
+                        <span class="stat-value">${player.folded ? '❌' : '✅'}</span>
+                    </div>
+                `;
+                container.appendChild(playerDiv);
+                
+                // Mettre à jour le siège correspondant
+                const seat = document.getElementById(`seat${index + 1}`);
+                if (seat) {
+                    seat.querySelector('.player-name').textContent = playerName;
+                    seat.querySelector('.player-chips').textContent = `₹${player.chips}`;
+                    seat.className = `player-seat seat-${index + 1} ${player.isAI ? 'ai' : ''} ${index === gameState.currentPlayer ? 'active' : ''}`;
+                }
+            });
+        }
+
+        // Mettre à jour l'affichage des statistiques
+        function updateStatsDisplay() {
+            document.getElementById('handValue').textContent = gameState.handNumber;
+            document.getElementById('potValue').textContent = `₹${gameState.pot}`;
+        }
+
+        // Mettre à jour l'affichage de la manche
+        function updateRoundDisplay() {
+            const t = translations[gameState.currentLanguage];
+            document.getElementById('roundValue').textContent = t.rounds[gameState.round];
+        }
+
+        // Mettre à jour l'affichage du pot
+        function updatePotDisplay() {
+            document.getElementById('potAmount').textContent = `₹${gameState.pot}`;
+        }
+
+        // Afficher un message
+        function showMessage(message) {
+            const messageElement = document.getElementById('gameMessage');
+            messageElement.innerHTML = `<span>${message}</span>`;
+        }
+
+        // Afficher les règles
+        function showRules() {
+            const t = translations[gameState.currentLanguage];
+            try{ parent.postMessage({ action: 'dialog', dialogType: 'alert', text: `Règles du Quantum Poker:\n\n1. Chaque joueur reçoit 2 cartes\n2. Misez, suivez ou couchez-vous\n3. 5 cartes communes sont révélées\n4. Formez la meilleure main de 5 cartes\n5. Le joueur avec la meilleure main gagne le pot!` }, '*'); }catch(e){}
+        }
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            createQuantumParticles();
+            initializePlayers();
+            updateDisplay();
+            updateLanguageInterface();
+            
+            // Initialiser le slider de mise
+            const slider = document.getElementById('betSlider');
+            slider.max = 1000;
+            updateBetAmount();
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'985b34cee229c123',t:'MTc1ODk3ODI2MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
