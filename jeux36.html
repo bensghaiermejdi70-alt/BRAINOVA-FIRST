@@ -1,0 +1,1471 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crystal Quest - Puzzle Spatial</title>
+    <style>
+        body {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Orbitron', 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            color: #00ffff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: #ffffff;
+            border-radius: 50%;
+            animation: twinkle 3s ease-in-out infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.5); }
+        }
+
+        .container {
+            position: relative;
+            z-index: 3;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 15px;
+            border: 2px solid #00ffff;
+            box-shadow: 0 0 40px rgba(0, 255, 255, 0.3);
+            position: relative;
+        }
+
+        .title {
+            font-size: 2.5rem;
+            font-weight: 900;
+            background: linear-gradient(45deg, #00ffff, #ff00ff, #ffff00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 5px;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        .language-selector {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+        }
+
+        @keyframes glow {
+            from { filter: drop-shadow(0 0 20px rgba(0, 255, 255, 0.5)); }
+            to { filter: drop-shadow(0 0 30px rgba(255, 0, 255, 0.8)); }
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            color: #cccccc;
+            margin-bottom: 10px;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: linear-gradient(45deg, #ff00ff, #00ffff);
+            color: #000;
+            box-shadow: 0 0 20px rgba(255, 0, 255, 0.5);
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 10px 30px rgba(255, 0, 255, 0.8);
+        }
+
+        .game-container {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .game-info {
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid #00ffff;
+            box-shadow: 0 0 25px rgba(0, 255, 255, 0.2);
+            min-width: 180px;
+        }
+
+        .game-info.left {
+            order: 1;
+        }
+
+        .game-info.right {
+            order: 3;
+        }
+
+        .info-item {
+            text-align: center;
+        }
+
+        .info-label {
+            font-size: 0.9rem;
+            color: #cccccc;
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #00ffff;
+            text-shadow: 0 0 10px #00ffff;
+        }
+
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 3px;
+            background: rgba(0, 0, 0, 0.9);
+            padding: 20px;
+            border-radius: 20px;
+            border: 3px solid #00ffff;
+            box-shadow: 0 0 50px rgba(0, 255, 255, 0.4);
+            margin: 0 auto;
+            max-width: 500px;
+            width: 100%;
+            order: 2;
+        }
+
+        .cell {
+            aspect-ratio: 1;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border: 2px solid #333;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cell:hover {
+            border-color: #00ffff;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+            transform: scale(1.05);
+        }
+
+        .cell.selected {
+            border-color: #ffff00;
+            box-shadow: 0 0 20px rgba(255, 255, 0, 0.8);
+            background: linear-gradient(135deg, #2a2a3e, #26314e);
+        }
+
+        .cell.matched {
+            animation: matchEffect 0.6s ease-in-out;
+        }
+
+        @keyframes matchEffect {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); box-shadow: 0 0 30px rgba(0, 255, 0, 1); }
+            100% { transform: scale(1); }
+        }
+
+        .crystal {
+            width: 80%;
+            height: 80%;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-shadow: 0 0 10px currentColor;
+            animation: crystalFloat 2s ease-in-out infinite;
+            position: relative;
+        }
+
+        @keyframes crystalFloat {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-3px) rotate(5deg); }
+        }
+
+        .crystal::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 3s linear infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .crystal.red {
+            background: linear-gradient(45deg, #ff0066, #ff3399);
+            color: #ffffff;
+            box-shadow: 0 0 15px rgba(255, 0, 102, 0.6);
+        }
+
+        .crystal.blue {
+            background: linear-gradient(45deg, #0066ff, #3399ff);
+            color: #ffffff;
+            box-shadow: 0 0 15px rgba(0, 102, 255, 0.6);
+        }
+
+        .crystal.green {
+            background: linear-gradient(45deg, #00ff66, #33ff99);
+            color: #000000;
+            box-shadow: 0 0 15px rgba(0, 255, 102, 0.6);
+        }
+
+        .crystal.yellow {
+            background: linear-gradient(45deg, #ffff00, #ffff66);
+            color: #000000;
+            box-shadow: 0 0 15px rgba(255, 255, 0, 0.6);
+        }
+
+        .crystal.purple {
+            background: linear-gradient(45deg, #9900ff, #cc33ff);
+            color: #ffffff;
+            box-shadow: 0 0 15px rgba(153, 0, 255, 0.6);
+        }
+
+        .crystal.orange {
+            background: linear-gradient(45deg, #ff6600, #ff9933);
+            color: #ffffff;
+            box-shadow: 0 0 15px rgba(255, 102, 0, 0.6);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            padding: 40px;
+            border-radius: 25px;
+            border: 3px solid #00ffff;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 0 50px rgba(0, 255, 255, 0.5);
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: #00ffff;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .modal-close:hover {
+            background: rgba(0, 255, 255, 0.2);
+            transform: scale(1.1);
+        }
+
+        .modal h2 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #00ffff, #ff00ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .instructions {
+            text-align: left;
+            margin: 20px 0;
+            line-height: 1.6;
+        }
+
+        .instructions h3 {
+            color: #00ffff;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+        .instructions ul {
+            margin-left: 20px;
+        }
+
+        .instructions li {
+            margin-bottom: 8px;
+            color: #cccccc;
+        }
+
+        .particle-effect {
+            position: absolute;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .particle {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            animation: particleExplode 1s ease-out forwards;
+        }
+
+        @keyframes particleExplode {
+            0% {
+                transform: scale(1) translate(0, 0);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(0) translate(var(--dx), var(--dy));
+                opacity: 0;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .title {
+                font-size: 1.8rem;
+            }
+            
+            .language-selector {
+                position: static;
+                text-align: center;
+                margin-bottom: 10px;
+            }
+            
+            .game-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .game-info.left,
+            .game-info.right {
+                order: unset;
+                display: flex;
+                justify-content: space-around;
+                width: 100%;
+                max-width: 400px;
+            }
+            
+            .game-info.left .info-item,
+            .game-info.right .info-item {
+                margin-top: 0;
+            }
+            
+            .game-board {
+                grid-template-columns: repeat(6, 1fr);
+                max-width: 400px;
+                order: unset;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="stars" id="stars"></div>
+    
+    <div class="container">
+        <div class="header">
+            <div class="language-selector">
+                <select id="languageSelect" style="padding: 8px 15px; border-radius: 15px; border: 2px solid #00ffff; background: rgba(0, 0, 0, 0.8); color: #00ffff; font-size: 0.9rem; cursor: pointer; backdrop-filter: blur(10px); box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);">
+                    <option value="fr">🇫🇷 Français</option>
+                    <option value="en">🇬🇧 English</option>
+                    <option value="ar">🇸🇦 العربية</option>
+                    <option value="es">🇪🇸 Español</option>
+                    <option value="de">🇩🇪 Deutsch</option>
+                    <option value="zh">🇨🇳 中文</option>
+                </select>
+            </div>
+            
+            <h1 class="title">CRYSTAL QUEST</h1>
+            <p class="subtitle">Collectez les cristaux en alignant 3 ou plus de la même couleur</p>
+            
+            <div class="controls">
+                <button class="btn" id="startBtn">🚀 Nouvelle Partie</button>
+                <button class="btn" id="rulesBtn">📋 Instructions</button>
+                <button class="btn" id="hintBtn">💡 Indice</button>
+            </div>
+        </div>
+
+        <div class="game-container">
+            <div class="game-info left">
+                <div class="info-item">
+                    <div class="info-label" id="scoreLabel">Score</div>
+                    <div class="info-value" id="scoreValue">0</div>
+                </div>
+                <div class="info-item" style="margin-top: 20px;">
+                    <div class="info-label" id="levelLabel">Niveau</div>
+                    <div class="info-value" id="levelValue">1</div>
+                </div>
+            </div>
+
+            <div class="game-board" id="gameBoard"></div>
+
+            <div class="game-info right">
+                <div class="info-item">
+                    <div class="info-label" id="movesLabel">Coups</div>
+                    <div class="info-value" id="movesValue">30</div>
+                </div>
+                <div class="info-item" style="margin-top: 20px;">
+                    <div class="info-label" id="targetLabel">Objectif</div>
+                    <div class="info-value" id="targetValue">1000</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Instructions -->
+    <div class="modal" id="rulesModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('rulesModal')">✕</button>
+            <h2>📋 Instructions</h2>
+            <div class="instructions">
+                <h3>🎯 Objectif</h3>
+                <p>Atteignez le score cible en alignant 3 cristaux ou plus de la même couleur.</p>
+                
+                <h3>🎮 Comment jouer</h3>
+                <ul>
+                    <li>Cliquez sur un cristal puis sur un cristal adjacent pour les échanger</li>
+                    <li>Alignez 3 cristaux ou plus horizontalement ou verticalement</li>
+                    <li>Les cristaux alignés disparaissent et vous gagnez des points</li>
+                    <li>De nouveaux cristaux tombent pour remplir les espaces vides</li>
+                </ul>
+                
+                <h3>💎 Types de cristaux</h3>
+                <ul>
+                    <li><span style="color: #ff0066;">🔴 Rouge</span> - 10 points</li>
+                    <li><span style="color: #0066ff;">🔵 Bleu</span> - 10 points</li>
+                    <li><span style="color: #00ff66;">🟢 Vert</span> - 15 points</li>
+                    <li><span style="color: #ffff00;">🟡 Jaune</span> - 15 points</li>
+                    <li><span style="color: #9900ff;">🟣 Violet</span> - 20 points</li>
+                    <li><span style="color: #ff6600;">🟠 Orange</span> - 20 points</li>
+                </ul>
+                
+                <h3>🏆 Bonus</h3>
+                <ul>
+                    <li>4 cristaux alignés : +50 points bonus</li>
+                    <li>5 cristaux alignés : +100 points bonus</li>
+                    <li>Combos multiples : multiplicateur x2</li>
+                </ul>
+            </div>
+            <button class="btn" onclick="closeModal('rulesModal')" id="rulesCloseBtn">Compris !</button>
+        </div>
+    </div>
+
+    <!-- Modal Victoire -->
+    <div class="modal" id="winModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('winModal')">✕</button>
+            <h2>🎉 Niveau Réussi !</h2>
+            <p>Félicitations ! Vous avez atteint l'objectif !</p>
+            <div id="winStats"></div>
+            <div style="margin-top: 30px;">
+                <button class="btn" onclick="nextLevel()">➡️ Niveau Suivant</button>
+                <button class="btn" onclick="closeModal('winModal')">🏠 Menu</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Game Over -->
+    <div class="modal" id="gameOverModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('gameOverModal')">✕</button>
+            <h2>💥 Partie Terminée</h2>
+            <p>Plus de coups disponibles !</p>
+            <div id="gameOverStats"></div>
+            <div style="margin-top: 30px;">
+                <button class="btn" onclick="startGame()">🔄 Recommencer</button>
+                <button class="btn" onclick="closeModal('gameOverModal')">🏠 Menu</button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .global-close-btn { position: fixed; top: 14px; right: 14px; z-index: 99999; background: #ff3b3b; color: #fff; border: none; width:52px; height:52px; border-radius:50%; font-size:22px; cursor:pointer; box-shadow:0 6px 18px rgba(255,59,59,0.3);} 
+        .global-close-btn:hover{ transform: scale(1.05); }
+    </style>
+    <button class="global-close-btn" title="Fermer" aria-label="Fermer" onclick="closePlatform()">✕</button>
+    <script>
+    /* Canonical child-side overlay closer for platform pages */
+    function closePlatform(){
+        try{ console.debug('jeux36: closePlatform called'); }catch(e){}
+        if(window.parent && window.parent !== window){
+            window.parent.postMessage({ action: 'close', reason: 'user-initiated', source: 'jeux36' }, '*');
+            return;
+        }
+        if(window.opener && !window.opener.closed){
+            try{ window.opener.postMessage({ action: 'child-closed', source: 'jeux36' }, '*'); }catch(e){}
+            try{ window.close(); }catch(e){}
+            return;
+        }
+        window.location.href = '/global_platform.html';
+    }
+    window.closePlatform = closePlatform;
+
+        // Traductions
+        const translations = {
+            fr: {
+                title: "CRYSTAL QUEST",
+                subtitle: "Collectez les cristaux en alignant 3 ou plus de la même couleur",
+                newGame: "🚀 Nouvelle Partie",
+                instructions: "📋 Instructions",
+                hint: "💡 Indice",
+                score: "Score",
+                level: "Niveau", 
+                moves: "Coups",
+                target: "Objectif",
+                instructionsTitle: "📋 Instructions",
+                objective: "🎯 Objectif",
+                objectiveText: "Atteignez le score cible en alignant 3 cristaux ou plus de la même couleur.",
+                howToPlay: "🎮 Comment jouer",
+                howToPlayText1: "Cliquez sur un cristal puis sur un cristal adjacent pour les échanger",
+                howToPlayText2: "Alignez 3 cristaux ou plus horizontalement ou verticalement",
+                howToPlayText3: "Les cristaux alignés disparaissent et vous gagnez des points",
+                howToPlayText4: "De nouveaux cristaux tombent pour remplir les espaces vides",
+                crystalTypes: "💎 Types de cristaux",
+                red: "Rouge", blue: "Bleu", green: "Vert", yellow: "Jaune", purple: "Violet", orange: "Orange",
+                points: "points",
+                bonus: "🏆 Bonus",
+                bonusText1: "4 cristaux alignés : +50 points bonus",
+                bonusText2: "5 cristaux alignés : +100 points bonus",
+                bonusText3: "Combos multiples : multiplicateur x2",
+                understood: "Compris !",
+                levelComplete: "🎉 Niveau Réussi !",
+                congratulations: "Félicitations ! Vous avez atteint l'objectif !",
+                nextLevel: "➡️ Niveau Suivant",
+                menu: "🏠 Menu",
+                gameOver: "💥 Partie Terminée",
+                noMoreMoves: "Plus de coups disponibles !",
+                restart: "🔄 Recommencer"
+            },
+            en: {
+                title: "CRYSTAL QUEST",
+                subtitle: "Collect crystals by aligning 3 or more of the same color",
+                newGame: "🚀 New Game",
+                instructions: "📋 Instructions",
+                hint: "💡 Hint",
+                score: "Score",
+                level: "Level",
+                moves: "Moves",
+                target: "Target",
+                instructionsTitle: "📋 Instructions",
+                objective: "🎯 Objective",
+                objectiveText: "Reach the target score by aligning 3 or more crystals of the same color.",
+                howToPlay: "🎮 How to play",
+                howToPlayText1: "Click on a crystal then on an adjacent crystal to swap them",
+                howToPlayText2: "Align 3 or more crystals horizontally or vertically",
+                howToPlayText3: "Aligned crystals disappear and you earn points",
+                howToPlayText4: "New crystals fall down to fill empty spaces",
+                crystalTypes: "💎 Crystal types",
+                red: "Red", blue: "Blue", green: "Green", yellow: "Yellow", purple: "Purple", orange: "Orange",
+                points: "points",
+                bonus: "🏆 Bonus",
+                bonusText1: "4 aligned crystals: +50 bonus points",
+                bonusText2: "5 aligned crystals: +100 bonus points",
+                bonusText3: "Multiple combos: x2 multiplier",
+                understood: "Got it!",
+                levelComplete: "🎉 Level Complete!",
+                congratulations: "Congratulations! You reached the objective!",
+                nextLevel: "➡️ Next Level",
+                menu: "🏠 Menu",
+                gameOver: "💥 Game Over",
+                noMoreMoves: "No more moves available!",
+                restart: "🔄 Restart"
+            },
+            ar: {
+                title: "مهمة الكريستال",
+                subtitle: "اجمع الكريستالات بمحاذاة 3 أو أكثر من نفس اللون",
+                newGame: "🚀 لعبة جديدة",
+                instructions: "📋 التعليمات",
+                hint: "💡 تلميح",
+                score: "النقاط",
+                level: "المستوى",
+                moves: "الحركات",
+                target: "الهدف",
+                instructionsTitle: "📋 التعليمات",
+                objective: "🎯 الهدف",
+                objectiveText: "اوصل إلى النقاط المطلوبة بمحاذاة 3 كريستالات أو أكثر من نفس اللون.",
+                howToPlay: "🎮 كيفية اللعب",
+                howToPlayText1: "انقر على كريستال ثم على كريستال مجاور لتبديلهما",
+                howToPlayText2: "رتب 3 كريستالات أو أكثر أفقياً أو عمودياً",
+                howToPlayText3: "الكريستالات المرتبة تختفي وتكسب نقاط",
+                howToPlayText4: "كريستالات جديدة تسقط لملء الفراغات",
+                crystalTypes: "💎 أنواع الكريستال",
+                red: "أحمر", blue: "أزرق", green: "أخضر", yellow: "أصفر", purple: "بنفسجي", orange: "برتقالي",
+                points: "نقاط",
+                bonus: "🏆 المكافآت",
+                bonusText1: "4 كريستالات مرتبة: +50 نقطة إضافية",
+                bonusText2: "5 كريستالات مرتبة: +100 نقطة إضافية",
+                bonusText3: "تركيبات متعددة: مضاعف x2",
+                understood: "فهمت!",
+                levelComplete: "🎉 اكتمل المستوى!",
+                congratulations: "تهانينا! لقد وصلت إلى الهدف!",
+                nextLevel: "➡️ المستوى التالي",
+                menu: "🏠 القائمة",
+                gameOver: "💥 انتهت اللعبة",
+                noMoreMoves: "لا توجد حركات متاحة!",
+                restart: "🔄 إعادة البدء"
+            },
+            es: {
+                title: "CRYSTAL QUEST",
+                subtitle: "Recolecta cristales alineando 3 o más del mismo color",
+                newGame: "🚀 Nueva Partida",
+                instructions: "📋 Instrucciones",
+                hint: "💡 Pista",
+                score: "Puntuación",
+                level: "Nivel",
+                moves: "Movimientos",
+                target: "Objetivo",
+                instructionsTitle: "📋 Instrucciones",
+                objective: "🎯 Objetivo",
+                objectiveText: "Alcanza la puntuación objetivo alineando 3 o más cristales del mismo color.",
+                howToPlay: "🎮 Cómo jugar",
+                howToPlayText1: "Haz clic en un cristal y luego en un cristal adyacente para intercambiarlos",
+                howToPlayText2: "Alinea 3 o más cristales horizontal o verticalmente",
+                howToPlayText3: "Los cristales alineados desaparecen y ganas puntos",
+                howToPlayText4: "Nuevos cristales caen para llenar los espacios vacíos",
+                crystalTypes: "💎 Tipos de cristales",
+                red: "Rojo", blue: "Azul", green: "Verde", yellow: "Amarillo", purple: "Morado", orange: "Naranja",
+                points: "puntos",
+                bonus: "🏆 Bonificaciones",
+                bonusText1: "4 cristales alineados: +50 puntos bonus",
+                bonusText2: "5 cristales alineados: +100 puntos bonus",
+                bonusText3: "Combos múltiples: multiplicador x2",
+                understood: "¡Entendido!",
+                levelComplete: "🎉 ¡Nivel Completado!",
+                congratulations: "¡Felicidades! ¡Has alcanzado el objetivo!",
+                nextLevel: "➡️ Siguiente Nivel",
+                menu: "🏠 Menú",
+                gameOver: "💥 Juego Terminado",
+                noMoreMoves: "¡No hay más movimientos disponibles!",
+                restart: "🔄 Reiniciar"
+            },
+            de: {
+                title: "CRYSTAL QUEST",
+                subtitle: "Sammle Kristalle, indem du 3 oder mehr derselben Farbe ausrichtest",
+                newGame: "🚀 Neues Spiel",
+                instructions: "📋 Anweisungen",
+                hint: "💡 Hinweis",
+                score: "Punkte",
+                level: "Level",
+                moves: "Züge",
+                target: "Ziel",
+                instructionsTitle: "📋 Anweisungen",
+                objective: "🎯 Ziel",
+                objectiveText: "Erreiche die Zielpunktzahl, indem du 3 oder mehr Kristalle derselben Farbe ausrichtest.",
+                howToPlay: "🎮 Spielanleitung",
+                howToPlayText1: "Klicke auf einen Kristall und dann auf einen benachbarten Kristall zum Tauschen",
+                howToPlayText2: "Richte 3 oder mehr Kristalle horizontal oder vertikal aus",
+                howToPlayText3: "Ausgerichtete Kristalle verschwinden und du erhältst Punkte",
+                howToPlayText4: "Neue Kristalle fallen herunter, um leere Räume zu füllen",
+                crystalTypes: "💎 Kristalltypen",
+                red: "Rot", blue: "Blau", green: "Grün", yellow: "Gelb", purple: "Lila", orange: "Orange",
+                points: "Punkte",
+                bonus: "🏆 Bonus",
+                bonusText1: "4 ausgerichtete Kristalle: +50 Bonuspunkte",
+                bonusText2: "5 ausgerichtete Kristalle: +100 Bonuspunkte",
+                bonusText3: "Mehrfache Kombos: x2 Multiplikator",
+                understood: "Verstanden!",
+                levelComplete: "🎉 Level Abgeschlossen!",
+                congratulations: "Glückwunsch! Du hast das Ziel erreicht!",
+                nextLevel: "➡️ Nächstes Level",
+                menu: "🏠 Menü",
+                gameOver: "💥 Spiel Vorbei",
+                noMoreMoves: "Keine Züge mehr verfügbar!",
+                restart: "🔄 Neustart"
+            },
+            zh: {
+                title: "水晶任务",
+                subtitle: "通过对齐3个或更多相同颜色的水晶来收集它们",
+                newGame: "🚀 新游戏",
+                instructions: "📋 说明",
+                hint: "💡 提示",
+                score: "分数",
+                level: "等级",
+                moves: "步数",
+                target: "目标",
+                instructionsTitle: "📋 说明",
+                objective: "🎯 目标",
+                objectiveText: "通过对齐3个或更多相同颜色的水晶来达到目标分数。",
+                howToPlay: "🎮 如何游戏",
+                howToPlayText1: "点击一个水晶，然后点击相邻的水晶来交换它们",
+                howToPlayText2: "水平或垂直对齐3个或更多水晶",
+                howToPlayText3: "对齐的水晶会消失，你会获得分数",
+                howToPlayText4: "新的水晶会掉落来填补空位",
+                crystalTypes: "💎 水晶类型",
+                red: "红色", blue: "蓝色", green: "绿色", yellow: "黄色", purple: "紫色", orange: "橙色",
+                points: "分",
+                bonus: "🏆 奖励",
+                bonusText1: "4个对齐水晶：+50奖励分数",
+                bonusText2: "5个对齐水晶：+100奖励分数",
+                bonusText3: "多重连击：x2倍数",
+                understood: "明白了！",
+                levelComplete: "🎉 关卡完成！",
+                congratulations: "恭喜！你达到了目标！",
+                nextLevel: "➡️ 下一关",
+                menu: "🏠 菜单",
+                gameOver: "💥 游戏结束",
+                noMoreMoves: "没有更多步数了！",
+                restart: "🔄 重新开始"
+            }
+        };
+
+        // Variables du jeu
+        let currentLanguage = 'fr';
+        let board = [];
+        let selectedCell = null;
+        let score = 0;
+        let level = 1;
+        let moves = 30;
+        let target = 1000;
+        let gameActive = false;
+        
+        const BOARD_SIZE = window.innerWidth <= 768 ? 6 : 8;
+        const CRYSTAL_TYPES = ['red', 'blue', 'green', 'yellow', 'purple', 'orange'];
+        const CRYSTAL_SYMBOLS_BY_LEVEL = {
+            1: { red: '🔴', blue: '🔵', green: '🟢', yellow: '🟡', purple: '🟣', orange: '🟠' },
+            2: { red: '💎', blue: '🔷', green: '🍀', yellow: '⭐', purple: '🔮', orange: '🧡' },
+            3: { red: '❤️', blue: '💙', green: '💚', yellow: '💛', purple: '💜', orange: '🧡' },
+            4: { red: '🌹', blue: '🌊', green: '🌿', yellow: '☀️', purple: '🍇', orange: '🔥' },
+            5: { red: '🍎', blue: '🫐', green: '🥝', yellow: '🍌', purple: '🍆', orange: '🍊' },
+            6: { red: '🚗', blue: '🚙', green: '🚕', yellow: '🚌', purple: '🚐', orange: '🚛' },
+            7: { red: '⚽', blue: '🏀', green: '🎾', yellow: '🏐', purple: '🎱', orange: '🏈' },
+            8: { red: '🎸', blue: '🎹', green: '🎺', yellow: '🎷', purple: '🥁', orange: '🎻' },
+            9: { red: '🏠', blue: '🏢', green: '🏰', yellow: '🏛️', purple: '🏭', orange: '🏗️' },
+            10: { red: '🐶', blue: '🐱', green: '🐸', yellow: '🐥', purple: '🦄', orange: '🦊' }
+        };
+        
+        function getCurrentSymbols() {
+            const symbolSet = CRYSTAL_SYMBOLS_BY_LEVEL[level] || generateRandomSymbolSet();
+            return symbolSet;
+        }
+        
+        function generateRandomSymbolSet() {
+            const allSymbols = [
+                '🌟', '⚡', '🔥', '❄️', '🌈', '🎭', '🎪', '🎨', '🎯', '🎲',
+                '🚀', '✈️', '🛸', '⛵', '🚁', '🏎️', '🚂', '🚢', '🛴', '🏍️',
+                '🎃', '🎄', '🎁', '🎂', '🍰', '🧁', '🍭', '🍬', '🍫', '🍩',
+                '🌺', '🌸', '🌼', '🌻', '🌷', '🌹', '🥀', '🌾', '🌵', '🍄',
+                '⚽', '🏀', '🏈', '⚾', '🎾', '🏐', '🏉', '🎱', '🏓', '🏸',
+                '🎵', '🎶', '🎼', '🎤', '🎧', '🎸', '🎹', '🥁', '🎺', '🎷'
+            ];
+            
+            const shuffled = allSymbols.sort(() => Math.random() - 0.5);
+            return {
+                red: shuffled[0],
+                blue: shuffled[1], 
+                green: shuffled[2],
+                yellow: shuffled[3],
+                purple: shuffled[4],
+                orange: shuffled[5]
+            };
+        }
+        const CRYSTAL_POINTS = {
+            red: 10, blue: 10, green: 15, yellow: 15, purple: 20, orange: 20
+        };
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            createStars();
+            setupEventListeners();
+            updateLanguage();
+            initializeBoard();
+        });
+
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            for (let i = 0; i < 100; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 3 + 's';
+                starsContainer.appendChild(star);
+            }
+        }
+
+        function setupEventListeners() {
+            document.getElementById('languageSelect').addEventListener('change', changeLanguage);
+            document.getElementById('startBtn').addEventListener('click', startGame);
+            document.getElementById('rulesBtn').addEventListener('click', () => openModal('rulesModal'));
+            document.getElementById('hintBtn').addEventListener('click', showHint);
+        }
+
+        function changeLanguage() {
+            currentLanguage = document.getElementById('languageSelect').value;
+            updateLanguage();
+        }
+
+        function updateLanguage() {
+            const t = translations[currentLanguage];
+            
+            // Mise à jour du titre et sous-titre
+            document.querySelector('.title').textContent = t.title;
+            document.querySelector('.subtitle').textContent = t.subtitle;
+            
+            // Mise à jour des boutons
+            document.getElementById('startBtn').innerHTML = t.newGame;
+            document.getElementById('rulesBtn').innerHTML = t.instructions;
+            document.getElementById('hintBtn').innerHTML = t.hint;
+            
+            // Mise à jour des labels
+            document.getElementById('scoreLabel').textContent = t.score;
+            document.getElementById('levelLabel').textContent = t.level;
+            document.getElementById('movesLabel').textContent = t.moves;
+            document.getElementById('targetLabel').textContent = t.target;
+            
+            // Mise à jour des modales
+            updateModalContent();
+        }
+
+        function updateModalContent() {
+            const t = translations[currentLanguage];
+            
+
+            
+            // Modal des instructions
+            document.querySelector('#rulesModal h2').textContent = t.instructionsTitle;
+            document.querySelector('#rulesModal .instructions').innerHTML = `
+                <h3>${t.objective}</h3>
+                <p>${t.objectiveText}</p>
+                
+                <h3>${t.howToPlay}</h3>
+                <ul>
+                    <li>${t.howToPlayText1}</li>
+                    <li>${t.howToPlayText2}</li>
+                    <li>${t.howToPlayText3}</li>
+                    <li>${t.howToPlayText4}</li>
+                </ul>
+                
+                <h3>${t.crystalTypes}</h3>
+                <ul>
+                    <li><span style="color: #ff0066;">🔴 ${t.red}</span> - 10 ${t.points}</li>
+                    <li><span style="color: #0066ff;">🔵 ${t.blue}</span> - 10 ${t.points}</li>
+                    <li><span style="color: #00ff66;">🟢 ${t.green}</span> - 15 ${t.points}</li>
+                    <li><span style="color: #ffff00;">🟡 ${t.yellow}</span> - 15 ${t.points}</li>
+                    <li><span style="color: #9900ff;">🟣 ${t.purple}</span> - 20 ${t.points}</li>
+                    <li><span style="color: #ff6600;">🟠 ${t.orange}</span> - 20 ${t.points}</li>
+                </ul>
+                
+                <h3>${t.bonus}</h3>
+                <ul>
+                    <li>${t.bonusText1}</li>
+                    <li>${t.bonusText2}</li>
+                    <li>${t.bonusText3}</li>
+                </ul>
+            `;
+            document.getElementById('rulesCloseBtn').textContent = t.understood;
+            
+            // Modal victoire
+            document.querySelector('#winModal h2').textContent = t.levelComplete;
+            document.querySelector('#winModal p').textContent = t.congratulations;
+            const winButtons = document.querySelectorAll('#winModal .btn');
+            winButtons[0].innerHTML = t.nextLevel;
+            winButtons[1].innerHTML = t.menu;
+            
+            // Modal game over
+            document.querySelector('#gameOverModal h2').textContent = t.gameOver;
+            document.querySelector('#gameOverModal p').textContent = t.noMoreMoves;
+            const gameOverButtons = document.querySelectorAll('#gameOverModal .btn');
+            gameOverButtons[0].innerHTML = t.restart;
+            gameOverButtons[1].innerHTML = t.menu;
+        }
+
+        function initializeBoard() {
+            const gameBoard = document.getElementById('gameBoard');
+            gameBoard.style.gridTemplateColumns = `repeat(${BOARD_SIZE}, 1fr)`;
+            gameBoard.innerHTML = '';
+            
+            board = [];
+            for (let row = 0; row < BOARD_SIZE; row++) {
+                board[row] = [];
+                for (let col = 0; col < BOARD_SIZE; col++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    cell.dataset.row = row;
+                    cell.dataset.col = col;
+                    cell.addEventListener('click', () => handleCellClick(row, col));
+                    
+                    const crystalType = getRandomCrystal();
+                    board[row][col] = crystalType;
+                    
+                    const crystal = document.createElement('div');
+                    crystal.className = `crystal ${crystalType}`;
+                    const symbols = getCurrentSymbols();
+                    crystal.textContent = symbols[crystalType];
+                    
+                    cell.appendChild(crystal);
+                    gameBoard.appendChild(cell);
+                }
+            }
+            
+            // Éviter les matches initiaux
+            removeInitialMatches();
+        }
+
+        function getRandomCrystal() {
+            return CRYSTAL_TYPES[Math.floor(Math.random() * CRYSTAL_TYPES.length)];
+        }
+
+        function removeInitialMatches() {
+            let hasMatches = true;
+            while (hasMatches) {
+                hasMatches = false;
+                for (let row = 0; row < BOARD_SIZE; row++) {
+                    for (let col = 0; col < BOARD_SIZE; col++) {
+                        if (checkMatch(row, col, board[row][col])) {
+                            board[row][col] = getRandomCrystal();
+                            hasMatches = true;
+                        }
+                    }
+                }
+            }
+            updateBoardDisplay();
+        }
+
+        function checkMatch(row, col, type) {
+            // Vérifier horizontal
+            let horizontalCount = 1;
+            // Gauche
+            for (let c = col - 1; c >= 0 && board[row][c] === type; c--) {
+                horizontalCount++;
+            }
+            // Droite
+            for (let c = col + 1; c < BOARD_SIZE && board[row][c] === type; c++) {
+                horizontalCount++;
+            }
+            
+            // Vérifier vertical
+            let verticalCount = 1;
+            // Haut
+            for (let r = row - 1; r >= 0 && board[r][col] === type; r--) {
+                verticalCount++;
+            }
+            // Bas
+            for (let r = row + 1; r < BOARD_SIZE && board[r][col] === type; r++) {
+                verticalCount++;
+            }
+            
+            return horizontalCount >= 3 || verticalCount >= 3;
+        }
+
+        function handleCellClick(row, col) {
+            if (!gameActive) return;
+            
+            const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+            
+            if (selectedCell === null) {
+                selectedCell = { row, col };
+                cell.classList.add('selected');
+            } else {
+                const prevCell = document.querySelector(`[data-row="${selectedCell.row}"][data-col="${selectedCell.col}"]`);
+                prevCell.classList.remove('selected');
+                
+                if (selectedCell.row === row && selectedCell.col === col) {
+                    selectedCell = null;
+                    return;
+                }
+                
+                if (isAdjacent(selectedCell.row, selectedCell.col, row, col)) {
+                    swapCrystals(selectedCell.row, selectedCell.col, row, col);
+                }
+                
+                selectedCell = null;
+            }
+        }
+
+        function isAdjacent(row1, col1, row2, col2) {
+            const rowDiff = Math.abs(row1 - row2);
+            const colDiff = Math.abs(col1 - col2);
+            return (rowDiff === 1 && colDiff === 0) || (rowDiff === 0 && colDiff === 1);
+        }
+
+        function swapCrystals(row1, col1, row2, col2) {
+            // Échanger temporairement
+            const temp = board[row1][col1];
+            board[row1][col1] = board[row2][col2];
+            board[row2][col2] = temp;
+            
+            // Vérifier si l'échange crée des matches
+            const hasMatch1 = checkMatch(row1, col1, board[row1][col1]);
+            const hasMatch2 = checkMatch(row2, col2, board[row2][col2]);
+            
+            if (hasMatch1 || hasMatch2) {
+                updateBoardDisplay();
+                moves--;
+                updateUI();
+                
+                setTimeout(() => {
+                    processMatches();
+                }, 300);
+            } else {
+                // Annuler l'échange
+                board[row1][col1] = board[row2][col2];
+                board[row2][col2] = temp;
+            }
+        }
+
+        function processMatches() {
+            const matches = findAllMatches();
+            if (matches.length === 0) {
+                checkGameEnd();
+                return;
+            }
+            
+            // Calculer les points
+            let matchPoints = 0;
+            matches.forEach(match => {
+                match.cells.forEach(cell => {
+                    const points = CRYSTAL_POINTS[board[cell.row][cell.col]];
+                    matchPoints += points;
+                    
+                    // Effet de particules
+                    createParticleEffect(cell.row, cell.col, board[cell.row][cell.col]);
+                });
+                
+                // Bonus pour les longs matches
+                if (match.cells.length >= 4) {
+                    matchPoints += 50;
+                }
+                if (match.cells.length >= 5) {
+                    matchPoints += 100;
+                }
+            });
+            
+            score += matchPoints;
+            
+            // Marquer les cellules pour suppression
+            matches.forEach(match => {
+                match.cells.forEach(cell => {
+                    const cellElement = document.querySelector(`[data-row="${cell.row}"][data-col="${cell.col}"]`);
+                    cellElement.classList.add('matched');
+                    board[cell.row][cell.col] = null;
+                });
+            });
+            
+            setTimeout(() => {
+                dropCrystals();
+            }, 600);
+        }
+
+        function findAllMatches() {
+            const matches = [];
+            const processed = new Set();
+            
+            for (let row = 0; row < BOARD_SIZE; row++) {
+                for (let col = 0; col < BOARD_SIZE; col++) {
+                    const key = `${row}-${col}`;
+                    if (processed.has(key) || board[row][col] === null) continue;
+                    
+                    const type = board[row][col];
+                    const horizontalMatch = findHorizontalMatch(row, col, type);
+                    const verticalMatch = findVerticalMatch(row, col, type);
+                    
+                    if (horizontalMatch.length >= 3) {
+                        matches.push({ cells: horizontalMatch, type: 'horizontal' });
+                        horizontalMatch.forEach(cell => processed.add(`${cell.row}-${cell.col}`));
+                    }
+                    
+                    if (verticalMatch.length >= 3) {
+                        matches.push({ cells: verticalMatch, type: 'vertical' });
+                        verticalMatch.forEach(cell => processed.add(`${cell.row}-${cell.col}`));
+                    }
+                }
+            }
+            
+            return matches;
+        }
+
+        function findHorizontalMatch(row, col, type) {
+            const match = [{ row, col }];
+            
+            // Gauche
+            for (let c = col - 1; c >= 0 && board[row][c] === type; c--) {
+                match.unshift({ row, col: c });
+            }
+            
+            // Droite
+            for (let c = col + 1; c < BOARD_SIZE && board[row][c] === type; c++) {
+                match.push({ row, col: c });
+            }
+            
+            return match;
+        }
+
+        function findVerticalMatch(row, col, type) {
+            const match = [{ row, col }];
+            
+            // Haut
+            for (let r = row - 1; r >= 0 && board[r][col] === type; r--) {
+                match.unshift({ row: r, col });
+            }
+            
+            // Bas
+            for (let r = row + 1; r < BOARD_SIZE && board[r][col] === type; r++) {
+                match.push({ row: r, col });
+            }
+            
+            return match;
+        }
+
+        function createParticleEffect(row, col, crystalType) {
+            const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+            const rect = cell.getBoundingClientRect();
+            
+            for (let i = 0; i < 8; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.background = getComputedStyle(cell.querySelector('.crystal')).background;
+                particle.style.left = rect.left + rect.width / 2 + 'px';
+                particle.style.top = rect.top + rect.height / 2 + 'px';
+                
+                const angle = (i / 8) * Math.PI * 2;
+                const distance = 50 + Math.random() * 50;
+                particle.style.setProperty('--dx', Math.cos(angle) * distance + 'px');
+                particle.style.setProperty('--dy', Math.sin(angle) * distance + 'px');
+                
+                document.body.appendChild(particle);
+                
+                setTimeout(() => particle.remove(), 1000);
+            }
+        }
+
+        function dropCrystals() {
+            // Faire tomber les cristaux
+            for (let col = 0; col < BOARD_SIZE; col++) {
+                let writePos = BOARD_SIZE - 1;
+                
+                for (let row = BOARD_SIZE - 1; row >= 0; row--) {
+                    if (board[row][col] !== null) {
+                        board[writePos][col] = board[row][col];
+                        if (writePos !== row) {
+                            board[row][col] = null;
+                        }
+                        writePos--;
+                    }
+                }
+                
+                // Remplir avec de nouveaux cristaux
+                for (let row = writePos; row >= 0; row--) {
+                    board[row][col] = getRandomCrystal();
+                }
+            }
+            
+            updateBoardDisplay();
+            updateUI();
+            
+            setTimeout(() => {
+                processMatches();
+            }, 500);
+        }
+
+        function updateBoardDisplay() {
+            for (let row = 0; row < BOARD_SIZE; row++) {
+                for (let col = 0; col < BOARD_SIZE; col++) {
+                    const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+                    const crystal = cell.querySelector('.crystal');
+                    
+                    if (board[row][col] !== null) {
+                        crystal.className = `crystal ${board[row][col]}`;
+                        const symbols = getCurrentSymbols();
+                        crystal.textContent = symbols[board[row][col]];
+                        cell.classList.remove('matched');
+                    }
+                }
+            }
+        }
+
+        function updateUI() {
+            document.getElementById('scoreValue').textContent = score;
+            document.getElementById('levelValue').textContent = level;
+            document.getElementById('movesValue').textContent = moves;
+            document.getElementById('targetValue').textContent = target;
+        }
+
+        function checkGameEnd() {
+            if (score >= target) {
+                // Victoire
+                document.getElementById('winStats').innerHTML = `
+                    <p>Score final: <strong>${score}</strong></p>
+                    <p>Coups restants: <strong>${moves}</strong></p>
+                `;
+                openModal('winModal');
+            } else if (moves <= 0) {
+                // Défaite
+                document.getElementById('gameOverStats').innerHTML = `
+                    <p>Score final: <strong>${score}</strong></p>
+                    <p>Objectif: <strong>${target}</strong></p>
+                `;
+                openModal('gameOverModal');
+            }
+        }
+
+        function startGame() {
+            gameActive = true;
+            score = 0;
+            level = 1;
+            moves = 30;
+            target = 1000;
+            selectedCell = null;
+            
+            closeAllModals();
+            initializeBoard();
+            updateUI();
+        }
+
+        function nextLevel() {
+            level++;
+            // Difficulté progressive : moins de coups, objectifs plus élevés
+            moves = Math.max(20, 40 - level * 2);
+            target = Math.floor(target * 1.5); // Augmentation de 50% à chaque niveau
+            selectedCell = null;
+            
+            closeModal('winModal');
+            initializeBoard();
+            updateUI();
+            
+            // Message de bienvenue pour le nouveau niveau avec nouveaux symboles
+            setTimeout(() => {
+                const t = translations[currentLanguage];
+                const levelMessage = level <= 10 ? 
+                    `🎉 Niveau ${level} - Nouveaux symboles débloqués !` :
+                    `🎉 Niveau ${level} - Symboles aléatoires générés !`;
+                
+                // Créer une notification temporaire
+                const notification = document.createElement('div');
+                notification.style.cssText = `
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: linear-gradient(135deg, #1a1a2e, #16213e);
+                    color: #00ffff;
+                    padding: 20px 40px;
+                    border-radius: 15px;
+                    border: 2px solid #00ffff;
+                    box-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
+                    z-index: 1001;
+                    text-align: center;
+                    font-size: 1.2rem;
+                    font-weight: bold;
+                    animation: fadeInOut 3s ease-in-out forwards;
+                `;
+                notification.textContent = levelMessage;
+                
+                // Ajouter l'animation CSS
+                const style = document.createElement('style');
+                style.textContent = `
+                    @keyframes fadeInOut {
+                        0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+                        20%, 80% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+                        100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+                    }
+                `;
+                document.head.appendChild(style);
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    notification.remove();
+                    style.remove();
+                }, 3000);
+            }, 500);
+        }
+
+        function showHint() {
+            if (!gameActive) return;
+            
+            // Trouver un mouvement possible
+            for (let row = 0; row < BOARD_SIZE; row++) {
+                for (let col = 0; col < BOARD_SIZE - 1; col++) {
+                    // Tester échange horizontal
+                    const temp = board[row][col];
+                    board[row][col] = board[row][col + 1];
+                    board[row][col + 1] = temp;
+                    
+                    if (checkMatch(row, col, board[row][col]) || checkMatch(row, col + 1, board[row][col + 1])) {
+                        // Annuler l'échange
+                        board[row][col + 1] = board[row][col];
+                        board[row][col] = temp;
+                        
+                        // Mettre en évidence
+                        const cell1 = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+                        const cell2 = document.querySelector(`[data-row="${row}"][data-col="${col + 1}"]`);
+                        
+                        cell1.style.border = '3px solid #ffff00';
+                        cell2.style.border = '3px solid #ffff00';
+                        
+                        setTimeout(() => {
+                            cell1.style.border = '';
+                            cell2.style.border = '';
+                        }, 2000);
+                        
+                        return;
+                    }
+                    
+                    // Annuler l'échange
+                    board[row][col + 1] = board[row][col];
+                    board[row][col] = temp;
+                }
+            }
+        }
+
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = 'block';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        function closeAllModals() {
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => modal.style.display = 'none');
+        }
+
+        // Gestion des événements globaux
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeAllModals();
+                // Afficher notification retour accueil
+                showEscapeNotification();
+            }
+        });
+
+        function showEscapeNotification() {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                background: linear-gradient(135deg, #1a1a2e, #16213e);
+                color: #00ffff;
+                padding: 15px 25px;
+                border-radius: 10px;
+                border: 2px solid #00ffff;
+                box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+                z-index: 1001;
+                font-size: 0.9rem;
+                animation: slideInOut 3s ease-in-out forwards;
+                backdrop-filter: blur(10px);
+            `;
+            
+            const t = translations[currentLanguage];
+            const messages = {
+                fr: "🏠 Échap pour retourner à l'accueil",
+                en: "🏠 Escape to return home",
+                ar: "🏠 إسكيب للعودة للرئيسية",
+                es: "🏠 Escape para volver al inicio",
+                de: "🏠 Escape um zur Startseite zurückzukehren",
+                zh: "🏠 按Escape返回主页"
+            };
+            
+            notification.textContent = messages[currentLanguage] || messages.fr;
+            
+            // Ajouter l'animation CSS si elle n'existe pas
+            if (!document.getElementById('escapeAnimation')) {
+                const style = document.createElement('style');
+                style.id = 'escapeAnimation';
+                style.textContent = `
+                    @keyframes slideInOut {
+                        0% { opacity: 0; transform: translateX(100%); }
+                        15%, 85% { opacity: 1; transform: translateX(0); }
+                        100% { opacity: 0; transform: translateX(100%); }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9896e6c840bce22d',t:'MTc1OTYwNDIxMC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
