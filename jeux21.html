@@ -1,0 +1,1856 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pharaon Cyber - Empire Galactique</title>
+    <style>
+        body {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Orbitron', 'Arial', sans-serif;
+            background: linear-gradient(135deg, #0a0a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #00ffff;
+            overflow-x: hidden;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Étoiles animées */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: #fff;
+            border-radius: 50%;
+            animation: twinkle 3s infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        /* Interface principale */
+        .game-container {
+            position: relative;
+            z-index: 10;
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            background: rgba(0, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px solid #00ffff;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
+        }
+
+        .title {
+            font-size: 3rem;
+            font-weight: bold;
+            text-shadow: 0 0 20px #00ffff;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #00ffff, #ffd700, #ff6b6b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { filter: drop-shadow(0 0 10px #00ffff); }
+            to { filter: drop-shadow(0 0 20px #ffd700); }
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: #ffd700;
+            margin-bottom: 20px;
+        }
+
+        /* Ressources */
+        .resources {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .resource {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #00ffff;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .resource:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 255, 255, 0.3);
+        }
+
+        .resource-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #ffd700;
+        }
+
+        /* Sélection des parties */
+        .chapters-selection {
+            background: rgba(0, 0, 0, 0.9);
+            border-radius: 20px;
+            padding: 30px;
+            border: 3px solid #ffd700;
+            box-shadow: 0 0 40px rgba(255, 215, 0, 0.3);
+            margin-bottom: 30px;
+        }
+
+        .chapters-title {
+            text-align: center;
+            font-size: 2rem;
+            color: #ffd700;
+            margin-bottom: 30px;
+        }
+
+        .chapters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .chapter {
+            background: linear-gradient(135deg, #1a1a3a, #0a0a2e);
+            border: 3px solid #00ffff;
+            border-radius: 15px;
+            padding: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chapter:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.6);
+        }
+
+        .chapter.completed {
+            border-color: #ffd700;
+            background: linear-gradient(135deg, #3a3a1a, #2e2e0a);
+        }
+
+        .chapter.locked {
+            opacity: 0.5;
+            cursor: not-allowed;
+            border-color: #666;
+        }
+
+        .chapter-number {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #ffd700;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .chapter-title {
+            font-size: 1.3rem;
+            color: #00ffff;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .chapter-description {
+            font-size: 0.9rem;
+            color: #ccc;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .chapter-progress {
+            background: rgba(0, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .progress-bar {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            height: 20px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #00ffff, #ffd700);
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+
+        /* Cartes des planètes */
+        .planets-section {
+            display: none;
+            background: rgba(0, 0, 0, 0.9);
+            border-radius: 20px;
+            padding: 30px;
+            border: 3px solid #ffd700;
+            box-shadow: 0 0 40px rgba(255, 215, 0, 0.3);
+            margin-bottom: 30px;
+        }
+
+        .planets-title {
+            text-align: center;
+            font-size: 1.8rem;
+            color: #ffd700;
+            margin-bottom: 20px;
+        }
+
+        .planets-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+        }
+
+        .planet {
+            background: radial-gradient(circle, #1a1a3a, #0a0a2e);
+            border: 2px solid #00ffff;
+            border-radius: 15px;
+            width: 120px;
+            height: 120px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            margin: 0 auto;
+        }
+
+        .planet:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.6);
+        }
+
+        .planet.conquered {
+            border-color: #ffd700;
+            background: radial-gradient(circle, #3a3a1a, #2e2e0a);
+        }
+
+        .planet.locked {
+            opacity: 0.5;
+            cursor: not-allowed;
+            border-color: #666;
+        }
+
+        .planet.available {
+            border-color: #00ffff;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 10px rgba(0, 255, 255, 0.3); }
+            50% { box-shadow: 0 0 20px rgba(0, 255, 255, 0.8); }
+        }
+
+        .planet-name {
+            font-size: 0.8rem;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 5px;
+        }
+
+        .planet-status {
+            font-size: 0.6rem;
+            margin-top: 2px;
+        }
+
+        /* Contrôles */
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            background: linear-gradient(45deg, #00ffff, #0080ff);
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0, 255, 255, 0.5);
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn-back {
+            background: linear-gradient(45deg, #ff6b6b, #ff4757);
+        }
+
+        .btn-success {
+            background: linear-gradient(45deg, #2ed573, #1dd1a1);
+        }
+
+        /* Modales */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #0a0a2e, #16213e);
+            margin: 5% auto;
+            padding: 30px;
+            border: 3px solid #00ffff;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 0 50px rgba(0, 255, 255, 0.5);
+            animation: modalAppear 0.3s ease;
+        }
+
+        @keyframes modalAppear {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .close {
+            color: #ff6b6b;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: #ff4757;
+        }
+
+        /* Quiz */
+        .question-container {
+            background: rgba(255, 215, 0, 0.1);
+            border: 2px solid #ffd700;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .answer-button {
+            background: rgba(0, 255, 255, 0.1);
+            border: 2px solid #00ffff;
+            color: #00ffff;
+            padding: 15px;
+            margin: 5px 0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+            width: 100%;
+        }
+
+        .answer-button:hover {
+            background: rgba(0, 255, 255, 0.3);
+            transform: translateX(10px);
+        }
+
+        .answer-button:disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        /* Notifications */
+        .notification {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 255, 255, 0.9);
+            color: #000;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-weight: bold;
+            z-index: 1500;
+            animation: slideDown 0.5s ease;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateX(-50%) translateY(-100%); }
+            to { transform: translateX(-50%) translateY(0); }
+        }
+
+        /* Cartes de conquête */
+        .conquest-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .conquest-card {
+            background: linear-gradient(135deg, #ffd700, #ffb347);
+            color: #000;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            border: 3px solid #ff6b6b;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+            animation: cardGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes cardGlow {
+            from { box-shadow: 0 0 20px rgba(255, 215, 0, 0.5); }
+            to { box-shadow: 0 0 30px rgba(255, 215, 0, 0.8); }
+        }
+
+        .conquest-card h3 {
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+
+        /* Support pour l'arabe */
+        .rtl {
+            direction: rtl;
+            text-align: right;
+        }
+
+        .rtl .header {
+            direction: rtl;
+        }
+
+        .rtl .chapter-description,
+        .rtl .chapter-progress {
+            text-align: right;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .title { font-size: 2rem; }
+            .chapters-grid { grid-template-columns: 1fr; }
+            .planets-grid { grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); }
+            .planet { width: 100px; height: 100px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Étoiles animées -->
+    <div class="stars" id="stars"></div>
+
+    <div class="game-container">
+        <!-- En-tête -->
+        <div class="header">
+            <!-- Sélecteur de langue -->
+            <div style="position: absolute; top: 20px; right: 20px;">
+                <select id="languageSelector" onchange="changeLanguage()" style="
+                    background: linear-gradient(45deg, #00ffff, #0080ff);
+                    color: #000;
+                    border: 2px solid #ffd700;
+                    border-radius: 8px;
+                    padding: 8px 12px;
+                    font-weight: bold;
+                    cursor: pointer;
+                    font-size: 0.9rem;
+                ">
+                    <option value="fr">🇫🇷 Français</option>
+                    <option value="en">🇬🇧 English</option>
+                    <option value="ar">🇸🇦 العربية</option>
+                    <option value="es">🇪🇸 Español</option>
+                    <option value="de">🇩🇪 Deutsch</option>
+                    <option value="zh">🇨🇳 中文</option>
+                </select>
+            </div>
+            
+            <h1 class="title" id="gameTitle">⚡ PHARAON CYBER ⚡<br>EMPIRE GALACTIQUE</h1>
+            <p class="subtitle" id="gameSubtitle">🌌 Conquérez la galaxie avec la sagesse des anciens pharaons ! 🌌</p>
+            
+            <!-- Ressources -->
+            <div class="resources">
+                <div class="resource">
+                    <div>🏆 Parties Complétées</div>
+                    <div class="resource-value" id="completedChapters">0</div>
+                </div>
+                <div class="resource">
+                    <div>⭐ Score Total</div>
+                    <div class="resource-value" id="totalScore">0</div>
+                </div>
+                <div class="resource">
+                    <div>🎯 Précision</div>
+                    <div class="resource-value" id="accuracy">0%</div>
+                </div>
+                <div class="resource">
+                    <div>👑 Cartes de Conquête</div>
+                    <div class="resource-value" id="conquestCards">0</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sélection des parties -->
+        <div class="chapters-selection" id="chaptersSelection">
+            <h2 class="chapters-title">🏛️ DYNASTIES DE L'ÉGYPTE ANCIENNE 🏛️</h2>
+            <div class="chapters-grid" id="chaptersGrid">
+                <!-- Les parties seront générées dynamiquement -->
+            </div>
+        </div>
+
+        <!-- Section des planètes -->
+        <div class="planets-section" id="planetsSection">
+            <div class="controls">
+                <button class="btn btn-back" onclick="backToChapters()">🔙 Retour aux Parties</button>
+            </div>
+            <h2 class="planets-title" id="planetsTitle">🌍 Planètes de la Partie</h2>
+            <div class="planets-grid" id="planetsGrid">
+                <!-- Les planètes seront générées dynamiquement -->
+            </div>
+        </div>
+
+        <!-- Cartes de conquête gagnées -->
+        <div id="conquestCardsDisplay" class="conquest-cards">
+            <!-- Les cartes seront affichées ici -->
+        </div>
+    </div>
+
+    <!-- Modal pour les quiz -->
+    <div id="quizModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeQuizModal()">&times;</span>
+            <h2 id="quizModalTitle">Quiz</h2>
+            <div id="quizModalContent"></div>
+        </div>
+    </div>
+
+    <style>
+        .global-close-btn { position: fixed; top: 14px; right: 14px; z-index: 99999; background: #ff3b3b; color: #fff; border: none; width:52px; height:52px; border-radius:50%; font-size:22px; cursor:pointer; box-shadow:0 6px 18px rgba(255,59,59,0.3);} 
+        .global-close-btn:hover{ transform: scale(1.05); }
+    </style>
+    <button class="global-close-btn" title="Fermer" aria-label="Fermer" onclick="closePlatform()">✕</button>
+    <script>
+        // État du jeu
+        let gameState = {
+            currentChapter: 0,
+            currentPlanet: 0,
+            currentLanguage: 'fr',
+            chapters: Array(5).fill().map(() => ({
+                completed: false,
+                planets: Array(5).fill().map(() => ({
+                    completed: false,
+                    score: 0,
+                    attempts: 3
+                }))
+            })),
+            totalScore: 0,
+            totalQuestions: 0,
+            correctAnswers: 0,
+            conquestCards: 0,
+            currentQuestionIndex: 0,
+            currentQuestions: [],
+            usedQuestions: new Set()
+        };
+
+        // Traductions
+        const translations = {
+            fr: {
+                gameTitle: "⚡ PHARAON CYBER ⚡<br>EMPIRE GALACTIQUE",
+                gameSubtitle: "🌌 Conquérez la galaxie avec la sagesse des anciens pharaons ! 🌌",
+                completedChapters: "Parties Complétées",
+                totalScore: "Score Total",
+                accuracy: "Précision",
+                conquestCards: "Cartes de Conquête",
+                dynastiesTitle: "🏛️ DYNASTIES DE L'ÉGYPTE ANCIENNE 🏛️",
+                planetsTitle: "🌍 Planètes de la Partie",
+                backButton: "🔙 Retour aux Parties",
+                completed: "✅ Terminée",
+                locked: "🔒 Verrouillée",
+                available: "🎯 Disponible",
+                lost: "💀 Perdue",
+                progression: "Progression",
+                planets: "planètes",
+                score: "Score",
+                correctAnswers: "Bonnes réponses",
+                attempts: "Tentatives",
+                question: "Question",
+                planetConquered: "🎉 Planète conquise ! Score:",
+                chapterCompleted: "🎉 PARTIE TERMINÉE ! Carte de conquête gagnée !",
+                planetLost: "💀 Planète perdue ! Score final:",
+                failed: "❌ Échec ! Tentatives restantes:",
+                chapterCompleted2: "Partie",
+                chapterCompleted3: "complétée !"
+            },
+            en: {
+                gameTitle: "⚡ PHARAOH CYBER ⚡<br>GALACTIC EMPIRE",
+                gameSubtitle: "🌌 Conquer the galaxy with ancient pharaohs' wisdom! 🌌",
+                completedChapters: "Completed Chapters",
+                totalScore: "Total Score",
+                accuracy: "Accuracy",
+                conquestCards: "Conquest Cards",
+                dynastiesTitle: "🏛️ ANCIENT EGYPT DYNASTIES 🏛️",
+                planetsTitle: "🌍 Chapter Planets",
+                backButton: "🔙 Back to Chapters",
+                completed: "✅ Completed",
+                locked: "🔒 Locked",
+                available: "🎯 Available",
+                lost: "💀 Lost",
+                progression: "Progress",
+                planets: "planets",
+                score: "Score",
+                correctAnswers: "Correct answers",
+                attempts: "Attempts",
+                question: "Question",
+                planetConquered: "🎉 Planet conquered! Score:",
+                chapterCompleted: "🎉 CHAPTER COMPLETED! Conquest card earned!",
+                planetLost: "💀 Planet lost! Final score:",
+                failed: "❌ Failed! Remaining attempts:",
+                chapterCompleted2: "Chapter",
+                chapterCompleted3: "completed!"
+            },
+            ar: {
+                gameTitle: "⚡ فرعون سايبر ⚡<br>الإمبراطورية المجرية",
+                gameSubtitle: "🌌 اغزُ المجرة بحكمة الفراعنة القدماء! 🌌",
+                completedChapters: "الفصول المكتملة",
+                totalScore: "النتيجة الإجمالية",
+                accuracy: "الدقة",
+                conquestCards: "بطاقات الغزو",
+                dynastiesTitle: "🏛️ سلالات مصر القديمة 🏛️",
+                planetsTitle: "🌍 كواكب الفصل",
+                backButton: "🔙 العودة للفصول",
+                completed: "✅ مكتمل",
+                locked: "🔒 مقفل",
+                available: "🎯 متاح",
+                lost: "💀 مفقود",
+                progression: "التقدم",
+                planets: "كواكب",
+                score: "النتيجة",
+                correctAnswers: "الإجابات الصحيحة",
+                attempts: "المحاولات",
+                question: "السؤال",
+                planetConquered: "🎉 تم غزو الكوكب! النتيجة:",
+                chapterCompleted: "🎉 اكتمل الفصل! تم كسب بطاقة غزو!",
+                planetLost: "💀 فُقد الكوكب! النتيجة النهائية:",
+                failed: "❌ فشل! المحاولات المتبقية:",
+                chapterCompleted2: "الفصل",
+                chapterCompleted3: "مكتمل!"
+            },
+            es: {
+                gameTitle: "⚡ FARAÓN CYBER ⚡<br>IMPERIO GALÁCTICO",
+                gameSubtitle: "🌌 ¡Conquista la galaxia con la sabiduría de los antiguos faraones! 🌌",
+                completedChapters: "Capítulos Completados",
+                totalScore: "Puntuación Total",
+                accuracy: "Precisión",
+                conquestCards: "Cartas de Conquista",
+                dynastiesTitle: "🏛️ DINASTÍAS DEL ANTIGUO EGIPTO 🏛️",
+                planetsTitle: "🌍 Planetas del Capítulo",
+                backButton: "🔙 Volver a Capítulos",
+                completed: "✅ Completado",
+                locked: "🔒 Bloqueado",
+                available: "🎯 Disponible",
+                lost: "💀 Perdido",
+                progression: "Progreso",
+                planets: "planetas",
+                score: "Puntuación",
+                correctAnswers: "Respuestas correctas",
+                attempts: "Intentos",
+                question: "Pregunta",
+                planetConquered: "🎉 ¡Planeta conquistado! Puntuación:",
+                chapterCompleted: "🎉 ¡CAPÍTULO COMPLETADO! ¡Carta de conquista ganada!",
+                planetLost: "💀 ¡Planeta perdido! Puntuación final:",
+                failed: "❌ ¡Fallo! Intentos restantes:",
+                chapterCompleted2: "Capítulo",
+                chapterCompleted3: "¡completado!"
+            },
+            de: {
+                gameTitle: "⚡ PHARAO CYBER ⚡<br>GALAKTISCHES REICH",
+                gameSubtitle: "🌌 Erobere die Galaxie mit der Weisheit der alten Pharaonen! 🌌",
+                completedChapters: "Abgeschlossene Kapitel",
+                totalScore: "Gesamtpunktzahl",
+                accuracy: "Genauigkeit",
+                conquestCards: "Eroberungskarten",
+                dynastiesTitle: "🏛️ DYNASTIEN DES ALTEN ÄGYPTEN 🏛️",
+                planetsTitle: "🌍 Kapitel-Planeten",
+                backButton: "🔙 Zurück zu Kapiteln",
+                completed: "✅ Abgeschlossen",
+                locked: "🔒 Gesperrt",
+                available: "🎯 Verfügbar",
+                lost: "💀 Verloren",
+                progression: "Fortschritt",
+                planets: "Planeten",
+                score: "Punktzahl",
+                correctAnswers: "Richtige Antworten",
+                attempts: "Versuche",
+                question: "Frage",
+                planetConquered: "🎉 Planet erobert! Punktzahl:",
+                chapterCompleted: "🎉 KAPITEL ABGESCHLOSSEN! Eroberungskarte erhalten!",
+                planetLost: "💀 Planet verloren! Endpunktzahl:",
+                failed: "❌ Fehlgeschlagen! Verbleibende Versuche:",
+                chapterCompleted2: "Kapitel",
+                chapterCompleted3: "abgeschlossen!"
+            },
+            zh: {
+                gameTitle: "⚡ 法老赛博 ⚡<br>银河帝国",
+                gameSubtitle: "🌌 用古代法老的智慧征服银河系！🌌",
+                completedChapters: "已完成章节",
+                totalScore: "总分",
+                accuracy: "准确率",
+                conquestCards: "征服卡片",
+                dynastiesTitle: "🏛️ 古埃及王朝 🏛️",
+                planetsTitle: "🌍 章节行星",
+                backButton: "🔙 返回章节",
+                completed: "✅ 已完成",
+                locked: "🔒 已锁定",
+                available: "🎯 可用",
+                lost: "💀 已失去",
+                progression: "进度",
+                planets: "行星",
+                score: "分数",
+                correctAnswers: "正确答案",
+                attempts: "尝试次数",
+                question: "问题",
+                planetConquered: "🎉 行星被征服！分数：",
+                chapterCompleted: "🎉 章节完成！获得征服卡片！",
+                planetLost: "💀 行星失去！最终分数：",
+                failed: "❌ 失败！剩余尝试次数：",
+                chapterCompleted2: "章节",
+                chapterCompleted3: "已完成！"
+            }
+        };
+
+        // Base de données des questions multilingues (20 premières questions traduites)
+        const questionDatabase = {
+            fr: [
+                // PARTIE 1: LES PHARAONS LÉGENDAIRES (50 questions)
+                // Planète 1: Les Grands Bâtisseurs (10 questions)
+                { q: "Quel pharaon a fait construire la Grande Pyramide de Gizeh ?", a: ["Khéphren", "Khéops", "Mykérinos", "Djéser", "Snéfrou"], c: 1 },
+                { q: "Combien d'années a duré le règne de Ramsès II ?", a: ["56 ans", "60 ans", "66 ans", "70 ans", "74 ans"], c: 2 },
+                { q: "Quel pharaon a fait construire Abou Simbel ?", a: ["Ramsès II", "Ramsès III", "Séthi Ier", "Thoutmôsis III", "Amenhotep III"], c: 0 },
+                { q: "Qui était le père de Khéops ?", a: ["Djéser", "Snéfrou", "Khéphren", "Mykérinos", "Houni"], c: 1 },
+                { q: "Quel pharaon a unifié la Haute et la Basse-Égypte ?", a: ["Narmer", "Aha", "Djer", "Djet", "Den"], c: 0 },
+                { q: "Combien de pyramides Snéfrou a-t-il fait construire ?", a: ["1", "2", "3", "4", "5"], c: 2 },
+                { q: "Quel pharaon a fait construire la pyramide à degrés de Saqqarah ?", a: ["Djéser", "Khéops", "Snéfrou", "Khéphren", "Mykérinos"], c: 0 },
+                { q: "Quelle était la capitale de Ramsès II ?", a: ["Memphis", "Thèbes", "Pi-Ramsès", "Amarna", "Alexandrie"], c: 2 },
+                { q: "Combien de colosses ornent la façade d'Abou Simbel ?", a: ["2", "3", "4", "5", "6"], c: 2 },
+                { q: "Quel architecte a conçu la pyramide à degrés ?", a: ["Imhotep", "Hemiounou", "Amenhotep", "Sénènmout", "Inéni"], c: 0 },
+
+                // Planète 2: Les Pharaons Guerriers (10 questions)
+                { q: "Quel pharaon a remporté la bataille de Qadesh ?", a: ["Ramsès II", "Séthi Ier", "Thoutmôsis III", "Amenhotep II", "Ramsès III"], c: 0 },
+                { q: "Combien de campagnes militaires Thoutmôsis III a-t-il menées ?", a: ["14", "15", "16", "17", "18"], c: 3 },
+                { q: "Quel pharaon a repoussé les Peuples de la Mer ?", a: ["Ramsès II", "Ramsès III", "Séthi Ier", "Mérenptah", "Ramsès IV"], c: 1 },
+                { q: "Quelle bataille a marqué l'apogée de l'empire égyptien ?", a: ["Qadesh", "Megiddo", "Kadesh", "Carchemish", "Hamath"], c: 1 },
+                { q: "Quel pharaon était surnommé le 'Napoléon de l'Égypte' ?", a: ["Ramsès II", "Thoutmôsis III", "Séthi Ier", "Amenhotep II", "Ahmôsis"], c: 1 },
+                { q: "Contre quel peuple Ramsès II a-t-il signé le premier traité de paix ?", a: ["Nubiens", "Libyens", "Hittites", "Assyriens", "Babyloniens"], c: 2 },
+                { q: "Quel pharaon a chassé les Hyksôs d'Égypte ?", a: ["Ahmôsis", "Amenhotep Ier", "Thoutmôsis Ier", "Kamôsis", "Séqénenrê"], c: 0 },
+                { q: "Combien de fils Ramsès II a-t-il eus ?", a: ["Plus de 50", "Plus de 80", "Plus de 100", "Plus de 120", "Plus de 150"], c: 2 },
+                { q: "Quel pharaon a étendu l'empire jusqu'à l'Euphrate ?", a: ["Thoutmôsis Ier", "Thoutmôsis III", "Amenhotep II", "Séthi Ier", "Ramsès II"], c: 1 },
+                { q: "Quelle arme révolutionnaire les Égyptiens ont-ils adoptée ?", a: ["L'arc composite", "Le char de guerre", "L'épée de bronze", "La lance", "La fronde"], c: 1 },
+
+                // Planète 3: Les Pharaons Femmes (10 questions)
+                { q: "Quelle reine a régné pendant 22 ans sur l'Égypte ?", a: ["Néfertiti", "Hatchepsout", "Cléopâtre VII", "Néfertari", "Tiyi"], c: 1 },
+                { q: "Quel pharaon femme s'est fait représenter avec une barbe postiche ?", a: ["Hatchepsout", "Néfertiti", "Cléopâtre", "Sobeknéfrou", "Taousert"], c: 0 },
+                { q: "Quelle reine était l'épouse de Ramsès II ?", a: ["Néfertari", "Néfertiti", "Hatchepsout", "Cléopâtre", "Tiyi"], c: 0 },
+                { q: "Combien de langues Cléopâtre VII parlait-elle ?", a: ["5", "7", "9", "11", "13"], c: 2 },
+                { q: "Quelle reine a fait construire l'obélisque de Karnak ?", a: ["Hatchepsout", "Néfertiti", "Cléopâtre", "Néfertari", "Tiyi"], c: 0 },
+                { q: "Quel était le nom de naissance d'Hatchepsout ?", a: ["Hatchepsout", "Maâtkarê", "Khénemetnéferhedjet", "Néférourê", "Sénènmout"], c: 0 },
+                { q: "Quelle reine a été la mère de Toutânkhamon ?", a: ["Néfertiti", "Kiya", "Tiyi", "Ânkhésenamon", "Méritaton"], c: 1 },
+                { q: "Combien d'années Cléopâtre VII a-t-elle régné ?", a: ["18 ans", "19 ans", "20 ans", "21 ans", "22 ans"], c: 3 },
+                { q: "Quelle reine était surnommée 'la Grande Épouse Royale' ?", a: ["Néfertari", "Néfertiti", "Hatchepsout", "Tiyi", "Cléopâtre"], c: 0 },
+                { q: "Quel temple Hatchepsout a-t-elle fait construire ?", a: ["Deir el-Bahari", "Karnak", "Louxor", "Abou Simbel", "Philae"], c: 0 },
+
+                // Planète 4: Les Pharaons Révolutionnaires (10 questions)
+                { q: "Quel pharaon a instauré le monothéisme en Égypte ?", a: ["Akhenaton", "Amenhotep III", "Toutânkhamon", "Séthi Ier", "Ramsès II"], c: 0 },
+                { q: "Quelle était la nouvelle capitale d'Akhenaton ?", a: ["Amarna", "Thèbes", "Memphis", "Pi-Ramsès", "Alexandrie"], c: 0 },
+                { q: "Quel dieu unique Akhenaton vénérait-il ?", a: ["Aton", "Amon", "Rê", "Ptah", "Thot"], c: 0 },
+                { q: "Combien d'années a duré le règne d'Akhenaton ?", a: ["15 ans", "16 ans", "17 ans", "18 ans", "19 ans"], c: 2 },
+                { q: "Quel pharaon a restauré l'ancien culte après Akhenaton ?", a: ["Toutânkhamon", "Aÿ", "Horemheb", "Séthi Ier", "Ramsès Ier"], c: 0 },
+                { q: "Quel âge avait Toutânkhamon à sa mort ?", a: ["17 ans", "18 ans", "19 ans", "20 ans", "21 ans"], c: 2 },
+                { q: "Qui était l'épouse d'Akhenaton ?", a: ["Néfertiti", "Kiya", "Tiyi", "Méritaton", "Ânkhésenamon"], c: 0 },
+                { q: "Combien de filles Akhenaton et Néfertiti ont-ils eues ?", a: ["4", "5", "6", "7", "8"], c: 2 },
+                { q: "Quel pharaon a effacé le nom d'Akhenaton des monuments ?", a: ["Horemheb", "Toutânkhamon", "Aÿ", "Séthi Ier", "Ramsès II"], c: 0 },
+                { q: "Dans quelle vallée se trouve la tombe de Toutânkhamon ?", a: ["Vallée des Rois", "Vallée des Reines", "Vallée des Nobles", "Saqqarah", "Gizeh"], c: 0 },
+
+                // Planète 5: Les Derniers Pharaons (10 questions)
+                { q: "Quel pharaon a fondé Alexandrie ?", a: ["Alexandre le Grand", "Ptolémée Ier", "Cléopâtre VII", "Philippe II", "Darius III"], c: 0 },
+                { q: "Combien d'années a duré la dynastie ptolémaïque ?", a: ["275 ans", "295 ans", "300 ans", "320 ans", "350 ans"], c: 1 },
+                { q: "Quel empereur romain a annexé l'Égypte ?", a: ["Jules César", "Auguste", "Marc Antoine", "Tibère", "Caligula"], c: 1 },
+                { q: "En quelle année l'Égypte est-elle devenue province romaine ?", a: ["31 av. J.-C.", "30 av. J.-C.", "29 av. J.-C.", "28 av. J.-C.", "27 av. J.-C."], c: 1 },
+                { q: "Quel pharaon nubien a conquis l'Égypte au VIIIe siècle av. J.-C. ?", a: ["Piânkhy", "Shabaka", "Taharqa", "Tantamani", "Alara"], c: 0 },
+                { q: "Combien de pharaons nubiens ont régné sur l'Égypte ?", a: ["3", "4", "5", "6", "7"], c: 2 },
+                { q: "Quel pharaon perse a conquis l'Égypte en 525 av. J.-C. ?", a: ["Cyrus II", "Cambyse II", "Darius Ier", "Xerxès Ier", "Artaxerxès Ier"], c: 1 },
+                { q: "Combien de fois l'Égypte a-t-elle été conquise par les Perses ?", a: ["1 fois", "2 fois", "3 fois", "4 fois", "5 fois"], c: 1 },
+                { q: "Quel pharaon égyptien a brièvement restauré l'indépendance face aux Perses ?", a: ["Amyrtée", "Nectanébo Ier", "Nectanébo II", "Khababash", "Psammétique III"], c: 0 },
+                { q: "Quelle bataille a marqué la fin de l'Égypte pharaonique ?", a: ["Bataille d'Actium", "Bataille de Pharsale", "Bataille de Philippes", "Bataille d'Alexandrie", "Bataille de Péluse"], c: 0 },
+
+                // PARTIE 2: PYRAMIDES ET MONUMENTS (50 questions)
+                // Planète 1: Les Pyramides de Gizeh (10 questions)
+                { q: "Combien de pierres composent la Grande Pyramide ?", a: ["2,1 millions", "2,3 millions", "2,5 millions", "2,7 millions", "2,9 millions"], c: 1 },
+                { q: "Quelle est la hauteur originelle de la Grande Pyramide ?", a: ["146,5 mètres", "147 mètres", "147,5 mètres", "148 mètres", "148,5 mètres"], c: 0 },
+                { q: "Combien pèse chaque bloc de pierre en moyenne ?", a: ["2 tonnes", "2,5 tonnes", "3 tonnes", "3,5 tonnes", "4 tonnes"], c: 1 },
+                { q: "Combien d'ouvriers ont travaillé sur la Grande Pyramide ?", a: ["10 000", "15 000", "20 000", "25 000", "30 000"], c: 2 },
+                { q: "Combien d'années a duré la construction de la Grande Pyramide ?", a: ["15 ans", "18 ans", "20 ans", "23 ans", "25 ans"], c: 2 },
+                { q: "Quel est l'angle d'inclinaison des faces de la Grande Pyramide ?", a: ["51°50'", "51°52'", "51°54'", "51°56'", "51°58'"], c: 1 },
+                { q: "Combien de chambres contient la Grande Pyramide ?", a: ["2", "3", "4", "5", "6"], c: 1 },
+                { q: "Quelle pyramide est la plus petite du complexe de Gizeh ?", a: ["Khéops", "Khéphren", "Mykérinos", "Pyramide satellite", "Pyramide de la reine"], c: 2 },
+                { q: "Combien de pyramides satellites entourent la Grande Pyramide ?", a: ["2", "3", "4", "5", "6"], c: 1 },
+                { q: "Quel matériau recouvrait originellement les pyramides ?", a: ["Granit rose", "Calcaire blanc", "Grès jaune", "Basalte noir", "Marbre blanc"], c: 1 },
+            ],
+            en: [
+                // PART 1: LEGENDARY PHARAOHS (50 questions)
+                // Planet 1: The Great Builders (10 questions)
+                { q: "Which pharaoh built the Great Pyramid of Giza?", a: ["Khafre", "Khufu", "Menkaure", "Djoser", "Sneferu"], c: 1 },
+                { q: "How many years did Ramesses II reign?", a: ["56 years", "60 years", "66 years", "70 years", "74 years"], c: 2 },
+                { q: "Which pharaoh built Abu Simbel?", a: ["Ramesses II", "Ramesses III", "Seti I", "Thutmose III", "Amenhotep III"], c: 0 },
+                { q: "Who was Khufu's father?", a: ["Djoser", "Sneferu", "Khafre", "Menkaure", "Huni"], c: 1 },
+                { q: "Which pharaoh unified Upper and Lower Egypt?", a: ["Narmer", "Aha", "Djer", "Djet", "Den"], c: 0 },
+                { q: "How many pyramids did Sneferu build?", a: ["1", "2", "3", "4", "5"], c: 2 },
+                { q: "Which pharaoh built the Step Pyramid at Saqqara?", a: ["Djoser", "Khufu", "Sneferu", "Khafre", "Menkaure"], c: 0 },
+                { q: "What was Ramesses II's capital?", a: ["Memphis", "Thebes", "Pi-Ramesses", "Amarna", "Alexandria"], c: 2 },
+                { q: "How many colossi adorn the facade of Abu Simbel?", a: ["2", "3", "4", "5", "6"], c: 2 },
+                { q: "Which architect designed the Step Pyramid?", a: ["Imhotep", "Hemiunu", "Amenhotep", "Senenmut", "Ineni"], c: 0 },
+
+                // Planet 2: The Warrior Pharaohs (10 questions)
+                { q: "Which pharaoh won the Battle of Kadesh?", a: ["Ramesses II", "Seti I", "Thutmose III", "Amenhotep II", "Ramesses III"], c: 0 },
+                { q: "How many military campaigns did Thutmose III lead?", a: ["14", "15", "16", "17", "18"], c: 3 },
+                { q: "Which pharaoh repelled the Sea Peoples?", a: ["Ramesses II", "Ramesses III", "Seti I", "Merneptah", "Ramesses IV"], c: 1 },
+                { q: "Which battle marked the peak of the Egyptian empire?", a: ["Kadesh", "Megiddo", "Kadesh", "Carchemish", "Hamath"], c: 1 },
+                { q: "Which pharaoh was nicknamed the 'Napoleon of Egypt'?", a: ["Ramesses II", "Thutmose III", "Seti I", "Amenhotep II", "Ahmose"], c: 1 },
+                { q: "With which people did Ramesses II sign the first peace treaty?", a: ["Nubians", "Libyans", "Hittites", "Assyrians", "Babylonians"], c: 2 },
+                { q: "Which pharaoh expelled the Hyksos from Egypt?", a: ["Ahmose", "Amenhotep I", "Thutmose I", "Kamose", "Seqenenre"], c: 0 },
+                { q: "How many sons did Ramesses II have?", a: ["More than 50", "More than 80", "More than 100", "More than 120", "More than 150"], c: 2 },
+                { q: "Which pharaoh extended the empire to the Euphrates?", a: ["Thutmose I", "Thutmose III", "Amenhotep II", "Seti I", "Ramesses II"], c: 1 },
+                { q: "What revolutionary weapon did the Egyptians adopt?", a: ["Composite bow", "War chariot", "Bronze sword", "Spear", "Sling"], c: 1 },
+
+                // Planet 3: Female Pharaohs (10 questions)
+                { q: "Which queen ruled Egypt for 22 years?", a: ["Nefertiti", "Hatshepsut", "Cleopatra VII", "Nefertari", "Tiye"], c: 1 },
+                { q: "Which female pharaoh was depicted with a false beard?", a: ["Hatshepsut", "Nefertiti", "Cleopatra", "Sobekneferu", "Tausret"], c: 0 },
+                { q: "Which queen was Ramesses II's wife?", a: ["Nefertari", "Nefertiti", "Hatshepsut", "Cleopatra", "Tiye"], c: 0 },
+                { q: "How many languages did Cleopatra VII speak?", a: ["5", "7", "9", "11", "13"], c: 2 },
+                { q: "Which queen built the obelisk at Karnak?", a: ["Hatshepsut", "Nefertiti", "Cleopatra", "Nefertari", "Tiye"], c: 0 },
+                { q: "What was Hatshepsut's birth name?", a: ["Hatshepsut", "Maatkare", "Khnemetnefer-hedjet", "Neferure", "Senenmut"], c: 0 },
+                { q: "Which queen was Tutankhamun's mother?", a: ["Nefertiti", "Kiya", "Tiye", "Ankhesenamun", "Meritaten"], c: 1 },
+                { q: "How many years did Cleopatra VII reign?", a: ["18 years", "19 years", "20 years", "21 years", "22 years"], c: 3 },
+                { q: "Which queen was called 'the Great Royal Wife'?", a: ["Nefertari", "Nefertiti", "Hatshepsut", "Tiye", "Cleopatra"], c: 0 },
+                { q: "Which temple did Hatshepsut build?", a: ["Deir el-Bahari", "Karnak", "Luxor", "Abu Simbel", "Philae"], c: 0 },
+
+                // Planet 4: Revolutionary Pharaohs (10 questions)
+                { q: "Which pharaoh established monotheism in Egypt?", a: ["Akhenaten", "Amenhotep III", "Tutankhamun", "Seti I", "Ramesses II"], c: 0 },
+                { q: "What was Akhenaten's new capital?", a: ["Amarna", "Thebes", "Memphis", "Pi-Ramesses", "Alexandria"], c: 0 },
+                { q: "Which single god did Akhenaten worship?", a: ["Aten", "Amun", "Ra", "Ptah", "Thoth"], c: 0 },
+                { q: "How many years did Akhenaten reign?", a: ["15 years", "16 years", "17 years", "18 years", "19 years"], c: 2 },
+                { q: "Which pharaoh restored the old cult after Akhenaten?", a: ["Tutankhamun", "Ay", "Horemheb", "Seti I", "Ramesses I"], c: 0 },
+                { q: "How old was Tutankhamun when he died?", a: ["17 years", "18 years", "19 years", "20 years", "21 years"], c: 2 },
+                { q: "Who was Akhenaten's wife?", a: ["Nefertiti", "Kiya", "Tiye", "Meritaten", "Ankhesenamun"], c: 0 },
+                { q: "How many daughters did Akhenaten and Nefertiti have?", a: ["4", "5", "6", "7", "8"], c: 2 },
+                { q: "Which pharaoh erased Akhenaten's name from monuments?", a: ["Horemheb", "Tutankhamun", "Ay", "Seti I", "Ramesses II"], c: 0 },
+                { q: "In which valley is Tutankhamun's tomb located?", a: ["Valley of the Kings", "Valley of the Queens", "Valley of the Nobles", "Saqqara", "Giza"], c: 0 },
+
+                // Planet 5: The Last Pharaohs (10 questions)
+                { q: "Which pharaoh founded Alexandria?", a: ["Alexander the Great", "Ptolemy I", "Cleopatra VII", "Philip II", "Darius III"], c: 0 },
+                { q: "How many years did the Ptolemaic dynasty last?", a: ["275 years", "295 years", "300 years", "320 years", "350 years"], c: 1 },
+                { q: "Which Roman emperor annexed Egypt?", a: ["Julius Caesar", "Augustus", "Mark Antony", "Tiberius", "Caligula"], c: 1 },
+                { q: "In which year did Egypt become a Roman province?", a: ["31 BC", "30 BC", "29 BC", "28 BC", "27 BC"], c: 1 },
+                { q: "Which Nubian pharaoh conquered Egypt in the 8th century BC?", a: ["Piye", "Shabaka", "Taharqa", "Tantamani", "Alara"], c: 0 },
+                { q: "How many Nubian pharaohs ruled over Egypt?", a: ["3", "4", "5", "6", "7"], c: 2 },
+                { q: "Which Persian pharaoh conquered Egypt in 525 BC?", a: ["Cyrus II", "Cambyses II", "Darius I", "Xerxes I", "Artaxerxes I"], c: 1 },
+                { q: "How many times was Egypt conquered by the Persians?", a: ["1 time", "2 times", "3 times", "4 times", "5 times"], c: 1 },
+                { q: "Which Egyptian pharaoh briefly restored independence against the Persians?", a: ["Amyrtaeus", "Nectanebo I", "Nectanebo II", "Khababash", "Psamtik III"], c: 0 },
+                { q: "Which battle marked the end of pharaonic Egypt?", a: ["Battle of Actium", "Battle of Pharsalus", "Battle of Philippi", "Battle of Alexandria", "Battle of Pelusium"], c: 0 },
+
+                // PART 2: PYRAMIDS AND MONUMENTS (50 questions)
+                // Planet 1: The Pyramids of Giza (10 questions)
+                { q: "How many stones make up the Great Pyramid?", a: ["2.1 million", "2.3 million", "2.5 million", "2.7 million", "2.9 million"], c: 1 },
+                { q: "What was the original height of the Great Pyramid?", a: ["146.5 meters", "147 meters", "147.5 meters", "148 meters", "148.5 meters"], c: 0 },
+                { q: "How much does each stone block weigh on average?", a: ["2 tons", "2.5 tons", "3 tons", "3.5 tons", "4 tons"], c: 1 },
+                { q: "How many workers worked on the Great Pyramid?", a: ["10,000", "15,000", "20,000", "25,000", "30,000"], c: 2 },
+                { q: "How many years did the construction of the Great Pyramid take?", a: ["15 years", "18 years", "20 years", "23 years", "25 years"], c: 2 },
+                { q: "What is the angle of inclination of the Great Pyramid's faces?", a: ["51°50'", "51°52'", "51°54'", "51°56'", "51°58'"], c: 1 },
+                { q: "How many chambers does the Great Pyramid contain?", a: ["2", "3", "4", "5", "6"], c: 1 },
+                { q: "Which pyramid is the smallest in the Giza complex?", a: ["Khufu", "Khafre", "Menkaure", "Satellite pyramid", "Queen's pyramid"], c: 2 },
+                { q: "How many satellite pyramids surround the Great Pyramid?", a: ["2", "3", "4", "5", "6"], c: 1 },
+                { q: "What material originally covered the pyramids?", a: ["Pink granite", "White limestone", "Yellow sandstone", "Black basalt", "White marble"], c: 1 },
+            ],
+            ar: [
+                // الجزء الأول: الفراعنة الأسطوريون (50 سؤال)
+                // الكوكب الأول: البناة العظام (10 أسئلة)
+                { q: "أي فرعون بنى الهرم الأكبر في الجيزة؟", a: ["خفرع", "خوفو", "منقرع", "زوسر", "سنفرو"], c: 1 },
+                { q: "كم سنة حكم رمسيس الثاني؟", a: ["56 سنة", "60 سنة", "66 سنة", "70 سنة", "74 سنة"], c: 2 },
+                { q: "أي فرعون بنى أبو سمبل؟", a: ["رمسيس الثاني", "رمسيس الثالث", "سيتي الأول", "تحتمس الثالث", "أمنحتب الثالث"], c: 0 },
+                { q: "من كان والد خوفو؟", a: ["زوسر", "سنفرو", "خفرع", "منقرع", "هوني"], c: 1 },
+                { q: "أي فرعون وحد مصر العليا والسفلى؟", a: ["نارمر", "آحا", "جر", "جت", "دن"], c: 0 },
+                { q: "كم هرماً بنى سنفرو؟", a: ["1", "2", "3", "4", "5"], c: 2 },
+                { q: "أي فرعون بنى الهرم المدرج في سقارة؟", a: ["زوسر", "خوفو", "سنفرو", "خفرع", "منقرع"], c: 0 },
+                { q: "ما كانت عاصمة رمسيس الثاني؟", a: ["منف", "طيبة", "بي-رمسيس", "أمارنا", "الإسكندرية"], c: 2 },
+                { q: "كم تمثالاً عملاقاً يزين واجهة أبو سمبل؟", a: ["2", "3", "4", "5", "6"], c: 2 },
+                { q: "أي مهندس صمم الهرم المدرج؟", a: ["إمحوتب", "حميونو", "أمنحتب", "سننموت", "إنيني"], c: 0 },
+
+                // الكوكب الثاني: الفراعنة المحاربون (10 أسئلة)
+                { q: "أي فرعون انتصر في معركة قادش؟", a: ["رمسيس الثاني", "سيتي الأول", "تحتمس الثالث", "أمنحتب الثاني", "رمسيس الثالث"], c: 0 },
+                { q: "كم حملة عسكرية قاد تحتمس الثالث؟", a: ["14", "15", "16", "17", "18"], c: 3 },
+                { q: "أي فرعون صد شعوب البحر؟", a: ["رمسيس الثاني", "رمسيس الثالث", "سيتي الأول", "مرنبتاح", "رمسيس الرابع"], c: 1 },
+                { q: "أي معركة شكلت ذروة الإمبراطورية المصرية؟", a: ["قادش", "مجدو", "قادش", "كركميش", "حماة"], c: 1 },
+                { q: "أي فرعون لُقب بـ'نابليون مصر'؟", a: ["رمسيس الثاني", "تحتمس الثالث", "سيتي الأول", "أمنحتب الثاني", "أحمس"], c: 1 },
+                { q: "مع أي شعب وقع رمسيس الثاني أول معاهدة سلام؟", a: ["النوبيون", "الليبيون", "الحيثيون", "الآشوريون", "البابليون"], c: 2 },
+                { q: "أي فرعون طرد الهكسوس من مصر؟", a: ["أحمس", "أمنحتب الأول", "تحتمس الأول", "كامس", "سقنن رع"], c: 0 },
+                { q: "كم ابناً كان لرمسيس الثاني؟", a: ["أكثر من 50", "أكثر من 80", "أكثر من 100", "أكثر من 120", "أكثر من 150"], c: 2 },
+                { q: "أي فرعون وسع الإمبراطورية حتى الفرات؟", a: ["تحتمس الأول", "تحتمس الثالث", "أمنحتب الثاني", "سيتي الأول", "رمسيس الثاني"], c: 1 },
+                { q: "أي سلاح ثوري تبناه المصريون؟", a: ["القوس المركب", "عربة الحرب", "سيف البرونز", "الرمح", "المقلاع"], c: 1 },
+
+                // الكوكب الثالث: الفراعنة النساء (10 أسئلة)
+                { q: "أي ملكة حكمت مصر لمدة 22 عاماً؟", a: ["نفرتيتي", "حتشبسوت", "كليوباترا السابعة", "نفرتاري", "تيي"], c: 1 },
+                { q: "أي فرعون امرأة صُورت بلحية مستعارة؟", a: ["حتشبسوت", "نفرتيتي", "كليوباترا", "سوبك نفرو", "تاوسرت"], c: 0 },
+                { q: "أي ملكة كانت زوجة رمسيس الثاني؟", a: ["نفرتاري", "نفرتيتي", "حتشبسوت", "كليوباترا", "تيي"], c: 0 },
+                { q: "كم لغة كانت كليوباترا السابعة تتحدث؟", a: ["5", "7", "9", "11", "13"], c: 2 },
+                { q: "أي ملكة بنت مسلة الكرنك؟", a: ["حتشبسوت", "نفرتيتي", "كليوباترا", "نفرتاري", "تيي"], c: 0 },
+                { q: "ما كان اسم حتشبسوت عند الولادة؟", a: ["حتشبسوت", "ماعت كا رع", "خنم نفر حجت", "نفرو رع", "سنن موت"], c: 0 },
+                { q: "أي ملكة كانت أم توت عنخ آمون؟", a: ["نفرتيتي", "كيا", "تيي", "عنخ إس إن آمون", "مريت آتون"], c: 1 },
+                { q: "كم سنة حكمت كليوباترا السابعة؟", a: ["18 سنة", "19 سنة", "20 سنة", "21 سنة", "22 سنة"], c: 3 },
+                { q: "أي ملكة لُقبت بـ'الزوجة الملكية العظيمة'؟", a: ["نفرتاري", "نفرتيتي", "حتشبسوت", "تيي", "كليوباترا"], c: 0 },
+                { q: "أي معبد بنته حتشبسوت؟", a: ["دير البحري", "الكرنك", "الأقصر", "أبو سمبل", "فيلة"], c: 0 },
+
+                // الكوكب الرابع: الفراعنة الثوريون (10 أسئلة)
+                { q: "أي فرعون أسس التوحيد في مصر؟", a: ["أخناتون", "أمنحتب الثالث", "توت عنخ آمون", "سيتي الأول", "رمسيس الثاني"], c: 0 },
+                { q: "ما كانت عاصمة أخناتون الجديدة؟", a: ["أمارنا", "طيبة", "منف", "بي-رمسيس", "الإسكندرية"], c: 0 },
+                { q: "أي إله واحد عبده أخناتون؟", a: ["آتون", "آمون", "رع", "بتاح", "تحوت"], c: 0 },
+                { q: "كم سنة حكم أخناتون؟", a: ["15 سنة", "16 سنة", "17 سنة", "18 سنة", "19 سنة"], c: 2 },
+                { q: "أي فرعون استعاد العبادة القديمة بعد أخناتون؟", a: ["توت عنخ آمون", "آي", "حور محب", "سيتي الأول", "رمسيس الأول"], c: 0 },
+                { q: "كم كان عمر توت عنخ آمون عند وفاته؟", a: ["17 سنة", "18 سنة", "19 سنة", "20 سنة", "21 سنة"], c: 2 },
+                { q: "من كانت زوجة أخناتون؟", a: ["نفرتيتي", "كيا", "تيي", "مريت آتون", "عنخ إس إن آمون"], c: 0 },
+                { q: "كم ابنة كان لأخناتون ونفرتيتي؟", a: ["4", "5", "6", "7", "8"], c: 2 },
+                { q: "أي فرعون محا اسم أخناتون من الآثار؟", a: ["حور محب", "توت عنخ آمون", "آي", "سيتي الأول", "رمسيس الثاني"], c: 0 },
+                { q: "في أي وادي توجد مقبرة توت عنخ آمون؟", a: ["وادي الملوك", "وادي الملكات", "وادي النبلاء", "سقارة", "الجيزة"], c: 0 },
+
+                // الكوكب الخامس: آخر الفراعنة (10 أسئلة)
+                { q: "أي فرعون أسس الإسكندرية؟", a: ["الإسكندر الأكبر", "بطليموس الأول", "كليوباترا السابعة", "فيليب الثاني", "داريوس الثالث"], c: 0 },
+                { q: "كم سنة استمرت الأسرة البطلمية؟", a: ["275 سنة", "295 سنة", "300 سنة", "320 سنة", "350 سنة"], c: 1 },
+                { q: "أي إمبراطور روماني ضم مصر؟", a: ["يوليوس قيصر", "أغسطس", "مارك أنطونيو", "تيبيريوس", "كاليجولا"], c: 1 },
+                { q: "في أي سنة أصبحت مصر مقاطعة رومانية؟", a: ["31 ق.م", "30 ق.م", "29 ق.م", "28 ق.م", "27 ق.م"], c: 1 },
+                { q: "أي فرعون نوبي غزا مصر في القرن الثامن ق.م؟", a: ["بيي", "شاباكا", "تهارقا", "تانتاماني", "ألارا"], c: 0 },
+                { q: "كم فرعوناً نوبياً حكم مصر؟", a: ["3", "4", "5", "6", "7"], c: 2 },
+                { q: "أي فرعون فارسي غزا مصر عام 525 ق.م؟", a: ["قورش الثاني", "قمبيز الثاني", "داريوس الأول", "زركسيس الأول", "أرتحشستا الأول"], c: 1 },
+                { q: "كم مرة غزا الفرس مصر؟", a: ["مرة واحدة", "مرتان", "3 مرات", "4 مرات", "5 مرات"], c: 1 },
+                { q: "أي فرعون مصري استعاد الاستقلال مؤقتاً ضد الفرس؟", a: ["أميرتايوس", "نكتانيبو الأول", "نكتانيبو الثاني", "خبابش", "بسماتيك الثالث"], c: 0 },
+                { q: "أي معركة شكلت نهاية مصر الفرعونية؟", a: ["معركة أكتيوم", "معركة فارساليا", "معركة فيليبي", "معركة الإسكندرية", "معركة بيلوسيوم"], c: 0 },
+
+                // الجزء الثاني: الأهرامات والآثار (50 سؤال)
+                // الكوكب الأول: أهرامات الجيزة (10 أسئلة)
+                { q: "كم حجراً يتكون منه الهرم الأكبر؟", a: ["2.1 مليون", "2.3 مليون", "2.5 مليون", "2.7 مليون", "2.9 مليون"], c: 1 },
+                { q: "ما هو الارتفاع الأصلي للهرم الأكبر؟", a: ["146.5 متر", "147 متر", "147.5 متر", "148 متر", "148.5 متر"], c: 0 },
+                { q: "كم يزن كل كتلة حجرية في المتوسط؟", a: ["2 طن", "2.5 طن", "3 طن", "3.5 طن", "4 طن"], c: 1 },
+                { q: "كم عاملاً عمل في بناء الهرم الأكبر؟", a: ["10,000", "15,000", "20,000", "25,000", "30,000"], c: 2 },
+                { q: "كم سنة استغرق بناء الهرم الأكبر؟", a: ["15 سنة", "18 سنة", "20 سنة", "23 سنة", "25 سنة"], c: 2 },
+                { q: "ما هي زاوية ميل وجوه الهرم الأكبر؟", a: ["51°50'", "51°52'", "51°54'", "51°56'", "51°58'"], c: 1 },
+                { q: "كم غرفة يحتوي الهرم الأكبر؟", a: ["2", "3", "4", "5", "6"], c: 1 },
+                { q: "أي هرم هو الأصغر في مجمع الجيزة؟", a: ["خوفو", "خفرع", "منقرع", "الهرم التابع", "هرم الملكة"], c: 2 },
+                { q: "كم هرماً تابعاً يحيط بالهرم الأكبر؟", a: ["2", "3", "4", "5", "6"], c: 1 },
+                { q: "أي مادة كانت تغطي الأهرامات أصلاً؟", a: ["الجرانيت الوردي", "الحجر الجيري الأبيض", "الحجر الرملي الأصفر", "البازلت الأسود", "الرخام الأبيض"], c: 1 },
+            ],
+            es: [
+                // PARTE 1: FARAONES LEGENDARIOS (50 preguntas)
+                // Planeta 1: Los Grandes Constructores (10 preguntas)
+                { q: "¿Qué faraón construyó la Gran Pirámide de Giza?", a: ["Kefrén", "Keops", "Micerino", "Zoser", "Esnofru"], c: 1 },
+                { q: "¿Cuántos años duró el reinado de Ramsés II?", a: ["56 años", "60 años", "66 años", "70 años", "74 años"], c: 2 },
+                { q: "¿Qué faraón construyó Abu Simbel?", a: ["Ramsés II", "Ramsés III", "Seti I", "Tutmosis III", "Amenhotep III"], c: 0 },
+                { q: "¿Quién era el padre de Keops?", a: ["Zoser", "Esnofru", "Kefrén", "Micerino", "Huni"], c: 1 },
+                { q: "¿Qué faraón unificó el Alto y Bajo Egipto?", a: ["Narmer", "Aha", "Djer", "Djet", "Den"], c: 0 },
+                { q: "¿Cuántas pirámides construyó Esnofru?", a: ["1", "2", "3", "4", "5"], c: 2 },
+                { q: "¿Qué faraón construyó la pirámide escalonada de Saqqara?", a: ["Zoser", "Keops", "Esnofru", "Kefrén", "Micerino"], c: 0 },
+                { q: "¿Cuál era la capital de Ramsés II?", a: ["Menfis", "Tebas", "Pi-Ramsés", "Amarna", "Alejandría"], c: 2 },
+                { q: "¿Cuántos colosos adornan la fachada de Abu Simbel?", a: ["2", "3", "4", "5", "6"], c: 2 },
+                { q: "¿Qué arquitecto diseñó la pirámide escalonada?", a: ["Imhotep", "Hemiunu", "Amenhotep", "Senenmut", "Ineni"], c: 0 },
+
+                // Planeta 2: Los Faraones Guerreros (10 preguntas)
+                { q: "¿Qué faraón ganó la batalla de Kadesh?", a: ["Ramsés II", "Seti I", "Tutmosis III", "Amenhotep II", "Ramsés III"], c: 0 },
+                { q: "¿Cuántas campañas militares dirigió Tutmosis III?", a: ["14", "15", "16", "17", "18"], c: 3 },
+                { q: "¿Qué faraón repelió a los Pueblos del Mar?", a: ["Ramsés II", "Ramsés III", "Seti I", "Merneptah", "Ramsés IV"], c: 1 },
+                { q: "¿Qué batalla marcó el apogeo del imperio egipcio?", a: ["Kadesh", "Megido", "Kadesh", "Carquemis", "Hamat"], c: 1 },
+                { q: "¿Qué faraón fue apodado el 'Napoleón de Egipto'?", a: ["Ramsés II", "Tutmosis III", "Seti I", "Amenhotep II", "Ahmose"], c: 1 },
+                { q: "¿Con qué pueblo firmó Ramsés II el primer tratado de paz?", a: ["Nubios", "Libios", "Hititas", "Asirios", "Babilonios"], c: 2 },
+                { q: "¿Qué faraón expulsó a los hicsos de Egipto?", a: ["Ahmose", "Amenhotep I", "Tutmosis I", "Kamose", "Seqenenre"], c: 0 },
+                { q: "¿Cuántos hijos tuvo Ramsés II?", a: ["Más de 50", "Más de 80", "Más de 100", "Más de 120", "Más de 150"], c: 2 },
+                { q: "¿Qué faraón extendió el imperio hasta el Éufrates?", a: ["Tutmosis I", "Tutmosis III", "Amenhotep II", "Seti I", "Ramsés II"], c: 1 },
+                { q: "¿Qué arma revolucionaria adoptaron los egipcios?", a: ["Arco compuesto", "Carro de guerra", "Espada de bronce", "Lanza", "Honda"], c: 1 },
+
+                // Planeta 3: Faraones Mujeres (10 preguntas)
+                { q: "¿Qué reina gobernó Egipto durante 22 años?", a: ["Nefertiti", "Hatshepsut", "Cleopatra VII", "Nefertari", "Tiye"], c: 1 },
+                { q: "¿Qué faraón mujer se representó con barba postiza?", a: ["Hatshepsut", "Nefertiti", "Cleopatra", "Sobekneferu", "Tausret"], c: 0 },
+                { q: "¿Qué reina fue esposa de Ramsés II?", a: ["Nefertari", "Nefertiti", "Hatshepsut", "Cleopatra", "Tiye"], c: 0 },
+                { q: "¿Cuántos idiomas hablaba Cleopatra VII?", a: ["5", "7", "9", "11", "13"], c: 2 },
+                { q: "¿Qué reina construyó el obelisco de Karnak?", a: ["Hatshepsut", "Nefertiti", "Cleopatra", "Nefertari", "Tiye"], c: 0 },
+                { q: "¿Cuál era el nombre de nacimiento de Hatshepsut?", a: ["Hatshepsut", "Maatkare", "Khnemetnefer-hedjet", "Neferure", "Senenmut"], c: 0 },
+                { q: "¿Qué reina fue la madre de Tutankamón?", a: ["Nefertiti", "Kiya", "Tiye", "Ankhesenamun", "Meritaten"], c: 1 },
+                { q: "¿Cuántos años reinó Cleopatra VII?", a: ["18 años", "19 años", "20 años", "21 años", "22 años"], c: 3 },
+                { q: "¿Qué reina fue llamada 'la Gran Esposa Real'?", a: ["Nefertari", "Nefertiti", "Hatshepsut", "Tiye", "Cleopatra"], c: 0 },
+                { q: "¿Qué templo construyó Hatshepsut?", a: ["Deir el-Bahari", "Karnak", "Luxor", "Abu Simbel", "Filae"], c: 0 },
+
+                // Planeta 4: Faraones Revolucionarios (10 preguntas)
+                { q: "¿Qué faraón estableció el monoteísmo en Egipto?", a: ["Akenatón", "Amenhotep III", "Tutankamón", "Seti I", "Ramsés II"], c: 0 },
+                { q: "¿Cuál era la nueva capital de Akenatón?", a: ["Amarna", "Tebas", "Menfis", "Pi-Ramsés", "Alejandría"], c: 0 },
+                { q: "¿Qué dios único adoraba Akenatón?", a: ["Atón", "Amón", "Ra", "Ptah", "Thot"], c: 0 },
+                { q: "¿Cuántos años reinó Akenatón?", a: ["15 años", "16 años", "17 años", "18 años", "19 años"], c: 2 },
+                { q: "¿Qué faraón restauró el culto antiguo después de Akenatón?", a: ["Tutankamón", "Ay", "Horemheb", "Seti I", "Ramsés I"], c: 0 },
+                { q: "¿Qué edad tenía Tutankamón cuando murió?", a: ["17 años", "18 años", "19 años", "20 años", "21 años"], c: 2 },
+                { q: "¿Quién era la esposa de Akenatón?", a: ["Nefertiti", "Kiya", "Tiye", "Meritaten", "Ankhesenamun"], c: 0 },
+                { q: "¿Cuántas hijas tuvieron Akenatón y Nefertiti?", a: ["4", "5", "6", "7", "8"], c: 2 },
+                { q: "¿Qué faraón borró el nombre de Akenatón de los monumentos?", a: ["Horemheb", "Tutankamón", "Ay", "Seti I", "Ramsés II"], c: 0 },
+                { q: "¿En qué valle se encuentra la tumba de Tutankamón?", a: ["Valle de los Reyes", "Valle de las Reinas", "Valle de los Nobles", "Saqqara", "Giza"], c: 0 },
+
+                // Planeta 5: Los Últimos Faraones (10 preguntas)
+                { q: "¿Qué faraón fundó Alejandría?", a: ["Alejandro Magno", "Ptolomeo I", "Cleopatra VII", "Filipo II", "Darío III"], c: 0 },
+                { q: "¿Cuántos años duró la dinastía ptolemaica?", a: ["275 años", "295 años", "300 años", "320 años", "350 años"], c: 1 },
+                { q: "¿Qué emperador romano anexó Egipto?", a: ["Julio César", "Augusto", "Marco Antonio", "Tiberio", "Calígula"], c: 1 },
+                { q: "¿En qué año se convirtió Egipto en provincia romana?", a: ["31 a.C.", "30 a.C.", "29 a.C.", "28 a.C.", "27 a.C."], c: 1 },
+                { q: "¿Qué faraón nubio conquistó Egipto en el siglo VIII a.C.?", a: ["Piye", "Shabaka", "Taharqa", "Tantamani", "Alara"], c: 0 },
+                { q: "¿Cuántos faraones nubios gobernaron Egipto?", a: ["3", "4", "5", "6", "7"], c: 2 },
+                { q: "¿Qué faraón persa conquistó Egipto en 525 a.C.?", a: ["Ciro II", "Cambises II", "Darío I", "Jerjes I", "Artajerjes I"], c: 1 },
+                { q: "¿Cuántas veces fue conquistado Egipto por los persas?", a: ["1 vez", "2 veces", "3 veces", "4 veces", "5 veces"], c: 1 },
+                { q: "¿Qué faraón egipcio restauró brevemente la independencia contra los persas?", a: ["Amirteo", "Nectanebo I", "Nectanebo II", "Khababash", "Psamético III"], c: 0 },
+                { q: "¿Qué batalla marcó el fin del Egipto faraónico?", a: ["Batalla de Actium", "Batalla de Farsalia", "Batalla de Filipos", "Batalla de Alejandría", "Batalla de Pelusio"], c: 0 },
+
+                // PARTE 2: PIRÁMIDES Y MONUMENTOS (50 preguntas)
+                // Planeta 1: Las Pirámides de Giza (10 preguntas)
+                { q: "¿Cuántas piedras componen la Gran Pirámide?", a: ["2,1 millones", "2,3 millones", "2,5 millones", "2,7 millones", "2,9 millones"], c: 1 },
+                { q: "¿Cuál era la altura original de la Gran Pirámide?", a: ["146,5 metros", "147 metros", "147,5 metros", "148 metros", "148,5 metros"], c: 0 },
+                { q: "¿Cuánto pesa cada bloque de piedra en promedio?", a: ["2 toneladas", "2,5 toneladas", "3 toneladas", "3,5 toneladas", "4 toneladas"], c: 1 },
+                { q: "¿Cuántos trabajadores trabajaron en la Gran Pirámide?", a: ["10.000", "15.000", "20.000", "25.000", "30.000"], c: 2 },
+                { q: "¿Cuántos años duró la construcción de la Gran Pirámide?", a: ["15 años", "18 años", "20 años", "23 años", "25 años"], c: 2 },
+                { q: "¿Cuál es el ángulo de inclinación de las caras de la Gran Pirámide?", a: ["51°50'", "51°52'", "51°54'", "51°56'", "51°58'"], c: 1 },
+                { q: "¿Cuántas cámaras contiene la Gran Pirámide?", a: ["2", "3", "4", "5", "6"], c: 1 },
+                { q: "¿Cuál es la pirámide más pequeña del complejo de Giza?", a: ["Keops", "Kefrén", "Micerino", "Pirámide satélite", "Pirámide de la reina"], c: 2 },
+                { q: "¿Cuántas pirámides satélite rodean la Gran Pirámide?", a: ["2", "3", "4", "5", "6"], c: 1 },
+                { q: "¿Qué material cubría originalmente las pirámides?", a: ["Granito rosa", "Caliza blanca", "Arenisca amarilla", "Basalto negro", "Mármol blanco"], c: 1 },
+            ],
+            de: [
+                // TEIL 1: LEGENDÄRE PHARAONEN (50 Fragen)
+                // Planet 1: Die Großen Baumeister (10 Fragen)
+                { q: "Welcher Pharao baute die Große Pyramide von Gizeh?", a: ["Chephren", "Cheops", "Mykerinos", "Djoser", "Snofru"], c: 1 },
+                { q: "Wie viele Jahre regierte Ramses II.?", a: ["56 Jahre", "60 Jahre", "66 Jahre", "70 Jahre", "74 Jahre"], c: 2 },
+                { q: "Welcher Pharao baute Abu Simbel?", a: ["Ramses II.", "Ramses III.", "Sethos I.", "Thutmosis III.", "Amenhotep III."], c: 0 },
+                { q: "Wer war Cheops' Vater?", a: ["Djoser", "Snofru", "Chephren", "Mykerinos", "Huni"], c: 1 },
+                { q: "Welcher Pharao vereinigte Ober- und Unterägypten?", a: ["Narmer", "Aha", "Djer", "Djet", "Den"], c: 0 },
+                { q: "Wie viele Pyramiden baute Snofru?", a: ["1", "2", "3", "4", "5"], c: 2 },
+                { q: "Welcher Pharao baute die Stufenpyramide von Sakkara?", a: ["Djoser", "Cheops", "Snofru", "Chephren", "Mykerinos"], c: 0 },
+                { q: "Was war Ramses II. Hauptstadt?", a: ["Memphis", "Theben", "Pi-Ramses", "Amarna", "Alexandria"], c: 2 },
+                { q: "Wie viele Kolosse schmücken die Fassade von Abu Simbel?", a: ["2", "3", "4", "5", "6"], c: 2 },
+                { q: "Welcher Architekt entwarf die Stufenpyramide?", a: ["Imhotep", "Hemiunu", "Amenhotep", "Senenmut", "Ineni"], c: 0 },
+
+                // Planet 2: Die Krieger-Pharaonen (10 Fragen)
+                { q: "Welcher Pharao gewann die Schlacht von Kadesch?", a: ["Ramses II.", "Sethos I.", "Thutmosis III.", "Amenhotep II.", "Ramses III."], c: 0 },
+                { q: "Wie viele Militärkampagnen führte Thutmosis III.?", a: ["14", "15", "16", "17", "18"], c: 3 },
+                { q: "Welcher Pharao wehrte die Seevölker ab?", a: ["Ramses II.", "Ramses III.", "Sethos I.", "Merenptah", "Ramses IV."], c: 1 },
+                { q: "Welche Schlacht markierte den Höhepunkt des ägyptischen Reiches?", a: ["Kadesch", "Megiddo", "Kadesch", "Karkemisch", "Hamath"], c: 1 },
+                { q: "Welcher Pharao wurde der 'Napoleon Ägyptens' genannt?", a: ["Ramses II.", "Thutmosis III.", "Sethos I.", "Amenhotep II.", "Ahmose"], c: 1 },
+                { q: "Mit welchem Volk schloss Ramses II. den ersten Friedensvertrag?", a: ["Nubier", "Libyer", "Hethiter", "Assyrer", "Babylonier"], c: 2 },
+                { q: "Welcher Pharao vertrieb die Hyksos aus Ägypten?", a: ["Ahmose", "Amenhotep I.", "Thutmosis I.", "Kamose", "Seqenenre"], c: 0 },
+                { q: "Wie viele Söhne hatte Ramses II.?", a: ["Mehr als 50", "Mehr als 80", "Mehr als 100", "Mehr als 120", "Mehr als 150"], c: 2 },
+                { q: "Welcher Pharao erweiterte das Reich bis zum Euphrat?", a: ["Thutmosis I.", "Thutmosis III.", "Amenhotep II.", "Sethos I.", "Ramses II."], c: 1 },
+                { q: "Welche revolutionäre Waffe übernahmen die Ägypter?", a: ["Kompositbogen", "Streitwagen", "Bronzeschwert", "Speer", "Schleuder"], c: 1 },
+
+                // Planet 3: Weibliche Pharaonen (10 Fragen)
+                { q: "Welche Königin regierte Ägypten 22 Jahre lang?", a: ["Nofretete", "Hatschepsut", "Kleopatra VII.", "Nefertari", "Teje"], c: 1 },
+                { q: "Welche weibliche Pharao wurde mit falschem Bart dargestellt?", a: ["Hatschepsut", "Nofretete", "Kleopatra", "Sobekneferu", "Tausret"], c: 0 },
+                { q: "Welche Königin war Ramses II. Ehefrau?", a: ["Nefertari", "Nofretete", "Hatschepsut", "Kleopatra", "Teje"], c: 0 },
+                { q: "Wie viele Sprachen sprach Kleopatra VII.?", a: ["5", "7", "9", "11", "13"], c: 2 },
+                { q: "Welche Königin baute den Obelisk von Karnak?", a: ["Hatschepsut", "Nofretete", "Kleopatra", "Nefertari", "Teje"], c: 0 },
+                { q: "Wie lautete Hatschepsuts Geburtsname?", a: ["Hatschepsut", "Maatkare", "Chnemetneferhedjet", "Neferure", "Senenmut"], c: 0 },
+                { q: "Welche Königin war Tutanchamuns Mutter?", a: ["Nofretete", "Kija", "Teje", "Anchesenamun", "Meritaton"], c: 1 },
+                { q: "Wie viele Jahre regierte Kleopatra VII.?", a: ["18 Jahre", "19 Jahre", "20 Jahre", "21 Jahre", "22 Jahre"], c: 3 },
+                { q: "Welche Königin wurde 'die Große Königsgemahlin' genannt?", a: ["Nefertari", "Nofretete", "Hatschepsut", "Teje", "Kleopatra"], c: 0 },
+                { q: "Welchen Tempel baute Hatschepsut?", a: ["Deir el-Bahari", "Karnak", "Luxor", "Abu Simbel", "Philae"], c: 0 },
+
+                // Planet 4: Revolutionäre Pharaonen (10 Fragen)
+                { q: "Welcher Pharao führte den Monotheismus in Ägypten ein?", a: ["Echnaton", "Amenhotep III.", "Tutanchamun", "Sethos I.", "Ramses II."], c: 0 },
+                { q: "Wie hieß Echnatons neue Hauptstadt?", a: ["Amarna", "Theben", "Memphis", "Pi-Ramses", "Alexandria"], c: 0 },
+                { q: "Welchen einzigen Gott verehrte Echnaton?", a: ["Aton", "Amun", "Re", "Ptah", "Thot"], c: 0 },
+                { q: "Wie viele Jahre regierte Echnaton?", a: ["15 Jahre", "16 Jahre", "17 Jahre", "18 Jahre", "19 Jahre"], c: 2 },
+                { q: "Welcher Pharao stellte den alten Kult nach Echnaton wieder her?", a: ["Tutanchamun", "Eje", "Haremhab", "Sethos I.", "Ramses I."], c: 0 },
+                { q: "Wie alt war Tutanchamun bei seinem Tod?", a: ["17 Jahre", "18 Jahre", "19 Jahre", "20 Jahre", "21 Jahre"], c: 2 },
+                { q: "Wer war Echnatons Ehefrau?", a: ["Nofretete", "Kija", "Teje", "Meritaton", "Anchesenamun"], c: 0 },
+                { q: "Wie viele Töchter hatten Echnaton und Nofretete?", a: ["4", "5", "6", "7", "8"], c: 2 },
+                { q: "Welcher Pharao löschte Echnatons Namen von den Monumenten?", a: ["Haremhab", "Tutanchamun", "Eje", "Sethos I.", "Ramses II."], c: 0 },
+                { q: "In welchem Tal befindet sich Tutanchamuns Grab?", a: ["Tal der Könige", "Tal der Königinnen", "Tal der Adligen", "Sakkara", "Gizeh"], c: 0 },
+
+                // Planet 5: Die Letzten Pharaonen (10 Fragen)
+                { q: "Welcher Pharao gründete Alexandria?", a: ["Alexander der Große", "Ptolemaios I.", "Kleopatra VII.", "Philipp II.", "Darius III."], c: 0 },
+                { q: "Wie viele Jahre dauerte die Ptolemäer-Dynastie?", a: ["275 Jahre", "295 Jahre", "300 Jahre", "320 Jahre", "350 Jahre"], c: 1 },
+                { q: "Welcher römische Kaiser annektierte Ägypten?", a: ["Julius Caesar", "Augustus", "Marcus Antonius", "Tiberius", "Caligula"], c: 1 },
+                { q: "In welchem Jahr wurde Ägypten römische Provinz?", a: ["31 v. Chr.", "30 v. Chr.", "29 v. Chr.", "28 v. Chr.", "27 v. Chr."], c: 1 },
+                { q: "Welcher nubische Pharao eroberte Ägypten im 8. Jahrhundert v. Chr.?", a: ["Pije", "Schabaka", "Taharqa", "Tantamani", "Alara"], c: 0 },
+                { q: "Wie viele nubische Pharaonen herrschten über Ägypten?", a: ["3", "4", "5", "6", "7"], c: 2 },
+                { q: "Welcher persische Pharao eroberte Ägypten 525 v. Chr.?", a: ["Kyros II.", "Kambyses II.", "Darius I.", "Xerxes I.", "Artaxerxes I."], c: 1 },
+                { q: "Wie oft wurde Ägypten von den Persern erobert?", a: ["1 Mal", "2 Mal", "3 Mal", "4 Mal", "5 Mal"], c: 1 },
+                { q: "Welcher ägyptische Pharao stellte kurzzeitig die Unabhängigkeit gegen die Perser wieder her?", a: ["Amyrtaios", "Nektanebos I.", "Nektanebos II.", "Khababasch", "Psammetich III."], c: 0 },
+                { q: "Welche Schlacht markierte das Ende des pharaonischen Ägypten?", a: ["Schlacht von Actium", "Schlacht von Pharsalos", "Schlacht von Philippi", "Schlacht von Alexandria", "Schlacht von Pelusium"], c: 0 },
+
+                // TEIL 2: PYRAMIDEN UND MONUMENTE (50 Fragen)
+                // Planet 1: Die Pyramiden von Gizeh (10 Fragen)
+                { q: "Wie viele Steine bilden die Große Pyramide?", a: ["2,1 Millionen", "2,3 Millionen", "2,5 Millionen", "2,7 Millionen", "2,9 Millionen"], c: 1 },
+                { q: "Wie hoch war die Große Pyramide ursprünglich?", a: ["146,5 Meter", "147 Meter", "147,5 Meter", "148 Meter", "148,5 Meter"], c: 0 },
+                { q: "Wie viel wiegt jeder Steinblock im Durchschnitt?", a: ["2 Tonnen", "2,5 Tonnen", "3 Tonnen", "3,5 Tonnen", "4 Tonnen"], c: 1 },
+                { q: "Wie viele Arbeiter arbeiteten an der Großen Pyramide?", a: ["10.000", "15.000", "20.000", "25.000", "30.000"], c: 2 },
+                { q: "Wie viele Jahre dauerte der Bau der Großen Pyramide?", a: ["15 Jahre", "18 Jahre", "20 Jahre", "23 Jahre", "25 Jahre"], c: 2 },
+                { q: "Welchen Neigungswinkel haben die Seiten der Großen Pyramide?", a: ["51°50'", "51°52'", "51°54'", "51°56'", "51°58'"], c: 1 },
+                { q: "Wie viele Kammern enthält die Große Pyramide?", a: ["2", "3", "4", "5", "6"], c: 1 },
+                { q: "Welche Pyramide ist die kleinste im Gizeh-Komplex?", a: ["Cheops", "Chephren", "Mykerinos", "Satellitenpyramide", "Königinnenpyramide"], c: 2 },
+                { q: "Wie viele Satellitenpyramiden umgeben die Große Pyramide?", a: ["2", "3", "4", "5", "6"], c: 1 },
+                { q: "Welches Material bedeckte ursprünglich die Pyramiden?", a: ["Rosa Granit", "Weißer Kalkstein", "Gelber Sandstein", "Schwarzer Basalt", "Weißer Marmor"], c: 1 },
+            ],
+            zh: [
+                // 第一部分：传奇法老（50个问题）
+                // 行星1：伟大的建造者（10个问题）
+                { q: "哪位法老建造了吉萨大金字塔？", a: ["卡夫拉", "胡夫", "门卡乌拉", "左塞尔", "斯奈夫鲁"], c: 1 },
+                { q: "拉美西斯二世统治了多少年？", a: ["56年", "60年", "66年", "70年", "74年"], c: 2 },
+                { q: "哪位法老建造了阿布辛贝神庙？", a: ["拉美西斯二世", "拉美西斯三世", "塞提一世", "图特摩斯三世", "阿蒙霍特普三世"], c: 0 },
+                { q: "胡夫的父亲是谁？", a: ["左塞尔", "斯奈夫鲁", "卡夫拉", "门卡乌拉", "胡尼"], c: 1 },
+                { q: "哪位法老统一了上埃及和下埃及？", a: ["纳尔迈", "阿哈", "哲尔", "哲特", "登"], c: 0 },
+                { q: "斯奈夫鲁建造了多少座金字塔？", a: ["1", "2", "3", "4", "5"], c: 2 },
+                { q: "哪位法老建造了萨卡拉阶梯金字塔？", a: ["左塞尔", "胡夫", "斯奈夫鲁", "卡夫拉", "门卡乌拉"], c: 0 },
+                { q: "拉美西斯二世的首都是什么？", a: ["孟菲斯", "底比斯", "比拉美西斯", "阿马尔纳", "亚历山大"], c: 2 },
+                { q: "阿布辛贝神庙正面有多少尊巨像？", a: ["2", "3", "4", "5", "6"], c: 2 },
+                { q: "哪位建筑师设计了阶梯金字塔？", a: ["伊姆霍特普", "赫米乌努", "阿蒙霍特普", "塞南穆特", "伊内尼"], c: 0 },
+
+                // 行星2：战士法老（10个问题）
+                { q: "哪位法老赢得了卡迭石战役？", a: ["拉美西斯二世", "塞提一世", "图特摩斯三世", "阿蒙霍特普二世", "拉美西斯三世"], c: 0 },
+                { q: "图特摩斯三世进行了多少次军事征战？", a: ["14", "15", "16", "17", "18"], c: 3 },
+                { q: "哪位法老击退了海上民族？", a: ["拉美西斯二世", "拉美西斯三世", "塞提一世", "美伦普塔", "拉美西斯四世"], c: 1 },
+                { q: "哪场战役标志着埃及帝国的顶峰？", a: ["卡迭石", "米吉多", "卡迭石", "卡尔赫米什", "哈马特"], c: 1 },
+                { q: "哪位法老被称为'埃及的拿破仑'？", a: ["拉美西斯二世", "图特摩斯三世", "塞提一世", "阿蒙霍特普二世", "阿赫摩斯"], c: 1 },
+                { q: "拉美西斯二世与哪个民族签署了第一个和平条约？", a: ["努比亚人", "利比亚人", "赫梯人", "亚述人", "巴比伦人"], c: 2 },
+                { q: "哪位法老将希克索斯人驱逐出埃及？", a: ["阿赫摩斯", "阿蒙霍特普一世", "图特摩斯一世", "卡摩斯", "塞肯恩拉"], c: 0 },
+                { q: "拉美西斯二世有多少个儿子？", a: ["超过50个", "超过80个", "超过100个", "超过120个", "超过150个"], c: 2 },
+                { q: "哪位法老将帝国扩展到幼发拉底河？", a: ["图特摩斯一世", "图特摩斯三世", "阿蒙霍特普二世", "塞提一世", "拉美西斯二世"], c: 1 },
+                { q: "埃及人采用了什么革命性武器？", a: ["复合弓", "战车", "青铜剑", "长矛", "投石器"], c: 1 },
+
+                // 行星3：女法老（10个问题）
+                { q: "哪位女王统治埃及22年？", a: ["娜芙蒂蒂", "哈特谢普苏特", "克利奥帕特拉七世", "娜芙塔丽", "提伊"], c: 1 },
+                { q: "哪位女法老被描绘戴着假胡须？", a: ["哈特谢普苏特", "娜芙蒂蒂", "克利奥帕特拉", "索贝克内弗鲁", "陶塞尔特"], c: 0 },
+                { q: "哪位女王是拉美西斯二世的妻子？", a: ["娜芙塔丽", "娜芙蒂蒂", "哈特谢普苏特", "克利奥帕特拉", "提伊"], c: 0 },
+                { q: "克利奥帕特拉七世会说多少种语言？", a: ["5", "7", "9", "11", "13"], c: 2 },
+                { q: "哪位女王建造了卡纳克方尖碑？", a: ["哈特谢普苏特", "娜芙蒂蒂", "克利奥帕特拉", "娜芙塔丽", "提伊"], c: 0 },
+                { q: "哈特谢普苏特的出生名是什么？", a: ["哈特谢普苏特", "玛阿特卡拉", "克奈美特奈费尔赫杰特", "奈费鲁拉", "塞南穆特"], c: 0 },
+                { q: "哪位女王是图坦卡蒙的母亲？", a: ["娜芙蒂蒂", "基雅", "提伊", "安克塞娜蒙", "美丽塔顿"], c: 1 },
+                { q: "克利奥帕特拉七世统治了多少年？", a: ["18年", "19年", "20年", "21年", "22年"], c: 3 },
+                { q: "哪位女王被称为'伟大的王后'？", a: ["娜芙塔丽", "娜芙蒂蒂", "哈特谢普苏特", "提伊", "克利奥帕特拉"], c: 0 },
+                { q: "哈特谢普苏特建造了哪座神庙？", a: ["代尔巴哈里", "卡纳克", "卢克索", "阿布辛贝", "菲莱"], c: 0 },
+
+                // 行星4：革命法老（10个问题）
+                { q: "哪位法老在埃及建立了一神教？", a: ["阿肯那顿", "阿蒙霍特普三世", "图坦卡蒙", "塞提一世", "拉美西斯二世"], c: 0 },
+                { q: "阿肯那顿的新首都是什么？", a: ["阿马尔纳", "底比斯", "孟菲斯", "比拉美西斯", "亚历山大"], c: 0 },
+                { q: "阿肯那顿崇拜哪个唯一的神？", a: ["阿顿", "阿蒙", "拉", "普塔", "托特"], c: 0 },
+                { q: "阿肯那顿统治了多少年？", a: ["15年", "16年", "17年", "18年", "19年"], c: 2 },
+                { q: "哪位法老在阿肯那顿之后恢复了古老的崇拜？", a: ["图坦卡蒙", "阿伊", "霍伦海布", "塞提一世", "拉美西斯一世"], c: 0 },
+                { q: "图坦卡蒙死时多少岁？", a: ["17岁", "18岁", "19岁", "20岁", "21岁"], c: 2 },
+                { q: "阿肯那顿的妻子是谁？", a: ["娜芙蒂蒂", "基雅", "提伊", "美丽塔顿", "安克塞娜蒙"], c: 0 },
+                { q: "阿肯那顿和娜芙蒂蒂有多少个女儿？", a: ["4", "5", "6", "7", "8"], c: 2 },
+                { q: "哪位法老从纪念碑上抹去了阿肯那顿的名字？", a: ["霍伦海布", "图坦卡蒙", "阿伊", "塞提一世", "拉美西斯二世"], c: 0 },
+                { q: "图坦卡蒙的陵墓位于哪个山谷？", a: ["帝王谷", "王后谷", "贵族谷", "萨卡拉", "吉萨"], c: 0 },
+
+                // 行星5：最后的法老（10个问题）
+                { q: "哪位法老建立了亚历山大城？", a: ["亚历山大大帝", "托勒密一世", "克利奥帕特拉七世", "腓力二世", "大流士三世"], c: 0 },
+                { q: "托勒密王朝持续了多少年？", a: ["275年", "295年", "300年", "320年", "350年"], c: 1 },
+                { q: "哪位罗马皇帝吞并了埃及？", a: ["尤利乌斯·凯撒", "奥古斯都", "马克·安东尼", "提比略", "卡利古拉"], c: 1 },
+                { q: "埃及在哪一年成为罗马行省？", a: ["公元前31年", "公元前30年", "公元前29年", "公元前28年", "公元前27年"], c: 1 },
+                { q: "哪位努比亚法老在公元前8世纪征服了埃及？", a: ["皮耶", "沙巴卡", "塔哈尔卡", "坦塔马尼", "阿拉拉"], c: 0 },
+                { q: "有多少位努比亚法老统治过埃及？", a: ["3", "4", "5", "6", "7"], c: 2 },
+                { q: "哪位波斯法老在公元前525年征服了埃及？", a: ["居鲁士二世", "冈比西斯二世", "大流士一世", "薛西斯一世", "阿尔塔薛西斯一世"], c: 1 },
+                { q: "波斯人征服埃及多少次？", a: ["1次", "2次", "3次", "4次", "5次"], c: 1 },
+                { q: "哪位埃及法老短暂地恢复了对波斯人的独立？", a: ["阿米尔泰乌斯", "奈克塔内布一世", "奈克塔内布二世", "卡巴巴什", "普萨美提克三世"], c: 0 },
+                { q: "哪场战役标志着法老埃及的终结？", a: ["阿克提乌姆战役", "法萨卢斯战役", "腓立比战役", "亚历山大战役", "佩卢西乌姆战役"], c: 0 },
+
+                // 第二部分：金字塔与纪念碑（50个问题）
+                // 行星1：吉萨金字塔（10个问题）
+                { q: "大金字塔由多少块石头组成？", a: ["210万", "230万", "250万", "270万", "290万"], c: 1 },
+                { q: "大金字塔的原始高度是多少？", a: ["146.5米", "147米", "147.5米", "148米", "148.5米"], c: 0 },
+                { q: "每块石头平均重多少？", a: ["2吨", "2.5吨", "3吨", "3.5吨", "4吨"], c: 1 },
+                { q: "有多少工人参与了大金字塔的建造？", a: ["1万", "1.5万", "2万", "2.5万", "3万"], c: 2 },
+                { q: "大金字塔的建造用了多少年？", a: ["15年", "18年", "20年", "23年", "25年"], c: 2 },
+                { q: "大金字塔面的倾斜角度是多少？", a: ["51°50'", "51°52'", "51°54'", "51°56'", "51°58'"], c: 1 },
+                { q: "大金字塔包含多少个房间？", a: ["2", "3", "4", "5", "6"], c: 1 },
+                { q: "吉萨建筑群中哪座金字塔最小？", a: ["胡夫", "卡夫拉", "门卡乌拉", "卫星金字塔", "王后金字塔"], c: 2 },
+                { q: "大金字塔周围有多少座卫星金字塔？", a: ["2", "3", "4", "5", "6"], c: 1 },
+                { q: "金字塔最初覆盖着什么材料？", a: ["粉红花岗岩", "白色石灰岩", "黄色砂岩", "黑色玄武岩", "白色大理石"], c: 1 },
+            ]
+        };
+
+        // Données des parties avec traductions
+        const chaptersData = {
+            fr: [
+                {
+                    title: "LES PHARAONS LÉGENDAIRES",
+                    description: "Découvrez les grands souverains qui ont marqué l'histoire de l'Égypte ancienne",
+                    icon: "👑",
+                    planets: ["Grands Bâtisseurs", "Pharaons Guerriers", "Pharaons Femmes", "Révolutionnaires", "Derniers Pharaons"]
+                },
+                {
+                    title: "PYRAMIDES ET MONUMENTS",
+                    description: "Explorez les merveilles architecturales de la civilisation pharaonique",
+                    icon: "🏛️",
+                    planets: ["Pyramides de Gizeh", "Sphinx et Mystères", "Autres Pyramides", "Temples Grandioses", "Tombeaux Royaux"]
+                },
+                {
+                    title: "DIEUX ET MYTHOLOGIE",
+                    description: "Plongez dans l'univers fascinant des divinités et croyances égyptiennes",
+                    icon: "⚡",
+                    planets: ["Grands Dieux", "Mythe d'Osiris", "Animaux Sacrés", "Cosmogonie", "Fêtes Religieuses"]
+                },
+                {
+                    title: "VIE QUOTIDIENNE ET CULTURE",
+                    description: "Découvrez comment vivaient les anciens Égyptiens au quotidien",
+                    icon: "📜",
+                    planets: ["Écriture et Scribes", "Art et Artisanat", "Médecine et Sciences", "Agriculture", "Vêtements et Mode"]
+                },
+                {
+                    title: "L'ÉGYPTE ET LE MONDE",
+                    description: "Explorez les relations de l'Égypte avec les civilisations voisines",
+                    icon: "🌍",
+                    planets: ["Relations Diplomatiques", "Conquêtes et Empire", "Invasions et Déclin", "Héritage Culturel", "Découvertes Modernes"]
+                }
+            ],
+            en: [
+                {
+                    title: "LEGENDARY PHARAOHS",
+                    description: "Discover the great rulers who marked ancient Egypt's history",
+                    icon: "👑",
+                    planets: ["Great Builders", "Warrior Pharaohs", "Female Pharaohs", "Revolutionaries", "Last Pharaohs"]
+                },
+                {
+                    title: "PYRAMIDS AND MONUMENTS",
+                    description: "Explore the architectural wonders of pharaonic civilization",
+                    icon: "🏛️",
+                    planets: ["Giza Pyramids", "Sphinx & Mysteries", "Other Pyramids", "Grand Temples", "Royal Tombs"]
+                },
+                {
+                    title: "GODS AND MYTHOLOGY",
+                    description: "Dive into the fascinating universe of Egyptian deities and beliefs",
+                    icon: "⚡",
+                    planets: ["Great Gods", "Osiris Myth", "Sacred Animals", "Cosmogony", "Religious Festivals"]
+                },
+                {
+                    title: "DAILY LIFE AND CULTURE",
+                    description: "Discover how ancient Egyptians lived their daily lives",
+                    icon: "📜",
+                    planets: ["Writing & Scribes", "Art & Crafts", "Medicine & Science", "Agriculture", "Clothing & Fashion"]
+                },
+                {
+                    title: "EGYPT AND THE WORLD",
+                    description: "Explore Egypt's relations with neighboring civilizations",
+                    icon: "🌍",
+                    planets: ["Diplomatic Relations", "Conquests & Empire", "Invasions & Decline", "Cultural Heritage", "Modern Discoveries"]
+                }
+            ],
+            ar: [
+                {
+                    title: "الفراعنة الأسطوريون",
+                    description: "اكتشف الحكام العظام الذين تركوا بصمتهم في تاريخ مصر القديمة",
+                    icon: "👑",
+                    planets: ["البناة العظام", "الفراعنة المحاربون", "الفراعنة النساء", "الثوريون", "آخر الفراعنة"]
+                },
+                {
+                    title: "الأهرامات والآثار",
+                    description: "استكشف عجائب العمارة في الحضارة الفرعونية",
+                    icon: "🏛️",
+                    planets: ["أهرامات الجيزة", "أبو الهول والأسرار", "الأهرامات الأخرى", "المعابد العظيمة", "المقابر الملكية"]
+                },
+                {
+                    title: "الآلهة والأساطير",
+                    description: "اغوص في عالم الآلهة والمعتقدات المصرية الساحر",
+                    icon: "⚡",
+                    planets: ["الآلهة العظام", "أسطورة أوزيريس", "الحيوانات المقدسة", "علم الكون", "الأعياد الدينية"]
+                },
+                {
+                    title: "الحياة اليومية والثقافة",
+                    description: "اكتشف كيف عاش المصريون القدماء حياتهم اليومية",
+                    icon: "📜",
+                    planets: ["الكتابة والكتبة", "الفن والحرف", "الطب والعلوم", "الزراعة", "الملابس والأزياء"]
+                },
+                {
+                    title: "مصر والعالم",
+                    description: "استكشف علاقات مصر مع الحضارات المجاورة",
+                    icon: "🌍",
+                    planets: ["العلاقات الدبلوماسية", "الفتوحات والإمبراطورية", "الغزوات والانحدار", "التراث الثقافي", "الاكتشافات الحديثة"]
+                }
+            ],
+            es: [
+                {
+                    title: "FARAONES LEGENDARIOS",
+                    description: "Descubre los grandes gobernantes que marcaron la historia del antiguo Egipto",
+                    icon: "👑",
+                    planets: ["Grandes Constructores", "Faraones Guerreros", "Faraones Mujeres", "Revolucionarios", "Últimos Faraones"]
+                },
+                {
+                    title: "PIRÁMIDES Y MONUMENTOS",
+                    description: "Explora las maravillas arquitectónicas de la civilización faraónica",
+                    icon: "🏛️",
+                    planets: ["Pirámides de Giza", "Esfinge y Misterios", "Otras Pirámides", "Templos Grandiosos", "Tumbas Reales"]
+                },
+                {
+                    title: "DIOSES Y MITOLOGÍA",
+                    description: "Sumérgete en el fascinante universo de las deidades y creencias egipcias",
+                    icon: "⚡",
+                    planets: ["Grandes Dioses", "Mito de Osiris", "Animales Sagrados", "Cosmogonía", "Festivales Religiosos"]
+                },
+                {
+                    title: "VIDA COTIDIANA Y CULTURA",
+                    description: "Descubre cómo vivían los antiguos egipcios en su día a día",
+                    icon: "📜",
+                    planets: ["Escritura y Escribas", "Arte y Artesanía", "Medicina y Ciencias", "Agricultura", "Ropa y Moda"]
+                },
+                {
+                    title: "EGIPTO Y EL MUNDO",
+                    description: "Explora las relaciones de Egipto con las civilizaciones vecinas",
+                    icon: "🌍",
+                    planets: ["Relaciones Diplomáticas", "Conquistas e Imperio", "Invasiones y Declive", "Herencia Cultural", "Descubrimientos Modernos"]
+                }
+            ],
+            de: [
+                {
+                    title: "LEGENDÄRE PHARAONEN",
+                    description: "Entdecke die großen Herrscher, die die Geschichte des alten Ägypten prägten",
+                    icon: "👑",
+                    planets: ["Große Baumeister", "Krieger-Pharaonen", "Weibliche Pharaonen", "Revolutionäre", "Letzte Pharaonen"]
+                },
+                {
+                    title: "PYRAMIDEN UND MONUMENTE",
+                    description: "Erkunde die architektonischen Wunder der pharaonischen Zivilisation",
+                    icon: "🏛️",
+                    planets: ["Pyramiden von Gizeh", "Sphinx & Geheimnisse", "Andere Pyramiden", "Große Tempel", "Königsgräber"]
+                },
+                {
+                    title: "GÖTTER UND MYTHOLOGIE",
+                    description: "Tauche ein in das faszinierende Universum ägyptischer Gottheiten und Glaubensvorstellungen",
+                    icon: "⚡",
+                    planets: ["Große Götter", "Osiris-Mythos", "Heilige Tiere", "Kosmogonie", "Religiöse Feste"]
+                },
+                {
+                    title: "ALLTAG UND KULTUR",
+                    description: "Entdecke, wie die alten Ägypter ihren Alltag lebten",
+                    icon: "📜",
+                    planets: ["Schrift & Schreiber", "Kunst & Handwerk", "Medizin & Wissenschaft", "Landwirtschaft", "Kleidung & Mode"]
+                },
+                {
+                    title: "ÄGYPTEN UND DIE WELT",
+                    description: "Erkunde Ägyptens Beziehungen zu benachbarten Zivilisationen",
+                    icon: "🌍",
+                    planets: ["Diplomatische Beziehungen", "Eroberungen & Reich", "Invasionen & Niedergang", "Kulturelles Erbe", "Moderne Entdeckungen"]
+                }
+            ],
+            zh: [
+                {
+                    title: "传奇法老",
+                    description: "发现那些在古埃及历史上留下印记的伟大统治者",
+                    icon: "👑",
+                    planets: ["伟大建造者", "战士法老", "女法老", "革命者", "最后的法老"]
+                },
+                {
+                    title: "金字塔与纪念碑",
+                    description: "探索法老文明的建筑奇迹",
+                    icon: "🏛️",
+                    planets: ["吉萨金字塔", "狮身人面像与谜团", "其他金字塔", "宏伟神庙", "皇家陵墓"]
+                },
+                {
+                    title: "神祇与神话",
+                    description: "深入探索埃及神祇和信仰的迷人世界",
+                    icon: "⚡",
+                    planets: ["伟大的神祇", "奥西里斯神话", "神圣动物", "宇宙起源", "宗教节日"]
+                },
+                {
+                    title: "日常生活与文化",
+                    description: "发现古埃及人的日常生活方式",
+                    icon: "📜",
+                    planets: ["文字与书吏", "艺术与工艺", "医学与科学", "农业", "服装与时尚"]
+                },
+                {
+                    title: "埃及与世界",
+                    description: "探索埃及与邻近文明的关系",
+                    icon: "🌍",
+                    planets: ["外交关系", "征服与帝国", "入侵与衰落", "文化遗产", "现代发现"]
+                }
+            ]
+        };
+
+        // Cartes de conquête avec traductions
+        const conquestCardsData = {
+            fr: [
+                { title: "MAÎTRE DES PHARAONS", description: "Vous connaissez les secrets des grands souverains", icon: "👑" },
+                { title: "ARCHITECTE DIVIN", description: "Les mystères des pyramides n'ont plus de secrets", icon: "🏛️" },
+                { title: "GARDIEN DES DIEUX", description: "Vous maîtrisez la mythologie égyptienne", icon: "⚡" },
+                { title: "SAGE DE L'ÉGYPTE", description: "La culture égyptienne vous appartient", icon: "📜" },
+                { title: "CONQUÉRANT GALACTIQUE", description: "L'empire égyptien s'étend aux étoiles", icon: "🌍" }
+            ],
+            en: [
+                { title: "MASTER OF PHARAOHS", description: "You know the secrets of great rulers", icon: "👑" },
+                { title: "DIVINE ARCHITECT", description: "The mysteries of pyramids hold no secrets", icon: "🏛️" },
+                { title: "GUARDIAN OF GODS", description: "You master Egyptian mythology", icon: "⚡" },
+                { title: "SAGE OF EGYPT", description: "Egyptian culture belongs to you", icon: "📜" },
+                { title: "GALACTIC CONQUEROR", description: "The Egyptian empire extends to the stars", icon: "🌍" }
+            ],
+            ar: [
+                { title: "سيد الفراعنة", description: "أنت تعرف أسرار الحكام العظام", icon: "👑" },
+                { title: "المهندس الإلهي", description: "أسرار الأهرامات لم تعد خافية عليك", icon: "🏛️" },
+                { title: "حارس الآلهة", description: "أنت تتقن الأساطير المصرية", icon: "⚡" },
+                { title: "حكيم مصر", description: "الثقافة المصرية ملكك", icon: "📜" },
+                { title: "الفاتح المجري", description: "الإمبراطورية المصرية تمتد إلى النجوم", icon: "🌍" }
+            ],
+            es: [
+                { title: "MAESTRO DE FARAONES", description: "Conoces los secretos de los grandes gobernantes", icon: "👑" },
+                { title: "ARQUITECTO DIVINO", description: "Los misterios de las pirámides no tienen secretos", icon: "🏛️" },
+                { title: "GUARDIÁN DE DIOSES", description: "Dominas la mitología egipcia", icon: "⚡" },
+                { title: "SABIO DE EGIPTO", description: "La cultura egipcia te pertenece", icon: "📜" },
+                { title: "CONQUISTADOR GALÁCTICO", description: "El imperio egipcio se extiende a las estrellas", icon: "🌍" }
+            ],
+            de: [
+                { title: "MEISTER DER PHARAONEN", description: "Du kennst die Geheimnisse großer Herrscher", icon: "👑" },
+                { title: "GÖTTLICHER ARCHITEKT", description: "Die Geheimnisse der Pyramiden sind dir bekannt", icon: "🏛️" },
+                { title: "HÜTER DER GÖTTER", description: "Du beherrschst die ägyptische Mythologie", icon: "⚡" },
+                { title: "WEISER ÄGYPTENS", description: "Die ägyptische Kultur gehört dir", icon: "📜" },
+                { title: "GALAKTISCHER EROBERER", description: "Das ägyptische Reich erstreckt sich zu den Sternen", icon: "🌍" }
+            ],
+            zh: [
+                { title: "法老大师", description: "你知道伟大统治者的秘密", icon: "👑" },
+                { title: "神圣建筑师", description: "金字塔的奥秘对你不再是秘密", icon: "🏛️" },
+                { title: "众神守护者", description: "你掌握了埃及神话", icon: "⚡" },
+                { title: "埃及智者", description: "埃及文化属于你", icon: "📜" },
+                { title: "银河征服者", description: "埃及帝国延伸到星辰", icon: "🌍" }
+            ]
+        };
+
+        // Fonction de changement de langue
+        function changeLanguage() {
+            const selector = document.getElementById('languageSelector');
+            gameState.currentLanguage = selector.value;
+            updateLanguage();
+            renderChapters();
+            if (document.getElementById('planetsSection').style.display === 'block') {
+                renderPlanets();
+            }
+        }
+
+        // Mettre à jour les textes selon la langue
+        function updateLanguage() {
+            const lang = gameState.currentLanguage;
+            const t = translations[lang];
+            
+            // Gestion RTL pour l'arabe
+            if (lang === 'ar') {
+                document.body.classList.add('rtl');
+            } else {
+                document.body.classList.remove('rtl');
+            }
+            
+            // Mettre à jour les éléments principaux
+            document.getElementById('gameTitle').innerHTML = t.gameTitle;
+            document.getElementById('gameSubtitle').textContent = t.gameSubtitle;
+            
+            // Mettre à jour les ressources
+            const resources = document.querySelectorAll('.resource div:first-child');
+            if (resources.length >= 4) {
+                resources[0].textContent = `🏆 ${t.completedChapters}`;
+                resources[1].textContent = `⭐ ${t.totalScore}`;
+                resources[2].textContent = `🎯 ${t.accuracy}`;
+                resources[3].textContent = `👑 ${t.conquestCards}`;
+            }
+            
+            // Mettre à jour les titres des sections
+            const dynastiesTitle = document.querySelector('.chapters-title');
+            if (dynastiesTitle) {
+                dynastiesTitle.textContent = t.dynastiesTitle;
+            }
+            
+            const planetsTitle = document.getElementById('planetsTitle');
+            if (planetsTitle && gameState.currentChapter !== undefined) {
+                const chapter = chaptersData[lang][gameState.currentChapter];
+                planetsTitle.textContent = `${chapter.icon} ${chapter.title}`;
+            }
+            
+            // Mettre à jour le bouton retour
+            const backButton = document.querySelector('.btn-back');
+            if (backButton) {
+                backButton.innerHTML = t.backButton;
+            }
+        }
+
+        // Initialisation du jeu
+        function initGame() {
+            createStars();
+            updateLanguage();
+            renderChapters();
+            updateUI();
+            
+            // Débloquer la première partie
+            gameState.chapters[0].planets[0].attempts = 3;
+        }
+
+        // Créer les étoiles animées
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            for (let i = 0; i < 100; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 3 + 's';
+                starsContainer.appendChild(star);
+            }
+        }
+
+        // Afficher les parties
+        function renderChapters() {
+            const grid = document.getElementById('chaptersGrid');
+            grid.innerHTML = '';
+            
+            const lang = gameState.currentLanguage;
+            const t = translations[lang];
+            const chapters = chaptersData[lang];
+
+            chapters.forEach((chapter, index) => {
+                const chapterDiv = document.createElement('div');
+                const isCompleted = gameState.chapters[index].completed;
+                const isLocked = index > 0 && !gameState.chapters[index - 1].completed;
+                
+                chapterDiv.className = `chapter ${isCompleted ? 'completed' : ''} ${isLocked ? 'locked' : ''}`;
+                
+                if (!isLocked) {
+                    chapterDiv.onclick = () => openChapter(index);
+                }
+
+                const completedPlanets = gameState.chapters[index].planets.filter(p => p.completed).length;
+                const progressPercent = (completedPlanets / 5) * 100;
+
+                let statusText = t.available;
+                if (isCompleted) statusText = t.completed;
+                else if (isLocked) statusText = t.locked;
+
+                chapterDiv.innerHTML = `
+                    <div class="chapter-number">${chapter.icon}</div>
+                    <div class="chapter-title">${chapter.title}</div>
+                    <div class="chapter-description">${chapter.description}</div>
+                    <div class="chapter-progress">
+                        <div>${t.progression}: ${completedPlanets}/5 ${t.planets}</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${progressPercent}%"></div>
+                        </div>
+                        <div>${statusText}</div>
+                    </div>
+                `;
+
+                grid.appendChild(chapterDiv);
+            });
+        }
+
+        // Ouvrir une partie
+        function openChapter(chapterIndex) {
+            gameState.currentChapter = chapterIndex;
+            document.getElementById('chaptersSelection').style.display = 'none';
+            document.getElementById('planetsSection').style.display = 'block';
+            
+            const lang = gameState.currentLanguage;
+            const chapter = chaptersData[lang][chapterIndex];
+            document.getElementById('planetsTitle').textContent = `${chapter.icon} ${chapter.title}`;
+            
+            renderPlanets();
+        }
+
+        // Retour aux parties
+        function backToChapters() {
+            document.getElementById('chaptersSelection').style.display = 'block';
+            document.getElementById('planetsSection').style.display = 'none';
+        }
+
+        // Afficher les planètes d'une partie
+        function renderPlanets() {
+            const grid = document.getElementById('planetsGrid');
+            grid.innerHTML = '';
+
+            const lang = gameState.currentLanguage;
+            const t = translations[lang];
+            const chapter = gameState.chapters[gameState.currentChapter];
+            const chapterData = chaptersData[lang][gameState.currentChapter];
+
+            chapterData.planets.forEach((planetName, index) => {
+                const planetDiv = document.createElement('div');
+                const planet = chapter.planets[index];
+                const isCompleted = planet.completed;
+                const isLocked = index > 0 && !chapter.planets[index - 1].completed;
+                const isAvailable = !isLocked && !isCompleted && planet.attempts > 0;
+
+                let status = 'locked';
+                if (isCompleted) {
+                    status = 'conquered';
+                } else if (isAvailable) {
+                    status = 'available';
+                }
+
+                planetDiv.className = `planet ${status}`;
+                
+                if (!isLocked && planet.attempts > 0) {
+                    planetDiv.onclick = () => startPlanetQuiz(index);
+                }
+
+                let statusText = t.locked;
+                if (isCompleted) {
+                    statusText = t.completed;
+                } else if (isAvailable) {
+                    statusText = t.available;
+                } else if (planet.attempts === 0) {
+                    statusText = t.lost;
+                }
+
+                planetDiv.innerHTML = `
+                    <div class="planet-name">${planetName}</div>
+                    <div class="planet-status">${statusText}</div>
+                    <div style="font-size: 0.5rem; margin-top: 2px;">
+                        ${t.score}: ${planet.score}/10
+                        ${planet.attempts > 0 ? `❤️${planet.attempts}` : ''}
+                    </div>
+                `;
+
+                grid.appendChild(planetDiv);
+            });
+        }
+
+        // Commencer le quiz d'une planète
+        function startPlanetQuiz(planetIndex) {
+            gameState.currentPlanet = planetIndex;
+            
+            // Sélectionner 10 questions pour cette planète selon la langue
+            const startIndex = (gameState.currentChapter * 50) + (planetIndex * 10);
+            const currentLangQuestions = questionDatabase[gameState.currentLanguage] || questionDatabase.fr;
+            gameState.currentQuestions = currentLangQuestions.slice(startIndex, startIndex + 10);
+            gameState.currentQuestionIndex = 0;
+            gameState.correctAnswers = 0;
+
+            showQuizQuestion();
+        }
+
+        // Afficher une question du quiz
+        function showQuizQuestion() {
+            const modal = document.getElementById('quizModal');
+            const title = document.getElementById('quizModalTitle');
+            const content = document.getElementById('quizModalContent');
+            
+            const lang = gameState.currentLanguage;
+            const t = translations[lang];
+            const chapterData = chaptersData[lang][gameState.currentChapter];
+            const planetName = chapterData.planets[gameState.currentPlanet];
+            const question = gameState.currentQuestions[gameState.currentQuestionIndex];
+
+            title.textContent = `${chapterData.icon} ${planetName} - ${t.question} ${gameState.currentQuestionIndex + 1}/10`;
+
+            content.innerHTML = `
+                <div style="margin-bottom: 20px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+                        <span>🎯 ${t.correctAnswers}: ${gameState.correctAnswers}/10</span>
+                        <span>❤️ ${t.attempts}: ${gameState.chapters[gameState.currentChapter].planets[gameState.currentPlanet].attempts}</span>
+                    </div>
+                    <div class="question-container">
+                        <h3 style="color: #ffd700; margin-bottom: 15px;">${question.q}</h3>
+                    </div>
+                    <div id="answerButtons" style="display: grid; gap: 10px;">
+                        ${question.a.map((answer, index) => `
+                            <button class="answer-button" onclick="selectAnswer(${index}, ${question.c})">
+                                ${String.fromCharCode(65 + index)}. ${answer}
+                            </button>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+
+            modal.style.display = 'block';
+        }
+
+        // Sélectionner une réponse
+        function selectAnswer(selectedIndex, correctIndex) {
+            const buttons = document.querySelectorAll('#answerButtons button');
+            
+            // Désactiver tous les boutons
+            buttons.forEach(btn => btn.disabled = true);
+            
+            // Colorer les réponses
+            buttons[correctIndex].style.background = 'linear-gradient(45deg, #2ed573, #1dd1a1)';
+            if (selectedIndex !== correctIndex) {
+                buttons[selectedIndex].style.background = 'linear-gradient(45deg, #ff6b6b, #ff4757)';
+            }
+
+            // Compter les bonnes réponses
+            if (selectedIndex === correctIndex) {
+                gameState.correctAnswers++;
+                gameState.totalScore++;
+            }
+            gameState.totalQuestions++;
+
+            setTimeout(() => {
+                gameState.currentQuestionIndex++;
+                
+                if (gameState.currentQuestionIndex >= 10) {
+                    finishPlanetQuiz();
+                } else {
+                    showQuizQuestion();
+                }
+            }, 1500);
+        }
+
+        // Terminer le quiz d'une planète
+        function finishPlanetQuiz() {
+            const lang = gameState.currentLanguage;
+            const t = translations[lang];
+            const planet = gameState.chapters[gameState.currentChapter].planets[gameState.currentPlanet];
+            const success = gameState.correctAnswers >= 6;
+
+            planet.score = gameState.correctAnswers;
+
+            if (success) {
+                planet.completed = true;
+                
+                // Débloquer la planète suivante
+                if (gameState.currentPlanet < 4) {
+                    gameState.chapters[gameState.currentChapter].planets[gameState.currentPlanet + 1].attempts = 3;
+                }
+                
+                // Vérifier si la partie est terminée
+                const allPlanetsCompleted = gameState.chapters[gameState.currentChapter].planets.every(p => p.completed);
+                if (allPlanetsCompleted) {
+                    gameState.chapters[gameState.currentChapter].completed = true;
+                    gameState.conquestCards++;
+                    
+                    // Débloquer la partie suivante
+                    if (gameState.currentChapter < 4) {
+                        gameState.chapters[gameState.currentChapter + 1].planets[0].attempts = 3;
+                    }
+                    
+                    showNotification(t.chapterCompleted);
+                    displayConquestCard(gameState.currentChapter);
+                } else {
+                    showNotification(`${t.planetConquered} ${gameState.correctAnswers}/10`);
+                }
+            } else {
+                planet.attempts--;
+                if (planet.attempts === 0) {
+                    showNotification(`${t.planetLost} ${gameState.correctAnswers}/10`);
+                } else {
+                    showNotification(`${t.failed} ${planet.attempts}`);
+                }
+            }
+
+            closeQuizModal();
+            renderPlanets();
+            renderChapters();
+            updateUI();
+        }
+
+        // Afficher une carte de conquête
+        function displayConquestCard(chapterIndex) {
+            const lang = gameState.currentLanguage;
+            const t = translations[lang];
+            const cardsContainer = document.getElementById('conquestCardsDisplay');
+            const cardData = conquestCardsData[lang][chapterIndex];
+            
+            const cardDiv = document.createElement('div');
+            cardDiv.className = 'conquest-card';
+            cardDiv.innerHTML = `
+                <h3>${cardData.icon} ${cardData.title}</h3>
+                <p>${cardData.description}</p>
+                <div style="font-size: 0.8rem; margin-top: 10px;">
+                    ${t.chapterCompleted2} ${chapterIndex + 1} ${t.chapterCompleted3}
+                </div>
+            `;
+            
+            cardsContainer.appendChild(cardDiv);
+        }
+
+        // Fermer le modal de quiz
+        function closeQuizModal() {
+            document.getElementById('quizModal').style.display = 'none';
+        }
+
+        // Mettre à jour l'interface
+        function updateUI() {
+            const completedChapters = gameState.chapters.filter(c => c.completed).length;
+            const accuracy = gameState.totalQuestions > 0 ? Math.round((gameState.totalScore / gameState.totalQuestions) * 100) : 0;
+
+            document.getElementById('completedChapters').textContent = completedChapters;
+            document.getElementById('totalScore').textContent = gameState.totalScore;
+            document.getElementById('accuracy').textContent = accuracy + '%';
+            document.getElementById('conquestCards').textContent = gameState.conquestCards;
+        }
+
+        // Notifications
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.textContent = message;
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                if (document.body.contains(notification)) {
+                    document.body.removeChild(notification);
+                }
+            }, 4000);
+        }
+
+        // Fermer les modales en cliquant à l'extérieur
+        window.onclick = function(event) {
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        }
+
+        // Initialiser le jeu au chargement
+        window.onload = initGame;
+    </script>
+    <script>
+        // canonical close handler for platform overlay
+        function closePlatform(){
+            try{ console.debug('jeux21: closePlatform called'); }catch(e){}
+            try{
+                if(window.parent && window.parent !== window){
+                    window.parent.postMessage({ action:'close', reason:'user-initiated', source:'jeux21' }, '*');
+                    return;
+                }
+            }catch(e){}
+            try{
+                if(window.opener && !window.opener.closed){
+                    try{ window.opener.postMessage({ action:'child-closed', source:'jeux21' }, '*'); }catch(e){}
+                    try{ window.close(); }catch(e){}
+                    return;
+                }
+            }catch(e){}
+            // final fallback: absolute path to platform
+            window.location.href = '/brainova.html';
+        }
+        window.closePlatform = closePlatform;
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9894ccec930de183',t:'MTc1OTU4MjE3OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
