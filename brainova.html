@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brainova</title>
+<style>
+body { margin:0; font-family: 'Rajdhani', sans-serif; background:#111; color:#fff; }
+#header { display:flex; justify-content:space-between; align-items:center; padding:10px 20px; background:#0a0a0a; }
+#brainovaTitle { font-size:1.8em; color:#00d4ff; font-weight:700; }
+#userSigle { display:flex; align-items:center; justify-content:center; width:36px; height:36px; background:#00d4ff; color:#000; border-radius:50%; font-weight:700; margin-left:10px; }
+#langSelect { margin-left:10px; }
+#gamesGrid { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:12px; padding:20px; }
+.game-card { background:linear-gradient(135deg,#00d4ff,#00aaff); padding:10px; border-radius:12px; cursor:pointer; position:relative; height:180px; display:flex; flex-direction:column; justify-content:flex-end; color:#000; font-weight:700; }
+.game-title { font-size:1em; margin-bottom:6px; }
+.game-status { font-size:0.8em; padding:2px 4px; border-radius:6px; position:absolute; top:6px; right:6px; background:rgba(255,255,255,0.3); color:#000; }
+#overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); display:none; align-items:center; justify-content:center; z-index:1000; }
+#overlay.active { display:flex; }
+#overlay iframe { width:100%; height:100%; border:none; border-radius:0; overflow:auto; }
+#closeBtn { position:absolute; top:16px; right:16px; width:32px; height:32px; background:red; border-radius:50%; color:#fff; font-weight:700; font-size:1.2em; cursor:pointer; display:flex; align-items:center; justify-content:center; z-index:1001; }
+</style>
+</head>
+<body>
+
+<div id="header">
+  <div id="brainovaTitle">Brainova</div>
+  <div style="display:flex; align-items:center;">
+    <div id="userSigle"></div>
+    <select id="langSelect">
+      <option value="fr">🇫🇷 FR</option>
+      <option value="en">🇬🇧 EN</option>
+      <option value="ar">🇸🇦 AR</option>
+      <option value="es">🇪🇸 ES</option>
+      <option value="de">🇩🇪 DE</option>
+      <option value="zh">🇨🇳 中文</option>
+    </select>
+    <button id="btnLogin">Connexion</button>
+    <button id="btnSignup">Inscription</button>
+  </div>
+</div>
+
+<div id="gamesGrid"></div>
+
+<div id="overlay">
+  <div id="closeBtn">✕</div>
+</div>
+
+<script>
+(() => {
+  const overlay = document.getElementById('overlay');
+  const grid = document.getElementById('gamesGrid');
+  const langSelect = document.getElementById('langSelect');
+  let currentLang = localStorage.getItem('brainovaLang') || 'fr';
+
+  const platformTranslations = {
+    fr: { brainovaTitle: 'Brainova', login:'Connexion', signup:'Inscription' },
+    en: { brainovaTitle: 'Brainova', login:'Login', signup:'Sign Up' },
+    zh: { brainovaTitle: '布莱诺瓦', login:'登录', signup:'注册' },
+    ar: { brainovaTitle: 'براينوفا', login:'تسجيل الدخول', signup:'إنشاء حساب' }
+  };
+
+  const gameMap = {
+    0: { title:'🎯 Défi 0', file:'jeux0.html' },
+    1: { title:'🧩 Puzzle 1', file:'jeux1super.html' },
+    2: { title:'🚀 Aventure 2', file:'jeux2.html' },
+    3: { title:'🛡️ Combat 3', file:'jeux3.html' },
+    4: { title:'♛ Quantum Chess', file:'jeux4.html' },
+    5: { title:'🔥 Quantum Checkers', file:'jeux5.html' },
+    6: { title:'🌌 Star Explorer', file:'jeux6.html' },
+    7: { title:'⚡ Speed Racer', file:'jeux7.html' },
+    8: { title:'🧠 Brain Trainer', file:'jeux8.html' },
+    9: { title:'🎨 Pixel Painter', file:'jeux9.html' },
+    10: { title:'🎵 Music Mania', file:'jeux10.html' },
+    11: { title:'🕹️ Adventure 11', file:'jeux11.html' },
+    12: { title:'🏰 Castle Siege', file:'jeux12.html' },
+    13: { title:'🐉 Dragon Quest', file:'jeux13super.html' },
+    14: { title:'💡 Puzzle Mania', file:'jeux14.html' },
+    15: { title:'🧙 Magic World', file:'jeux15.html' },
+    16: { title:'🏎️ Turbo Race', file:'jeux16.html' },
+    17: { title:'🛸 Space Battle', file:'jeux17.html' },
+    18: { title:'🧩 Mind Challenge', file:'jeux18.html' },
+    19: { title:'🎮 Retro Fun', file:'jeux19.html' },
+    20: { title:'🌟 Star Journey', file:'jeux20super.html' },
+    21: { title:'🧗 Mountain Climb', file:'jeux21.html' },
+    22: { title:'🏀 Slam Dunk', file:'jeux22.html' },
+    23: { title:'⚽ Soccer Hero', file:'jeux23.html' },
+    24: { title:'🕹️ Arcade 24', file:'jeux24.html' },
+    25: { title:'🎯 Target Master', file:'jeux25.html' },
+    26: { title:'🐱 Cat Adventure', file:'jeux26.html' },
+    27: { title:'🐶 Dog Quest', file:'jeux27.html' },
+    28: { title:'🚂 Train Tycoon', file:'jeux28.html' },
+    29: { title:'🛶 River Escape', file:'jeux29.html' },
+    30: { title:'🌋 Volcano Run', file:'jeux30.html' },
+    31: { title:'🎢 Roller Coaster', file:'jeux31.html' },
+    32: { title:'🧩 Puzzle Master', file:'jeux32.html' },
+    33: { title:'🛡️ Shield Hero', file:'jeux33.html' },
+    34: { title:'⚡ Lightning Race', file:'jeux34.html' },
+    35: { title:'🌌 Galaxy Adventure', file:'jeux35.html' },
+    36: { title:'💎 Crystal Quest', file:'jeux36.html' }
+  };
+
+  function renderGrid() {
+    grid.innerHTML = '';
+    Object.keys(gameMap).forEach(i => {
+      const g = gameMap[i];
+      const card = document.createElement('div');
+      card.className = 'game-card';
+      card.dataset.gameId = i;
+      card.innerHTML = `<div class="game-title">${g.title}</div><div class="game-status">N/D</div>`;
+      card.addEventListener('click', () => openGame(i));
+      grid.appendChild(card);
+    });
+  }
+
+  function openGame(id) {
+    const g = gameMap[id];
+    if(!g) return;
+    overlay.innerHTML = '<div id="closeBtn">✕</div>';
+    const newClose = document.getElementById('closeBtn');
+    newClose.addEventListener('click', closeGame);
+
+    const iframe = document.createElement('iframe');
+    iframe.src = g.file;
+    overlay.appendChild(iframe);
+    overlay.classList.add('active');
+  }
+
+  function closeGame() {
+    overlay.classList.remove('active');
+    overlay.innerHTML = '<div id="closeBtn">✕</div>';
+    document.getElementById('closeBtn').addEventListener('click', closeGame);
+  }
+
+  langSelect.value = currentLang;
+  langSelect.addEventListener('change', ()=>{
+    currentLang = langSelect.value;
+    localStorage.setItem('brainovaLang', currentLang);
+    updateLangUI();
+  });
+
+  function updateLangUI() {
+    const t = platformTranslations[currentLang];
+    document.getElementById('brainovaTitle').textContent = t.brainovaTitle;
+    document.getElementById('btnLogin').textContent = t.login;
+    document.getElementById('btnSignup').textContent = t.signup;
+  }
+
+  renderGrid();
+  updateLangUI();
+})();
+</script>
+</body>
+</html>
