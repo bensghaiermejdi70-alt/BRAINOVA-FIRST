@@ -1,0 +1,2119 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeuroSphere - Jeu de Société Futuriste IA</title>
+    <style>
+        body {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a, #1a1a2e, #16213e, #0f3460);
+            color: #ffffff;
+            overflow-x: hidden;
+            overflow-y: auto;
+            perspective: 1000px;
+            min-height: 100vh;
+        }
+
+        .game-container {
+            width: 100vw;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(0, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 0, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(0, 255, 127, 0.08) 0%, transparent 60%),
+                linear-gradient(135deg, #0a0a0a, #1a1a2e, #16213e, #0f3460);
+            animation: backgroundPulse 8s ease-in-out infinite alternate;
+            overflow: auto;
+            scrollbar-width: auto;
+            scrollbar-color: #00ffff rgba(0, 0, 0, 0.5);
+        }
+
+        .game-container::-webkit-scrollbar {
+            width: 18px;
+            height: 18px;
+        }
+
+        .game-container::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 12px;
+            border: 3px solid rgba(0, 255, 255, 0.3);
+        }
+
+        .game-container::-webkit-scrollbar-thumb {
+            background: linear-gradient(45deg, #00ffff, #ff00ff);
+            border-radius: 12px;
+            border: 3px solid rgba(0, 0, 0, 0.4);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.6);
+        }
+
+        .game-container::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(45deg, #00ff7f, #ff0080);
+            box-shadow: 0 0 20px rgba(0, 255, 127, 0.9);
+        }
+
+        .game-container::-webkit-scrollbar-corner {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 8px;
+        }
+
+        @keyframes backgroundPulse {
+            0% { filter: hue-rotate(0deg) brightness(1); }
+            100% { filter: hue-rotate(30deg) brightness(1.1); }
+        }
+
+        .game-header {
+            height: 120px;
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.15), rgba(255, 0, 255, 0.15));
+            border-bottom: 3px solid #00ffff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 40px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 8px 40px rgba(0, 255, 255, 0.3);
+            position: relative;
+            z-index: 100;
+        }
+
+        .game-title {
+            font-size: 36px;
+            font-weight: bold;
+            background: linear-gradient(45deg, #00ffff, #ff00ff, #00ff7f);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(0, 255, 255, 0.8);
+            animation: titleGlow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes titleGlow {
+            0% { filter: drop-shadow(0 0 10px #00ffff); }
+            100% { filter: drop-shadow(0 0 25px #ff00ff); }
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .control-btn {
+            padding: 15px 25px;
+            background: linear-gradient(45deg, rgba(0, 255, 255, 0.2), rgba(255, 0, 255, 0.2));
+            border: 2px solid #00ffff;
+            color: #ffffff;
+            border-radius: 15px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: bold;
+            font-size: 14px;
+            transition: all 0.4s ease;
+            backdrop-filter: blur(10px);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .control-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .control-btn:hover::before {
+            left: 100%;
+        }
+
+        .control-btn:hover {
+            background: linear-gradient(45deg, rgba(0, 255, 255, 0.4), rgba(255, 0, 255, 0.4));
+            border-color: #ff00ff;
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 10px 30px rgba(0, 255, 255, 0.5);
+        }
+
+        .control-btn.active {
+            background: linear-gradient(45deg, #00ffff, #ff00ff);
+            color: #000000;
+            box-shadow: 0 0 40px rgba(0, 255, 255, 0.8);
+        }
+
+        .language-selector {
+            position: relative;
+        }
+
+        .language-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: rgba(0, 0, 0, 0.95);
+            border: 2px solid #00ffff;
+            border-radius: 15px;
+            display: none;
+            z-index: 1000;
+            backdrop-filter: blur(20px);
+            min-width: 200px;
+        }
+
+        .language-option {
+            padding: 15px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-bottom: 1px solid rgba(0, 255, 255, 0.3);
+            font-weight: bold;
+        }
+
+        .language-option:hover {
+            background: rgba(0, 255, 255, 0.2);
+            color: #00ffff;
+        }
+
+        .language-option:last-child {
+            border-bottom: none;
+        }
+
+        .game-main {
+            flex: 1;
+            display: flex;
+            position: relative;
+        }
+
+        .game-board {
+            flex: 1;
+            position: relative;
+            background: 
+                radial-gradient(circle at 25% 25%, rgba(0, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(255, 0, 255, 0.1) 0%, transparent 50%);
+            overflow: auto;
+            perspective: 1200px;
+            height: calc(100vh - 120px);
+            max-height: calc(100vh - 120px);
+            scrollbar-width: auto;
+            scrollbar-color: #00ffff rgba(0, 0, 0, 0.4);
+        }
+
+        .board-3d {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            animation: boardRotate 20s linear infinite;
+        }
+
+        @keyframes boardRotate {
+            0% { transform: rotateY(0deg) rotateX(5deg); }
+            100% { transform: rotateY(360deg) rotateX(5deg); }
+        }
+
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            grid-template-rows: repeat(8, 1fr);
+            gap: 3px;
+            padding: 20px;
+            width: 80%;
+            height: 80%;
+            margin: auto;
+            position: relative;
+            z-index: 10;
+        }
+
+        .grid-cell {
+            background: linear-gradient(45deg, rgba(0, 255, 255, 0.1), rgba(255, 0, 255, 0.1));
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            position: relative;
+            backdrop-filter: blur(5px);
+            transform-style: preserve-3d;
+        }
+
+        .grid-cell::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            border-radius: 10px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .grid-cell:hover::before {
+            opacity: 1;
+        }
+
+        .grid-cell:hover {
+            background: linear-gradient(45deg, rgba(0, 255, 255, 0.3), rgba(255, 0, 255, 0.3));
+            border-color: #00ffff;
+            transform: translateZ(20px) scale(1.05);
+            box-shadow: 0 10px 30px rgba(0, 255, 255, 0.5);
+        }
+
+        .grid-cell.player {
+            background: linear-gradient(45deg, #00ffff, #00ff7f);
+            color: #000000;
+            font-weight: bold;
+            animation: playerPulse 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes playerPulse {
+            0% { box-shadow: 0 0 20px rgba(0, 255, 255, 0.8); }
+            100% { box-shadow: 0 0 40px rgba(0, 255, 127, 1); }
+        }
+
+        .grid-cell.ai {
+            background: linear-gradient(45deg, #ff00ff, #ff0080);
+            color: #ffffff;
+            font-weight: bold;
+            animation: aiPulse 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes aiPulse {
+            0% { box-shadow: 0 0 20px rgba(255, 0, 255, 0.8); }
+            100% { box-shadow: 0 0 40px rgba(255, 0, 128, 1); }
+        }
+
+        .grid-cell.special {
+            background: linear-gradient(45deg, #ffd700, #ff8c00);
+            animation: specialGlow 1.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes specialGlow {
+            0% { box-shadow: 0 0 15px rgba(255, 215, 0, 0.8); }
+            100% { box-shadow: 0 0 35px rgba(255, 140, 0, 1); }
+        }
+
+        .sidebar {
+            width: 320px;
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0.9), rgba(26, 26, 46, 0.95));
+            border-left: 3px solid #00ffff;
+            display: flex;
+            flex-direction: column;
+            backdrop-filter: blur(20px);
+            position: relative;
+            overflow-y: auto;
+            overflow-x: hidden;
+            height: calc(100vh - 120px);
+            max-height: calc(100vh - 120px);
+            scrollbar-width: thin;
+            scrollbar-color: #00ffff rgba(0, 0, 0, 0.4);
+        }
+
+        .sidebar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 50% 0%, rgba(0, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 50% 100%, rgba(255, 0, 255, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .sidebar-section {
+            padding: 15px;
+            border-bottom: 2px solid rgba(0, 255, 255, 0.3);
+            position: relative;
+            z-index: 10;
+        }
+
+        .sidebar-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: #00ffff;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-align: center;
+            text-shadow: 0 0 15px rgba(0, 255, 255, 0.8);
+        }
+
+        .score-display {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding: 10px;
+            background: rgba(0, 255, 255, 0.1);
+            border-radius: 8px;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+        }
+
+        .score-item {
+            text-align: center;
+        }
+
+        .score-label {
+            font-size: 12px;
+            color: #aaa;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        .score-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #00ffff;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.6);
+        }
+
+        .level-progress {
+            margin: 12px 0;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            overflow: hidden;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ffff, #00ff7f);
+            transition: width 0.8s ease;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.8);
+        }
+
+        .ai-status {
+            padding: 12px;
+            background: rgba(255, 0, 255, 0.1);
+            border-radius: 10px;
+            border: 2px solid rgba(255, 0, 255, 0.3);
+            margin: 10px 0;
+        }
+
+        .ai-thinking {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #ff00ff;
+            font-weight: bold;
+        }
+
+        .thinking-dots {
+            display: flex;
+            gap: 3px;
+        }
+
+        .thinking-dot {
+            width: 8px;
+            height: 8px;
+            background: #ff00ff;
+            border-radius: 50%;
+            animation: thinkingPulse 1.5s ease-in-out infinite;
+        }
+
+        .thinking-dot:nth-child(2) { animation-delay: 0.2s; }
+        .thinking-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes thinkingPulse {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+
+        .game-stats {
+            font-size: 14px;
+            line-height: 1.8;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+        }
+
+        .leaderboard {
+            max-height: 120px;
+            overflow-y: auto;
+        }
+
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px;
+            margin-bottom: 4px;
+            background: rgba(0, 255, 255, 0.05);
+            border-radius: 6px;
+            border-left: 2px solid #00ffff;
+            font-size: 12px;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            backdrop-filter: blur(20px);
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+            border: 3px solid #00ffff;
+            border-radius: 25px;
+            padding: 40px;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            color: #fff;
+            box-shadow: 0 0 60px rgba(0, 255, 255, 0.8);
+            position: relative;
+        }
+
+        .modal-content::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        .modal-content::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+        }
+
+        .modal-content::-webkit-scrollbar-thumb {
+            background: linear-gradient(45deg, #00ffff, #ff00ff);
+            border-radius: 10px;
+            border: 2px solid rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-content::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(45deg, #00ff7f, #ff0080);
+        }
+
+        .sidebar::-webkit-scrollbar {
+            width: 14px;
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            border: 2px solid rgba(0, 255, 255, 0.3);
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: linear-gradient(45deg, #00ffff, #ff00ff);
+            border-radius: 10px;
+            border: 2px solid rgba(0, 0, 0, 0.4);
+            box-shadow: 0 0 12px rgba(0, 255, 255, 0.6);
+        }
+
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(45deg, #00ff7f, #ff0080);
+            box-shadow: 0 0 18px rgba(0, 255, 127, 0.8);
+        }
+
+        .leaderboard::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .leaderboard::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 4px;
+        }
+
+        .leaderboard::-webkit-scrollbar-thumb {
+            background: rgba(0, 255, 255, 0.5);
+            border-radius: 4px;
+        }
+
+        .leaderboard::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 255, 255, 0.8);
+        }
+
+        .game-board {
+            scrollbar-width: thin;
+            scrollbar-color: #00ffff rgba(0, 0, 0, 0.3);
+        }
+
+        .game-board::-webkit-scrollbar {
+            width: 16px;
+            height: 16px;
+        }
+
+        .game-board::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 10px;
+            border: 2px solid rgba(0, 255, 255, 0.2);
+        }
+
+        .game-board::-webkit-scrollbar-thumb {
+            background: linear-gradient(45deg, #00ffff, #ff00ff);
+            border-radius: 10px;
+            border: 2px solid rgba(0, 0, 0, 0.3);
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        }
+
+        .game-board::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(45deg, #00ff7f, #ff0080);
+            box-shadow: 0 0 15px rgba(0, 255, 127, 0.8);
+        }
+
+        .game-board::-webkit-scrollbar-corner {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 5px;
+        }
+
+        /* Barres de défilement pour la zone principale */
+        .game-main {
+            scrollbar-width: thin;
+            scrollbar-color: #00ffff rgba(0, 0, 0, 0.3);
+        }
+
+        .game-main::-webkit-scrollbar {
+            width: 14px;
+            height: 14px;
+        }
+
+        .game-main::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+        }
+
+        .game-main::-webkit-scrollbar-thumb {
+            background: linear-gradient(45deg, #00ffff, #ff00ff);
+            border-radius: 8px;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+        }
+
+        .game-main::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(45deg, #00ff7f, #ff0080);
+        }
+
+        .game-main::-webkit-scrollbar-corner {
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        body::-webkit-scrollbar {
+            width: 14px;
+        }
+
+        body::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 10px;
+        }
+
+        body::-webkit-scrollbar-thumb {
+            background: linear-gradient(45deg, #00ffff, #ff00ff);
+            border-radius: 10px;
+            border: 2px solid rgba(0, 0, 0, 0.4);
+        }
+
+        body::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(45deg, #00ff7f, #ff0080);
+        }
+
+        .modal-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 30% 30%, rgba(0, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 70% 70%, rgba(255, 0, 255, 0.1) 0%, transparent 50%);
+            border-radius: 22px;
+            pointer-events: none;
+        }
+
+        .modal-content h2 {
+            color: #00ffff;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 28px;
+            text-shadow: 0 0 20px rgba(0, 255, 255, 0.8);
+            position: relative;
+            z-index: 10;
+        }
+
+        .modal-content h3 {
+            color: #ff00ff;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            font-size: 20px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .modal-content p, .modal-content li {
+            position: relative;
+            z-index: 10;
+            line-height: 1.6;
+        }
+
+        .level-selector {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .level-input {
+            width: 80px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid #00ffff;
+            color: #ffffff;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .difficulty-selector {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .difficulty-btn {
+            padding: 15px;
+            background: linear-gradient(45deg, rgba(0, 255, 255, 0.2), rgba(255, 0, 255, 0.2));
+            border: 2px solid #00ffff;
+            color: #ffffff;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.4s ease;
+            text-align: center;
+        }
+
+        .difficulty-btn:hover {
+            background: linear-gradient(45deg, rgba(0, 255, 255, 0.4), rgba(255, 0, 255, 0.4));
+            transform: translateY(-2px);
+        }
+
+        .difficulty-btn.selected {
+            background: linear-gradient(45deg, #00ffff, #ff00ff);
+            color: #000000;
+            box-shadow: 0 0 25px rgba(0, 255, 255, 0.8);
+        }
+
+        .paused-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 500;
+            backdrop-filter: blur(20px);
+        }
+
+        .paused-text {
+            font-size: 60px;
+            color: #00ffff;
+            font-weight: bold;
+            text-shadow: 0 0 40px rgba(0, 255, 255, 1);
+            animation: pauseGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes pauseGlow {
+            0% { opacity: 0.8; transform: scale(1); }
+            100% { opacity: 1; transform: scale(1.1); }
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #00ffff;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: particleFloat 3s linear forwards;
+        }
+
+        @keyframes particleFloat {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-200px) scale(0); }
+        }
+
+        .victory-animation {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 48px;
+            font-weight: bold;
+            color: #00ff7f;
+            text-shadow: 0 0 30px rgba(0, 255, 127, 1);
+            z-index: 1000;
+            animation: victoryBounce 2s ease-out;
+            pointer-events: none;
+        }
+
+        @keyframes victoryBounce {
+            0% { transform: translate(-50%, -50%) scale(0) rotate(-180deg); }
+            50% { transform: translate(-50%, -50%) scale(1.3) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) scale(1) rotate(0deg); }
+        }
+
+        .floating-score {
+            position: absolute;
+            font-size: 20px;
+            font-weight: bold;
+            color: #00ffff;
+            pointer-events: none;
+            animation: floatingScore 2s ease-out forwards;
+            z-index: 100;
+        }
+
+        @keyframes floatingScore {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-100px) scale(1.5); }
+        }
+
+        @media (max-width: 768px) {
+            .game-container {
+                flex-direction: column;
+            }
+            
+            .game-header {
+                height: 100px;
+                padding: 0 20px;
+            }
+            
+            .game-title {
+                font-size: 24px;
+            }
+            
+            .control-btn {
+                padding: 10px 15px;
+                font-size: 12px;
+            }
+            
+            .game-main {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                height: 200px;
+                border-left: none;
+                border-top: 3px solid #00ffff;
+            }
+            
+            .game-grid {
+                padding: 20px;
+                grid-template-columns: repeat(6, 1fr);
+                grid-template-rows: repeat(6, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <!-- En-tête du jeu -->
+        <div class="game-header">
+            <div class="game-title" data-lang="gameTitle">NeuroSphere</div>
+            <div class="header-controls">
+                <button class="control-btn" onclick="showRules()" data-lang="rules">📋 Règles</button>
+                <button class="control-btn" id="startBtn" onclick="startGame()" data-lang="startGame">🚀 Démarrer</button>
+                <button class="control-btn" id="pauseBtn" onclick="togglePause()" style="display: none;" data-lang="pause">⏸️ Pause</button>
+                <div class="level-selector">
+                    <span data-lang="level">Niveau:</span>
+                    <input type="number" class="level-input" id="levelInput" min="1" max="10" value="1">
+                </div>
+                <button class="control-btn" onclick="newGame()" data-lang="newGame">🔄 Nouvelle Partie</button>
+                
+                <div class="language-selector">
+                    <button class="control-btn" onclick="toggleLanguageDropdown()">
+                        <span id="currentLanguageFlag">🇫🇷</span> <span id="currentLanguageName">Français</span>
+                    </button>
+                    <div class="language-dropdown" id="languageDropdown">
+                        <div class="language-option" onclick="changeLanguage('fr')">🇫🇷 Français</div>
+                        <div class="language-option" onclick="changeLanguage('en')">🇬🇧 English</div>
+                        <div class="language-option" onclick="changeLanguage('ar')">🇸🇦 العربية</div>
+                        <div class="language-option" onclick="changeLanguage('es')">🇪🇸 Español</div>
+                        <div class="language-option" onclick="changeLanguage('de')">🇩🇪 Deutsch</div>
+                        <div class="language-option" onclick="changeLanguage('zh')">🇨🇳 中文</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Zone de jeu principale -->
+        <div class="game-main">
+            <div class="game-board">
+                <div class="board-3d">
+                    <div class="game-grid" id="gameGrid">
+                        <!-- Les cellules seront générées dynamiquement -->
+                    </div>
+                </div>
+                
+                <!-- Overlay de pause -->
+                <div class="paused-overlay" id="pausedOverlay">
+                    <div class="paused-text" data-lang="pausedText">JEU EN PAUSE</div>
+                </div>
+            </div>
+            
+            <!-- Barre latérale -->
+            <div class="sidebar">
+                <div class="sidebar-section">
+                    <div class="sidebar-title" data-lang="scoreTitle">Score & Progression</div>
+                    <div class="score-display">
+                        <div class="score-item">
+                            <div class="score-label" data-lang="playerScore">Joueur</div>
+                            <div class="score-value" id="playerScore">0</div>
+                        </div>
+                        <div class="score-item">
+                            <div class="score-label" data-lang="aiScore">IA</div>
+                            <div class="score-value" id="aiScore">0</div>
+                        </div>
+                        <div class="score-item">
+                            <div class="score-label" data-lang="currentLevel">Niveau</div>
+                            <div class="score-value" id="currentLevel">1</div>
+                        </div>
+                    </div>
+                    
+                    <div class="level-progress">
+                        <div class="score-label" data-lang="progress">Progression du Niveau</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                        </div>
+                        <div style="text-align: center; margin-top: 8px; font-size: 12px;" id="progressText">0 / 100</div>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-title" data-lang="aiStatus">Statut IA</div>
+                    <div class="ai-status">
+                        <div class="ai-thinking" id="aiThinking" style="display: none;">
+                            <span data-lang="aiThinking">IA réfléchit</span>
+                            <div class="thinking-dots">
+                                <div class="thinking-dot"></div>
+                                <div class="thinking-dot"></div>
+                                <div class="thinking-dot"></div>
+                            </div>
+                        </div>
+                        <div id="aiStatusText" data-lang="aiReady">IA prête à jouer</div>
+                    </div>
+                    
+                    <div class="difficulty-selector">
+                        <button class="difficulty-btn selected" onclick="setDifficulty('easy')" data-lang="easy">Facile</button>
+                        <button class="difficulty-btn" onclick="setDifficulty('medium')" data-lang="medium">Moyen</button>
+                        <button class="difficulty-btn" onclick="setDifficulty('hard')" data-lang="hard">Difficile</button>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-title" data-lang="gameStats">Statistiques</div>
+                    <div class="game-stats">
+                        <div class="stat-row">
+                            <span data-lang="gamesPlayed">Parties jouées:</span>
+                            <span id="gamesPlayed">0</span>
+                        </div>
+                        <div class="stat-row">
+                            <span data-lang="gamesWon">Victoires:</span>
+                            <span id="gamesWon">0</span>
+                        </div>
+                        <div class="stat-row">
+                            <span data-lang="winRate">Taux de victoire:</span>
+                            <span id="winRate">0%</span>
+                        </div>
+                        <div class="stat-row">
+                            <span data-lang="bestScore">Meilleur score:</span>
+                            <span id="bestScore">0</span>
+                        </div>
+                        <div class="stat-row">
+                            <span data-lang="totalMoves">Coups totaux:</span>
+                            <span id="totalMoves">0</span>
+                        </div>
+                        <div class="stat-row">
+                            <span data-lang="avgMoveTime">Temps moyen/coup:</span>
+                            <span id="avgMoveTime">0s</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-title" data-lang="leaderboard">Classement</div>
+                    <div class="leaderboard" id="leaderboard">
+                        <!-- Le classement sera généré dynamiquement -->
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-title">🎯 Objectifs</div>
+                    <div class="game-stats">
+                        <div class="stat-row">
+                            <span>Score cible:</span>
+                            <span id="targetScore">100</span>
+                        </div>
+                        <div class="stat-row">
+                            <span>Progression:</span>
+                            <span id="progressPercent">0%</span>
+                        </div>
+                        <div class="stat-row">
+                            <span>Combo actuel:</span>
+                            <span id="currentCombo">x1</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-title">⚡ Bonus</div>
+                    <div class="game-stats">
+                        <div class="stat-row">
+                            <span>Cases spéciales:</span>
+                            <span id="specialCellsCount">0</span>
+                        </div>
+                        <div class="stat-row">
+                            <span>Lignes complètes:</span>
+                            <span id="completedLines">0</span>
+                        </div>
+                        <div class="stat-row">
+                            <span>Bonus total:</span>
+                            <span id="totalBonus">0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-title">🏆 Achievements</div>
+                    <div class="game-stats">
+                        <div class="stat-row">
+                            <span>Premier sang:</span>
+                            <span>🏅</span>
+                        </div>
+                        <div class="stat-row">
+                            <span>Combo Master:</span>
+                            <span>🎯</span>
+                        </div>
+                        <div class="stat-row">
+                            <span>Stratège:</span>
+                            <span>🧠</span>
+                        </div>
+                        <div class="stat-row">
+                            <span>Vainqueur:</span>
+                            <span>👑</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal des règles -->
+    <div class="modal" id="rulesModal">
+        <div class="modal-content">
+            <h2 data-lang="rulesTitle">Règles de NeuroSphere</h2>
+            
+            <h3 data-lang="objectiveTitle">🎯 Objectif</h3>
+            <p data-lang="objectiveText">NeuroSphere est un jeu de stratégie futuriste où vous affrontez une IA avancée. Le but est de contrôler le maximum de territoire en plaçant stratégiquement vos pièces sur la grille 3D.</p>
+            
+            <h3 data-lang="howToPlayTitle">🎮 Comment jouer</h3>
+            <ul>
+                <li data-lang="rule1">Cliquez sur une case vide pour placer votre pièce (cyan)</li>
+                <li data-lang="rule2">L'IA placera automatiquement sa pièce (magenta)</li>
+                <li data-lang="rule3">Formez des lignes, colonnes ou diagonales pour marquer des points</li>
+                <li data-lang="rule4">Les cases spéciales (dorées) donnent des points bonus</li>
+                <li data-lang="rule5">Atteignez l'objectif de points pour passer au niveau suivant</li>
+            </ul>
+            
+            <h3 data-lang="aiLevelsTitle">🤖 Niveaux d'IA</h3>
+            <ul>
+                <li data-lang="easyAI"><strong>Facile:</strong> IA basique, idéale pour débuter</li>
+                <li data-lang="mediumAI"><strong>Moyen:</strong> IA tactique, analyse les patterns</li>
+                <li data-lang="hardAI"><strong>Difficile:</strong> IA stratégique, anticipe vos mouvements</li>
+            </ul>
+            
+            <h3 data-lang="scoringTitle">📊 Système de score</h3>
+            <ul>
+                <li data-lang="basicScore">Placement normal: +10 points</li>
+                <li data-lang="lineScore">Ligne complète: +50 points</li>
+                <li data-lang="specialScore">Case spéciale: +25 points</li>
+                <li data-lang="comboScore">Combo multiple: points x2</li>
+            </ul>
+            
+            <h3 data-lang="controlsTitle">⌨️ Contrôles</h3>
+            <ul>
+                <li data-lang="clickMove">Clic gauche: Placer une pièce</li>
+                <li data-lang="spaceKey">Espace: Pause/Reprendre</li>
+                <li data-lang="escKey">Échap: Fermer les menus</li>
+                <li data-lang="rKey">R: Redémarrer la partie</li>
+            </ul>
+            
+            <button class="control-btn" onclick="hideRules()" style="margin-top: 30px; width: 100%;" data-lang="closeRules">Fermer les Règles</button>
+        </div>
+    </div>
+
+    <style>
+        .global-close-btn { position: fixed; top: 14px; right: 14px; z-index: 99999; background: #ff3b3b; color: #fff; border: none; width:52px; height:52px; border-radius:50%; font-size:22px; cursor:pointer; box-shadow:0 6px 18px rgba(255,59,59,0.3);} 
+        .global-close-btn:hover{ transform: scale(1.05); }
+    </style>
+    <button class="global-close-btn" title="Fermer" aria-label="Fermer" onclick="closePlatform()">✕</button>
+    <script>
+    /* Canonical child-side overlay closer for platform pages */
+    function closePlatform(){
+        try{ console.debug('jeux31: closePlatform called'); }catch(e){}
+        if(window.parent && window.parent !== window){
+            window.parent.postMessage({ action: 'close', reason: 'user-initiated', source: 'jeux31' }, '*');
+            return;
+        }
+        if(window.opener && !window.opener.closed){
+            try{ window.opener.postMessage({ action: 'child-closed', source: 'jeux31' }, '*'); }catch(e){}
+            try{ window.close(); }catch(e){}
+            return;
+        }
+        window.location.href = '/global_platform.html';
+    }
+    window.closePlatform = closePlatform;
+
+        // Système de traduction multilingue
+        const translations = {
+            fr: {
+                gameTitle: "NeuroSphere",
+                rules: "📋 Règles",
+                startGame: "🚀 Démarrer",
+                pause: "⏸️ Pause",
+                resume: "▶️ Reprendre",
+                newGame: "🔄 Nouvelle Partie",
+                level: "Niveau:",
+                scoreTitle: "Score & Progression",
+                playerScore: "Joueur",
+                aiScore: "IA",
+                currentLevel: "Niveau",
+                progress: "Progression du Niveau",
+                aiStatus: "Statut IA",
+                aiThinking: "IA réfléchit",
+                aiReady: "IA prête à jouer",
+                easy: "Facile",
+                medium: "Moyen",
+                hard: "Difficile",
+                gameStats: "Statistiques",
+                gamesPlayed: "Parties jouées:",
+                gamesWon: "Victoires:",
+                winRate: "Taux de victoire:",
+                bestScore: "Meilleur score:",
+                totalMoves: "Coups totaux:",
+                avgMoveTime: "Temps moyen/coup:",
+                leaderboard: "Classement",
+                pausedText: "JEU EN PAUSE",
+                rulesTitle: "Règles de NeuroSphere",
+                objectiveTitle: "🎯 Objectif",
+                objectiveText: "NeuroSphere est un jeu de stratégie futuriste où vous affrontez une IA avancée. Le but est de contrôler le maximum de territoire en plaçant stratégiquement vos pièces sur la grille 3D.",
+                howToPlayTitle: "🎮 Comment jouer",
+                rule1: "Cliquez sur une case vide pour placer votre pièce (cyan)",
+                rule2: "L'IA placera automatiquement sa pièce (magenta)",
+                rule3: "Formez des lignes, colonnes ou diagonales pour marquer des points",
+                rule4: "Les cases spéciales (dorées) donnent des points bonus",
+                rule5: "Atteignez l'objectif de points pour passer au niveau suivant",
+                aiLevelsTitle: "🤖 Niveaux d'IA",
+                easyAI: "Facile: IA basique, idéale pour débuter",
+                mediumAI: "Moyen: IA tactique, analyse les patterns",
+                hardAI: "Difficile: IA stratégique, anticipe vos mouvements",
+                scoringTitle: "📊 Système de score",
+                basicScore: "Placement normal: +10 points",
+                lineScore: "Ligne complète: +50 points",
+                specialScore: "Case spéciale: +25 points",
+                comboScore: "Combo multiple: points x2",
+                controlsTitle: "⌨️ Contrôles",
+                clickMove: "Clic gauche: Placer une pièce",
+                spaceKey: "Espace: Pause/Reprendre",
+                escKey: "Échap: Fermer les menus",
+                rKey: "R: Redémarrer la partie",
+                closeRules: "Fermer les Règles",
+                victory: "🎉 VICTOIRE !",
+                defeat: "💀 DÉFAITE !",
+                draw: "🤝 ÉGALITÉ !",
+                levelUp: "🌟 NIVEAU SUPÉRIEUR !",
+                gameOver: "🎮 FIN DE PARTIE",
+                victoryMessage: "🎉 FÉLICITATIONS ! VOUS AVEZ GAGNÉ !",
+                defeatMessage: "💀 DOMMAGE ! L'IA A GAGNÉ !",
+                drawMessage: "🤝 MATCH NUL ! ÉGALITÉ PARFAITE !"
+            },
+            
+            en: {
+                gameTitle: "NeuroSphere",
+                rules: "📋 Rules",
+                startGame: "🚀 Start Game",
+                pause: "⏸️ Pause",
+                resume: "▶️ Resume",
+                newGame: "🔄 New Game",
+                level: "Level:",
+                scoreTitle: "Score & Progress",
+                playerScore: "Player",
+                aiScore: "AI",
+                currentLevel: "Level",
+                progress: "Level Progress",
+                aiStatus: "AI Status",
+                aiThinking: "AI thinking",
+                aiReady: "AI ready to play",
+                easy: "Easy",
+                medium: "Medium",
+                hard: "Hard",
+                gameStats: "Statistics",
+                gamesPlayed: "Games played:",
+                gamesWon: "Victories:",
+                winRate: "Win rate:",
+                bestScore: "Best score:",
+                totalMoves: "Total moves:",
+                avgMoveTime: "Avg time/move:",
+                leaderboard: "Leaderboard",
+                pausedText: "GAME PAUSED",
+                rulesTitle: "NeuroSphere Rules",
+                objectiveTitle: "🎯 Objective",
+                objectiveText: "NeuroSphere is a futuristic strategy game where you face an advanced AI. The goal is to control maximum territory by strategically placing your pieces on the 3D grid.",
+                howToPlayTitle: "🎮 How to play",
+                rule1: "Click on an empty cell to place your piece (cyan)",
+                rule2: "AI will automatically place its piece (magenta)",
+                rule3: "Form lines, columns or diagonals to score points",
+                rule4: "Special cells (golden) give bonus points",
+                rule5: "Reach the point target to advance to next level",
+                aiLevelsTitle: "🤖 AI Levels",
+                easyAI: "Easy: Basic AI, ideal for beginners",
+                mediumAI: "Medium: Tactical AI, analyzes patterns",
+                hardAI: "Hard: Strategic AI, anticipates your moves",
+                scoringTitle: "📊 Scoring System",
+                basicScore: "Normal placement: +10 points",
+                lineScore: "Complete line: +50 points",
+                specialScore: "Special cell: +25 points",
+                comboScore: "Multiple combo: points x2",
+                controlsTitle: "⌨️ Controls",
+                clickMove: "Left click: Place a piece",
+                spaceKey: "Space: Pause/Resume",
+                escKey: "Esc: Close menus",
+                rKey: "R: Restart game",
+                closeRules: "Close Rules",
+                victory: "🎉 VICTORY!",
+                defeat: "💀 DEFEAT!",
+                draw: "🤝 DRAW!",
+                levelUp: "🌟 LEVEL UP!",
+                gameOver: "🎮 GAME OVER",
+                victoryMessage: "🎉 CONGRATULATIONS! YOU WON!",
+                defeatMessage: "💀 TOO BAD! AI WON!",
+                drawMessage: "🤝 TIE GAME! PERFECT EQUALITY!"
+            },
+            
+            ar: {
+                gameTitle: "نيوروسفير",
+                rules: "📋 القواعد",
+                startGame: "🚀 بدء اللعبة",
+                pause: "⏸️ إيقاف مؤقت",
+                resume: "▶️ استئناف",
+                newGame: "🔄 لعبة جديدة",
+                level: "المستوى:",
+                scoreTitle: "النقاط والتقدم",
+                playerScore: "اللاعب",
+                aiScore: "الذكاء الاصطناعي",
+                currentLevel: "المستوى",
+                progress: "تقدم المستوى",
+                aiStatus: "حالة الذكاء الاصطناعي",
+                aiThinking: "الذكاء الاصطناعي يفكر",
+                aiReady: "الذكاء الاصطناعي جاهز للعب",
+                easy: "سهل",
+                medium: "متوسط",
+                hard: "صعب",
+                gameStats: "الإحصائيات",
+                gamesPlayed: "الألعاب المُلعبة:",
+                gamesWon: "الانتصارات:",
+                winRate: "معدل الفوز:",
+                bestScore: "أفضل نتيجة:",
+                totalMoves: "إجمالي الحركات:",
+                avgMoveTime: "متوسط الوقت/حركة:",
+                leaderboard: "لوحة المتصدرين",
+                pausedText: "اللعبة متوقفة مؤقتاً",
+                rulesTitle: "قواعد نيوروسفير",
+                objectiveTitle: "🎯 الهدف",
+                objectiveText: "نيوروسفير هي لعبة استراتيجية مستقبلية حيث تواجه ذكاءً اصطناعياً متقدماً. الهدف هو السيطرة على أقصى مساحة من الأراضي عبر وضع قطعك بشكل استراتيجي على الشبكة ثلاثية الأبعاد.",
+                howToPlayTitle: "🎮 كيفية اللعب",
+                rule1: "انقر على خلية فارغة لوضع قطعتك (سماوي)",
+                rule2: "سيضع الذكاء الاصطناعي قطعته تلقائياً (بنفسجي)",
+                rule3: "كوّن خطوطاً أو أعمدة أو أقطار لتسجيل النقاط",
+                rule4: "الخلايا الخاصة (الذهبية) تعطي نقاط إضافية",
+                rule5: "اوصل إلى هدف النقاط للانتقال للمستوى التالي",
+                aiLevelsTitle: "🤖 مستويات الذكاء الاصطناعي",
+                easyAI: "سهل: ذكاء اصطناعي أساسي، مثالي للمبتدئين",
+                mediumAI: "متوسط: ذكاء اصطناعي تكتيكي، يحلل الأنماط",
+                hardAI: "صعب: ذكاء اصطناعي استراتيجي، يتوقع حركاتك",
+                scoringTitle: "📊 نظام النقاط",
+                basicScore: "الوضع العادي: +10 نقاط",
+                lineScore: "خط كامل: +50 نقطة",
+                specialScore: "خلية خاصة: +25 نقطة",
+                comboScore: "كومبو متعدد: النقاط x2",
+                controlsTitle: "⌨️ التحكم",
+                clickMove: "النقر الأيسر: وضع قطعة",
+                spaceKey: "مسافة: إيقاف/استئناف",
+                escKey: "إسكيب: إغلاق القوائم",
+                rKey: "R: إعادة تشغيل اللعبة",
+                closeRules: "إغلاق القواعد",
+                victory: "🎉 انتصار!",
+                defeat: "💀 هزيمة!",
+                draw: "🤝 تعادل!",
+                levelUp: "🌟 مستوى أعلى!",
+                gameOver: "🎮 انتهاء اللعبة",
+                victoryMessage: "🎉 تهانينا! لقد فزت!",
+                defeatMessage: "💀 للأسف! الذكاء الاصطناعي فاز!",
+                drawMessage: "🤝 تعادل! مساواة تامة!"
+            },
+            
+            es: {
+                gameTitle: "NeuroSphere",
+                rules: "📋 Reglas",
+                startGame: "🚀 Iniciar Juego",
+                pause: "⏸️ Pausa",
+                resume: "▶️ Reanudar",
+                newGame: "🔄 Nuevo Juego",
+                level: "Nivel:",
+                scoreTitle: "Puntuación y Progreso",
+                playerScore: "Jugador",
+                aiScore: "IA",
+                currentLevel: "Nivel",
+                progress: "Progreso del Nivel",
+                aiStatus: "Estado de la IA",
+                aiThinking: "IA pensando",
+                aiReady: "IA lista para jugar",
+                easy: "Fácil",
+                medium: "Medio",
+                hard: "Difícil",
+                gameStats: "Estadísticas",
+                gamesPlayed: "Partidas jugadas:",
+                gamesWon: "Victorias:",
+                winRate: "Tasa de victoria:",
+                bestScore: "Mejor puntuación:",
+                totalMoves: "Movimientos totales:",
+                avgMoveTime: "Tiempo promedio/movimiento:",
+                leaderboard: "Clasificación",
+                pausedText: "JUEGO EN PAUSA",
+                rulesTitle: "Reglas de NeuroSphere",
+                objectiveTitle: "🎯 Objetivo",
+                objectiveText: "NeuroSphere es un juego de estrategia futurista donde enfrentas una IA avanzada. El objetivo es controlar el máximo territorio colocando estratégicamente tus piezas en la cuadrícula 3D.",
+                howToPlayTitle: "🎮 Cómo jugar",
+                rule1: "Haz clic en una celda vacía para colocar tu pieza (cian)",
+                rule2: "La IA colocará automáticamente su pieza (magenta)",
+                rule3: "Forma líneas, columnas o diagonales para anotar puntos",
+                rule4: "Las celdas especiales (doradas) dan puntos bonus",
+                rule5: "Alcanza el objetivo de puntos para avanzar al siguiente nivel",
+                aiLevelsTitle: "🤖 Niveles de IA",
+                easyAI: "Fácil: IA básica, ideal para principiantes",
+                mediumAI: "Medio: IA táctica, analiza patrones",
+                hardAI: "Difícil: IA estratégica, anticipa tus movimientos",
+                scoringTitle: "📊 Sistema de Puntuación",
+                basicScore: "Colocación normal: +10 puntos",
+                lineScore: "Línea completa: +50 puntos",
+                specialScore: "Celda especial: +25 puntos",
+                comboScore: "Combo múltiple: puntos x2",
+                controlsTitle: "⌨️ Controles",
+                clickMove: "Clic izquierdo: Colocar una pieza",
+                spaceKey: "Espacio: Pausar/Reanudar",
+                escKey: "Esc: Cerrar menús",
+                rKey: "R: Reiniciar juego",
+                closeRules: "Cerrar Reglas",
+                victory: "🎉 ¡VICTORIA!",
+                defeat: "💀 ¡DERROTA!",
+                draw: "🤝 ¡EMPATE!",
+                levelUp: "🌟 ¡NIVEL SUPERIOR!",
+                gameOver: "🎮 FIN DEL JUEGO",
+                victoryMessage: "🎉 ¡FELICITACIONES! ¡HAS GANADO!",
+                defeatMessage: "💀 ¡QUÉ LÁSTIMA! ¡LA IA GANÓ!",
+                drawMessage: "🤝 ¡EMPATE! ¡IGUALDAD PERFECTA!"
+            },
+            
+            de: {
+                gameTitle: "NeuroSphere",
+                rules: "📋 Regeln",
+                startGame: "🚀 Spiel Starten",
+                pause: "⏸️ Pause",
+                resume: "▶️ Fortsetzen",
+                newGame: "🔄 Neues Spiel",
+                level: "Level:",
+                scoreTitle: "Punkte & Fortschritt",
+                playerScore: "Spieler",
+                aiScore: "KI",
+                currentLevel: "Level",
+                progress: "Level-Fortschritt",
+                aiStatus: "KI-Status",
+                aiThinking: "KI denkt nach",
+                aiReady: "KI bereit zu spielen",
+                easy: "Einfach",
+                medium: "Mittel",
+                hard: "Schwer",
+                gameStats: "Statistiken",
+                gamesPlayed: "Gespielte Spiele:",
+                gamesWon: "Siege:",
+                winRate: "Siegesrate:",
+                bestScore: "Beste Punktzahl:",
+                totalMoves: "Gesamte Züge:",
+                avgMoveTime: "Durchschn. Zeit/Zug:",
+                leaderboard: "Bestenliste",
+                pausedText: "SPIEL PAUSIERT",
+                rulesTitle: "NeuroSphere Regeln",
+                objectiveTitle: "🎯 Ziel",
+                objectiveText: "NeuroSphere ist ein futuristisches Strategiespiel, bei dem Sie gegen eine fortschrittliche KI antreten. Das Ziel ist es, maximales Territorium zu kontrollieren, indem Sie Ihre Steine strategisch auf dem 3D-Raster platzieren.",
+                howToPlayTitle: "🎮 Spielanleitung",
+                rule1: "Klicken Sie auf eine leere Zelle, um Ihren Stein zu platzieren (cyan)",
+                rule2: "Die KI wird automatisch ihren Stein platzieren (magenta)",
+                rule3: "Bilden Sie Linien, Spalten oder Diagonalen, um Punkte zu erzielen",
+                rule4: "Spezielle Zellen (golden) geben Bonuspunkte",
+                rule5: "Erreichen Sie das Punktziel, um zum nächsten Level aufzusteigen",
+                aiLevelsTitle: "🤖 KI-Level",
+                easyAI: "Einfach: Basis-KI, ideal für Anfänger",
+                mediumAI: "Mittel: Taktische KI, analysiert Muster",
+                hardAI: "Schwer: Strategische KI, antizipiert Ihre Züge",
+                scoringTitle: "📊 Punktesystem",
+                basicScore: "Normale Platzierung: +10 Punkte",
+                lineScore: "Vollständige Linie: +50 Punkte",
+                specialScore: "Spezielle Zelle: +25 Punkte",
+                comboScore: "Mehrfach-Combo: Punkte x2",
+                controlsTitle: "⌨️ Steuerung",
+                clickMove: "Linksklick: Einen Stein platzieren",
+                spaceKey: "Leertaste: Pause/Fortsetzen",
+                escKey: "Esc: Menüs schließen",
+                rKey: "R: Spiel neu starten",
+                closeRules: "Regeln Schließen",
+                victory: "🎉 SIEG!",
+                defeat: "💀 NIEDERLAGE!",
+                draw: "🤝 UNENTSCHIEDEN!",
+                levelUp: "🌟 LEVEL AUFSTIEG!",
+                gameOver: "🎮 SPIEL ENDE",
+                victoryMessage: "🎉 GLÜCKWUNSCH! SIE HABEN GEWONNEN!",
+                defeatMessage: "💀 SCHADE! DIE KI HAT GEWONNEN!",
+                drawMessage: "🤝 UNENTSCHIEDEN! PERFEKTE GLEICHHEIT!"
+            },
+            
+            zh: {
+                gameTitle: "神经球",
+                rules: "📋 规则",
+                startGame: "🚀 开始游戏",
+                pause: "⏸️ 暂停",
+                resume: "▶️ 继续",
+                newGame: "🔄 新游戏",
+                level: "等级:",
+                scoreTitle: "分数与进度",
+                playerScore: "玩家",
+                aiScore: "人工智能",
+                currentLevel: "等级",
+                progress: "等级进度",
+                aiStatus: "AI状态",
+                aiThinking: "AI思考中",
+                aiReady: "AI准备就绪",
+                easy: "简单",
+                medium: "中等",
+                hard: "困难",
+                gameStats: "统计数据",
+                gamesPlayed: "已玩游戏:",
+                gamesWon: "胜利次数:",
+                winRate: "胜率:",
+                bestScore: "最高分:",
+                totalMoves: "总移动数:",
+                avgMoveTime: "平均时间/移动:",
+                leaderboard: "排行榜",
+                pausedText: "游戏暂停",
+                rulesTitle: "神经球规则",
+                objectiveTitle: "🎯 目标",
+                objectiveText: "神经球是一款未来主义策略游戏，您将面对先进的AI。目标是通过在3D网格上战略性地放置棋子来控制最大领土。",
+                howToPlayTitle: "🎮 游戏玩法",
+                rule1: "点击空格子放置您的棋子（青色）",
+                rule2: "AI将自动放置其棋子（洋红色）",
+                rule3: "形成直线、列或对角线来得分",
+                rule4: "特殊格子（金色）给予奖励分数",
+                rule5: "达到分数目标以进入下一关",
+                aiLevelsTitle: "🤖 AI等级",
+                easyAI: "简单：基础AI，适合初学者",
+                mediumAI: "中等：战术AI，分析模式",
+                hardAI: "困难：战略AI，预测您的行动",
+                scoringTitle: "📊 计分系统",
+                basicScore: "普通放置：+10分",
+                lineScore: "完整直线：+50分",
+                specialScore: "特殊格子：+25分",
+                comboScore: "多重连击：分数x2",
+                controlsTitle: "⌨️ 控制",
+                clickMove: "左键点击：放置棋子",
+                spaceKey: "空格键：暂停/继续",
+                escKey: "Esc键：关闭菜单",
+                rKey: "R键：重新开始游戏",
+                closeRules: "关闭规则",
+                victory: "🎉 胜利！",
+                defeat: "💀 失败！",
+                draw: "🤝 平局！",
+                levelUp: "🌟 升级！",
+                gameOver: "🎮 游戏结束",
+                victoryMessage: "🎉 恭喜！您获胜了！",
+                defeatMessage: "💀 遗憾！人工智能获胜了！",
+                drawMessage: "🤝 平局！完美平等！"
+            }
+        };
+
+        // État du jeu
+        const gameState = {
+            currentLanguage: 'fr',
+            gameRunning: false,
+            paused: false,
+            level: 1,
+            difficulty: 'easy',
+            playerScore: 0,
+            aiScore: 0,
+            progress: 0,
+            targetScore: 100,
+            grid: [],
+            gridSize: 8,
+            currentPlayer: 'player', // 'player' ou 'ai'
+            aiThinking: false,
+            gameStats: {
+                gamesPlayed: 0,
+                gamesWon: 0,
+                bestScore: 0,
+                totalMoves: 0,
+                totalTime: 0
+            },
+            moveStartTime: 0,
+            specialCells: [],
+            combo: 1,
+            lastMoveTime: Date.now()
+        };
+
+        // Fonction de traduction
+        function translate(key) {
+            return translations[gameState.currentLanguage][key] || translations['fr'][key] || key;
+        }
+
+        function updateLanguage() {
+            document.querySelectorAll('[data-lang]').forEach(element => {
+                const key = element.getAttribute('data-lang');
+                element.textContent = translate(key);
+            });
+            
+            // Mettre à jour le nom et drapeau de la langue actuelle
+            const languageFlags = {
+                fr: '🇫🇷', en: '🇬🇧', ar: '🇸🇦', es: '🇪🇸', de: '🇩🇪', zh: '🇨🇳'
+            };
+            
+            const languageNames = {
+                fr: 'Français', en: 'English', ar: 'العربية', es: 'Español', de: 'Deutsch', zh: '中文'
+            };
+            
+            document.getElementById('currentLanguageFlag').textContent = languageFlags[gameState.currentLanguage];
+            document.getElementById('currentLanguageName').textContent = languageNames[gameState.currentLanguage];
+        }
+
+        function changeLanguage(lang) {
+            gameState.currentLanguage = lang;
+            document.getElementById('languageDropdown').style.display = 'none';
+            updateLanguage();
+            localStorage.setItem('neurosphereLanguage', lang);
+        }
+
+        function toggleLanguageDropdown() {
+            const dropdown = document.getElementById('languageDropdown');
+            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+        }
+
+        // Fonctions de base du jeu
+        function initializeGrid() {
+            gameState.grid = [];
+            gameState.specialCells = [];
+            
+            for (let i = 0; i < gameState.gridSize; i++) {
+                gameState.grid[i] = [];
+                for (let j = 0; j < gameState.gridSize; j++) {
+                    gameState.grid[i][j] = null;
+                }
+            }
+            
+            // Générer des cases spéciales aléatoirement
+            const specialCount = Math.floor(gameState.gridSize * gameState.gridSize * 0.1);
+            for (let i = 0; i < specialCount; i++) {
+                let row, col;
+                do {
+                    row = Math.floor(Math.random() * gameState.gridSize);
+                    col = Math.floor(Math.random() * gameState.gridSize);
+                } while (gameState.specialCells.some(cell => cell.row === row && cell.col === col));
+                
+                gameState.specialCells.push({ row, col });
+            }
+        }
+
+        function createGameGrid() {
+            const gameGrid = document.getElementById('gameGrid');
+            gameGrid.innerHTML = '';
+            
+            for (let i = 0; i < gameState.gridSize; i++) {
+                for (let j = 0; j < gameState.gridSize; j++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'grid-cell';
+                    cell.dataset.row = i;
+                    cell.dataset.col = j;
+                    
+                    // Vérifier si c'est une case spéciale
+                    if (gameState.specialCells.some(special => special.row === i && special.col === j)) {
+                        cell.classList.add('special');
+                        cell.innerHTML = '⭐';
+                    }
+                    
+                    cell.addEventListener('click', () => handleCellClick(i, j));
+                    gameGrid.appendChild(cell);
+                }
+            }
+        }
+
+        function handleCellClick(row, col) {
+            if (!gameState.gameRunning || gameState.paused || gameState.aiThinking) return;
+            if (gameState.currentPlayer !== 'player') return;
+            if (gameState.grid[row][col] !== null) return;
+            
+            makeMove(row, col, 'player');
+        }
+
+        function makeMove(row, col, player) {
+            gameState.grid[row][col] = player;
+            const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+            
+            if (player === 'player') {
+                cell.classList.add('player');
+                cell.innerHTML = '🔵';
+                gameState.moveStartTime = Date.now();
+            } else {
+                cell.classList.add('ai');
+                cell.innerHTML = '🟣';
+            }
+            
+            // Calculer les points
+            const points = calculatePoints(row, col, player);
+            if (player === 'player') {
+                gameState.playerScore += points;
+                showFloatingScore(cell, `+${points}`);
+            } else {
+                gameState.aiScore += points;
+            }
+            
+            // Créer des particules
+            createParticles(cell);
+            
+            // Vérifier les conditions de victoire
+            checkGameEnd();
+            
+            // Changer de joueur
+            if (gameState.gameRunning) {
+                gameState.currentPlayer = player === 'player' ? 'ai' : 'player';
+                
+                if (gameState.currentPlayer === 'ai') {
+                    setTimeout(makeAIMove, 300 + Math.random() * 500);
+                }
+            }
+            
+            updateUI();
+        }
+
+        function calculatePoints(row, col, player) {
+            let points = 10; // Points de base
+            
+            // Bonus pour case spéciale
+            if (gameState.specialCells.some(special => special.row === row && special.col === col)) {
+                points += 25;
+            }
+            
+            // Vérifier les lignes complètes
+            const lines = checkLines(row, col, player);
+            points += lines * 50;
+            
+            // Appliquer le combo
+            points *= gameState.combo;
+            
+            // Mettre à jour le combo
+            if (lines > 0) {
+                gameState.combo = Math.min(gameState.combo + 1, 5);
+            } else {
+                gameState.combo = 1;
+            }
+            
+            return points;
+        }
+
+        function checkLines(row, col, player) {
+            let lines = 0;
+            
+            // Vérifier ligne horizontale
+            let count = 1;
+            for (let i = col - 1; i >= 0 && gameState.grid[row][i] === player; i--) count++;
+            for (let i = col + 1; i < gameState.gridSize && gameState.grid[row][i] === player; i++) count++;
+            if (count >= 4) lines++;
+            
+            // Vérifier ligne verticale
+            count = 1;
+            for (let i = row - 1; i >= 0 && gameState.grid[i][col] === player; i--) count++;
+            for (let i = row + 1; i < gameState.gridSize && gameState.grid[i][col] === player; i++) count++;
+            if (count >= 4) lines++;
+            
+            // Vérifier diagonale principale
+            count = 1;
+            for (let i = 1; row - i >= 0 && col - i >= 0 && gameState.grid[row - i][col - i] === player; i++) count++;
+            for (let i = 1; row + i < gameState.gridSize && col + i < gameState.gridSize && gameState.grid[row + i][col + i] === player; i++) count++;
+            if (count >= 4) lines++;
+            
+            // Vérifier diagonale secondaire
+            count = 1;
+            for (let i = 1; row - i >= 0 && col + i < gameState.gridSize && gameState.grid[row - i][col + i] === player; i++) count++;
+            for (let i = 1; row + i < gameState.gridSize && col - i >= 0 && gameState.grid[row + i][col - i] === player; i++) count++;
+            if (count >= 4) lines++;
+            
+            return lines;
+        }
+
+        function makeAIMove() {
+            if (!gameState.gameRunning || gameState.currentPlayer !== 'ai') return;
+            
+            gameState.aiThinking = true;
+            document.getElementById('aiThinking').style.display = 'flex';
+            document.getElementById('aiStatusText').style.display = 'none';
+            
+            setTimeout(() => {
+                const move = getAIMove();
+                if (move) {
+                    makeMove(move.row, move.col, 'ai');
+                }
+                
+                gameState.aiThinking = false;
+                document.getElementById('aiThinking').style.display = 'none';
+                document.getElementById('aiStatusText').style.display = 'block';
+            }, 400 + Math.random() * 300);
+        }
+
+        function getAIMove() {
+            const emptyCells = [];
+            for (let i = 0; i < gameState.gridSize; i++) {
+                for (let j = 0; j < gameState.gridSize; j++) {
+                    if (gameState.grid[i][j] === null) {
+                        emptyCells.push({ row: i, col: j });
+                    }
+                }
+            }
+            
+            if (emptyCells.length === 0) return null;
+            
+            // IA selon la difficulté
+            switch (gameState.difficulty) {
+                case 'easy':
+                    return emptyCells[Math.floor(Math.random() * emptyCells.length)];
+                
+                case 'medium':
+                    return getStrategicMove(emptyCells) || emptyCells[Math.floor(Math.random() * emptyCells.length)];
+                
+                case 'hard':
+                    return getBestMove(emptyCells) || emptyCells[Math.floor(Math.random() * emptyCells.length)];
+                
+                default:
+                    return emptyCells[Math.floor(Math.random() * emptyCells.length)];
+            }
+        }
+
+        function getStrategicMove(emptyCells) {
+            // Chercher les cases spéciales
+            const specialMoves = emptyCells.filter(cell => 
+                gameState.specialCells.some(special => special.row === cell.row && special.col === cell.col)
+            );
+            
+            if (specialMoves.length > 0) {
+                return specialMoves[Math.floor(Math.random() * specialMoves.length)];
+            }
+            
+            // Chercher les mouvements près des pièces existantes
+            const strategicMoves = emptyCells.filter(cell => {
+                for (let dr = -1; dr <= 1; dr++) {
+                    for (let dc = -1; dc <= 1; dc++) {
+                        const nr = cell.row + dr;
+                        const nc = cell.col + dc;
+                        if (nr >= 0 && nr < gameState.gridSize && nc >= 0 && nc < gameState.gridSize) {
+                            if (gameState.grid[nr][nc] !== null) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+                return false;
+            });
+            
+            return strategicMoves.length > 0 ? strategicMoves[Math.floor(Math.random() * strategicMoves.length)] : null;
+        }
+
+        function getBestMove(emptyCells) {
+            let bestMove = null;
+            let bestScore = -Infinity;
+            
+            for (const cell of emptyCells) {
+                // Simuler le mouvement
+                gameState.grid[cell.row][cell.col] = 'ai';
+                const score = evaluatePosition('ai') - evaluatePosition('player');
+                gameState.grid[cell.row][cell.col] = null;
+                
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestMove = cell;
+                }
+            }
+            
+            return bestMove;
+        }
+
+        function evaluatePosition(player) {
+            let score = 0;
+            
+            // Évaluer les lignes potentielles
+            for (let i = 0; i < gameState.gridSize; i++) {
+                for (let j = 0; j < gameState.gridSize; j++) {
+                    if (gameState.grid[i][j] === player) {
+                        score += evaluateCell(i, j, player);
+                    }
+                }
+            }
+            
+            return score;
+        }
+
+        function evaluateCell(row, col, player) {
+            let score = 1;
+            
+            // Bonus pour case spéciale
+            if (gameState.specialCells.some(special => special.row === row && special.col === col)) {
+                score += 3;
+            }
+            
+            // Évaluer les connexions
+            const directions = [
+                [0, 1], [1, 0], [1, 1], [1, -1]
+            ];
+            
+            for (const [dr, dc] of directions) {
+                let count = 1;
+                for (let i = 1; i < 4; i++) {
+                    const nr = row + dr * i;
+                    const nc = col + dc * i;
+                    if (nr >= 0 && nr < gameState.gridSize && nc >= 0 && nc < gameState.gridSize) {
+                        if (gameState.grid[nr][nc] === player) {
+                            count++;
+                        } else {
+                            break;
+                        }
+                    }
+                }
+                score += count * count;
+            }
+            
+            return score;
+        }
+
+        function checkGameEnd() {
+            const emptyCells = gameState.grid.flat().filter(cell => cell === null).length;
+            
+            if (emptyCells === 0 || gameState.playerScore >= gameState.targetScore || gameState.aiScore >= gameState.targetScore) {
+                endGame();
+            } else {
+                // Mettre à jour la progression
+                gameState.progress = Math.max(gameState.playerScore, gameState.aiScore) / gameState.targetScore * 100;
+                
+                if (gameState.progress >= 100) {
+                    levelUp();
+                }
+            }
+        }
+
+        function levelUp() {
+            gameState.level++;
+            gameState.targetScore += 50;
+            gameState.progress = 0;
+            gameState.gridSize = Math.min(10, gameState.gridSize + 1);
+            
+            showVictoryAnimation(translate('levelUp'));
+            
+            // Réinitialiser la grille avec la nouvelle taille
+            setTimeout(() => {
+                initializeGrid();
+                createGameGrid();
+                updateUI();
+            }, 2000);
+        }
+
+        function endGame() {
+            gameState.gameRunning = false;
+            gameState.gameStats.gamesPlayed++;
+            
+            let message;
+            if (gameState.playerScore > gameState.aiScore) {
+                gameState.gameStats.gamesWon++;
+                message = `${translate('victoryMessage')} (${gameState.playerScore} - ${gameState.aiScore})`;
+            } else if (gameState.aiScore > gameState.playerScore) {
+                message = `${translate('defeatMessage')} (${gameState.aiScore} - ${gameState.playerScore})`;
+            } else {
+                message = `${translate('drawMessage')} (${gameState.playerScore} - ${gameState.aiScore})`;
+            }
+            
+            showVictoryAnimation(message);
+            
+            if (gameState.playerScore > gameState.gameStats.bestScore) {
+                gameState.gameStats.bestScore = gameState.playerScore;
+            }
+            
+            saveGameStats();
+            updateUI();
+            
+            document.getElementById('startBtn').style.display = 'inline-block';
+            document.getElementById('pauseBtn').style.display = 'none';
+        }
+
+        function startGame() {
+            gameState.gameRunning = true;
+            gameState.paused = false;
+            gameState.level = parseInt(document.getElementById('levelInput').value);
+            gameState.playerScore = 0;
+            gameState.aiScore = 0;
+            gameState.progress = 0;
+            gameState.targetScore = 100 + (gameState.level - 1) * 50;
+            gameState.currentPlayer = 'player';
+            gameState.combo = 1;
+            gameState.moveStartTime = Date.now();
+            
+            document.getElementById('startBtn').style.display = 'none';
+            document.getElementById('pauseBtn').style.display = 'inline-block';
+            document.getElementById('pausedOverlay').style.display = 'none';
+            
+            initializeGrid();
+            createGameGrid();
+            updateUI();
+        }
+
+        function togglePause() {
+            if (!gameState.gameRunning) return;
+            
+            gameState.paused = !gameState.paused;
+            const pausedOverlay = document.getElementById('pausedOverlay');
+            const pauseBtn = document.getElementById('pauseBtn');
+            
+            if (gameState.paused) {
+                pausedOverlay.style.display = 'flex';
+                pauseBtn.innerHTML = '<span data-lang="resume">▶️ Reprendre</span>';
+            } else {
+                pausedOverlay.style.display = 'none';
+                pauseBtn.innerHTML = '<span data-lang="pause">⏸️ Pause</span>';
+            }
+            updateLanguage();
+        }
+
+        function newGame() {
+            gameState.gameRunning = false;
+            gameState.paused = false;
+            gameState.level = 1;
+            gameState.playerScore = 0;
+            gameState.aiScore = 0;
+            gameState.progress = 0;
+            gameState.targetScore = 100;
+            gameState.gridSize = 8;
+            gameState.combo = 1;
+            
+            document.getElementById('startBtn').style.display = 'inline-block';
+            document.getElementById('pauseBtn').style.display = 'none';
+            document.getElementById('pausedOverlay').style.display = 'none';
+            document.getElementById('levelInput').value = 1;
+            
+            initializeGrid();
+            createGameGrid();
+            updateUI();
+        }
+
+        function setDifficulty(difficulty) {
+            gameState.difficulty = difficulty;
+            document.querySelectorAll('.difficulty-btn').forEach(btn => btn.classList.remove('selected'));
+            event.target.classList.add('selected');
+        }
+
+        function showRules() {
+            document.getElementById('rulesModal').style.display = 'flex';
+        }
+
+        function hideRules() {
+            document.getElementById('rulesModal').style.display = 'none';
+        }
+
+        // Fonctions d'interface utilisateur
+        function updateUI() {
+            document.getElementById('playerScore').textContent = gameState.playerScore;
+            document.getElementById('aiScore').textContent = gameState.aiScore;
+            document.getElementById('currentLevel').textContent = gameState.level;
+            
+            const progressPercent = Math.min(100, gameState.progress);
+            document.getElementById('progressFill').style.width = progressPercent + '%';
+            document.getElementById('progressText').textContent = `${Math.floor(progressPercent)} / 100`;
+            
+            // Mettre à jour les objectifs
+            document.getElementById('targetScore').textContent = gameState.targetScore;
+            document.getElementById('progressPercent').textContent = Math.floor(progressPercent) + '%';
+            document.getElementById('currentCombo').textContent = 'x' + gameState.combo;
+            
+            // Mettre à jour les bonus
+            document.getElementById('specialCellsCount').textContent = gameState.specialCells.length;
+            document.getElementById('completedLines').textContent = gameState.completedLines || 0;
+            document.getElementById('totalBonus').textContent = gameState.totalBonus || 0;
+            
+            // Mettre à jour les statistiques
+            const stats = gameState.gameStats;
+            document.getElementById('gamesPlayed').textContent = stats.gamesPlayed;
+            document.getElementById('gamesWon').textContent = stats.gamesWon;
+            document.getElementById('winRate').textContent = stats.gamesPlayed > 0 ? 
+                Math.round((stats.gamesWon / stats.gamesPlayed) * 100) + '%' : '0%';
+            document.getElementById('bestScore').textContent = stats.bestScore;
+            document.getElementById('totalMoves').textContent = stats.totalMoves;
+            document.getElementById('avgMoveTime').textContent = stats.gamesPlayed > 0 ? 
+                Math.round(stats.totalTime / stats.gamesPlayed / 1000) + 's' : '0s';
+            
+            updateLeaderboard();
+        }
+
+        function updateLeaderboard() {
+            const leaderboard = document.getElementById('leaderboard');
+            const scores = JSON.parse(localStorage.getItem('neurosphereScores') || '[]');
+            
+            leaderboard.innerHTML = '';
+            scores.slice(0, 5).forEach((score, index) => {
+                const item = document.createElement('div');
+                item.className = 'leaderboard-item';
+                item.innerHTML = `
+                    <span>#${index + 1}</span>
+                    <span>${score.score} pts</span>
+                `;
+                leaderboard.appendChild(item);
+            });
+        }
+
+        function saveGameStats() {
+            localStorage.setItem('neurosphereStats', JSON.stringify(gameState.gameStats));
+            
+            // Sauvegarder le score dans le classement
+            const scores = JSON.parse(localStorage.getItem('neurosphereScores') || '[]');
+            scores.push({
+                score: gameState.playerScore,
+                level: gameState.level,
+                date: new Date().toISOString()
+            });
+            scores.sort((a, b) => b.score - a.score);
+            scores.splice(10); // Garder seulement les 10 meilleurs
+            localStorage.setItem('neurosphereScores', JSON.stringify(scores));
+        }
+
+        function loadGameStats() {
+            const savedStats = localStorage.getItem('neurosphereStats');
+            if (savedStats) {
+                gameState.gameStats = { ...gameState.gameStats, ...JSON.parse(savedStats) };
+            }
+        }
+
+        // Effets visuels
+        function createParticles(element) {
+            const rect = element.getBoundingClientRect();
+            const colors = ['#00ffff', '#ff00ff', '#00ff7f', '#ffd700'];
+            
+            for (let i = 0; i < 8; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = (rect.left + rect.width / 2) + 'px';
+                particle.style.top = (rect.top + rect.height / 2) + 'px';
+                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                particle.style.animationDelay = (Math.random() * 0.5) + 's';
+                
+                const angle = (Math.PI * 2 * i) / 8;
+                const distance = 50 + Math.random() * 100;
+                particle.style.setProperty('--dx', Math.cos(angle) * distance + 'px');
+                particle.style.setProperty('--dy', Math.sin(angle) * distance + 'px');
+                
+                document.body.appendChild(particle);
+                
+                setTimeout(() => particle.remove(), 3000);
+            }
+        }
+
+        function showFloatingScore(element, text) {
+            const rect = element.getBoundingClientRect();
+            const floatingScore = document.createElement('div');
+            floatingScore.className = 'floating-score';
+            floatingScore.textContent = text;
+            floatingScore.style.left = (rect.left + rect.width / 2) + 'px';
+            floatingScore.style.top = rect.top + 'px';
+            
+            document.body.appendChild(floatingScore);
+            
+            setTimeout(() => floatingScore.remove(), 2000);
+        }
+
+        function showVictoryAnimation(text) {
+            const animation = document.createElement('div');
+            animation.className = 'victory-animation';
+            animation.textContent = text;
+            
+            document.body.appendChild(animation);
+            
+            setTimeout(() => animation.remove(), 2000);
+        }
+
+        // Gestion des événements
+        document.addEventListener('keydown', function(e) {
+            switch(e.key.toLowerCase()) {
+                case ' ':
+                    e.preventDefault();
+                    if (gameState.gameRunning) togglePause();
+                    break;
+                case 'escape':
+                    if (document.getElementById('rulesModal').style.display === 'flex') {
+                        hideRules();
+                    }
+                    break;
+                case 'r':
+                    if (gameState.gameRunning) newGame();
+                    break;
+            }
+        });
+
+        // Fermer les dropdowns en cliquant ailleurs
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.language-selector')) {
+                document.getElementById('languageDropdown').style.display = 'none';
+            }
+        });
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            // Charger la langue sauvegardée
+            const savedLanguage = localStorage.getItem('neurosphereLanguage');
+            if (savedLanguage && translations[savedLanguage]) {
+                gameState.currentLanguage = savedLanguage;
+            }
+            
+            loadGameStats();
+            updateLanguage();
+            initializeGrid();
+            createGameGrid();
+            updateUI();
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'988ceeba002ee22d',t:'MTc1OTQ5OTY3Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
