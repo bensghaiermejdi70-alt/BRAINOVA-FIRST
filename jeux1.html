@@ -1,0 +1,2632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tetris Quantum AI 2077</title>
+    <style>
+        body {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Orbitron', monospace;
+            background: linear-gradient(135deg, #0a0a0a, #1a1a2e, #16213e, #0f3460);
+            color: #00ffff;
+            height: 100%;
+            overflow-x: hidden;
+            overflow-y: auto;
+            animation: backgroundPulse 8s ease-in-out infinite;
+        }
+
+        /* Style personnalisé pour la barre de défilement */
+        ::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #00ffff, #0080ff, #ff00ff);
+            border-radius: 10px;
+            border: 1px solid rgba(0, 255, 255, 0.5);
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #ff00ff, #00ffff, #ffff00);
+            box-shadow: 0 0 15px rgba(255, 0, 255, 0.5);
+        }
+
+        ::-webkit-scrollbar-corner {
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        @keyframes backgroundPulse {
+            0%, 100% { background: linear-gradient(135deg, #0a0a0a, #1a1a2e, #16213e, #0f3460); }
+            50% { background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460, #533483); }
+        }
+
+        .game-header {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .language-selector:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 255, 255, 0.4);
+        }
+
+        .language-selector option {
+            background: #1a1a2e;
+            color: #00ffff;
+            padding: 5px;
+        }
+
+        /* Futuristic language selector */
+        .futuristic-select {
+            appearance: none;
+            -webkit-appearance: none;
+            background: linear-gradient(135deg, rgba(0,255,255,0.08), rgba(255,0,255,0.06));
+            border: 1px solid rgba(0,255,255,0.18);
+            color: #00ffff;
+            padding: 8px 12px;
+            border-radius: 12px;
+            font-weight: bold;
+            box-shadow: 0 8px 30px rgba(0,255,255,0.04);
+            backdrop-filter: blur(6px);
+            cursor: pointer;
+            transition: transform 160ms ease, box-shadow 160ms ease;
+            font-family: 'Orbitron', monospace;
+        }
+
+        .controls-header {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end; /* keep select right aligned */
+            gap: 6px;
+        }
+
+        .close-btn {
+            background: linear-gradient(45deg, #ff4b4b, #ff0000);
+            color: #fff;
+            border: 0;
+            padding: 6px 10px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 0 8px 30px rgba(255,0,0,0.12);
+            transition: transform 120ms ease, box-shadow 120ms ease, opacity 120ms;
+        }
+
+        .close-btn:hover { transform: translateY(-3px); opacity: 0.95 }
+
+        .difficulty-selector {
+            width: 100%;
+            background: linear-gradient(45deg, #ff00ff, #8000ff);
+            border: 2px solid #ff00ff;
+            border-radius: 8px;
+            color: #fff;
+            font-weight: bold;
+            font-size: 12px;
+            padding: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            outline: none;
+            margin-bottom: 10px;
+        }
+
+        .difficulty-selector:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 0, 255, 0.4);
+        }
+
+        .difficulty-selector option {
+            background: #1a1a2e;
+            color: #fff;
+            padding: 5px;
+        }
+
+        .difficulty-info {
+            background: rgba(255, 0, 255, 0.1);
+            border: 1px solid rgba(255, 0, 255, 0.3);
+            border-radius: 6px;
+            padding: 8px;
+            font-size: 10px;
+        }
+
+        .difficulty-stat {
+            display: flex;
+            justify-content: space-between;
+            margin: 3px 0;
+        }
+
+        .difficulty-value {
+            font-weight: bold;
+            color: #ff00ff;
+            text-shadow: 0 0 5px #ff00ff;
+        }
+
+        .obstacle-cell {
+            background: linear-gradient(45deg, #666, #333) !important;
+            border: 2px solid #999 !important;
+            box-shadow: 0 0 8px rgba(153, 153, 153, 0.5) !important;
+        }
+
+        .quantum-effect {
+            animation: quantumGlitch 0.5s ease-in-out infinite;
+        }
+
+        @keyframes quantumGlitch {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            25% { transform: scale(1.1) rotate(1deg); }
+            50% { transform: scale(0.9) rotate(-1deg); }
+            75% { transform: scale(1.05) rotate(0.5deg); }
+        }
+
+
+
+
+
+
+
+        .game-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 20px;
+            padding: 15px;
+            min-height: calc(100vh - 120px);
+            transition: margin-left 0.4s ease;
+        }
+
+
+
+        .side-panel {
+            width: 220px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .panel {
+            background: rgba(0, 255, 255, 0.1);
+            border: 2px solid #00ffff;
+            border-radius: 10px;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .panel h3 {
+            margin: 0 0 8px 0;
+            font-size: 13px;
+            color: #00ffff;
+            text-shadow: 0 0 10px #00ffff;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 8px;
+            margin: 3px 0;
+            background: linear-gradient(45deg, #00ffff, #0080ff);
+            border: none;
+            border-radius: 8px;
+            color: #000;
+            font-weight: bold;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 255, 255, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .tetris-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .game-board {
+            width: 300px;
+            height: 480px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 4px solid #00ffff;
+            border-radius: 15px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 40px rgba(0, 255, 255, 0.5), 
+                        0 0 60px rgba(255, 0, 255, 0.3);
+        }
+
+        .game-board::before {
+            content: '';
+            position: absolute;
+            top: -4px;
+            left: -4px;
+            right: -4px;
+            bottom: -4px;
+            background: linear-gradient(45deg, #00ffff, #ff00ff, #ffff00);
+            border-radius: 19px;
+            z-index: -1;
+            animation: borderGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes borderGlow {
+            0%, 100% { 
+                background: linear-gradient(45deg, #00ffff, #ff00ff, #ffff00);
+                filter: brightness(1);
+            }
+            50% { 
+                background: linear-gradient(45deg, #ffff00, #00ffff, #ff00ff);
+                filter: brightness(1.5);
+            }
+        }
+
+        .tetris-grid {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            grid-template-rows: repeat(16, 1fr);
+            width: 100%;
+            height: 100%;
+            gap: 1px;
+            padding: 5px;
+        }
+
+        .tetris-cell {
+            background: rgba(0, 20, 40, 0.3);
+            border: 1px solid rgba(0, 255, 255, 0.1);
+            transition: all 0.3s;
+        }
+
+        .tetris-cell.filled {
+            border: 2px solid #fff;
+            box-shadow: 0 0 10px currentColor;
+            animation: cellGlow 0.5s ease-in-out;
+        }
+
+        @keyframes cellGlow {
+            0% { transform: scale(0.8); opacity: 0.5; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .tetris-cell.clearing {
+            animation: lineClear 0.8s ease-in-out;
+        }
+
+        @keyframes lineClear {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); background: #ffff00; }
+            100% { opacity: 0; transform: scale(0); }
+        }
+
+        /* Couleurs des pièces Tetris */
+        .piece-I { background: linear-gradient(45deg, #00ffff, #0080ff); }
+        .piece-O { background: linear-gradient(45deg, #ffff00, #ff8000); }
+        .piece-T { background: linear-gradient(45deg, #ff00ff, #8000ff); }
+        .piece-S { background: linear-gradient(45deg, #00ff00, #008000); }
+        .piece-Z { background: linear-gradient(45deg, #ff0000, #800000); }
+        .piece-J { background: linear-gradient(45deg, #0000ff, #000080); }
+        .piece-L { background: linear-gradient(45deg, #ff8000, #804000); }
+
+        .next-piece-panel {
+            width: 80px;
+            height: 80px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #ff00ff;
+            border-radius: 8px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(4, 1fr);
+            gap: 1px;
+            padding: 6px;
+        }
+
+        .next-cell {
+            /* keep the cell visually empty by default; allow piece color classes (.piece-I etc.) to apply their background */
+            background: transparent;
+            border-radius: 3px;
+            border: 1px solid rgba(255, 0, 255, 0.06);
+            transition: background 120ms ease, box-shadow 120ms ease;
+                box-sizing: border-box;
+                display: block;
+                width: 100%;
+                height: 100%;
+        }
+
+        .next-cell.filled {
+                /* when a piece is drawn, the piece color class (e.g. .piece-I) will set the background
+                    and we add a visible glow to emphasize it */
+                box-shadow: 0 0 8px rgba(255,255,255,0.08);
+                border: 1px solid rgba(255,255,255,0.06);
+                transform: translateZ(0);
+        }
+
+
+
+        .stats-display {
+            background: rgba(255, 0, 255, 0.1);
+            border: 2px solid #ff00ff;
+            border-radius: 10px;
+            padding: 10px;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
+            font-size: 11px;
+        }
+
+        .stat-value {
+            font-weight: bold;
+            color: #ff00ff;
+            text-shadow: 0 0 10px #ff00ff;
+        }
+
+        .ai-panel {
+            background: rgba(0, 255, 0, 0.1);
+            border: 2px solid #00ff00;
+            border-radius: 10px;
+            padding: 10px;
+        }
+
+        .ai-suggestion {
+            font-size: 10px;
+            margin-top: 8px;
+            color: #00ff00;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            line-height: 1.3;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 6px;
+            padding: 8px;
+        }
+
+        .level-bar {
+            width: 100%;
+            height: 15px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 6px 0;
+        }
+
+        .level-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff0000, #ffff00, #00ff00);
+            transition: width 0.5s ease;
+            border-radius: 8px;
+        }
+
+        .game-status {
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+            margin: 15px 0;
+            min-height: 25px;
+            text-shadow: 0 0 15px currentColor;
+        }
+
+        .game-status.paused {
+            color: #ffff00;
+            animation: statusPulse 2s ease-in-out infinite;
+        }
+
+        .game-status.game-over {
+            color: #ff0000;
+            animation: statusPulse 1s ease-in-out infinite;
+        }
+
+        @keyframes statusPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .controls-info {
+            background: rgba(255, 255, 0, 0.1);
+            border: 2px solid #ffff00;
+            border-radius: 10px;
+            padding: 10px;
+            font-size: 10px;
+        }
+
+        .control-key {
+            display: inline-block;
+            background: rgba(255, 255, 0, 0.2);
+            border: 1px solid #ffff00;
+            border-radius: 4px;
+            padding: 1px 4px;
+            margin: 1px;
+            font-weight: bold;
+            font-size: 9px;
+        }
+
+        .neural-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0.1;
+            z-index: -1;
+        }
+
+        .neural-line {
+            position: absolute;
+            background: linear-gradient(90deg, transparent, #00ffff, transparent);
+            height: 1px;
+            animation: neuralFlow 6s linear infinite;
+        }
+
+        @keyframes neuralFlow {
+            0% { transform: translateX(-100%); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateX(100vw); opacity: 0; }
+        }
+
+        .quantum-effects {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .quantum-particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #00ffff;
+            border-radius: 50%;
+            animation: quantumFloat 4s ease-in-out infinite;
+        }
+
+        @keyframes quantumFloat {
+            0%, 100% { transform: translateY(0) scale(1); opacity: 0.3; }
+            50% { transform: translateY(-20px) scale(1.5); opacity: 1; }
+        }
+
+        @media (max-width: 1200px) {
+            .game-container {
+                flex-direction: column;
+                align-items: center;
+                height: auto;
+                overflow-y: auto;
+            }
+            
+            .side-panel {
+                width: 100%;
+                max-width: 500px;
+            }
+            
+            .game-board {
+                width: 250px;
+                height: 500px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .game-title {
+                font-size: 32px;
+            }
+            
+            .game-board {
+                width: 200px;
+                height: 400px;
+            }
+            
+            .side-panel {
+                width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="neural-grid" id="neuralGrid"></div>
+
+
+
+    <div class="game-header">
+    <h1 class="game-title">TETRIS QUANTUM AI 2077</h1>
+    <p class="subtitle">NEURAL PLACEMENT INTERFACE ACTIVATED</p>
+        
+        <div class="controls-header">
+            <!-- language selector: futuristic style -->
+            <select id="languageSelector" onchange="changeLanguage()" class="language-selector futuristic-select">
+                <option value="fr">🇫🇷 Français</option>
+                <option value="en" selected>🇺🇸 English</option>
+                <option value="ar">🇸🇦 العربية</option>
+                <option value="es">🇪🇸 Español</option>
+                <option value="de">🇩🇪 Deutsch</option>
+                <option value="zh">🇨🇳 中文</option>
+            </select>
+            <!-- close button moved below and aligned right -->
+            <div style="width:100%;display:flex;justify-content:flex-end;">
+                <button class="close-btn" onclick="closePlatform()" id="closeBtn" title="Back to platform home">✕</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="game-container">
+        <div class="side-panel">
+            <div class="panel">
+                <h3 data-i18n="quantumControls">QUANTUM CONTROLS</h3>
+                <button class="btn" id="startBtn" onclick="startGame()">Start</button>
+                <button class="btn" id="pauseBtn" onclick="pauseGame()" disabled>Pause</button>
+                <button class="btn" id="resetBtn" onclick="resetGame()">Reset</button>
+                <button class="btn" id="aiModeBtn" onclick="toggleAIMode()">AI Mode: OFF</button>
+            </div>
+
+            <div class="panel">
+                <h3 data-i18n="difficultyLevel">DIFFICULTY LEVEL</h3>
+                <select id="difficultySelector" onchange="changeDifficulty()" class="difficulty-selector">
+                    <option value="easy">🟢 Easy</option>
+                    <option value="normal" selected>🟡 Normal</option>
+                    <option value="hard">🟠 Hard</option>
+                    <option value="expert">🔴 Expert</option>
+                    <option value="quantum">⚡ Quantum</option>
+                </select>
+                <div class="difficulty-info" id="difficultyInfo">
+                    <div class="difficulty-stat">
+                        <span>Vitesse:</span>
+                        <span class="difficulty-value" id="speedValue">Normal</span>
+                    </div>
+                    <div class="difficulty-stat">
+                        <span>Obstacles:</span>
+                        <span class="difficulty-value" id="obstaclesValue">Aucun</span>
+                    </div>
+                    <div class="difficulty-stat">
+                        <span>Bonus:</span>
+                        <span class="difficulty-value" id="bonusValue">x1</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stats-display">
+                <h3 data-i18n="statistics">STATISTICS</h3>
+                <div class="stat-item">
+                    <span>Score:</span>
+                    <span class="stat-value" id="scoreValue">0</span>
+                </div>
+                <div class="stat-item">
+                    <span>Lines:</span>
+                    <span class="stat-value" id="linesValue">0</span>
+                </div>
+                <div class="stat-item">
+                    <span>Level:</span>
+                    <span class="stat-value" id="levelValue">1</span>
+                </div>
+                <div class="stat-item">
+                    <span>Pieces:</span>
+                    <span class="stat-value" id="piecesValue">0</span>
+                </div>
+                <div class="level-bar">
+                    <div class="level-fill" id="levelFill" style="width: 0%"></div>
+                </div>
+            </div>
+
+
+
+            <div class="controls-info">
+                <h3 data-i18n="controls">CONTROLS</h3>
+                <div>
+                    <span class="control-key">←→</span> Move<br>
+                    <span class="control-key">↓</span> Down<br>
+                    <span class="control-key">↑</span> Up<br>
+                    <span class="control-key">R</span> Rotate<br>
+                    <span class="control-key">ESPACE</span> Hard Drop<br>
+                    <span class="control-key">P</span> Pause
+                </div>
+            </div>
+        </div>
+
+        <div class="tetris-container">
+            <div class="game-status" id="gameStatus">Press Start to begin</div>
+            
+            <div class="game-board">
+                <div class="quantum-effects" id="quantumEffects"></div>
+                <div class="tetris-grid" id="tetrisGrid"></div>
+            </div>
+        </div>
+
+        <div class="side-panel">
+            <div class="panel">
+                <h3 data-i18n="nextPiece">NEXT PIECE</h3>
+                <div class="next-piece-panel" id="nextPiecePanel"></div>
+            </div>
+
+
+
+            <div class="stats-display">
+                <h3 data-i18n="aiAnalysis">AI ANALYSIS</h3>
+                <div class="stat-item">
+                    <span data-i18n="efficiency">Efficacité :</span>
+                    <span class="stat-value" id="efficiencyValue">0%</span>
+                </div>
+                <div class="stat-item">
+                    <span data-i18n="prediction">Prédiction :</span>
+                    <span class="stat-value" id="predictionValue">-</span>
+                </div>
+                <div class="stat-item">
+                    <span data-i18n="holes">Trous :</span>
+                    <span class="stat-value" id="holesValue">0</span>
+                </div>
+                <div class="stat-item">
+                    <span data-i18n="height">Hauteur :</span>
+                    <span class="stat-value" id="heightValue">0</span>
+                </div>
+            </div>
+
+            <div class="ai-panel">
+                <h3 data-i18n="aiAssistant">QUANTUM AI ASSISTANT</h3>
+                <button class="btn" id="aiHintBtn" onclick="getAIHint()" style="background: linear-gradient(45deg, #00ff00, #00cc00);">AI Hint</button>
+                <button class="btn" id="aiAnalyzeBtn" onclick="analyzeBoard()" style="background: linear-gradient(45deg, #ff00ff, #cc00cc);">Analyze</button>
+                <div class="ai-suggestion" id="aiSuggestion">AI ready to analyze the board</div>
+            </div>
+
+            <div class="panel">
+                <h3 data-i18n="strategies">AI STRATEGIES</h3>
+                <button class="btn" data-i18n="tetrisStrategy" onclick="applyStrategy('tetris')" style="font-size: 11px;">Aim Tetris</button>
+                <button class="btn" data-i18n="clearStrategy" onclick="applyStrategy('clear')" style="font-size: 11px;">Clear</button>
+                <button class="btn" data-i18n="stackStrategy" onclick="applyStrategy('stack')" style="font-size: 11px;">Stack</button>
+                <button class="btn" data-i18n="surviveStrategy" onclick="applyStrategy('survive')" style="font-size: 11px;">Survive</button>
+            </div>
+
+            <div class="stats-display">
+                <h3 data-i18n="records">RECORDS</h3>
+                <div class="stat-item">
+                    <span>Best Score:</span>
+                    <span class="stat-value" id="bestScoreValue">0</span>
+                </div>
+                <div class="stat-item">
+                    <span>Max Lines:</span>
+                    <span class="stat-value" id="bestLinesValue">0</span>
+                </div>
+                <div class="stat-item">
+                    <span>Max Level:</span>
+                    <span class="stat-value" id="bestLevelValue">1</span>
+                </div>
+                <div class="stat-item">
+                    <span>Total Time:</span>
+                    <span class="stat-value" id="totalTimeValue">0:00</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variables du jeu
+        const BOARD_WIDTH = 10;
+        const BOARD_HEIGHT = 16;
+        let board = Array(BOARD_HEIGHT).fill().map(() => Array(BOARD_WIDTH).fill(0));
+        let currentPiece = null;
+        let nextPiece = null;
+
+        let gameRunning = false;
+        let gamePaused = false;
+        let aiMode = false;
+        let gameLoop = null;
+        let dropInterval = 1000;
+        
+        // Système de difficulté
+        let currentDifficulty = 'normal';
+        let difficultySettings = {
+            easy: {
+                baseSpeed: 1500,
+                speedIncrease: 30,
+                obstacles: false,
+                scoreMultiplier: 0.8,
+                quantumEffects: false,
+                ghostPieces: false
+            },
+            normal: {
+                baseSpeed: 1000,
+                speedIncrease: 50,
+                obstacles: false,
+                scoreMultiplier: 1.0,
+                quantumEffects: false,
+                ghostPieces: false
+            },
+            hard: {
+                baseSpeed: 700,
+                speedIncrease: 70,
+                obstacles: true,
+                scoreMultiplier: 1.3,
+                quantumEffects: false,
+                ghostPieces: true
+            },
+            expert: {
+                baseSpeed: 400,
+                speedIncrease: 100,
+                obstacles: true,
+                scoreMultiplier: 1.8,
+                quantumEffects: true,
+                ghostPieces: true
+            },
+            quantum: {
+                baseSpeed: 200,
+                speedIncrease: 150,
+                obstacles: true,
+                scoreMultiplier: 2.5,
+                quantumEffects: true,
+                ghostPieces: true
+            }
+        };
+        
+        // Statistiques
+        let score = 0;
+        let lines = 0;
+        let level = 1;
+        let pieces = 0;
+        let gameStartTime = 0;
+        
+        // Records
+        let bestScore = localStorage.getItem('tetris-best-score') || 0;
+        let bestLines = localStorage.getItem('tetris-best-lines') || 0;
+        let bestLevel = localStorage.getItem('tetris-best-level') || 1;
+        let totalTime = localStorage.getItem('tetris-total-time') || 0;
+
+    // Système de traduction
+    // Prefer the platform-wide key 'brainovaLang' when available; fallback to the local key.
+    let currentLanguage = localStorage.getItem('brainovaLang') || localStorage.getItem('tetris-language') || 'en';
+        
+        const translations = {
+            fr: {
+                title: "TETRIS QUANTUM AI 2077",
+                subtitle: "INTERFACE NEURALE DE PLACEMENT ACTIVÉE",
+                quantumControls: "CONTRÔLES QUANTIQUES",
+                start: "Démarrer",
+                pause: "Pause",
+                resume: "Reprendre",
+                reset: "Reset",
+                aiMode: "Mode IA",
+                statistics: "STATISTIQUES",
+                score: "Score:",
+                lines: "Lignes:",
+                level: "Niveau:",
+                pieces: "Pièces:",
+                nextPiece: "PROCHAINE PIÈCE",
+
+                controls: "CONTRÔLES",
+                move: "Déplacer",
+                down: "Descendre",
+                up: "Monter",
+                fastDown: "Descente rapide",
+                fastUp: "Montée rapide",
+                rotate: "Rotation",
+                drop: "Chute libre",
+                pauseKey: "Pause",
+                aiAssistant: "ASSISTANT IA QUANTIQUE",
+                aiHint: "Conseil IA",
+                analyze: "Analyser",
+                aiReady: "IA prête à analyser le plateau",
+                aiAnalysis: "ANALYSE IA",
+                efficiency: "Efficacité:",
+                prediction: "Prédiction:",
+                holes: "Trous:",
+                height: "Hauteur:",
+                strategies: "STRATÉGIES IA",
+                tetrisStrategy: "Viser Tetris",
+                clearStrategy: "Nettoyer",
+                stackStrategy: "Empiler",
+                surviveStrategy: "Survivre",
+                records: "RECORDS",
+                bestScore: "Meilleur Score:",
+                maxLines: "Max Lignes:",
+                maxLevel: "Max Niveau:",
+                totalTime: "Temps Total:",
+                startMessage: "Appuyez sur Démarrer pour commencer",
+                gameRunning: "Jeu en cours...",
+                gamePaused: "Jeu en pause",
+                gameOver: "Game Over! Score:",
+                noPiece: "Aucune pièce active",
+                startToAnalyze: "Démarrez une partie pour analyser",
+                startToUseStrategies: "Démarrez une partie pour utiliser les stratégies",
+                newRecord: "🏆 Nouveau record établi!",
+                confirmQuit: "Voulez-vous vraiment quitter le jeu et retourner à l'accueil ?",
+                backToHome: "Retour à l'accueil de la plateforme",
+                difficultyLevel: "NIVEAU DE DIFFICULTÉ",
+                easy: "🟢 Facile",
+                normal: "🟡 Normal", 
+                hard: "🟠 Difficile",
+                expert: "🔴 Expert",
+                quantum: "⚡ Quantique",
+                speed: "Vitesse:",
+                obstacles: "Obstacles:",
+                bonus: "Bonus:",
+                none: "Aucun",
+                few: "Quelques",
+                many: "Nombreux",
+                extreme: "Extrême",
+                slow: "Lente",
+                fast: "Rapide",
+                veryFast: "Très rapide",
+                insane: "Folle"
+            },
+            en: {
+                title: "TETRIS QUANTUM AI 2077",
+                subtitle: "NEURAL PLACEMENT INTERFACE ACTIVATED",
+                quantumControls: "QUANTUM CONTROLS",
+                start: "Start",
+                pause: "Pause",
+                resume: "Resume",
+                reset: "Reset",
+                aiMode: "AI Mode",
+                statistics: "STATISTICS",
+                score: "Score:",
+                lines: "Lines:",
+                level: "Level:",
+                pieces: "Pieces:",
+                nextPiece: "NEXT PIECE",
+
+                controls: "CONTROLS",
+                move: "Move",
+                down: "Down",
+                up: "Up",
+                fastDown: "Fast Down",
+                fastUp: "Fast Up",
+                rotate: "Rotate",
+                drop: "Hard Drop",
+                pauseKey: "Pause",
+                aiAssistant: "QUANTUM AI ASSISTANT",
+                aiHint: "AI Hint",
+                analyze: "Analyze",
+                aiReady: "AI ready to analyze the board",
+                aiAnalysis: "AI ANALYSIS",
+                efficiency: "Efficiency:",
+                prediction: "Prediction:",
+                holes: "Holes:",
+                height: "Height:",
+                strategies: "AI STRATEGIES",
+                tetrisStrategy: "Aim Tetris",
+                clearStrategy: "Clear",
+                stackStrategy: "Stack",
+                surviveStrategy: "Survive",
+                records: "RECORDS",
+                bestScore: "Best Score:",
+                maxLines: "Max Lines:",
+                maxLevel: "Max Level:",
+                totalTime: "Total Time:",
+                startMessage: "Press Start to begin",
+                gameRunning: "Game running...",
+                gamePaused: "Game paused",
+                gameOver: "Game Over! Score:",
+                noPiece: "No active piece",
+                startToAnalyze: "Start a game to analyze",
+                startToUseStrategies: "Start a game to use strategies",
+                newRecord: "🏆 New record achieved!",
+                confirmQuit: "Do you really want to quit the game and return to home?",
+                backToHome: "Back to platform home",
+                difficultyLevel: "DIFFICULTY LEVEL",
+                easy: "🟢 Easy",
+                normal: "🟡 Normal",
+                hard: "🟠 Hard", 
+                expert: "🔴 Expert",
+                quantum: "⚡ Quantum",
+                speed: "Speed:",
+                obstacles: "Obstacles:",
+                bonus: "Bonus:",
+                none: "None",
+                few: "Few",
+                many: "Many",
+                extreme: "Extreme",
+                slow: "Slow",
+                fast: "Fast",
+                veryFast: "Very Fast",
+                insane: "Insane"
+            },
+            ar: {
+                title: "تيتريس الذكاء الاصطناعي الكمي 2077",
+                subtitle: "تم تفعيل واجهة الوضع العصبي",
+                quantumControls: "التحكم الكمي",
+                start: "ابدأ",
+                pause: "توقف",
+                resume: "استئناف",
+                reset: "إعادة تعيين",
+                aiMode: "وضع الذكاء الاصطناعي",
+                statistics: "الإحصائيات",
+                score: "النقاط:",
+                lines: "الخطوط:",
+                level: "المستوى:",
+                pieces: "القطع:",
+                nextPiece: "القطعة التالية",
+
+                controls: "التحكم",
+                move: "تحرك",
+                down: "أسفل",
+                up: "أعلى",
+                fastDown: "نزول سريع",
+                fastUp: "صعود سريع",
+                rotate: "دوران",
+                drop: "سقوط سريع",
+                pauseKey: "توقف",
+                aiAssistant: "مساعد الذكاء الاصطناعي الكمي",
+                aiHint: "نصيحة الذكاء الاصطناعي",
+                analyze: "تحليل",
+                aiReady: "الذكاء الاصطناعي جاهز لتحليل اللوحة",
+                aiAnalysis: "تحليل الذكاء الاصطناعي",
+                efficiency: "الكفاءة:",
+                prediction: "التنبؤ:",
+                holes: "الثقوب:",
+                height: "الارتفاع:",
+                strategies: "استراتيجيات الذكاء الاصطناعي",
+                tetrisStrategy: "استهداف تيتريس",
+                clearStrategy: "تنظيف",
+                stackStrategy: "تكديس",
+                surviveStrategy: "البقاء",
+                records: "الأرقام القياسية",
+                bestScore: "أفضل نقاط:",
+                maxLines: "أقصى خطوط:",
+                maxLevel: "أقصى مستوى:",
+                totalTime: "الوقت الإجمالي:",
+                startMessage: "اضغط ابدأ للبدء",
+                gameRunning: "اللعبة قيد التشغيل...",
+                gamePaused: "اللعبة متوقفة",
+                gameOver: "انتهت اللعبة! النقاط:",
+                noPiece: "لا توجد قطعة نشطة",
+                startToAnalyze: "ابدأ لعبة للتحليل",
+                startToUseStrategies: "ابدأ لعبة لاستخدام الاستراتيجيات",
+                newRecord: "🏆 تم تحقيق رقم قياسي جديد!",
+                confirmQuit: "هل تريد حقاً الخروج من اللعبة والعودة للرئيسية؟",
+                backToHome: "العودة لرئيسية المنصة"
+            },
+            es: {
+                title: "TETRIS QUANTUM AI 2077",
+                subtitle: "INTERFAZ NEURAL DE COLOCACIÓN ACTIVADA",
+                quantumControls: "CONTROLES CUÁNTICOS",
+                start: "Iniciar",
+                pause: "Pausa",
+                resume: "Reanudar",
+                reset: "Reiniciar",
+                aiMode: "Modo IA",
+                statistics: "ESTADÍSTICAS",
+                score: "Puntuación:",
+                lines: "Líneas:",
+                level: "Nivel:",
+                pieces: "Piezas:",
+                nextPiece: "SIGUIENTE PIEZA",
+
+                controls: "CONTROLES",
+                move: "Mover",
+                down: "Abajo",
+                up: "Arriba",
+                fastDown: "Bajada rápida",
+                fastUp: "Subida rápida",
+                rotate: "Rotar",
+                drop: "Caída rápida",
+                pauseKey: "Pausa",
+                aiAssistant: "ASISTENTE IA CUÁNTICO",
+                aiHint: "Consejo IA",
+                analyze: "Analizar",
+                aiReady: "IA lista para analizar el tablero",
+                aiAnalysis: "ANÁLISIS IA",
+                efficiency: "Eficiencia:",
+                prediction: "Predicción:",
+                holes: "Agujeros:",
+                height: "Altura:",
+                strategies: "ESTRATEGIAS IA",
+                tetrisStrategy: "Apuntar Tetris",
+                clearStrategy: "Limpiar",
+                stackStrategy: "Apilar",
+                surviveStrategy: "Sobrevivir",
+                records: "RÉCORDS",
+                bestScore: "Mejor Puntuación:",
+                maxLines: "Máx Líneas:",
+                maxLevel: "Máx Nivel:",
+                totalTime: "Tiempo Total:",
+                startMessage: "Presiona Iniciar para comenzar",
+                gameRunning: "Juego en curso...",
+                gamePaused: "Juego pausado",
+                gameOver: "¡Juego Terminado! Puntuación:",
+                noPiece: "No hay pieza activa",
+                startToAnalyze: "Inicia un juego para analizar",
+                startToUseStrategies: "Inicia un juego para usar estrategias",
+                newRecord: "🏆 ¡Nuevo récord logrado!",
+                confirmQuit: "¿Realmente quieres salir del juego y volver al inicio?",
+                backToHome: "Volver al inicio de la plataforma"
+            },
+            de: {
+                title: "TETRIS QUANTUM AI 2077",
+                subtitle: "NEURALE PLATZIERUNGSSCHNITTSTELLE AKTIVIERT",
+                quantumControls: "QUANTENSTEUERUNG",
+                start: "Starten",
+                pause: "Pause",
+                resume: "Fortsetzen",
+                reset: "Zurücksetzen",
+                aiMode: "KI-Modus",
+                statistics: "STATISTIKEN",
+                score: "Punkte:",
+                lines: "Linien:",
+                level: "Level:",
+                pieces: "Teile:",
+                nextPiece: "NÄCHSTES TEIL",
+
+                controls: "STEUERUNG",
+                move: "Bewegen",
+                down: "Runter",
+                up: "Hoch",
+                fastDown: "Schnell runter",
+                fastUp: "Schnell hoch",
+                rotate: "Drehen",
+                drop: "Schneller Fall",
+                pauseKey: "Pause",
+                aiAssistant: "QUANTEN-KI-ASSISTENT",
+                aiHint: "KI-Tipp",
+                analyze: "Analysieren",
+                aiReady: "KI bereit zur Brett-Analyse",
+                aiAnalysis: "KI-ANALYSE",
+                efficiency: "Effizienz:",
+                prediction: "Vorhersage:",
+                holes: "Löcher:",
+                height: "Höhe:",
+                strategies: "KI-STRATEGIEN",
+                tetrisStrategy: "Tetris anvisieren",
+                clearStrategy: "Räumen",
+                stackStrategy: "Stapeln",
+                surviveStrategy: "Überleben",
+                records: "REKORDE",
+                bestScore: "Beste Punkte:",
+                maxLines: "Max Linien:",
+                maxLevel: "Max Level:",
+                totalTime: "Gesamtzeit:",
+                startMessage: "Drücke Starten zum Beginnen",
+                gameRunning: "Spiel läuft...",
+                gamePaused: "Spiel pausiert",
+                gameOver: "Spiel Vorbei! Punkte:",
+                noPiece: "Kein aktives Teil",
+                startToAnalyze: "Starte ein Spiel zur Analyse",
+                startToUseStrategies: "Starte ein Spiel für Strategien",
+                newRecord: "🏆 Neuer Rekord erreicht!",
+                confirmQuit: "Willst du wirklich das Spiel verlassen und zur Startseite zurückkehren?",
+                backToHome: "Zurück zur Plattform-Startseite"
+            },
+            zh: {
+                title: "俄罗斯方块量子AI 2077",
+                subtitle: "神经放置界面已激活",
+                quantumControls: "量子控制",
+                start: "开始",
+                pause: "暂停",
+                resume: "继续",
+                reset: "重置",
+                aiMode: "AI模式",
+                statistics: "统计",
+                score: "分数:",
+                lines: "行数:",
+                level: "等级:",
+                pieces: "方块:",
+                nextPiece: "下一个方块",
+                controls: "控制",
+                move: "移动",
+                down: "下降",
+                up: "上升",
+                fastDown: "快速下降",
+                fastUp: "快速上升",
+                rotate: "旋转",
+                drop: "瞬间下降",
+                pauseKey: "暂停",
+                aiAssistant: "量子AI助手",
+                aiHint: "AI提示",
+                analyze: "分析",
+                aiReady: "AI准备分析棋盘",
+                aiAnalysis: "AI分析",
+                efficiency: "效率:",
+                prediction: "预测:",
+                holes: "空洞:",
+                height: "高度:",
+                strategies: "AI策略",
+                tetrisStrategy: "瞄准俄罗斯方块",
+                clearStrategy: "清除",
+                stackStrategy: "堆叠",
+                surviveStrategy: "生存",
+                records: "记录",
+                bestScore: "最高分:",
+                maxLines: "最多行:",
+                maxLevel: "最高等级:",
+                totalTime: "总时间:",
+                startMessage: "按开始键开始游戏",
+                gameRunning: "游戏进行中...",
+                gamePaused: "游戏已暂停",
+                gameOver: "游戏结束！分数:",
+                noPiece: "没有活动方块",
+                startToAnalyze: "开始游戏进行分析",
+                startToUseStrategies: "开始游戏使用策略",
+                newRecord: "🏆 新记录达成！",
+                confirmQuit: "你真的想退出游戏并返回主页吗？",
+                backToHome: "返回平台主页"
+            }
+        };
+
+        // Définition des pièces Tetris
+        const PIECES = {
+            I: {
+                shape: [
+                    [1, 1, 1, 1]
+                ],
+                color: 'piece-I'
+            },
+            O: {
+                shape: [
+                    [1, 1],
+                    [1, 1]
+                ],
+                color: 'piece-O'
+            },
+            T: {
+                shape: [
+                    [0, 1, 0],
+                    [1, 1, 1]
+                ],
+                color: 'piece-T'
+            },
+            S: {
+                shape: [
+                    [0, 1, 1],
+                    [1, 1, 0]
+                ],
+                color: 'piece-S'
+            },
+            Z: {
+                shape: [
+                    [1, 1, 0],
+                    [0, 1, 1]
+                ],
+                color: 'piece-Z'
+            },
+            J: {
+                shape: [
+                    [1, 0, 0],
+                    [1, 1, 1]
+                ],
+                color: 'piece-J'
+            },
+            L: {
+                shape: [
+                    [0, 0, 1],
+                    [1, 1, 1]
+                ],
+                color: 'piece-L'
+            }
+        };
+
+        const PIECE_TYPES = Object.keys(PIECES);
+
+        // Initialisation
+        function init() {
+            createNeuralGrid();
+            createQuantumEffects();
+            createTetrisGrid();
+            createNextPieceGrid();
+            // ensure the next-piece preview shows immediately (even before the first Start)
+            try { nextPiece = generatePiece(); } catch (e) { nextPiece = null; }
+
+            setupEventListeners();
+            updateDisplay();
+            loadRecords();
+        }
+
+        function createNeuralGrid() {
+            const neuralGrid = document.getElementById('neuralGrid');
+            for (let i = 0; i < 50; i++) {
+                const line = document.createElement('div');
+                line.className = 'neural-line';
+                line.style.top = Math.random() * 100 + '%';
+                line.style.width = '400px';
+                line.style.animationDelay = Math.random() * 6 + 's';
+                neuralGrid.appendChild(line);
+            }
+        }
+
+        function createQuantumEffects() {
+            const effectsContainer = document.getElementById('quantumEffects');
+            for (let i = 0; i < 20; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'quantum-particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 4 + 's';
+                effectsContainer.appendChild(particle);
+            }
+        }
+
+        function createTetrisGrid() {
+            const grid = document.getElementById('tetrisGrid');
+            grid.innerHTML = '';
+            
+            for (let row = 0; row < BOARD_HEIGHT; row++) {
+                for (let col = 0; col < BOARD_WIDTH; col++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'tetris-cell';
+                    cell.dataset.row = row;
+                    cell.dataset.col = col;
+                    grid.appendChild(cell);
+                }
+            }
+        }
+
+        function createNextPieceGrid() {
+            const grid = document.getElementById('nextPiecePanel');
+            grid.innerHTML = '';
+            
+            for (let i = 0; i < 16; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'next-cell';
+                grid.appendChild(cell);
+            }
+        }
+
+
+
+        function setupEventListeners() {
+            document.addEventListener('keydown', handleKeyPress);
+        }
+
+        function handleKeyPress(e) {
+            if (!gameRunning || gamePaused || !currentPiece) return;
+            
+            switch(e.code) {
+                case 'ArrowLeft':
+                    e.preventDefault();
+                    movePiece(-1, 0);
+                    break;
+                case 'ArrowRight':
+                    e.preventDefault();
+                    movePiece(1, 0);
+                    break;
+                case 'ArrowDown':
+                    e.preventDefault();
+                    movePiece(0, 1); // Descendre normalement
+                    break;
+                case 'ArrowUp':
+                    e.preventDefault();
+                    movePiece(0, -1); // Monter la pièce
+                    break;
+                case 'KeyR':
+                    e.preventDefault();
+                    rotatePiece(); // Rotation avec R
+                    break;
+                case 'Space':
+                    e.preventDefault();
+                    hardDrop(); // Chute libre instantanée
+                    break;
+                case 'KeyS':
+                    e.preventDefault();
+                    softDrop(); // Descente rapide mais contrôlée
+                    break;
+                case 'KeyW':
+                    e.preventDefault();
+                    fastUp(); // Montée rapide
+                    break;
+                case 'KeyP':
+                    e.preventDefault();
+                    pauseGame();
+                    break;
+            }
+        }
+
+        function generatePiece() {
+            const type = PIECE_TYPES[Math.floor(Math.random() * PIECE_TYPES.length)];
+            return {
+                type: type,
+                shape: PIECES[type].shape,
+                color: PIECES[type].color,
+                x: Math.floor(BOARD_WIDTH / 2) - Math.floor(PIECES[type].shape[0].length / 2),
+                y: 0
+            };
+        }
+
+        function changeDifficulty() {
+            if (gameRunning) return; // Ne pas changer pendant le jeu
+            
+            const selector = document.getElementById('difficultySelector');
+            currentDifficulty = selector.value;
+            localStorage.setItem('tetris-difficulty', currentDifficulty);
+            
+            // Mettre à jour l'affichage des informations de difficulté
+            updateDifficultyDisplay();
+            
+            // Appliquer les paramètres de difficulté
+            const settings = difficultySettings[currentDifficulty];
+            dropInterval = settings.baseSpeed;
+        }
+
+        function updateDifficultyDisplay() {
+            const t = translations[currentLanguage];
+            const settings = difficultySettings[currentDifficulty];
+            
+            // Mettre à jour la vitesse
+            let speedText = t.slow;
+            if (settings.baseSpeed <= 200) speedText = t.insane;
+            else if (settings.baseSpeed <= 400) speedText = t.veryFast;
+            else if (settings.baseSpeed <= 700) speedText = t.fast;
+            else if (settings.baseSpeed <= 1000) speedText = t.normal;
+            
+            document.getElementById('speedValue').textContent = speedText;
+            
+            // Mettre à jour les obstacles
+            let obstacleText = t.none;
+            if (currentDifficulty === 'hard') obstacleText = t.few;
+            else if (currentDifficulty === 'expert') obstacleText = t.many;
+            else if (currentDifficulty === 'quantum') obstacleText = t.extreme;
+            
+            document.getElementById('obstaclesValue').textContent = obstacleText;
+            
+            // Mettre à jour le bonus
+            document.getElementById('bonusValue').textContent = 'x' + settings.scoreMultiplier;
+        }
+
+        function addObstacles() {
+            if (!difficultySettings[currentDifficulty].obstacles) return;
+            
+            const obstacleCount = {
+                hard: 3,
+                expert: 6,
+                quantum: 10
+            }[currentDifficulty] || 0;
+            
+            for (let i = 0; i < obstacleCount; i++) {
+                const row = Math.floor(Math.random() * (BOARD_HEIGHT - 5)) + 5; // Obstacles dans la partie basse
+                const col = Math.floor(Math.random() * BOARD_WIDTH);
+                
+                if (board[row][col] === 0) {
+                    board[row][col] = 'obstacle';
+                }
+            }
+        }
+
+        function startGame() {
+            if (gameRunning) return;
+            
+            gameRunning = true;
+            gamePaused = false;
+            gameStartTime = Date.now();
+            const t = translations[currentLanguage];
+            
+            // Réinitialiser le plateau
+            board = Array(BOARD_HEIGHT).fill().map(() => Array(BOARD_WIDTH).fill(0));
+            
+            // Ajouter des obstacles selon la difficulté
+            addObstacles();
+            
+            // Appliquer les paramètres de difficulté
+            const settings = difficultySettings[currentDifficulty];
+            dropInterval = settings.baseSpeed;
+            
+            // Générer les pièces
+            currentPiece = generatePiece();
+            nextPiece = generatePiece();
+            
+            // Démarrer la boucle de jeu
+            gameLoop = setInterval(gameStep, dropInterval);
+            
+            // Mettre à jour l'interface
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('pauseBtn').disabled = false;
+            document.getElementById('gameStatus').textContent = t.gameRunning;
+            document.getElementById('difficultySelector').disabled = true;
+            
+            updateDisplay();
+        }
+
+        function pauseGame() {
+            if (!gameRunning) return;
+            
+            gamePaused = !gamePaused;
+            const t = translations[currentLanguage];
+            
+            if (gamePaused) {
+                clearInterval(gameLoop);
+                document.getElementById('gameStatus').textContent = t.gamePaused;
+                document.getElementById('gameStatus').className = 'game-status paused';
+                document.getElementById('pauseBtn').textContent = t.resume;
+            } else {
+                gameLoop = setInterval(gameStep, dropInterval);
+                document.getElementById('gameStatus').textContent = t.gameRunning;
+                document.getElementById('gameStatus').className = 'game-status';
+                document.getElementById('pauseBtn').textContent = t.pause;
+            }
+        }
+
+        function resetGame() {
+            gameRunning = false;
+            gamePaused = false;
+            const t = translations[currentLanguage];
+            
+            if (gameLoop) {
+                clearInterval(gameLoop);
+            }
+            
+            // Réinitialiser les statistiques
+            score = 0;
+            lines = 0;
+            level = 1;
+            pieces = 0;
+            dropInterval = difficultySettings[currentDifficulty].baseSpeed;
+            
+            // Réinitialiser le plateau
+            board = Array(BOARD_HEIGHT).fill().map(() => Array(BOARD_WIDTH).fill(0));
+            currentPiece = null;
+            // ensure a next piece is available so the preview isn't empty after reset
+            try { nextPiece = generatePiece(); } catch (e) { nextPiece = null; }
+            
+            // Mettre à jour l'interface
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('pauseBtn').disabled = true;
+            document.getElementById('pauseBtn').textContent = t.pause;
+            document.getElementById('gameStatus').textContent = t.startMessage;
+            document.getElementById('gameStatus').className = 'game-status';
+            document.getElementById('difficultySelector').disabled = false;
+            
+            updateDisplay();
+        }
+
+        function gameStep() {
+            if (!currentPiece) return;
+            
+            // Mode IA automatique
+            if (aiMode) {
+                performAIMove();
+            }
+            
+            // Appliquer les effets quantiques
+            applyQuantumEffects();
+            
+            // Faire descendre la pièce
+            if (!movePiece(0, 1)) {
+                // La pièce ne peut plus descendre
+                placePiece();
+                clearLines();
+                
+                // Générer une nouvelle pièce
+                currentPiece = nextPiece;
+                nextPiece = generatePiece();
+                pieces++;
+                
+                // Vérifier si le jeu est terminé
+                if (checkGameOver()) {
+                    endGame();
+                    return;
+                }
+            }
+            
+            updateDisplay();
+        }
+
+        function movePiece(dx, dy) {
+            if (!currentPiece) return false;
+            
+            const newX = currentPiece.x + dx;
+            const newY = currentPiece.y + dy;
+            
+            if (isValidPosition(currentPiece.shape, newX, newY)) {
+                currentPiece.x = newX;
+                currentPiece.y = newY;
+                return true;
+            }
+            
+            return false;
+        }
+
+        function rotatePiece() {
+            if (!currentPiece) return;
+            
+            const rotated = rotateMatrix(currentPiece.shape);
+            
+            if (isValidPosition(rotated, currentPiece.x, currentPiece.y)) {
+                currentPiece.shape = rotated;
+            }
+        }
+
+        function rotateMatrix(matrix) {
+            const rows = matrix.length;
+            const cols = matrix[0].length;
+            const rotated = Array(cols).fill().map(() => Array(rows).fill(0));
+            
+            for (let row = 0; row < rows; row++) {
+                for (let col = 0; col < cols; col++) {
+                    rotated[col][rows - 1 - row] = matrix[row][col];
+                }
+            }
+            
+            return rotated;
+        }
+
+        function hardDrop() {
+            if (!currentPiece) return;
+            
+            while (movePiece(0, 1)) {
+                // Continue à descendre jusqu'au bas
+            }
+        }
+
+        function softDrop() {
+            if (!currentPiece) return;
+            
+            // Descente rapide de 3 cases
+            for (let i = 0; i < 3; i++) {
+                if (!movePiece(0, 1)) break;
+            }
+        }
+
+        function fastUp() {
+            if (!currentPiece) return;
+            
+            // Montée rapide de 3 cases
+            for (let i = 0; i < 3; i++) {
+                if (!movePiece(0, -1)) break;
+            }
+        }
+
+        function isValidPosition(shape, x, y) {
+            for (let row = 0; row < shape.length; row++) {
+                for (let col = 0; col < shape[row].length; col++) {
+                    if (shape[row][col]) {
+                        const newX = x + col;
+                        const newY = y + row;
+                        
+                        if (newX < 0 || newX >= BOARD_WIDTH || 
+                            newY >= BOARD_HEIGHT || 
+                            (newY >= 0 && board[newY][newX])) {
+                            return false;
+                        }
+                    }
+                }
+            }
+            return true;
+        }
+
+        function applyQuantumEffects() {
+            if (!difficultySettings[currentDifficulty].quantumEffects) return;
+            
+            // Effet quantique : téléportation aléatoire de la pièce
+            if (Math.random() < 0.05) { // 5% de chance
+                const newX = Math.floor(Math.random() * (BOARD_WIDTH - 3));
+                if (isValidPosition(currentPiece.shape, newX, currentPiece.y)) {
+                    currentPiece.x = newX;
+                    
+                    // Effet visuel
+                    const gameBoard = document.querySelector('.game-board');
+                    gameBoard.classList.add('quantum-effect');
+                    setTimeout(() => {
+                        gameBoard.classList.remove('quantum-effect');
+                    }, 500);
+                }
+            }
+            
+            // Effet quantique : rotation spontanée
+            if (Math.random() < 0.03) { // 3% de chance
+                const rotated = rotateMatrix(currentPiece.shape);
+                if (isValidPosition(rotated, currentPiece.x, currentPiece.y)) {
+                    currentPiece.shape = rotated;
+                }
+            }
+        }
+
+        function placePiece() {
+            if (!currentPiece) return;
+            
+            for (let row = 0; row < currentPiece.shape.length; row++) {
+                for (let col = 0; col < currentPiece.shape[row].length; col++) {
+                    if (currentPiece.shape[row][col]) {
+                        const x = currentPiece.x + col;
+                        const y = currentPiece.y + row;
+                        
+                        if (y >= 0) {
+                            board[y][x] = currentPiece.color;
+                        }
+                    }
+                }
+            }
+        }
+
+        function clearLines() {
+            let linesCleared = 0;
+            
+            for (let row = BOARD_HEIGHT - 1; row >= 0; row--) {
+                if (board[row].every(cell => cell !== 0)) {
+                    // Animer la ligne qui disparaît
+                    animateLineClear(row);
+                    
+                    // Supprimer la ligne
+                    board.splice(row, 1);
+                    board.unshift(Array(BOARD_WIDTH).fill(0));
+                    
+                    linesCleared++;
+                    row++; // Revérifier la même ligne
+                }
+            }
+            
+            if (linesCleared > 0) {
+                // Calculer le score avec multiplicateur de difficulté
+                const lineScores = [0, 100, 300, 500, 800];
+                const settings = difficultySettings[currentDifficulty];
+                const baseScore = lineScores[linesCleared] * level;
+                score += Math.floor(baseScore * settings.scoreMultiplier);
+                lines += linesCleared;
+                
+                // Augmenter le niveau
+                const newLevel = Math.floor(lines / 10) + 1;
+                if (newLevel > level) {
+                    level = newLevel;
+                    // Calculer la nouvelle vitesse selon la difficulté
+                    dropInterval = Math.max(50, settings.baseSpeed - (level - 1) * settings.speedIncrease);
+                    
+                    if (gameLoop) {
+                        clearInterval(gameLoop);
+                        gameLoop = setInterval(gameStep, dropInterval);
+                    }
+                }
+            }
+        }
+
+        function animateLineClear(row) {
+            for (let col = 0; col < BOARD_WIDTH; col++) {
+                const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+                if (cell) {
+                    cell.classList.add('clearing');
+                    setTimeout(() => {
+                        cell.classList.remove('clearing');
+                    }, 800);
+                }
+            }
+        }
+
+        function checkGameOver() {
+            return !isValidPosition(currentPiece.shape, currentPiece.x, currentPiece.y);
+        }
+
+        function endGame() {
+            gameRunning = false;
+            gamePaused = false;
+            const t = translations[currentLanguage];
+            
+            if (gameLoop) {
+                clearInterval(gameLoop);
+            }
+            
+            // Mettre à jour les records
+            updateRecords();
+            
+            // Afficher le message de fin
+            document.getElementById('gameStatus').textContent = `${t.gameOver} ${score}`;
+            document.getElementById('gameStatus').className = 'game-status game-over';
+            
+            // Réactiver les boutons
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('pauseBtn').disabled = true;
+            document.getElementById('pauseBtn').textContent = t.pause;
+        }
+
+        function updateDisplay() {
+            // Mettre à jour la grille
+            const cells = document.querySelectorAll('.tetris-cell');
+            
+            // Effacer la grille
+            cells.forEach(cell => {
+                cell.className = 'tetris-cell';
+            });
+            
+            // Afficher le plateau
+            for (let row = 0; row < BOARD_HEIGHT; row++) {
+                for (let col = 0; col < BOARD_WIDTH; col++) {
+                    const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+                    if (board[row][col]) {
+                        if (board[row][col] === 'obstacle') {
+                            cell.classList.add('obstacle-cell');
+                        } else {
+                            cell.classList.add('filled', board[row][col]);
+                        }
+                    }
+                }
+            }
+            
+            // Afficher la pièce actuelle
+            if (currentPiece) {
+                for (let row = 0; row < currentPiece.shape.length; row++) {
+                    for (let col = 0; col < currentPiece.shape[row].length; col++) {
+                        if (currentPiece.shape[row][col]) {
+                            const x = currentPiece.x + col;
+                            const y = currentPiece.y + row;
+                            
+                            if (y >= 0 && y < BOARD_HEIGHT && x >= 0 && x < BOARD_WIDTH) {
+                                const cell = document.querySelector(`[data-row="${y}"][data-col="${x}"]`);
+                                if (cell) {
+                                    cell.classList.add('filled', currentPiece.color);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Afficher la prochaine pièce
+            updateNextPieceDisplay();
+            
+
+            
+            // Mettre à jour les statistiques
+            document.getElementById('scoreValue').textContent = score.toLocaleString();
+            document.getElementById('linesValue').textContent = lines;
+            document.getElementById('levelValue').textContent = level;
+            document.getElementById('piecesValue').textContent = pieces;
+            
+            // Barre de progression du niveau
+            const levelProgress = (lines % 10) / 10 * 100;
+            document.getElementById('levelFill').style.width = levelProgress + '%';
+            
+            // Analyse IA
+            updateAIAnalysis();
+            
+
+        }
+
+        function updateNextPieceDisplay() {
+            const cells = Array.from(document.querySelectorAll('.next-cell'));
+
+            // clear cells keeping the base class
+            cells.forEach(cell => {
+                // remove any piece- classes but keep next-cell
+                cell.className = 'next-cell';
+            });
+
+            // Debug/testing fallback: if localStorage contains a forced piece code, use it
+            try {
+                const forced = localStorage.getItem('tetris-debug-force-next');
+                if (forced && PIECES[forced]) {
+                    console.debug('[debug] Forcing nextPiece to:', forced);
+                    nextPiece = {
+                        type: forced,
+                        shape: PIECES[forced].shape,
+                        color: PIECES[forced].color,
+                        x: 0, y: 0
+                    };
+                }
+            } catch (e) { /* ignore */ }
+
+            if (!nextPiece) {
+                console.debug('[debug] updateNextPieceDisplay: no nextPiece available');
+                return;
+            }
+
+            try {
+                const shape = nextPiece.shape;
+                const startRow = Math.floor((4 - shape.length) / 2);
+                const startCol = Math.floor((4 - shape[0].length) / 2);
+                const colorClass = nextPiece.color || '';
+
+                console.debug('[debug] updateNextPieceDisplay nextPiece:', nextPiece, 'startRow', startRow, 'startCol', startCol);
+
+                // ensure cells are cleared of previous color classes
+                cells.forEach(c => {
+                    Array.from(c.classList).forEach(cl => {
+                        if (/^piece-/.test(cl)) c.classList.remove(cl);
+                    });
+                    // clear inline styles too
+                    c.style.background = '';
+                    c.style.boxShadow = '';
+                });
+
+                // mapping JS gradients to avoid CSS specificity issues
+                const PIECE_BACKGROUNDS = {
+                    I: 'linear-gradient(45deg, #00ffff, #0080ff)',
+                    O: 'linear-gradient(45deg, #ffff00, #ff8000)',
+                    T: 'linear-gradient(45deg, #ff00ff, #8000ff)',
+                    S: 'linear-gradient(45deg, #00ff00, #008000)',
+                    Z: 'linear-gradient(45deg, #ff0000, #800000)',
+                    J: 'linear-gradient(45deg, #0000ff, #000080)',
+                    L: 'linear-gradient(45deg, #ff8000, #804000)'
+                };
+
+                const glow = '0 0 8px rgba(255,255,255,0.08)';
+
+                for (let row = 0; row < shape.length; row++) {
+                    for (let col = 0; col < shape[row].length; col++) {
+                        if (shape[row][col]) {
+                            const cellIndex = (startRow + row) * 4 + (startCol + col);
+                            if (cellIndex >= 0 && cellIndex < cells.length) {
+                                const target = cells[cellIndex];
+                                if (target) {
+                                    target.classList.add('filled');
+                                    if (colorClass) target.classList.add(colorClass);
+                                    // apply inline background for reliability
+                                    try {
+                                        const typeKey = nextPiece.type || (colorClass.replace(/^piece-/, '').toUpperCase());
+                                        const bg = PIECE_BACKGROUNDS[typeKey] || '';
+                                        if (bg) target.style.background = bg;
+                                        target.style.boxShadow = glow;
+                                    } catch (e) { /* ignore */ }
+                                }
+                            } else {
+                                console.debug('[debug] computed cellIndex out of bounds:', cellIndex);
+                            }
+                        }
+                    }
+                }
+            } catch (e) {
+                console.error('Error in updateNextPieceDisplay:', e);
+            }
+        }
+
+
+
+        function updateAIAnalysis() {
+            if (!gameRunning) return;
+            
+            // Calculer l'efficacité
+            const totalCells = BOARD_WIDTH * BOARD_HEIGHT;
+            const filledCells = board.flat().filter(cell => cell !== 0).length;
+            const efficiency = Math.round((filledCells / totalCells) * 100);
+            document.getElementById('efficiencyValue').textContent = efficiency + '%';
+            
+            // Calculer les trous
+            const holes = countHoles();
+            document.getElementById('holesValue').textContent = holes;
+            
+            // Calculer la hauteur moyenne
+            const height = calculateAverageHeight();
+            document.getElementById('heightValue').textContent = height;
+            
+            // Prédiction simple
+            const prediction = predictNextMove();
+            document.getElementById('predictionValue').textContent = prediction;
+        }
+
+        function countHoles() {
+            let holes = 0;
+            
+            for (let col = 0; col < BOARD_WIDTH; col++) {
+                let foundBlock = false;
+                for (let row = 0; row < BOARD_HEIGHT; row++) {
+                    if (board[row][col] !== 0) {
+                        foundBlock = true;
+                    } else if (foundBlock) {
+                        holes++;
+                    }
+                }
+            }
+            
+            return holes;
+        }
+
+        function calculateAverageHeight() {
+            let totalHeight = 0;
+            
+            for (let col = 0; col < BOARD_WIDTH; col++) {
+                for (let row = 0; row < BOARD_HEIGHT; row++) {
+                    if (board[row][col] !== 0) {
+                        totalHeight += BOARD_HEIGHT - row;
+                        break;
+                    }
+                }
+            }
+            
+            return Math.round(totalHeight / BOARD_WIDTH);
+        }
+
+        function predictNextMove() {
+            if (!currentPiece) return '-';
+            
+            const moves = {
+                fr: ['Gauche', 'Droite', 'Rotation', 'Descente'],
+                en: ['Left', 'Right', 'Rotate', 'Down'],
+                ar: ['يسار', 'يمين', 'دوران', 'أسفل'],
+                es: ['Izquierda', 'Derecha', 'Rotar', 'Abajo'],
+                de: ['Links', 'Rechts', 'Drehen', 'Runter'],
+                zh: ['左', '右', '旋转', '下']
+            };
+            
+            const currentMoves = moves[currentLanguage] || moves.fr;
+            return currentMoves[Math.floor(Math.random() * currentMoves.length)];
+        }
+
+        function toggleAIMode() {
+            aiMode = !aiMode;
+            const t = translations[currentLanguage];
+            const btn = document.getElementById('aiModeBtn');
+            btn.textContent = `${t.aiMode}: ${aiMode ? 'ON' : 'OFF'}`;
+            btn.style.background = aiMode ? 
+                'linear-gradient(45deg, #00ff00, #00cc00)' : 
+                'linear-gradient(45deg, #00ffff, #0080ff)';
+        }
+
+        function getAIHint() {
+            const t = translations[currentLanguage];
+            
+            if (!currentPiece || !gameRunning) {
+                document.getElementById('aiSuggestion').textContent = t.noPiece;
+                return;
+            }
+            
+            const hints = {
+                fr: [
+                    '💡 Essayez de créer des lignes complètes',
+                    '🎯 Placez la pièce sur le côté droit',
+                    '⚡ Utilisez la rotation pour mieux ajuster',
+                    '🔄 Évitez de créer des trous',
+                    '📊 Gardez une hauteur uniforme',
+                    '🎮 Préparez-vous pour un Tetris!'
+                ],
+                en: [
+                    '💡 Try to create complete lines',
+                    '🎯 Place the piece on the right side',
+                    '⚡ Use rotation to adjust better',
+                    '🔄 Avoid creating holes',
+                    '📊 Keep uniform height',
+                    '🎮 Prepare for a Tetris!'
+                ],
+                ar: [
+                    '💡 حاول إنشاء خطوط كاملة',
+                    '🎯 ضع القطعة على الجانب الأيمن',
+                    '⚡ استخدم الدوران للتعديل بشكل أفضل',
+                    '🔄 تجنب إنشاء ثقوب',
+                    '📊 حافظ على ارتفاع موحد',
+                    '🎮 استعد لتيتريس!'
+                ],
+                es: [
+                    '💡 Trata de crear líneas completas',
+                    '🎯 Coloca la pieza en el lado derecho',
+                    '⚡ Usa la rotación para ajustar mejor',
+                    '🔄 Evita crear agujeros',
+                    '📊 Mantén altura uniforme',
+                    '🎮 ¡Prepárate para un Tetris!'
+                ],
+                de: [
+                    '💡 Versuche vollständige Linien zu erstellen',
+                    '🎯 Platziere das Teil auf der rechten Seite',
+                    '⚡ Nutze Rotation für bessere Anpassung',
+                    '🔄 Vermeide Löcher zu schaffen',
+                    '📊 Halte einheitliche Höhe',
+                    '🎮 Bereite dich auf Tetris vor!'
+                ],
+                zh: [
+                    '💡 尝试创建完整的行',
+                    '🎯 将方块放在右侧',
+                    '⚡ 使用旋转来更好地调整',
+                    '🔄 避免创建空洞',
+                    '📊 保持均匀高度',
+                    '🎮 为俄罗斯方块做准备！'
+                ]
+            };
+            
+            const currentHints = hints[currentLanguage] || hints.fr;
+            const hint = currentHints[Math.floor(Math.random() * currentHints.length)];
+            document.getElementById('aiSuggestion').textContent = hint;
+        }
+
+        function analyzeBoard() {
+            const t = translations[currentLanguage];
+            
+            if (!gameRunning) {
+                document.getElementById('aiSuggestion').textContent = t.startToAnalyze;
+                return;
+            }
+            
+            const holes = countHoles();
+            const height = calculateAverageHeight();
+            
+            const analysisTexts = {
+                fr: {
+                    title: '🔍 Analyse du plateau:\n',
+                    noHoles: '✅ Aucun trou détecté',
+                    fewHoles: '⚠️ Quelques trous présents',
+                    manyHoles: '❌ Trop de trous, attention!',
+                    optimalHeight: '\n📊 Hauteur optimale',
+                    moderateHeight: '\n⚠️ Hauteur modérée',
+                    criticalHeight: '\n🚨 Hauteur critique!'
+                },
+                en: {
+                    title: '🔍 Board analysis:\n',
+                    noHoles: '✅ No holes detected',
+                    fewHoles: '⚠️ Few holes present',
+                    manyHoles: '❌ Too many holes, watch out!',
+                    optimalHeight: '\n📊 Optimal height',
+                    moderateHeight: '\n⚠️ Moderate height',
+                    criticalHeight: '\n🚨 Critical height!'
+                },
+                ar: {
+                    title: '🔍 تحليل اللوحة:\n',
+                    noHoles: '✅ لم يتم اكتشاف ثقوب',
+                    fewHoles: '⚠️ بعض الثقوب موجودة',
+                    manyHoles: '❌ ثقوب كثيرة، انتبه!',
+                    optimalHeight: '\n📊 ارتفاع مثالي',
+                    moderateHeight: '\n⚠️ ارتفاع معتدل',
+                    criticalHeight: '\n🚨 ارتفاع حرج!'
+                },
+                es: {
+                    title: '🔍 Análisis del tablero:\n',
+                    noHoles: '✅ No se detectaron agujeros',
+                    fewHoles: '⚠️ Pocos agujeros presentes',
+                    manyHoles: '❌ Demasiados agujeros, ¡cuidado!',
+                    optimalHeight: '\n📊 Altura óptima',
+                    moderateHeight: '\n⚠️ Altura moderada',
+                    criticalHeight: '\n🚨 ¡Altura crítica!'
+                },
+                de: {
+                    title: '🔍 Brett-Analyse:\n',
+                    noHoles: '✅ Keine Löcher erkannt',
+                    fewHoles: '⚠️ Wenige Löcher vorhanden',
+                    manyHoles: '❌ Zu viele Löcher, Vorsicht!',
+                    optimalHeight: '\n📊 Optimale Höhe',
+                    moderateHeight: '\n⚠️ Moderate Höhe',
+                    criticalHeight: '\n🚨 Kritische Höhe!'
+                },
+                zh: {
+                    title: '🔍 棋盘分析:\n',
+                    noHoles: '✅ 未检测到空洞',
+                    fewHoles: '⚠️ 存在少量空洞',
+                    manyHoles: '❌ 空洞太多，小心！',
+                    optimalHeight: '\n📊 最佳高度',
+                    moderateHeight: '\n⚠️ 中等高度',
+                    criticalHeight: '\n🚨 危险高度！'
+                }
+            };
+            
+            const texts = analysisTexts[currentLanguage] || analysisTexts.fr;
+            let analysis = texts.title;
+            
+            if (holes === 0) {
+                analysis += texts.noHoles;
+            } else if (holes < 3) {
+                analysis += texts.fewHoles;
+            } else {
+                analysis += texts.manyHoles;
+            }
+            
+            if (height < 5) {
+                analysis += texts.optimalHeight;
+            } else if (height < 10) {
+                analysis += texts.moderateHeight;
+            } else {
+                analysis += texts.criticalHeight;
+            }
+            
+            document.getElementById('aiSuggestion').textContent = analysis;
+        }
+
+        function performAIMove() {
+            if (!currentPiece) return;
+            
+            // IA simple qui essaie de placer les pièces intelligemment
+            const moves = Math.floor(Math.random() * 4);
+            
+            switch(moves) {
+                case 0:
+                    if (Math.random() > 0.7) movePiece(-1, 0);
+                    break;
+                case 1:
+                    if (Math.random() > 0.7) movePiece(1, 0);
+                    break;
+                case 2:
+                    if (Math.random() > 0.9) rotatePiece();
+                    break;
+                case 3:
+                    if (Math.random() > 0.8) hardDrop();
+                    break;
+            }
+        }
+
+        function applyStrategy(strategy) {
+            const t = translations[currentLanguage];
+            
+            if (!gameRunning || !currentPiece) {
+                document.getElementById('aiSuggestion').textContent = t.startToUseStrategies;
+                return;
+            }
+            
+            const strategyMessages = {
+                fr: {
+                    tetris: '🎯 Stratégie Tetris: Gardez une colonne libre pour les pièces I',
+                    clear: '🧹 Stratégie Nettoyage: Éliminez les trous en priorité',
+                    stack: '📚 Stratégie Empilement: Construisez uniformément',
+                    survive: '🛡️ Stratégie Survie: Gardez la hauteur basse'
+                },
+                en: {
+                    tetris: '🎯 Tetris Strategy: Keep one column free for I-pieces',
+                    clear: '🧹 Clear Strategy: Eliminate holes first',
+                    stack: '📚 Stack Strategy: Build evenly',
+                    survive: '🛡️ Survive Strategy: Keep height low'
+                },
+                ar: {
+                    tetris: '🎯 استراتيجية تيتريس: احتفظ بعمود واحد فارغ للقطع I',
+                    clear: '🧹 استراتيجية التنظيف: تخلص من الثقوب أولاً',
+                    stack: '📚 استراتيجية التكديس: ابن بانتظام',
+                    survive: '🛡️ استراتيجية البقاء: حافظ على ارتفاع منخفض'
+                },
+                es: {
+                    tetris: '🎯 Estrategia Tetris: Mantén una columna libre para piezas I',
+                    clear: '🧹 Estrategia Limpiar: Elimina agujeros primero',
+                    stack: '📚 Estrategia Apilar: Construye uniformemente',
+                    survive: '🛡️ Estrategia Sobrevivir: Mantén altura baja'
+                },
+                de: {
+                    tetris: '🎯 Tetris-Strategie: Halte eine Spalte für I-Teile frei',
+                    clear: '🧹 Räum-Strategie: Löcher zuerst beseitigen',
+                    stack: '📚 Stapel-Strategie: Gleichmäßig bauen',
+                    survive: '🛡️ Überlebens-Strategie: Höhe niedrig halten'
+                },
+                zh: {
+                    tetris: '🎯 俄罗斯方块策略：为I型方块保留一列',
+                    clear: '🧹 清除策略：优先消除空洞',
+                    stack: '📚 堆叠策略：均匀建造',
+                    survive: '🛡️ 生存策略：保持低高度'
+                }
+            };
+            
+            const messages = strategyMessages[currentLanguage] || strategyMessages.fr;
+            document.getElementById('aiSuggestion').textContent = messages[strategy];
+        }
+
+        function loadRecords() {
+            document.getElementById('bestScoreValue').textContent = parseInt(bestScore).toLocaleString();
+            document.getElementById('bestLinesValue').textContent = bestLines;
+            document.getElementById('bestLevelValue').textContent = bestLevel;
+            
+            const totalSeconds = parseInt(totalTime);
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
+            document.getElementById('totalTimeValue').textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function updateRecords() {
+            let updated = false;
+            
+            if (score > bestScore) {
+                bestScore = score;
+                localStorage.setItem('tetris-best-score', bestScore);
+                updated = true;
+            }
+            
+            if (lines > bestLines) {
+                bestLines = lines;
+                localStorage.setItem('tetris-best-lines', bestLines);
+                updated = true;
+            }
+            
+            if (level > bestLevel) {
+                bestLevel = level;
+                localStorage.setItem('tetris-best-level', bestLevel);
+                updated = true;
+            }
+            
+            // Ajouter le temps de jeu
+            const gameTime = Math.floor((Date.now() - gameStartTime) / 1000);
+            totalTime = parseInt(totalTime) + gameTime;
+            localStorage.setItem('tetris-total-time', totalTime);
+            
+            loadRecords();
+            
+            if (updated) {
+                const t = translations[currentLanguage];
+                document.getElementById('aiSuggestion').textContent = t.newRecord;
+            }
+        }
+
+        function closePlatform() {
+            console.debug('jeux1: closePlatform called');
+            try{
+                if (window.parent && window.parent !== window) {
+                        window.parent.postMessage({ action: 'close', reason: 'user-initiated' }, '*');
+                        return;
+                    }
+            }catch(e){/* ignore */}
+            try{
+                if(window.opener && !window.opener.closed){
+                    try{ window.opener.postMessage({ action: 'child-closed' }, '*'); }catch(e){}
+                    try{ window.close(); }catch(e){}
+                    return;
+                }
+            }catch(e){/* ignore */}
+            try{ window.location.href = '/brainova.html'; }catch(e){/* ignore */}
+        }
+
+
+        // Apply translations to visible UI elements
+        function setTexts(t) {
+            try {
+                // Title & subtitle
+                const titleEl = document.querySelector('.game-title');
+                if (titleEl) titleEl.textContent = t.title || titleEl.textContent;
+                const sub = document.querySelector('.subtitle');
+                if (sub) sub.textContent = t.subtitle || sub.textContent;
+
+                // Main buttons
+                const startBtn = document.getElementById('startBtn');
+                const pauseBtn = document.getElementById('pauseBtn');
+                const resetBtn = document.getElementById('resetBtn');
+                const aiModeBtn = document.getElementById('aiModeBtn');
+                const aiHintBtn = document.getElementById('aiHintBtn');
+                const aiAnalyzeBtn = document.getElementById('aiAnalyzeBtn');
+
+                if (startBtn) startBtn.textContent = t.start || startBtn.textContent;
+                if (pauseBtn) pauseBtn.textContent = t.pause || pauseBtn.textContent;
+                if (resetBtn) resetBtn.textContent = t.reset || resetBtn.textContent;
+                if (aiModeBtn) aiModeBtn.textContent = (t.aiMode || 'Mode IA') + ': ' + (aiMode ? (t.on || 'ON') : (t.off || 'OFF'));
+                if (aiHintBtn) aiHintBtn.textContent = t.aiHint || aiHintBtn.textContent;
+                if (aiAnalyzeBtn) aiAnalyzeBtn.textContent = t.analyze || aiAnalyzeBtn.textContent;
+
+                // Apply translations to elements that declare a data-i18n key (preferred)
+                document.querySelectorAll('[data-i18n]').forEach(el => {
+                    const key = el.getAttribute('data-i18n');
+                    if (key && t[key]) el.textContent = t[key];
+                });
+
+                // Fallback heuristic for legacy headings that may not have data-i18n
+                document.querySelectorAll('h3').forEach(h3 => {
+                    // skip if we already set it via data-i18n
+                    if (h3.hasAttribute('data-i18n')) return;
+                    const txt = h3.textContent.trim().toLowerCase();
+                    if (/contr/i.test(txt) || /control/i.test(txt)) h3.textContent = t.quantumControls || h3.textContent;
+                    else if (/niveau|difficulty/i.test(txt)) h3.textContent = t.difficultyLevel || h3.textContent;
+                    else if (/procha|next/i.test(txt)) h3.textContent = t.nextPiece || h3.textContent;
+                    else if (/analyse|ai/i.test(txt)) h3.textContent = t.aiAnalysis || h3.textContent;
+                    else if (/assistant|assistant/i.test(txt)) h3.textContent = t.aiAssistant || h3.textContent;
+                    else if (/strat/i.test(txt) || /strateg/i.test(txt)) h3.textContent = t.strategies || h3.textContent;
+                    else if (/record/i.test(txt) || /meilleur|best/i.test(txt)) h3.textContent = t.records || h3.textContent;
+                });
+
+                // Controls info (list of keys + labels)
+                const controlsInfo = document.querySelector('.controls-info');
+                if (controlsInfo) {
+                    controlsInfo.innerHTML = `
+                        <h3>${t.controls || 'CONTROLS'}</h3>
+                        <div>
+                            <span class="control-key">←→</span> ${t.move || 'Move'}<br>
+                            <span class="control-key">↓</span> ${t.down || 'Down'}<br>
+                            <span class="control-key">↑</span> ${t.up || 'Up'}<br>
+                            <span class="control-key">R</span> ${t.rotate || 'Rotate'}<br>
+                            <span class="control-key">ESPACE</span> ${t.drop || 'Hard Drop'}<br>
+                            <span class="control-key">P</span> ${t.pauseKey || 'Pause'}
+                        </div>
+                    `;
+                }
+
+                // Difficulty options
+                const diff = document.getElementById('difficultySelector');
+                if (diff && diff.options) {
+                    const map = ['easy','normal','hard','expert','quantum'];
+                    for (let i=0;i<diff.options.length && i<map.length;i++){
+                        const k = map[i];
+                        if (t[k]) diff.options[i].text = t[k];
+                    }
+                }
+
+                // Stat labels (update left label preceding value spans)
+                const statMap = {
+                    'scoreValue': t.score || 'Score:',
+                    'linesValue': t.lines || 'Lines:',
+                    'levelValue': t.level || 'Level:',
+                    'piecesValue': t.pieces || 'Pieces:'
+                };
+                Object.keys(statMap).forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) {
+                        // try to find the label element in the same .stat-item
+                        const parent = el.closest('.stat-item');
+                        if (parent) {
+                            const lbl = parent.querySelector('span:not(.stat-value)');
+                            if (lbl) lbl.textContent = statMap[id];
+                        }
+                    }
+                });
+
+                // Strategies buttons
+                document.querySelectorAll('button[onclick^="applyStrategy"]').forEach(btn => {
+                    const txt = btn.textContent.trim().toLowerCase();
+                    if (/tetris/i.test(txt)) btn.textContent = t.tetrisStrategy || btn.textContent;
+                    else if (/nettoyer|clear/i.test(txt)) btn.textContent = t.clearStrategy || btn.textContent;
+                    else if (/empil|stack/i.test(txt)) btn.textContent = t.stackStrategy || btn.textContent;
+                    else if (/surviv|survive/i.test(txt)) btn.textContent = t.surviveStrategy || btn.textContent;
+                });
+
+                // Records panel headers
+                const recordsHeaders = Array.from(document.querySelectorAll('.stats-display h3'));
+                recordsHeaders.forEach(h3 => {
+                    const p = h3.textContent.trim().toLowerCase();
+                    if (/records|record|meilleur|best/i.test(p)) h3.textContent = t.records || h3.textContent;
+                });
+
+                // Game status initial message
+                const gs = document.getElementById('gameStatus');
+                if (gs) gs.textContent = t.startMessage || gs.textContent;
+
+                // Close button tooltip/title
+                const closeBtn = document.getElementById('closeBtn');
+                if (closeBtn) closeBtn.title = t.backToHome || closeBtn.title;
+
+                // Direction for Arabic
+                document.documentElement.dir = (currentLanguage === 'ar') ? 'rtl' : 'ltr';
+
+                // Normalization pass: remove mixed-language fragments like "Démarrer / Start" or "Start / Démarrer"
+                normalizeMixedLanguage(currentLanguage);
+                // Update dynamic labels that are controlled by helper functions
+                try { updateStatLabels(t); } catch(e) {}
+                try { updateControlsText(t); } catch(e) {}
+                try { updateStrategyButtons(t); } catch(e) {}
+                try { updateSectionTitles(t); } catch(e) {}
+                try { updateStatusMessages(t); } catch(e) {}
+            } catch (e) { /* ignore errors */ }
+        }
+
+        function normalizeMixedLanguage(lang) {
+            // Build a regex that matches patterns like "frText / enText" or "enText / frText" and keep only the chunk matching 'lang'
+            // We rely on translations object to know common words in each language.
+            try {
+                const allKeys = Object.keys(translations[lang] || {});
+                // Create a set of common words for current language for heuristic matching
+                const keepWords = new Set(allKeys.map(k => (translations[lang][k] || '').split(/\s+/)[0]).filter(Boolean).map(s=>s.toLowerCase()));
+
+                // Walk text nodes under the main container
+                const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
+                const toUpdate = [];
+                while(walker.nextNode()){
+                    const node = walker.currentNode;
+                    const txt = node.nodeValue;
+                    if (!txt || txt.trim().length < 2) continue;
+                    // detect common bilingual separators
+                    if (/[\/\|·–—]/.test(txt) && /[A-Za-zÀ-ž\u0600-\u06FF\u4E00-\u9FFF]/.test(txt)){
+                        // split by slash, pipe, bullet, dash
+                        const parts = txt.split(/[\/\|·–—]/).map(p=>p.trim()).filter(Boolean);
+                        if (parts.length >= 2) {
+                            // choose the part that contains a 'keep' word or that best matches language script
+                            let chosen = parts.find(p => {
+                                const lower = p.toLowerCase();
+                                // check for Arabic script if lang === 'ar'
+                                if (lang === 'ar' && /[\u0600-\u06FF]/.test(p)) return true;
+                                if (lang === 'zh' && /[\u4E00-\u9FFF]/.test(p)) return true;
+                                // heuristic: contains any of keepWords
+                                for (const w of keepWords) if (lower.includes(w)) return true;
+                                return false;
+                            });
+                            if (!chosen) chosen = parts[0];
+                            toUpdate.push({node, val: chosen});
+                        }
+                    }
+                }
+                toUpdate.forEach(({node,val})=> node.nodeValue = val);
+            } catch(e) { /* ignore */ }
+        }
+
+        function changeLanguage() {
+            const sel = document.getElementById('languageSelector');
+            if (!sel) return;
+            currentLanguage = sel.value;
+            localStorage.setItem('brainovaLang', currentLanguage);
+            localStorage.setItem('tetris-language', currentLanguage);
+            const t = translations[currentLanguage] || translations['fr'];
+            setTexts(t);
+        }
+
+        // Initialize language selector and apply texts after DOM is ready
+        function applyInitialLanguage(){
+            const sel = document.getElementById('languageSelector');
+            if (sel) sel.value = currentLanguage;
+            const t = translations[currentLanguage] || translations['fr'];
+            setTexts(t);
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', applyInitialLanguage);
+        } else {
+            applyInitialLanguage();
+        }
+
+
+
+        function showControls() {
+            const controlsText = `
+🎮 CONTRÔLES TETRIS QUANTUM:\n
+⌨️ Clavier:\n• ← → : Déplacer la pièce horizontalement\n• ↓ : Descendre la pièce\n• ↑ : Monter la pièce\n• R : Rotation de la pièce\n• ESPACE : Chute libre\n• P : Pause/Reprendre\n
+🤖 IA:\n• Mode IA Auto : L'IA joue automatiquement\n• Conseil IA : Obtenir des suggestions\n• Analyser : Évaluer le plateau\n
+⚡ Stratégies:\n• Tetris : Viser les lignes de 4\n• Nettoyage : Éliminer les trous\n• Empilement : Construction uniforme\n• Survie : Garder une hauteur basse\n`;
+
+            showInlineModal('Contrôles Tetris Quantum', controlsText, [{ label: 'Fermer', value: 'close' }]);
+        }
+
+        function resetRecords() {
+            showInlineModal('Effacer les records', 'Voulez-vous vraiment effacer tous vos records ?', [
+                { label: 'Annuler', value: 'cancel' },
+                { label: 'Effacer', value: 'confirm', class: 'danger' }
+            ]).then(res => {
+                if (res === 'confirm'){
+                    localStorage.removeItem('tetris-best-score');
+                    localStorage.removeItem('tetris-best-lines');
+                    localStorage.removeItem('tetris-best-level');
+                    localStorage.removeItem('tetris-total-time');
+
+                    bestScore = 0;
+                    bestLines = 0;
+                    bestLevel = 1;
+                    totalTime = 0;
+
+                    loadRecords();
+
+                    document.getElementById('aiSuggestion').textContent = '🗑️ Records effacés avec succès!';
+                }
+            }).catch(()=>{});
+        }
+
+
+
+        
+
+        function updateSectionTitles(t) {
+            const sections = document.querySelectorAll('.panel h3, .stats-display h3, .ai-panel h3, .controls-info h3');
+            sections.forEach(section => {
+                const text = section.textContent;
+                if (text.includes('CONTRÔLES') || text.includes('QUANTUM') || text.includes('QUANTENSTEUERUNG') || text.includes('التحكم') || text.includes('CONTROLES') || text.includes('量子')) {
+                    section.textContent = t.quantumControls;
+                } else if (text.includes('STATISTIQUES') || text.includes('STATISTICS') || text.includes('الإحصائيات') || text.includes('ESTADÍSTICAS') || text.includes('STATISTIKEN') || text.includes('统计')) {
+                    section.textContent = t.statistics;
+                } else if (text.includes('PROCHAINE') || text.includes('NEXT') || text.includes('التالية') || text.includes('SIGUIENTE') || text.includes('NÄCHSTES') || text.includes('下一个')) {
+                    section.textContent = t.nextPiece;
+                } else if (text.includes('ASSISTANT') || text.includes('مساعد') || text.includes('ASISTENTE') || text.includes('ASSISTENT') || text.includes('助手')) {
+                    section.textContent = t.aiAssistant;
+                } else if (text.includes('ANALYSE') || text.includes('ANALYSIS') || text.includes('تحليل') || text.includes('ANÁLISIS') || text.includes('分析')) {
+                    section.textContent = t.aiAnalysis;
+                } else if (text.includes('STRATÉGIES') || text.includes('STRATEGIES') || text.includes('استراتيجيات') || text.includes('ESTRATEGIAS') || text.includes('STRATEGIEN') || text.includes('策略')) {
+                    section.textContent = t.strategies;
+                } else if (text.includes('RECORDS') || text.includes('الأرقام') || text.includes('RÉCORDS') || text.includes('REKORDE') || text.includes('记录')) {
+                    section.textContent = t.records;
+                }
+            });
+        }
+
+        function updateStatLabels(t) {
+            const statItems = document.querySelectorAll('.stat-item span:first-child');
+            statItems.forEach(label => {
+                const text = label.textContent;
+                if (text.includes('Score') || text.includes('النقاط') || text.includes('Puntuación') || text.includes('Punkte') || text.includes('分数')) {
+                    label.textContent = t.score;
+                } else if (text.includes('Lignes') || text.includes('Lines') || text.includes('Líneas') || text.includes('Linien') || text.includes('الخطوط') || text.includes('行数')) {
+                    label.textContent = t.lines;
+                } else if (text.includes('Niveau') || text.includes('Level') || text.includes('Nivel') || text.includes('المستوى') || text.includes('等级')) {
+                    label.textContent = t.level;
+                } else if (text.includes('Pièces') || text.includes('Pieces') || text.includes('Piezas') || text.includes('Teile') || text.includes('القطع') || text.includes('方块')) {
+                    label.textContent = t.pieces;
+                } else if (text.includes('Efficacité') || text.includes('Efficiency') || text.includes('الكفاءة') || text.includes('Eficiencia') || text.includes('Effizienz') || text.includes('效率')) {
+                    label.textContent = t.efficiency;
+                } else if (text.includes('Prédiction') || text.includes('Prediction') || text.includes('التنبؤ') || text.includes('Predicción') || text.includes('Vorhersage') || text.includes('预测')) {
+                    label.textContent = t.prediction;
+                } else if (text.includes('Trous') || text.includes('Holes') || text.includes('الثقوب') || text.includes('Agujeros') || text.includes('Löcher') || text.includes('空洞')) {
+                    label.textContent = t.holes;
+                } else if (text.includes('Hauteur') || text.includes('Height') || text.includes('الارتفاع') || text.includes('Altura') || text.includes('Höhe') || text.includes('高度')) {
+                    label.textContent = t.height;
+                } else if (text.includes('Meilleur') || text.includes('Best') || text.includes('أفضل') || text.includes('Mejor') || text.includes('Beste') || text.includes('最高')) {
+                    label.textContent = t.bestScore;
+                } else if (text.includes('Max') && (text.includes('Lignes') || text.includes('Lines') || text.includes('خطوط') || text.includes('Líneas') || text.includes('Linien') || text.includes('行'))) {
+                    label.textContent = t.maxLines;
+                } else if (text.includes('Max') && (text.includes('Niveau') || text.includes('Level') || text.includes('مستوى') || text.includes('Nivel') || text.includes('等级'))) {
+                    label.textContent = t.maxLevel;
+                } else if (text.includes('Temps') || text.includes('Time') || text.includes('الوقت') || text.includes('Tiempo') || text.includes('Zeit') || text.includes('时间')) {
+                    label.textContent = t.totalTime;
+                }
+            });
+        }
+
+        function updateControlsText(t) {
+            const controlsDiv = document.querySelector('.controls-info div');
+            if (controlsDiv) {
+                controlsDiv.innerHTML = `
+                    <span class="control-key">←→</span> ${t.move}<br>
+                    <span class="control-key">↓</span> ${t.down}<br>
+                    <span class="control-key">↑</span> ${t.up}<br>
+                    <span class="control-key">S</span> ${t.fastDown}<br>
+                    <span class="control-key">W</span> ${t.fastUp}<br>
+                    <span class="control-key">R</span> ${t.rotate}<br>
+                    <span class="control-key">ESPACE</span> ${t.drop}<br>
+                    <span class="control-key">P</span> ${t.pauseKey}
+                `;
+            }
+        }
+
+        function updateStatusMessages(t) {
+            const gameStatus = document.getElementById('gameStatus');
+            const currentStatus = gameStatus.textContent;
+            
+            if (!gameRunning && !gamePaused) {
+                gameStatus.textContent = t.startMessage;
+            } else if (gamePaused) {
+                gameStatus.textContent = t.gamePaused;
+            } else if (gameRunning) {
+                if (!currentStatus.includes('Score') && !currentStatus.includes('النقاط') && !currentStatus.includes('Puntuación') && !currentStatus.includes('Punkte') && !currentStatus.includes('分数')) {
+                    gameStatus.textContent = t.gameRunning;
+                }
+            }
+            
+            // Mettre à jour le message de l'IA
+            const aiSuggestion = document.getElementById('aiSuggestion');
+            if (aiSuggestion.textContent.includes('prête') || aiSuggestion.textContent.includes('ready') || aiSuggestion.textContent.includes('جاهز') || aiSuggestion.textContent.includes('lista') || aiSuggestion.textContent.includes('bereit') || aiSuggestion.textContent.includes('准备')) {
+                aiSuggestion.textContent = t.aiReady;
+            }
+        }
+
+        function updateStrategyButtons(t) {
+            const strategyButtons = document.querySelectorAll('.panel:last-child .btn');
+            if (strategyButtons.length >= 4) {
+                strategyButtons[0].textContent = t.tetrisStrategy;
+                strategyButtons[1].textContent = t.clearStrategy;
+                strategyButtons[2].textContent = t.stackStrategy;
+                strategyButtons[3].textContent = t.surviveStrategy;
+            }
+        }
+
+    // Initialiser le jeu
+    init();
+
+    // Charger la langue sauvegardée (safe)
+    const langSel = document.getElementById('languageSelector');
+    if (langSel) langSel.value = currentLanguage;
+    const _t_init = translations[currentLanguage] || translations['fr'];
+    setTexts(_t_init);
+        
+        // Charger la difficulté sauvegardée
+        const savedDifficulty = localStorage.getItem('tetris-difficulty');
+        if (savedDifficulty && difficultySettings[savedDifficulty]) {
+            currentDifficulty = savedDifficulty;
+            document.getElementById('difficultySelector').value = currentDifficulty;
+        }
+        updateDifficultyDisplay();
+</script>
+<!-- Inline modal used to replace alert()/confirm() -->
+<style>
+    #inlineModal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);z-index:99999}
+    #inlineModal .card{background:#071026;padding:18px;border-radius:10px;max-width:720px;color:#e6f9ff;border:1px solid rgba(0,212,255,0.06);box-shadow:0 12px 40px rgba(0,0,0,0.6)}
+    #inlineModal .card h3{margin:0 0 8px 0}
+    #inlineModal .card pre{white-space:pre-wrap;font-family:monospace;background:transparent;border:none;color:inherit}
+    #inlineModal .actions{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
+    #inlineModal .btn{padding:8px 12px;border-radius:8px;border:none;cursor:pointer}
+    #inlineModal .btn.danger{background:linear-gradient(45deg,#ff4444,#ff0000);color:#fff}
+    #inlineModal .btn.primary{background:linear-gradient(45deg,#00d4ff,#0088ff);color:#001}
+</style>
+<div id="inlineModal" role="dialog" aria-modal="true">
+    <div class="card">
+        <h3 id="inlineModalTitle">Titre</h3>
+        <pre id="inlineModalBody"></pre>
+        <div class="actions" id="inlineModalActions"></div>
+    </div>
+</div>
+<script>
+    function showInlineModal(title, message, buttons){
+        return new Promise((resolve)=>{
+            const modal = document.getElementById('inlineModal');
+            document.getElementById('inlineModalTitle').textContent = title || '';
+            document.getElementById('inlineModalBody').textContent = message || '';
+            const actions = document.getElementById('inlineModalActions');
+            actions.innerHTML = '';
+            buttons = buttons || [{ label: 'OK', value: 'ok', class: 'primary' }];
+            buttons.forEach(b=>{
+                const btn = document.createElement('button');
+                btn.className = 'btn ' + (b.class || '');
+                btn.textContent = b.label;
+                btn.addEventListener('click', ()=>{
+                    modal.style.display = 'none';
+                    resolve(b.value);
+                });
+                actions.appendChild(btn);
+            });
+            modal.style.display = 'flex';
+        });
+    }
+</script>
+</body>
+</html>
