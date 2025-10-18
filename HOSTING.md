@@ -146,7 +146,6 @@ Créez un fichier `.htaccess` :
 <IfModule mod_headers.c>
     Header set X-Content-Type-Options "nosniff"
     Header set X-Frame-Options "DENY"
-    Header set X-XSS-Protection "1; mode=block"
 </IfModule>
 ```
 
@@ -172,7 +171,6 @@ server {
     # En-têtes de sécurité
     add_header X-Content-Type-Options "nosniff";
     add_header X-Frame-Options "DENY";
-    add_header X-XSS-Protection "1; mode=block";
 
     location / {
         try_files $uri $uri/ =404;

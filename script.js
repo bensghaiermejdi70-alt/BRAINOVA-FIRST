@@ -1,19 +1,6 @@
 // Main JavaScript file for Jeux Brise-Glace platform
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Add smooth scrolling
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
-            e.preventDefault();
-            const target = document.querySelector(this.getAttribute('href'));
-            if (target) {
-                target.scrollIntoView({
-                    behavior: 'smooth'
-                });
-            }
-        });
-    });
-
     // Add click handlers to game buttons
     const gameButtons = document.querySelectorAll('.game-card .btn');
     gameButtons.forEach((button, index) => {
