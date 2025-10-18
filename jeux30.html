@@ -1,0 +1,2501 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Space Explorer - Aventure Galactique</title>
+    <style>
+        body {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0c0c0c, #1a1a2e, #16213e);
+            color: #ffffff;
+            overflow: hidden;
+        }
+
+        .game-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            margin: 0 auto;
+            border: 3px solid #00d4ff;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.5);
+        }
+
+        .game-header {
+            height: 80px;
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.2), rgba(0, 150, 255, 0.2));
+            border-bottom: 2px solid #00d4ff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            box-shadow: 0 2px 20px rgba(0, 212, 255, 0.4);
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .header-btn {
+            padding: 8px 16px;
+            background: linear-gradient(45deg, rgba(0, 212, 255, 0.3), rgba(0, 150, 255, 0.3));
+            border: 2px solid #00d4ff;
+            color: #ffffff;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+
+        .header-btn:hover {
+            background: linear-gradient(45deg, rgba(0, 212, 255, 0.5), rgba(0, 150, 255, 0.5));
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.6);
+            transform: translateY(-2px);
+        }
+
+        .header-btn.active {
+            background: linear-gradient(45deg, #00d4ff, #0096ff);
+            color: #ffffff;
+        }
+
+        .ship-stats {
+            display: flex;
+            gap: 25px;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: #aaa;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+        }
+
+        .stat-value {
+            font-size: 16px;
+            font-weight: bold;
+            color: #00d4ff;
+        }
+
+        .resource-bar {
+            width: 80px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 4px;
+        }
+
+        .energy-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00d4ff, #0096ff);
+            transition: width 0.3s ease;
+        }
+
+        .fuel-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff6b35, #f7931e);
+            transition: width 0.3s ease;
+        }
+
+        .oxygen-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4ecdc4, #44a08d);
+            transition: width 0.3s ease;
+        }
+
+        .hull-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #a8e6cf, #7fcdcd);
+            transition: width 0.3s ease;
+        }
+
+        .game-info {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .level-display {
+            font-size: 20px;
+            font-weight: bold;
+            color: #00d4ff;
+            text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+        }
+
+        .score-display {
+            font-size: 16px;
+            color: #00d4ff;
+        }
+
+        .game-main {
+            flex: 1;
+            display: flex;
+            position: relative;
+        }
+
+        .space-field {
+            width: calc(100% - 320px);
+            height: calc(100vh - 130px);
+            position: relative;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(0, 212, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(138, 43, 226, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(255, 20, 147, 0.1) 0%, transparent 50%),
+                linear-gradient(135deg, #0c0c0c, #1a1a2e, #16213e);
+            overflow: hidden;
+            cursor: crosshair;
+        }
+
+        .stars {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(2px 2px at 20px 30px, #eee, transparent),
+                radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.8), transparent),
+                radial-gradient(1px 1px at 90px 40px, #fff, transparent),
+                radial-gradient(1px 1px at 130px 80px, rgba(255,255,255,0.6), transparent),
+                radial-gradient(2px 2px at 160px 30px, #ddd, transparent);
+            background-repeat: repeat;
+            background-size: 200px 100px;
+            animation: twinkle 4s ease-in-out infinite alternate;
+        }
+
+        @keyframes twinkle {
+            0% { opacity: 0.8; }
+            100% { opacity: 1; }
+        }
+
+        .spaceship {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(45deg, #00d4ff, #0096ff);
+            border: 3px solid #ffffff;
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.6);
+            z-index: 100;
+        }
+
+        .spaceship:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.8);
+        }
+
+        .spaceship.selected {
+            border-color: #ffff00;
+            box-shadow: 0 0 25px rgba(255, 255, 0, 0.8);
+        }
+
+        .planet {
+            position: absolute;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+        }
+
+        .planet:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 25px rgba(255, 255, 255, 0.5);
+        }
+
+        .planet.earth {
+            background: radial-gradient(circle at 30% 30%, #4a90e2, #2e5c8a);
+            width: 80px;
+            height: 80px;
+        }
+
+        .planet.mars {
+            background: radial-gradient(circle at 30% 30%, #cd5c5c, #8b0000);
+            width: 70px;
+            height: 70px;
+        }
+
+        .planet.jupiter {
+            background: radial-gradient(circle at 30% 30%, #daa520, #b8860b);
+            width: 100px;
+            height: 100px;
+        }
+
+        .asteroid {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: radial-gradient(circle, #696969, #2f4f4f);
+            border-radius: 50%;
+            cursor: pointer;
+            animation: asteroidFloat 6s infinite linear;
+            transition: all 0.3s ease;
+        }
+
+        .asteroid:hover {
+            transform: scale(1.2);
+        }
+
+        @keyframes asteroidFloat {
+            0% { transform: rotate(0deg) translateY(-10px); }
+            100% { transform: rotate(360deg) translateY(-10px); }
+        }
+
+        .space-station {
+            position: absolute;
+            width: 90px;
+            height: 90px;
+            background: linear-gradient(45deg, #silver, #darkgray);
+            border: 3px solid #00d4ff;
+            border-radius: 20%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.4);
+        }
+
+        .space-station:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.6);
+        }
+
+        .sidebar {
+            width: 320px;
+            height: 100%;
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0.9), rgba(26, 26, 46, 0.95));
+            border-left: 2px solid #00d4ff;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .sidebar-fixed {
+            flex-shrink: 0;
+        }
+
+        .sidebar-scrollable {
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .sidebar-content {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            transition: transform 0.3s ease;
+        }
+
+        .scroll-controls {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            z-index: 100;
+        }
+
+        .scroll-btn {
+            width: 30px;
+            height: 30px;
+            background: linear-gradient(45deg, rgba(0, 212, 255, 0.8), rgba(0, 150, 255, 0.8));
+            border: 2px solid #00d4ff;
+            color: #ffffff;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .scroll-btn:hover {
+            background: linear-gradient(45deg, #00d4ff, #0096ff);
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.6);
+            transform: scale(1.1);
+        }
+
+        .scroll-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .scroll-indicator {
+            position: absolute;
+            right: 5px;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: rgba(0, 212, 255, 0.2);
+            border-radius: 2px;
+        }
+
+        .scroll-thumb {
+            position: absolute;
+            right: 0;
+            width: 4px;
+            background: linear-gradient(180deg, #00d4ff, #0096ff);
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-section {
+            padding: 20px;
+            border-bottom: 1px solid rgba(0, 212, 255, 0.3);
+        }
+
+        .sidebar-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #00d4ff;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            text-align: center;
+        }
+
+        .upgrade-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .upgrade-btn {
+            padding: 15px 10px;
+            background: linear-gradient(45deg, rgba(0, 212, 255, 0.2), rgba(0, 150, 255, 0.2));
+            border: 2px solid rgba(0, 212, 255, 0.5);
+            color: #ffffff;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-size: 11px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .upgrade-btn:hover {
+            background: linear-gradient(45deg, rgba(0, 212, 255, 0.4), rgba(0, 150, 255, 0.4));
+            border-color: #00d4ff;
+            transform: translateY(-2px);
+        }
+
+        .upgrade-btn.active {
+            background: linear-gradient(45deg, #00d4ff, #0096ff);
+            border-color: #ffff00;
+        }
+
+        .upgrade-icon {
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+
+        .upgrade-cost {
+            font-size: 9px;
+            color: #ffff00;
+        }
+
+        .mission-info {
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+
+        .mission-name {
+            font-weight: bold;
+            color: #00d4ff;
+            margin-bottom: 8px;
+        }
+
+        .mission-details {
+            font-size: 12px;
+            color: #ccc;
+            line-height: 1.4;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 8px;
+            background: linear-gradient(45deg, rgba(0, 212, 255, 0.3), rgba(0, 150, 255, 0.3));
+            border: 1px solid rgba(0, 212, 255, 0.5);
+            color: #ffffff;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn:hover {
+            background: linear-gradient(45deg, rgba(0, 212, 255, 0.5), rgba(0, 150, 255, 0.5));
+            border-color: #00d4ff;
+        }
+
+        .game-footer {
+            height: 50px;
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.2), rgba(0, 150, 255, 0.2));
+            border-top: 2px solid #00d4ff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 20px;
+            box-shadow: 0 -2px 20px rgba(0, 212, 255, 0.3);
+        }
+
+        .controls-info {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 12px 20px;
+            border-radius: 10px;
+            border: 1px solid rgba(0, 212, 255, 0.4);
+            font-size: 11px;
+            display: flex;
+            gap: 30px;
+            align-items: center;
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        .controls-info h4 {
+            margin: 0;
+            color: #00d4ff;
+            font-size: 14px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .control-item {
+            font-size: 11px;
+            color: #ccc;
+            margin: 0;
+        }
+
+        .language-selector {
+            position: relative;
+        }
+
+        .language-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.95);
+            border: 2px solid #00d4ff;
+            border-radius: 8px;
+            display: none;
+            z-index: 1000;
+        }
+
+        .language-option {
+            padding: 12px 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-bottom: 1px solid rgba(0, 212, 255, 0.3);
+        }
+
+        .language-option:hover {
+            background: rgba(0, 212, 255, 0.2);
+        }
+
+        .language-option:last-child {
+            border-bottom: none;
+        }
+
+        .level-selector {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .level-input {
+            width: 50px;
+            padding: 6px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid #00d4ff;
+            color: #ffffff;
+            border-radius: 4px;
+            text-align: center;
+            font-size: 12px;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #0c0c0c, #1a1a2e);
+            border: 3px solid #00d4ff;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 700px;
+            max-height: 80vh;
+            overflow-y: auto;
+            color: #fff;
+            box-shadow: 0 0 50px rgba(0, 212, 255, 0.5);
+        }
+
+        .modal-content h2 {
+            color: #00d4ff;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-content h3 {
+            color: #ffff00;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+        .paused-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 500;
+        }
+
+        .paused-text {
+            font-size: 48px;
+            color: #00d4ff;
+            font-weight: bold;
+            text-shadow: 0 0 20px rgba(0, 212, 255, 0.8);
+            animation: pausePulse 2s infinite;
+        }
+
+        @keyframes pausePulse {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+
+        .level-up-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #00d4ff, #0096ff);
+            border: 3px solid #ffffff;
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            color: #ffffff;
+            font-size: 24px;
+            font-weight: bold;
+            box-shadow: 0 0 50px rgba(0, 212, 255, 0.8);
+            z-index: 1001;
+            display: none;
+            animation: levelUpPulse 0.6s ease-out;
+        }
+
+        @keyframes levelUpPulse {
+            0% { transform: translate(-50%, -50%) scale(0.5); }
+            100% { transform: translate(-50%, -50%) scale(1); }
+        }
+
+        .explosion {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle, #ff6b35, #f7931e, transparent);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: explode 1s ease-out forwards;
+            z-index: 200;
+        }
+
+        @keyframes explode {
+            0% { transform: scale(0); opacity: 1; }
+            100% { transform: scale(3); opacity: 0; }
+        }
+
+        .particle {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #00d4ff;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: particleFloat 3s linear forwards;
+        }
+
+        @keyframes particleFloat {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-150px) scale(0); }
+        }
+
+        .trail {
+            position: absolute;
+            width: 4px;
+            height: 20px;
+            background: linear-gradient(to bottom, #00d4ff, transparent);
+            border-radius: 2px;
+            pointer-events: none;
+            animation: trailFade 2s linear forwards;
+        }
+
+        @keyframes trailFade {
+            0% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        .minimap {
+            width: 150px;
+            height: 100px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #00d4ff;
+            border-radius: 8px;
+            position: relative;
+            margin-bottom: 15px;
+        }
+
+        .minimap-dot {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            border-radius: 50%;
+        }
+
+        .minimap-dot.ship {
+            background: #00d4ff;
+        }
+
+        .minimap-dot.planet {
+            background: #ffff00;
+        }
+
+        .minimap-dot.asteroid {
+            background: #696969;
+        }
+
+        @media (max-width: 768px) {
+            .game-container {
+                width: 95vw;
+            }
+            
+            .sidebar {
+                width: 280px;
+            }
+            
+            .space-field {
+                width: calc(100% - 280px);
+                height: calc(100vh - 150px);
+            }
+            
+            .game-header {
+                padding: 0 10px;
+                height: 90px;
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .header-controls {
+                gap: 8px;
+            }
+            
+            .header-btn {
+                padding: 6px 10px;
+                font-size: 11px;
+            }
+            
+            .ship-stats {
+                gap: 15px;
+            }
+            
+            .stat-value {
+                font-size: 14px;
+            }
+            
+            .resource-bar {
+                width: 60px;
+            }
+            
+            .game-footer {
+                height: 60px;
+                padding: 0 10px;
+            }
+            
+            .controls-info {
+                font-size: 10px;
+                padding: 8px 12px;
+                gap: 15px;
+            }
+        }
+    </style>
+        <style>
+        /* nudge language selector left to avoid close button overlap */
+        @media (min-width:800px){
+            .language-selector{ right:80px !important; }
+        }
+        </style>
+</head>
+<body>
+    <div class="game-container">
+        <!-- En-tête du jeu -->
+        <div class="game-header">
+            <div class="ship-stats">
+                <div class="stat-item">
+                    <div class="stat-label" id="energyLabel">Énergie</div>
+                    <div class="stat-value" id="energyValue">100</div>
+                    <div class="resource-bar">
+                        <div class="energy-fill" id="energyFill" style="width: 100%"></div>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label" id="fuelLabel">Carburant</div>
+                    <div class="stat-value" id="fuelValue">80</div>
+                    <div class="resource-bar">
+                        <div class="fuel-fill" id="fuelFill" style="width: 80%"></div>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label" id="oxygenLabel">Oxygène</div>
+                    <div class="stat-value" id="oxygenValue">90</div>
+                    <div class="resource-bar">
+                        <div class="oxygen-fill" id="oxygenFill" style="width: 90%"></div>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label" id="hullLabel">Coque</div>
+                    <div class="stat-value" id="hullValue">100</div>
+                    <div class="resource-bar">
+                        <div class="hull-fill" id="hullFill" style="width: 100%"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="header-controls">
+                <button class="header-btn" id="startBtn" onclick="startGame()">🚀 <span id="startBtnText">Démarrer</span></button>
+                <button class="header-btn" id="pauseBtn" onclick="togglePause()" style="display: none;">⏸️ <span id="pauseBtnText">Pause</span></button>
+                <button class="header-btn" onclick="newGame()">🔄 <span id="newGameText">Nouvelle Mission</span></button>
+                
+                <div class="level-selector">
+                    <span id="levelSelectorText">Secteur:</span>
+                    <input type="number" class="level-input" id="levelInput" min="1" max="10" value="1" onchange="setStartLevel()">
+                </div>
+                
+                <button class="header-btn" onclick="showRules()">📋 <span id="rulesText">Guide</span></button>
+                <button class="header-btn" onclick="rotateGame()" id="rotateBtn">🔄 <span id="rotateText">Rotation</span></button>
+            </div>
+            
+            <div class="game-info">
+                <div class="level-display">Secteur <span id="levelValue">1</span></div>
+                <div class="score-display">Score: <span id="scoreValue">0</span></div>
+                <div class="language-selector">
+                    <button class="header-btn" onclick="toggleLanguageDropdown()">🌍 <span id="languageText">Français</span></button>
+                    <div class="language-dropdown" id="languageDropdown">
+                        <div class="language-option" onclick="changeLanguage('fr')">🇫🇷 Français</div>
+                        <div class="language-option" onclick="changeLanguage('en')">🇬🇧 English</div>
+                        <div class="language-option" onclick="changeLanguage('ar')">🇸🇦 العربية</div>
+                        <div class="language-option" onclick="changeLanguage('es')">🇪🇸 Español</div>
+                        <div class="language-option" onclick="changeLanguage('de')">🇩🇪 Deutsch</div>
+                        <div class="language-option" onclick="changeLanguage('zh')">🇨🇳 中文</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Zone de jeu principale -->
+        <div class="game-main">
+            <div class="space-field" id="spaceField">
+                <div class="stars"></div>
+                
+                <!-- Overlay de pause -->
+                <div class="paused-overlay" id="pausedOverlay">
+                    <div class="paused-text" id="pausedText">PAUSE</div>
+                </div>
+            </div>
+            
+            <!-- Barre latérale -->
+            <div class="sidebar">
+                <!-- Section fixe - Améliorations toujours visibles -->
+                <div class="sidebar-section sidebar-fixed" id="upgradesInfo">
+                    <div class="sidebar-title" id="upgradesTitle">Améliorations</div>
+                    <div class="upgrade-grid">
+                        <button class="upgrade-btn" onclick="upgradeShip('engine')">
+                            <div class="upgrade-icon">🚀</div>
+                            <div id="upgradeEngine">Moteur</div>
+                            <div class="upgrade-cost" id="engineCost">Coût: 100</div>
+                        </button>
+                        <button class="upgrade-btn" onclick="upgradeShip('shield')">
+                            <div class="upgrade-icon">🛡️</div>
+                            <div id="upgradeShield">Bouclier</div>
+                            <div class="upgrade-cost" id="shieldCost">Coût: 150</div>
+                        </button>
+                        <button class="upgrade-btn" onclick="upgradeShip('weapon')">
+                            <div class="upgrade-icon">⚡</div>
+                            <div id="upgradeWeapon">Arme</div>
+                            <div class="upgrade-cost" id="weaponCost">Coût: 200</div>
+                        </button>
+                        <button class="upgrade-btn" onclick="upgradeShip('scanner')">
+                            <div class="upgrade-icon">📡</div>
+                            <div id="upgradeScanner">Scanner</div>
+                            <div class="upgrade-cost" id="scannerCost">Coût: 120</div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Section défilante -->
+                <div class="sidebar-scrollable">
+                    <div class="sidebar-content" id="sidebarContent">
+                        <div class="sidebar-section">
+                            <div class="sidebar-title" id="missionTitle">Mission Actuelle</div>
+                            <div id="currentMissionInfo">
+                                <div class="mission-info">
+                                    <div class="mission-name" id="missionName">Exploration Initiale</div>
+                                    <div class="mission-details" id="missionDetails">
+                                        Explorez le secteur et collectez des ressources pour améliorer votre vaisseau.
+                                    </div>
+                                    <div class="action-buttons">
+                                        <button class="action-btn" onclick="scanArea()" id="scanBtn">Scanner</button>
+                                        <button class="action-btn" onclick="collectResources()" id="collectBtn">Collecter</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="sidebar-section">
+                            <div class="sidebar-title" id="minimapTitle">Radar Spatial</div>
+                            <div class="minimap" id="minimap">
+                                <!-- Les points du radar seront générés dynamiquement -->
+                            </div>
+                        </div>
+
+                        <div class="sidebar-section">
+                            <div class="sidebar-title" id="leaderboardTitle">Classement</div>
+                            <div id="leaderboard">
+                                <!-- Le classement sera généré dynamiquement -->
+                            </div>
+                        </div>
+
+                        <div class="sidebar-section">
+                            <div class="sidebar-title">Statistiques Détaillées</div>
+                            <div id="detailedStats">
+                                <div style="font-size: 12px; color: #ccc; line-height: 1.6;">
+                                    <div>🚀 Vitesse: <span id="speedStat">3.0</span></div>
+                                    <div>⚡ Puissance: <span id="powerStat">100</span></div>
+                                    <div>🛡️ Protection: <span id="shieldStat">100</span></div>
+                                    <div>📡 Portée: <span id="rangeStat">150</span></div>
+                                    <div>🏆 Missions: <span id="missionsStat">0</span></div>
+                                    <div>💎 Ressources: <span id="resourcesStat">0</span></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="sidebar-section">
+                            <div class="sidebar-title">Journal de Bord</div>
+                            <div id="logbook" style="font-size: 11px; color: #aaa; max-height: 150px; overflow-y: auto;">
+                                <div>📅 Mission démarrée</div>
+                                <div>🌌 Secteur exploré</div>
+                                <div>⚡ Énergie rechargée</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Contrôles de défilement -->
+                    <div class="scroll-controls">
+                        <button class="scroll-btn" id="scrollUpBtn" onclick="scrollSidebar('up')">▲</button>
+                        <button class="scroll-btn" id="scrollDownBtn" onclick="scrollSidebar('down')">▼</button>
+                    </div>
+
+                    <!-- Indicateur de défilement -->
+                    <div class="scroll-indicator">
+                        <div class="scroll-thumb" id="scrollThumb"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pied de page avec contrôles -->
+        <div class="game-footer">
+            <div class="controls-info">
+                <h4 id="controlsTitle">Contrôles</h4>
+                <div class="control-group">
+                    <div class="control-item" id="control1">Clic : Sélectionner vaisseau</div>
+                    <div class="control-item" id="control2">Clic droit : Déplacer vers</div>
+                </div>
+                <div class="control-group">
+                    <div class="control-item" id="control3">WASD : Navigation manuelle</div>
+                    <div class="control-item" id="control4">Espace : Tirer/Scanner</div>
+                </div>
+                <div class="control-group">
+                    <div class="control-item" id="control5">P : Pause</div>
+                    <div class="control-item" id="control6">Échap : Menu principal</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de montée de niveau -->
+    <div class="level-up-modal" id="levelUpModal">
+        🌟 <span id="levelUpText">NOUVEAU SECTEUR DÉBLOQUÉ !</span> 🌟
+    </div>
+
+    <!-- Modal des règles -->
+    <div class="modal" id="rulesModal">
+        <div class="modal-content">
+            <h2 id="rulesTitle">Guide de l'Explorateur Spatial</h2>
+            <div id="rulesContent">
+                <h3 id="objectiveTitle">🎯 Objectif</h3>
+                <p id="objectiveText">Explorez la galaxie, collectez des ressources, améliorez votre vaisseau et découvrez de nouveaux mondes dans cette aventure spatiale épique !</p>
+                
+                <h3 id="resourcesTitle">⚡ Ressources du Vaisseau</h3>
+                <ul id="resourcesList">
+                    <li id="resource1">🔋 Énergie : Alimentation principale du vaisseau</li>
+                    <li id="resource2">⛽ Carburant : Nécessaire pour les déplacements</li>
+                    <li id="resource3">💨 Oxygène : Survie de l'équipage</li>
+                    <li id="resource4">🛡️ Coque : Intégrité structurelle du vaisseau</li>
+                </ul>
+                
+                <h3 id="upgradesTitle">🔧 Améliorations</h3>
+                <ul id="upgradesList">
+                    <li id="upgrade1">🚀 Moteur : Augmente la vitesse de déplacement</li>
+                    <li id="upgrade2">🛡️ Bouclier : Améliore la protection</li>
+                    <li id="upgrade3">⚡ Arme : Renforce la puissance de feu</li>
+                    <li id="upgrade4">📡 Scanner : Étend la portée de détection</li>
+                </ul>
+                
+                <h3 id="objectsTitle">🌌 Objets Spatiaux</h3>
+                <ul id="objectsList">
+                    <li id="object1">🌍 Planètes : Sources de ressources rares</li>
+                    <li id="object2">🏗️ Stations : Centres de commerce et réparation</li>
+                    <li id="object3">☄️ Astéroïdes : Minerais précieux à extraire</li>
+                    <li id="object4">⭐ Étoiles : Points de navigation galactique</li>
+                </ul>
+                
+                <h3 id="strategyTitle">🧠 Stratégie</h3>
+                <ul id="strategyList">
+                    <li id="strategy1">Gérez vos ressources avec prudence</li>
+                    <li id="strategy2">Explorez méthodiquement chaque secteur</li>
+                    <li id="strategy3">Améliorez votre vaisseau régulièrement</li>
+                    <li id="strategy4">Évitez les dangers spatiaux</li>
+                </ul>
+            </div>
+            <button class="header-btn" onclick="hideRules()" style="margin-top: 20px; width: 100%;">
+                <span id="closeRulesText">Fermer</span>
+            </button>
+        </div>
+    </div>
+
+    <style>
+        .global-close-btn { position: fixed; top: 14px; right: 14px; z-index: 99999; background: #ff3b3b; color: #fff; border: none; width:52px; height:52px; border-radius:50%; font-size:22px; cursor:pointer; box-shadow:0 6px 18px rgba(255,59,59,0.3);} 
+        .global-close-btn:hover{ transform: scale(1.05); }
+    </style>
+    <button class="global-close-btn" title="Fermer" aria-label="Fermer" onclick="closePlatform()">✕</button>
+    <script>
+    /* Canonical child-side overlay closer for platform pages */
+    function closePlatform(){
+        try{ console.debug('jeux30: closePlatform called'); }catch(e){}
+        if(window.parent && window.parent !== window){
+            window.parent.postMessage({ action: 'close', reason: 'user-initiated', source: 'jeux30' }, '*');
+            return;
+        }
+        if(window.opener && !window.opener.closed){
+            try{ window.opener.postMessage({ action: 'child-closed', source: 'jeux30' }, '*'); }catch(e){}
+            try{ window.close(); }catch(e){}
+            return;
+        }
+        window.location.href = '/global_platform.html';
+    }
+    window.closePlatform = closePlatform;
+
+    
+        // Système de langues
+        const languages = {
+            fr: {
+                // Interface principale
+                energy: "Énergie",
+                fuel: "Carburant", 
+                oxygen: "Oxygène",
+                hull: "Coque",
+                sector: "Secteur",
+                score: "Score",
+                radar: "Radar Spatial",
+                upgrades: "Améliorations",
+                mission: "Mission Actuelle",
+                leaderboard: "Classement",
+                
+                // Contrôles
+                start: "Démarrer",
+                pause: "Pause",
+                resume: "Reprendre",
+                newMission: "Nouvelle Mission",
+                sectorSelector: "Secteur:",
+                language: "Français",
+                rotation: "Rotation",
+                guide: "Guide",
+                
+                // Améliorations
+                engine: "Moteur",
+                shield: "Bouclier",
+                weapon: "Arme",
+                scanner: "Scanner",
+                cost: "Coût",
+                
+                // Actions
+                scan: "Scanner",
+                collect: "Collecter",
+                
+                // Messages
+                levelUp: "NOUVEAU SECTEUR DÉBLOQUÉ !",
+                gameOver: "Mission échouée! Score final:",
+                noScores: "Aucun score enregistré",
+                missionName: "Exploration Initiale",
+                missionDetails: "Explorez le secteur et collectez des ressources pour améliorer votre vaisseau.",
+                
+                // Contrôles
+                controlsTitle: "Contrôles",
+                control1: "Clic : Sélectionner vaisseau",
+                control2: "Clic droit : Déplacer vers",
+                control3: "WASD : Navigation manuelle",
+                control4: "Espace : Tirer/Scanner",
+                control5: "P : Pause",
+                control6: "Échap : Menu principal",
+                
+                // Règles
+                rulesTitle: "Guide de l'Explorateur Spatial",
+                objective: "🎯 Objectif",
+                objectiveText: "Explorez la galaxie, collectez des ressources, améliorez votre vaisseau et découvrez de nouveaux mondes dans cette aventure spatiale épique !",
+                resourcesTitle: "⚡ Ressources du Vaisseau",
+                resource1: "🔋 Énergie : Alimentation principale du vaisseau",
+                resource2: "⛽ Carburant : Nécessaire pour les déplacements",
+                resource3: "💨 Oxygène : Survie de l'équipage",
+                resource4: "🛡️ Coque : Intégrité structurelle du vaisseau",
+                upgradesTitle: "🔧 Améliorations",
+                upgrade1: "🚀 Moteur : Augmente la vitesse de déplacement",
+                upgrade2: "🛡️ Bouclier : Améliore la protection",
+                upgrade3: "⚡ Arme : Renforce la puissance de feu",
+                upgrade4: "📡 Scanner : Étend la portée de détection",
+                objectsTitle: "🌌 Objets Spatiaux",
+                object1: "🌍 Planètes : Sources de ressources rares",
+                object2: "🏗️ Stations : Centres de commerce et réparation",
+                object3: "☄️ Astéroïdes : Minerais précieux à extraire",
+                object4: "⭐ Étoiles : Points de navigation galactique",
+                strategyTitle: "🧠 Stratégie",
+                strategy1: "Gérez vos ressources avec prudence",
+                strategy2: "Explorez méthodiquement chaque secteur",
+                strategy3: "Améliorez votre vaisseau régulièrement",
+                strategy4: "Évitez les dangers spatiaux",
+                close: "Fermer"
+            },
+            en: {
+                energy: "Energy",
+                fuel: "Fuel",
+                oxygen: "Oxygen",
+                hull: "Hull",
+                sector: "Sector",
+                score: "Score",
+                radar: "Space Radar",
+                upgrades: "Upgrades",
+                mission: "Current Mission",
+                leaderboard: "Leaderboard",
+                
+                start: "Start",
+                pause: "Pause",
+                resume: "Resume",
+                newMission: "New Mission",
+                sectorSelector: "Sector:",
+                language: "English",
+                rotation: "Rotation",
+                guide: "Guide",
+                
+                engine: "Engine",
+                shield: "Shield",
+                weapon: "Weapon",
+                scanner: "Scanner",
+                cost: "Cost",
+                
+                scan: "Scan",
+                collect: "Collect",
+                
+                levelUp: "NEW SECTOR UNLOCKED!",
+                gameOver: "Mission failed! Final score:",
+                noScores: "No scores recorded",
+                missionName: "Initial Exploration",
+                missionDetails: "Explore the sector and collect resources to upgrade your ship.",
+                
+                controlsTitle: "Controls",
+                control1: "Click: Select ship",
+                control2: "Right click: Move to",
+                control3: "WASD: Manual navigation",
+                control4: "Space: Fire/Scan",
+                control5: "P: Pause",
+                control6: "Esc: Main menu",
+                
+                rulesTitle: "Space Explorer Guide",
+                objective: "🎯 Objective",
+                objectiveText: "Explore the galaxy, collect resources, upgrade your ship and discover new worlds in this epic space adventure!",
+                resourcesTitle: "⚡ Ship Resources",
+                resource1: "🔋 Energy: Main ship power supply",
+                resource2: "⛽ Fuel: Required for movement",
+                resource3: "💨 Oxygen: Crew survival",
+                resource4: "🛡️ Hull: Ship structural integrity",
+                upgradesTitle: "🔧 Upgrades",
+                upgrade1: "🚀 Engine: Increases movement speed",
+                upgrade2: "🛡️ Shield: Improves protection",
+                upgrade3: "⚡ Weapon: Enhances firepower",
+                upgrade4: "📡 Scanner: Extends detection range",
+                objectsTitle: "🌌 Space Objects",
+                object1: "🌍 Planets: Sources of rare resources",
+                object2: "🏗️ Stations: Trade and repair centers",
+                object3: "☄️ Asteroids: Precious minerals to extract",
+                object4: "⭐ Stars: Galactic navigation points",
+                strategyTitle: "🧠 Strategy",
+                strategy1: "Manage your resources carefully",
+                strategy2: "Explore each sector methodically",
+                strategy3: "Upgrade your ship regularly",
+                strategy4: "Avoid space hazards",
+                close: "Close"
+            },
+            ar: {
+                energy: "الطاقة",
+                fuel: "الوقود",
+                oxygen: "الأكسجين",
+                hull: "الهيكل",
+                sector: "القطاع",
+                score: "النقاط",
+                radar: "رادار الفضاء",
+                upgrades: "التحسينات",
+                mission: "المهمة الحالية",
+                leaderboard: "الترتيب",
+                
+                start: "ابدأ",
+                pause: "توقف",
+                resume: "استكمل",
+                newMission: "مهمة جديدة",
+                sectorSelector: "القطاع:",
+                language: "العربية",
+                rotation: "دوران",
+                guide: "الدليل",
+                
+                engine: "المحرك",
+                shield: "الدرع",
+                weapon: "السلاح",
+                scanner: "الماسح",
+                cost: "التكلفة",
+                
+                scan: "مسح",
+                collect: "جمع",
+                
+                levelUp: "قطاع جديد مفتوح!",
+                gameOver: "فشلت المهمة! النقاط النهائية:",
+                noScores: "لا توجد نقاط مسجلة",
+                missionName: "الاستكشاف الأولي",
+                missionDetails: "استكشف القطاع واجمع الموارد لتحسين سفينتك.",
+                
+                controlsTitle: "التحكم",
+                control1: "نقر: اختيار السفينة",
+                control2: "نقر يمين: الانتقال إلى",
+                control3: "WASD: التنقل اليدوي",
+                control4: "مسافة: إطلاق نار/مسح",
+                control5: "P: توقف",
+                control6: "Esc: القائمة الرئيسية",
+                
+                rulesTitle: "دليل مستكشف الفضاء",
+                objective: "🎯 الهدف",
+                objectiveText: "استكشف المجرة، اجمع الموارد، حسن سفينتك واكتشف عوالم جديدة في هذه المغامرة الفضائية الملحمية!",
+                resourcesTitle: "⚡ موارد السفينة",
+                resource1: "🔋 الطاقة: مصدر الطاقة الرئيسي للسفينة",
+                resource2: "⛽ الوقود: مطلوب للحركة",
+                resource3: "💨 الأكسجين: بقاء الطاقم",
+                resource4: "🛡️ الهيكل: سلامة هيكل السفينة",
+                upgradesTitle: "🔧 التحسينات",
+                upgrade1: "🚀 المحرك: يزيد سرعة الحركة",
+                upgrade2: "🛡️ الدرع: يحسن الحماية",
+                upgrade3: "⚡ السلاح: يعزز القوة النارية",
+                upgrade4: "📡 الماسح: يوسع نطاق الكشف",
+                objectsTitle: "🌌 الأجرام الفضائية",
+                object1: "🌍 الكواكب: مصادر الموارد النادرة",
+                object2: "🏗️ المحطات: مراكز التجارة والإصلاح",
+                object3: "☄️ الكويكبات: معادن ثمينة للاستخراج",
+                object4: "⭐ النجوم: نقاط الملاحة المجرية",
+                strategyTitle: "🧠 الاستراتيجية",
+                strategy1: "أدر مواردك بحذر",
+                strategy2: "استكشف كل قطاع بمنهجية",
+                strategy3: "حسن سفينتك بانتظام",
+                strategy4: "تجنب مخاطر الفضاء",
+                close: "إغلاق"
+            },
+            es: {
+                energy: "Energía",
+                fuel: "Combustible",
+                oxygen: "Oxígeno",
+                hull: "Casco",
+                sector: "Sector",
+                score: "Puntuación",
+                radar: "Radar Espacial",
+                upgrades: "Mejoras",
+                mission: "Misión Actual",
+                leaderboard: "Clasificación",
+                
+                start: "Iniciar",
+                pause: "Pausa",
+                resume: "Reanudar",
+                newMission: "Nueva Misión",
+                sectorSelector: "Sector:",
+                language: "Español",
+                rotation: "Rotación",
+                guide: "Guía",
+                
+                engine: "Motor",
+                shield: "Escudo",
+                weapon: "Arma",
+                scanner: "Escáner",
+                cost: "Costo",
+                
+                scan: "Escanear",
+                collect: "Recolectar",
+                
+                levelUp: "¡NUEVO SECTOR DESBLOQUEADO!",
+                gameOver: "¡Misión fallida! Puntuación final:",
+                noScores: "No hay puntuaciones registradas",
+                missionName: "Exploración Inicial",
+                missionDetails: "Explora el sector y recolecta recursos para mejorar tu nave.",
+                
+                controlsTitle: "Controles",
+                control1: "Clic: Seleccionar nave",
+                control2: "Clic derecho: Mover a",
+                control3: "WASD: Navegación manual",
+                control4: "Espacio: Disparar/Escanear",
+                control5: "P: Pausa",
+                control6: "Esc: Menú principal",
+                
+                rulesTitle: "Guía del Explorador Espacial",
+                objective: "🎯 Objetivo",
+                objectiveText: "¡Explora la galaxia, recolecta recursos, mejora tu nave y descubre nuevos mundos en esta épica aventura espacial!",
+                resourcesTitle: "⚡ Recursos de la Nave",
+                resource1: "🔋 Energía: Suministro principal de energía de la nave",
+                resource2: "⛽ Combustible: Requerido para el movimiento",
+                resource3: "💨 Oxígeno: Supervivencia de la tripulación",
+                resource4: "🛡️ Casco: Integridad estructural de la nave",
+                upgradesTitle: "🔧 Mejoras",
+                upgrade1: "🚀 Motor: Aumenta la velocidad de movimiento",
+                upgrade2: "🛡️ Escudo: Mejora la protección",
+                upgrade3: "⚡ Arma: Aumenta la potencia de fuego",
+                upgrade4: "📡 Escáner: Extiende el rango de detección",
+                objectsTitle: "🌌 Objetos Espaciales",
+                object1: "🌍 Planetas: Fuentes de recursos raros",
+                object2: "🏗️ Estaciones: Centros de comercio y reparación",
+                object3: "☄️ Asteroides: Minerales preciosos para extraer",
+                object4: "⭐ Estrellas: Puntos de navegación galáctica",
+                strategyTitle: "🧠 Estrategia",
+                strategy1: "Gestiona tus recursos cuidadosamente",
+                strategy2: "Explora cada sector metódicamente",
+                strategy3: "Mejora tu nave regularmente",
+                strategy4: "Evita los peligros espaciales",
+                close: "Cerrar"
+            },
+            de: {
+                energy: "Energie",
+                fuel: "Treibstoff",
+                oxygen: "Sauerstoff",
+                hull: "Rumpf",
+                sector: "Sektor",
+                score: "Punkte",
+                radar: "Weltraumradar",
+                upgrades: "Verbesserungen",
+                mission: "Aktuelle Mission",
+                leaderboard: "Rangliste",
+                
+                start: "Starten",
+                pause: "Pause",
+                resume: "Fortsetzen",
+                newMission: "Neue Mission",
+                sectorSelector: "Sektor:",
+                language: "Deutsch",
+                rotation: "Rotation",
+                guide: "Anleitung",
+                
+                engine: "Triebwerk",
+                shield: "Schild",
+                weapon: "Waffe",
+                scanner: "Scanner",
+                cost: "Kosten",
+                
+                scan: "Scannen",
+                collect: "Sammeln",
+                
+                levelUp: "NEUER SEKTOR FREIGESCHALTET!",
+                gameOver: "Mission gescheitert! Endpunktzahl:",
+                noScores: "Keine Punkte aufgezeichnet",
+                missionName: "Erste Erkundung",
+                missionDetails: "Erkunde den Sektor und sammle Ressourcen, um dein Schiff zu verbessern.",
+                
+                controlsTitle: "Steuerung",
+                control1: "Klick: Schiff auswählen",
+                control2: "Rechtsklick: Bewegen zu",
+                control3: "WASD: Manuelle Navigation",
+                control4: "Leertaste: Feuern/Scannen",
+                control5: "P: Pause",
+                control6: "Esc: Hauptmenü",
+                
+                rulesTitle: "Weltraum-Explorer Anleitung",
+                objective: "🎯 Ziel",
+                objectiveText: "Erkunde die Galaxie, sammle Ressourcen, verbessere dein Schiff und entdecke neue Welten in diesem epischen Weltraumabenteuer!",
+                resourcesTitle: "⚡ Schiffsressourcen",
+                resource1: "🔋 Energie: Hauptenergiequelle des Schiffs",
+                resource2: "⛽ Treibstoff: Erforderlich für Bewegung",
+                resource3: "💨 Sauerstoff: Überleben der Besatzung",
+                resource4: "🛡️ Rumpf: Strukturelle Integrität des Schiffs",
+                upgradesTitle: "🔧 Verbesserungen",
+                upgrade1: "🚀 Triebwerk: Erhöht Bewegungsgeschwindigkeit",
+                upgrade2: "🛡️ Schild: Verbessert Schutz",
+                upgrade3: "⚡ Waffe: Verstärkt Feuerkraft",
+                upgrade4: "📡 Scanner: Erweitert Erkennungsreichweite",
+                objectsTitle: "🌌 Weltraumobjekte",
+                object1: "🌍 Planeten: Quellen seltener Ressourcen",
+                object2: "🏗️ Stationen: Handels- und Reparaturzentren",
+                object3: "☄️ Asteroiden: Wertvolle Mineralien zum Abbau",
+                object4: "⭐ Sterne: Galaktische Navigationspunkte",
+                strategyTitle: "🧠 Strategie",
+                strategy1: "Verwalte deine Ressourcen sorgfältig",
+                strategy2: "Erkunde jeden Sektor methodisch",
+                strategy3: "Verbessere dein Schiff regelmäßig",
+                strategy4: "Vermeide Weltraumgefahren",
+                close: "Schließen"
+            },
+            zh: {
+                energy: "能量",
+                fuel: "燃料",
+                oxygen: "氧气",
+                hull: "船体",
+                sector: "星区",
+                score: "分数",
+                radar: "太空雷达",
+                upgrades: "升级",
+                mission: "当前任务",
+                leaderboard: "排行榜",
+                
+                start: "开始",
+                pause: "暂停",
+                resume: "继续",
+                newMission: "新任务",
+                sectorSelector: "星区:",
+                language: "中文",
+                rotation: "旋转",
+                guide: "指南",
+                
+                engine: "引擎",
+                shield: "护盾",
+                weapon: "武器",
+                scanner: "扫描器",
+                cost: "费用",
+                
+                scan: "扫描",
+                collect: "收集",
+                
+                levelUp: "新星区解锁！",
+                gameOver: "任务失败！最终分数:",
+                noScores: "没有记录分数",
+                missionName: "初始探索",
+                missionDetails: "探索星区并收集资源来升级你的飞船。",
+                
+                controlsTitle: "控制",
+                control1: "点击：选择飞船",
+                control2: "右键：移动到",
+                control3: "WASD：手动导航",
+                control4: "空格：射击/扫描",
+                control5: "P：暂停",
+                control6: "Esc：主菜单",
+                
+                rulesTitle: "太空探索者指南",
+                objective: "🎯 目标",
+                objectiveText: "探索银河系，收集资源，升级你的飞船，在这个史诗般的太空冒险中发现新世界！",
+                resourcesTitle: "⚡ 飞船资源",
+                resource1: "🔋 能量：飞船主要动力供应",
+                resource2: "⛽ 燃料：移动所需",
+                resource3: "💨 氧气：船员生存",
+                resource4: "🛡️ 船体：飞船结构完整性",
+                upgradesTitle: "🔧 升级",
+                upgrade1: "🚀 引擎：增加移动速度",
+                upgrade2: "🛡️ 护盾：提高保护",
+                upgrade3: "⚡ 武器：增强火力",
+                upgrade4: "📡 扫描器：扩展探测范围",
+                objectsTitle: "🌌 太空物体",
+                object1: "🌍 行星：稀有资源来源",
+                object2: "🏗️ 空间站：贸易和维修中心",
+                object3: "☄️ 小行星：珍贵矿物开采",
+                object4: "⭐ 恒星：银河导航点",
+                strategyTitle: "🧠 策略",
+                strategy1: "谨慎管理你的资源",
+                strategy2: "有条不紊地探索每个星区",
+                strategy3: "定期升级你的飞船",
+                strategy4: "避免太空危险",
+                close: "关闭"
+            }
+        };
+
+        // État du jeu
+        const gameState = {
+            ship: {
+                x: 300,
+                y: 300,
+                energy: 100,
+                fuel: 80,
+                oxygen: 90,
+                hull: 100,
+                maxEnergy: 100,
+                maxFuel: 100,
+                maxOxygen: 100,
+                maxHull: 100,
+                speed: 3,
+                level: 1,
+                score: 0,
+                upgrades: {
+                    engine: 0,
+                    shield: 0,
+                    weapon: 0,
+                    scanner: 0
+                }
+            },
+            planets: [],
+            asteroids: [],
+            stations: [],
+            gameRunning: false,
+            paused: false,
+            rotated: false,
+            currentLanguage: 'fr',
+            startLevel: 1,
+            keys: {},
+            selectedShip: null,
+            currentMission: null,
+            sidebarScroll: 0,
+            maxSidebarScroll: 0,
+            missionCount: 0,
+            resourcesCollected: 0
+        };
+
+        // Éléments DOM
+        const spaceField = document.getElementById('spaceField');
+        const levelUpModal = document.getElementById('levelUpModal');
+
+        // Fonctions de contrôle du jeu
+        function startGame() {
+            if (!gameState.gameRunning) {
+                gameState.gameRunning = true;
+                gameState.paused = false;
+                document.getElementById('startBtn').style.display = 'none';
+                document.getElementById('pauseBtn').style.display = 'inline-block';
+                document.getElementById('pausedOverlay').style.display = 'none';
+                
+                // Appliquer le niveau de départ
+                gameState.ship.level = gameState.startLevel;
+                if (gameState.startLevel > 1) {
+                    // Améliorer les ressources selon le niveau
+                    gameState.ship.energy = 100;
+                    gameState.ship.fuel = 80 + ((gameState.startLevel - 1) * 10);
+                    gameState.ship.oxygen = 90 + ((gameState.startLevel - 1) * 5);
+                    gameState.ship.hull = 100;
+                }
+                
+                // Initialiser l'espace
+                initializeSpace();
+                
+                // Créer le vaisseau
+                createSpaceship();
+                
+                // Démarrer la boucle de jeu
+                gameLoop();
+                
+                updateUI();
+                updateLanguage();
+            }
+        }
+
+        function togglePause() {
+            if (!gameState.gameRunning) return;
+            
+            gameState.paused = !gameState.paused;
+            const pausedOverlay = document.getElementById('pausedOverlay');
+            const pauseBtn = document.getElementById('pauseBtn');
+            
+            if (gameState.paused) {
+                pausedOverlay.style.display = 'flex';
+                pauseBtn.innerHTML = '▶️ <span id="pauseBtnText">' + getText('resume') + '</span>';
+            } else {
+                pausedOverlay.style.display = 'none';
+                pauseBtn.innerHTML = '⏸️ <span id="pauseBtnText">' + getText('pause') + '</span>';
+            }
+        }
+
+        function newGame() {
+            // Réinitialiser l'état du jeu
+            gameState.ship = {
+                x: 300,
+                y: 300,
+                energy: 100,
+                fuel: 80,
+                oxygen: 90,
+                hull: 100,
+                maxEnergy: 100,
+                maxFuel: 100,
+                maxOxygen: 100,
+                maxHull: 100,
+                speed: 3,
+                level: gameState.startLevel,
+                score: 0,
+                upgrades: {
+                    engine: 0,
+                    shield: 0,
+                    weapon: 0,
+                    scanner: 0
+                }
+            };
+            
+            // Nettoyer l'espace
+            clearSpace();
+            
+            gameState.planets = [];
+            gameState.asteroids = [];
+            gameState.stations = [];
+            gameState.gameRunning = false;
+            gameState.paused = false;
+            gameState.selectedShip = null;
+            gameState.currentMission = null;
+            
+            // Fermer les modals
+            closeAllModals();
+            
+            // Réinitialiser les boutons
+            document.getElementById('startBtn').style.display = 'inline-block';
+            document.getElementById('pauseBtn').style.display = 'none';
+            
+            // Recréer le contenu
+            initGame();
+        }
+
+        function clearSpace() {
+            const elements = spaceField.querySelectorAll('.spaceship, .planet, .asteroid, .space-station, .explosion, .particle, .trail');
+            elements.forEach(element => element.remove());
+        }
+
+        function closeAllModals() {
+            document.getElementById('levelUpModal').style.display = 'none';
+            document.getElementById('pausedOverlay').style.display = 'none';
+        }
+
+        function setStartLevel() {
+            const levelInput = document.getElementById('levelInput');
+            gameState.startLevel = Math.max(1, Math.min(10, parseInt(levelInput.value) || 1));
+            levelInput.value = gameState.startLevel;
+        }
+
+        function rotateGame() {
+            gameState.rotated = !gameState.rotated;
+            const gameContainer = document.querySelector('.game-container');
+            
+            if (gameState.rotated) {
+                gameContainer.style.transform = 'rotate(90deg)';
+            } else {
+                gameContainer.style.transform = 'rotate(0deg)';
+            }
+        }
+
+        function toggleLanguageDropdown() {
+            const dropdown = document.getElementById('languageDropdown');
+            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function changeLanguage(lang) {
+            gameState.currentLanguage = lang;
+            document.getElementById('languageDropdown').style.display = 'none';
+            updateLanguage();
+        }
+
+        function getText(key) {
+            return languages[gameState.currentLanguage][key] || key;
+        }
+
+        function updateLanguage() {
+            // Mettre à jour tous les textes de l'interface
+            const elements = {
+                // Labels des ressources
+                'energyLabel': getText('energy'),
+                'fuelLabel': getText('fuel'),
+                'oxygenLabel': getText('oxygen'),
+                'hullLabel': getText('hull'),
+                
+                // Boutons de contrôle
+                'startBtnText': gameState.gameRunning ? getText('resume') : getText('start'),
+                'pauseBtnText': gameState.paused ? getText('resume') : getText('pause'),
+                'newGameText': getText('newMission'),
+                'levelSelectorText': getText('sectorSelector'),
+                'languageText': getText('language'),
+                'rotateText': getText('rotation'),
+                'rulesText': getText('guide'),
+                
+                // Améliorations
+                'upgradeEngine': getText('engine'),
+                'upgradeShield': getText('shield'),
+                'upgradeWeapon': getText('weapon'),
+                'upgradeScanner': getText('scanner'),
+                
+                // Actions
+                'scanBtn': getText('scan'),
+                'collectBtn': getText('collect'),
+                
+                // Mission
+                'missionName': getText('missionName'),
+                'missionDetails': getText('missionDetails'),
+                
+                // Contrôles
+                'controlsTitle': getText('controlsTitle'),
+                'control1': getText('control1'),
+                'control2': getText('control2'),
+                'control3': getText('control3'),
+                'control4': getText('control4'),
+                'control5': getText('control5'),
+                'control6': getText('control6'),
+                
+                // Autres
+                'levelUpText': getText('levelUp'),
+                'pausedText': gameState.paused ? getText('pause').toUpperCase() : 'PAUSE',
+                'closeRulesText': getText('close'),
+                
+                // Règles du jeu
+                'rulesTitle': getText('rulesTitle'),
+                'objectiveTitle': getText('objective'),
+                'objectiveText': getText('objectiveText'),
+                'resourcesTitle': getText('resourcesTitle'),
+                'resource1': getText('resource1'),
+                'resource2': getText('resource2'),
+                'resource3': getText('resource3'),
+                'resource4': getText('resource4'),
+                'upgradesTitle': getText('upgradesTitle'),
+                'upgrade1': getText('upgrade1'),
+                'upgrade2': getText('upgrade2'),
+                'upgrade3': getText('upgrade3'),
+                'upgrade4': getText('upgrade4'),
+                'objectsTitle': getText('objectsTitle'),
+                'object1': getText('object1'),
+                'object2': getText('object2'),
+                'object3': getText('object3'),
+                'object4': getText('object4'),
+                'strategyTitle': getText('strategyTitle'),
+                'strategy1': getText('strategy1'),
+                'strategy2': getText('strategy2'),
+                'strategy3': getText('strategy3'),
+                'strategy4': getText('strategy4')
+            };
+            
+            // Appliquer les textes
+            Object.keys(elements).forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.textContent = elements[id];
+                }
+            });
+            
+            // Mettre à jour les titres des sections
+            const sidebarTitles = document.querySelectorAll('.sidebar-title');
+            if (sidebarTitles[0]) sidebarTitles[0].textContent = getText('upgrades');
+            if (sidebarTitles[1]) sidebarTitles[1].textContent = getText('mission');
+            if (sidebarTitles[2]) sidebarTitles[2].textContent = getText('radar');
+            if (sidebarTitles[3]) sidebarTitles[3].textContent = getText('leaderboard');
+            
+            // Mettre à jour les coûts des améliorations
+            document.getElementById('engineCost').textContent = getText('cost') + ': ' + (100 + gameState.ship.upgrades.engine * 50);
+            document.getElementById('shieldCost').textContent = getText('cost') + ': ' + (150 + gameState.ship.upgrades.shield * 75);
+            document.getElementById('weaponCost').textContent = getText('cost') + ': ' + (200 + gameState.ship.upgrades.weapon * 100);
+            document.getElementById('scannerCost').textContent = getText('cost') + ': ' + (120 + gameState.ship.upgrades.scanner * 60);
+        }
+
+        function showRules() {
+            document.getElementById('rulesModal').style.display = 'flex';
+        }
+
+        function hideRules() {
+            document.getElementById('rulesModal').style.display = 'none';
+        }
+
+        // Fermer les dropdowns en cliquant ailleurs
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.language-selector')) {
+                document.getElementById('languageDropdown').style.display = 'none';
+            }
+            if (e.target.id === 'rulesModal') {
+                hideRules();
+            }
+        });
+
+        // Initialisation du jeu
+        function initGame() {
+            updateUI();
+            loadLeaderboard();
+            updateLanguage();
+        }
+
+        // Initialisation de l'espace
+        function initializeSpace() {
+            // Créer des planètes
+            spawnPlanets();
+            
+            // Créer des astéroïdes
+            spawnAsteroids();
+            
+            // Créer des stations spatiales
+            spawnStations();
+        }
+
+        function spawnPlanets() {
+            const planetTypes = ['earth', 'mars', 'jupiter'];
+            const planetCount = 3 + gameState.ship.level;
+            
+            for (let i = 0; i < planetCount; i++) {
+                const type = planetTypes[Math.floor(Math.random() * planetTypes.length)];
+                const x = Math.random() * (spaceField.offsetWidth - 150) + 75;
+                const y = Math.random() * (spaceField.offsetHeight - 150) + 75;
+                
+                createPlanet(type, x, y);
+            }
+        }
+
+        function createPlanet(type, x, y) {
+            const planet = {
+                id: Date.now() + Math.random(),
+                type: type,
+                x: x,
+                y: y,
+                resources: 100 + Math.random() * 200,
+                element: null
+            };
+
+            const planetElement = document.createElement('div');
+            planetElement.className = `planet ${type}`;
+            planetElement.id = `planet-${planet.id}`;
+            planetElement.style.left = x + 'px';
+            planetElement.style.top = y + 'px';
+            
+            // Ajouter l'icône selon le type
+            const icons = { earth: '🌍', mars: '🔴', jupiter: '🟠' };
+            planetElement.innerHTML = icons[type];
+            
+            planetElement.onclick = () => interactWithPlanet(planet);
+
+            spaceField.appendChild(planetElement);
+            gameState.planets.push(planet);
+            planet.element = planetElement;
+        }
+
+        function spawnAsteroids() {
+            const asteroidCount = 5 + (gameState.ship.level * 2);
+            
+            for (let i = 0; i < asteroidCount; i++) {
+                const x = Math.random() * (spaceField.offsetWidth - 60) + 30;
+                const y = Math.random() * (spaceField.offsetHeight - 60) + 30;
+                
+                createAsteroid(x, y);
+            }
+        }
+
+        function createAsteroid(x, y) {
+            const asteroid = {
+                id: Date.now() + Math.random(),
+                x: x,
+                y: y,
+                minerals: 50 + Math.random() * 100,
+                element: null
+            };
+
+            const asteroidElement = document.createElement('div');
+            asteroidElement.className = 'asteroid';
+            asteroidElement.id = `asteroid-${asteroid.id}`;
+            asteroidElement.style.left = x + 'px';
+            asteroidElement.style.top = y + 'px';
+            asteroidElement.innerHTML = '☄️';
+            
+            asteroidElement.onclick = () => mineAsteroid(asteroid);
+
+            spaceField.appendChild(asteroidElement);
+            gameState.asteroids.push(asteroid);
+            asteroid.element = asteroidElement;
+        }
+
+        function spawnStations() {
+            const stationCount = 1 + Math.floor(gameState.ship.level / 2);
+            
+            for (let i = 0; i < stationCount; i++) {
+                const x = Math.random() * (spaceField.offsetWidth - 120) + 60;
+                const y = Math.random() * (spaceField.offsetHeight - 120) + 60;
+                
+                createStation(x, y);
+            }
+        }
+
+        function createStation(x, y) {
+            const station = {
+                id: Date.now() + Math.random(),
+                x: x,
+                y: y,
+                services: ['repair', 'refuel', 'upgrade'],
+                element: null
+            };
+
+            const stationElement = document.createElement('div');
+            stationElement.className = 'space-station';
+            stationElement.id = `station-${station.id}`;
+            stationElement.style.left = x + 'px';
+            stationElement.style.top = y + 'px';
+            stationElement.innerHTML = '🏗️';
+            
+            stationElement.onclick = () => dockAtStation(station);
+
+            spaceField.appendChild(stationElement);
+            gameState.stations.push(station);
+            station.element = stationElement;
+        }
+
+        // Création du vaisseau
+        function createSpaceship() {
+            const shipElement = document.createElement('div');
+            shipElement.className = 'spaceship';
+            shipElement.id = 'playerShip';
+            shipElement.style.left = gameState.ship.x + 'px';
+            shipElement.style.top = gameState.ship.y + 'px';
+            shipElement.innerHTML = '🚀';
+            
+            shipElement.onclick = (e) => {
+                e.stopPropagation();
+                selectShip();
+            };
+
+            spaceField.appendChild(shipElement);
+            gameState.selectedShip = shipElement;
+        }
+
+        function selectShip() {
+            if (gameState.selectedShip) {
+                gameState.selectedShip.classList.add('selected');
+            }
+        }
+
+        // Interactions
+        function interactWithPlanet(planet) {
+            if (!gameState.selectedShip) return;
+            
+            const distance = Math.sqrt(
+                Math.pow(planet.x - gameState.ship.x, 2) + 
+                Math.pow(planet.y - gameState.ship.y, 2)
+            );
+            
+            if (distance < 100) {
+                // Collecter des ressources
+                const resourceGain = 20 + Math.random() * 30;
+                gameState.ship.energy = Math.min(gameState.ship.maxEnergy, gameState.ship.energy + resourceGain);
+                gameState.ship.score += Math.floor(resourceGain);
+                
+                createParticles(planet.x, planet.y, '#00d4ff');
+                showNotification(`+${Math.floor(resourceGain)} Énergie!`);
+                
+                updateUI();
+            } else {
+                moveShipTo(planet.x, planet.y);
+            }
+        }
+
+        function mineAsteroid(asteroid) {
+            if (!gameState.selectedShip) return;
+            
+            const distance = Math.sqrt(
+                Math.pow(asteroid.x - gameState.ship.x, 2) + 
+                Math.pow(asteroid.y - gameState.ship.y, 2)
+            );
+            
+            if (distance < 80) {
+                // Extraire des minerais
+                const mineralGain = 15 + Math.random() * 25;
+                gameState.ship.fuel = Math.min(gameState.ship.maxFuel, gameState.ship.fuel + mineralGain);
+                gameState.ship.score += Math.floor(mineralGain * 1.5);
+                
+                asteroid.minerals -= mineralGain;
+                
+                if (asteroid.minerals <= 0) {
+                    asteroid.element.remove();
+                    gameState.asteroids = gameState.asteroids.filter(a => a.id !== asteroid.id);
+                    
+                    // Respawn d'un nouvel astéroïde
+                    setTimeout(() => {
+                        const newX = Math.random() * (spaceField.offsetWidth - 60) + 30;
+                        const newY = Math.random() * (spaceField.offsetHeight - 60) + 30;
+                        createAsteroid(newX, newY);
+                    }, 5000);
+                }
+                
+                createParticles(asteroid.x, asteroid.y, '#ff6b35');
+                showNotification(`+${Math.floor(mineralGain)} Carburant!`);
+                
+                updateUI();
+            } else {
+                moveShipTo(asteroid.x, asteroid.y);
+            }
+        }
+
+        function dockAtStation(station) {
+            if (!gameState.selectedShip) return;
+            
+            const distance = Math.sqrt(
+                Math.pow(station.x - gameState.ship.x, 2) + 
+                Math.pow(station.y - gameState.ship.y, 2)
+            );
+            
+            if (distance < 120) {
+                // Services de la station
+                gameState.ship.hull = gameState.ship.maxHull;
+                gameState.ship.oxygen = gameState.ship.maxOxygen;
+                
+                createParticles(station.x, station.y, '#4ecdc4');
+                showNotification('Vaisseau réparé et ravitaillé!');
+                
+                updateUI();
+            } else {
+                moveShipTo(station.x, station.y);
+            }
+        }
+
+        // Mouvement du vaisseau
+        function moveShipTo(targetX, targetY) {
+            const moveInterval = setInterval(() => {
+                if (gameState.paused || !gameState.gameRunning) return;
+                
+                const dx = targetX - gameState.ship.x;
+                const dy = targetY - gameState.ship.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance < gameState.ship.speed) {
+                    // Arrivé à destination
+                    gameState.ship.x = targetX;
+                    gameState.ship.y = targetY;
+                    clearInterval(moveInterval);
+                } else {
+                    // Continuer le mouvement
+                    gameState.ship.x += (dx / distance) * gameState.ship.speed;
+                    gameState.ship.y += (dy / distance) * gameState.ship.speed;
+                    
+                    // Consommer du carburant
+                    gameState.ship.fuel = Math.max(0, gameState.ship.fuel - 0.1);
+                }
+                
+                // Mettre à jour la position visuelle
+                const shipElement = document.getElementById('playerShip');
+                if (shipElement) {
+                    shipElement.style.left = gameState.ship.x + 'px';
+                    shipElement.style.top = gameState.ship.y + 'px';
+                    
+                    // Créer une traînée
+                    createTrail(gameState.ship.x, gameState.ship.y);
+                }
+                
+                updateUI();
+            }, 100);
+        }
+
+        // Système d'améliorations
+        function upgradeShip(type) {
+            const costs = {
+                engine: 100 + gameState.ship.upgrades.engine * 50,
+                shield: 150 + gameState.ship.upgrades.shield * 75,
+                weapon: 200 + gameState.ship.upgrades.weapon * 100,
+                scanner: 120 + gameState.ship.upgrades.scanner * 60
+            };
+            
+            const cost = costs[type];
+            
+            if (gameState.ship.score >= cost) {
+                gameState.ship.score -= cost;
+                gameState.ship.upgrades[type]++;
+                
+                // Appliquer les améliorations
+                switch (type) {
+                    case 'engine':
+                        gameState.ship.speed += 0.5;
+                        gameState.ship.maxFuel += 10;
+                        break;
+                    case 'shield':
+                        gameState.ship.maxHull += 20;
+                        gameState.ship.hull = gameState.ship.maxHull;
+                        break;
+                    case 'weapon':
+                        gameState.ship.maxEnergy += 15;
+                        break;
+                    case 'scanner':
+                        gameState.ship.maxOxygen += 10;
+                        break;
+                }
+                
+                showNotification(`${getText(type)} amélioré!`);
+                updateUI();
+                updateLanguage(); // Mettre à jour les coûts
+            }
+        }
+
+        // Actions de mission
+        function scanArea() {
+            if (gameState.ship.energy < 10) return;
+            
+            gameState.ship.energy -= 10;
+            gameState.ship.score += 25;
+            gameState.missionCount++;
+            
+            // Révéler des objets cachés
+            createParticles(gameState.ship.x, gameState.ship.y, '#00d4ff');
+            showNotification('Zone scannée! +25 points');
+            addLogEntry('📡 Zone scannée - Secteur ' + gameState.ship.level);
+            
+            updateUI();
+        }
+
+        function collectResources() {
+            if (gameState.ship.fuel < 5) return;
+            
+            gameState.ship.fuel -= 5;
+            gameState.ship.score += 15;
+            gameState.ship.oxygen = Math.min(gameState.ship.maxOxygen, gameState.ship.oxygen + 5);
+            gameState.resourcesCollected++;
+            
+            createParticles(gameState.ship.x, gameState.ship.y, '#4ecdc4');
+            showNotification('Ressources collectées! +15 points');
+            addLogEntry('💎 Ressources collectées (+15 pts)');
+            
+            updateUI();
+        }
+
+        // Contrôles clavier
+        document.addEventListener('keydown', (e) => {
+            gameState.keys[e.key.toLowerCase()] = true;
+            
+            if (e.key === ' ') {
+                e.preventDefault();
+                scanArea();
+            }
+            
+            if (e.key.toLowerCase() === 'p') {
+                e.preventDefault();
+                togglePause();
+            }
+            
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                if (gameState.selectedShip) {
+                    gameState.selectedShip.classList.remove('selected');
+                    gameState.selectedShip = null;
+                }
+            }
+        });
+
+        document.addEventListener('keyup', (e) => {
+            gameState.keys[e.key.toLowerCase()] = false;
+        });
+
+        // Contrôles de la souris
+        spaceField.addEventListener('click', (e) => {
+            if (gameState.selectedShip && gameState.gameRunning && !gameState.paused) {
+                const rect = spaceField.getBoundingClientRect();
+                const targetX = e.clientX - rect.left;
+                const targetY = e.clientY - rect.top;
+                
+                moveShipTo(targetX, targetY);
+            }
+        });
+
+        spaceField.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+        });
+
+        // Effets visuels
+        function createParticles(x, y, color = '#00d4ff', count = 8) {
+            for (let i = 0; i < count; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = (x + Math.random() * 60 - 30) + 'px';
+                particle.style.top = (y + Math.random() * 60 - 30) + 'px';
+                particle.style.background = color;
+                particle.style.animationDelay = (Math.random() * 1) + 's';
+
+                spaceField.appendChild(particle);
+
+                setTimeout(() => {
+                    particle.remove();
+                }, 3000);
+            }
+        }
+
+        function createTrail(x, y) {
+            const trail = document.createElement('div');
+            trail.className = 'trail';
+            trail.style.left = (x + Math.random() * 20 - 10) + 'px';
+            trail.style.top = (y + 30) + 'px';
+
+            spaceField.appendChild(trail);
+
+            setTimeout(() => {
+                trail.remove();
+            }, 2000);
+        }
+
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.style.position = 'fixed';
+            notification.style.top = '20px';
+            notification.style.right = '20px';
+            notification.style.background = 'linear-gradient(45deg, #00d4ff, #0096ff)';
+            notification.style.color = '#ffffff';
+            notification.style.padding = '15px 20px';
+            notification.style.borderRadius = '10px';
+            notification.style.fontWeight = 'bold';
+            notification.style.zIndex = '1002';
+            notification.style.animation = 'slideIn 0.5s ease-out';
+            notification.textContent = message;
+
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // Mise à jour de l'interface
+        function updateUI() {
+            document.getElementById('energyValue').textContent = Math.floor(gameState.ship.energy);
+            document.getElementById('fuelValue').textContent = Math.floor(gameState.ship.fuel);
+            document.getElementById('oxygenValue').textContent = Math.floor(gameState.ship.oxygen);
+            document.getElementById('hullValue').textContent = Math.floor(gameState.ship.hull);
+            document.getElementById('levelValue').textContent = gameState.ship.level;
+            document.getElementById('scoreValue').textContent = gameState.ship.score;
+
+            // Barres de progression
+            document.getElementById('energyFill').style.width = (gameState.ship.energy / gameState.ship.maxEnergy * 100) + '%';
+            document.getElementById('fuelFill').style.width = (gameState.ship.fuel / gameState.ship.maxFuel * 100) + '%';
+            document.getElementById('oxygenFill').style.width = (gameState.ship.oxygen / gameState.ship.maxOxygen * 100) + '%';
+            document.getElementById('hullFill').style.width = (gameState.ship.hull / gameState.ship.maxHull * 100) + '%';
+            
+            updateMinimap();
+            updateDetailedStats();
+        }
+
+        function updateMinimap() {
+            const minimap = document.getElementById('minimap');
+            minimap.innerHTML = '';
+            
+            const scaleX = 150 / spaceField.offsetWidth;
+            const scaleY = 100 / spaceField.offsetHeight;
+            
+            // Vaisseau du joueur
+            const shipDot = document.createElement('div');
+            shipDot.className = 'minimap-dot ship';
+            shipDot.style.left = (gameState.ship.x * scaleX) + 'px';
+            shipDot.style.top = (gameState.ship.y * scaleY) + 'px';
+            minimap.appendChild(shipDot);
+            
+            // Planètes
+            gameState.planets.forEach(planet => {
+                const dot = document.createElement('div');
+                dot.className = 'minimap-dot planet';
+                dot.style.left = (planet.x * scaleX) + 'px';
+                dot.style.top = (planet.y * scaleY) + 'px';
+                minimap.appendChild(dot);
+            });
+            
+            // Astéroïdes
+            gameState.asteroids.forEach(asteroid => {
+                const dot = document.createElement('div');
+                dot.className = 'minimap-dot asteroid';
+                dot.style.left = (asteroid.x * scaleX) + 'px';
+                dot.style.top = (asteroid.y * scaleY) + 'px';
+                minimap.appendChild(dot);
+            });
+        }
+
+        // Système de classement
+        function saveScore() {
+            const scores = JSON.parse(localStorage.getItem('spaceExplorerScores') || '[]');
+            scores.push({
+                score: gameState.ship.score,
+                level: gameState.ship.level,
+                date: new Date().toLocaleDateString()
+            });
+            scores.sort((a, b) => b.score - a.score);
+            scores.splice(10); // Garder seulement le top 10
+            localStorage.setItem('spaceExplorerScores', JSON.stringify(scores));
+        }
+
+        function loadLeaderboard() {
+            const scores = JSON.parse(localStorage.getItem('spaceExplorerScores') || '[]');
+            const leaderboard = document.getElementById('leaderboard');
+            
+            if (scores.length === 0) {
+                leaderboard.innerHTML = `<p style="color: #888; font-size: 12px;">${getText('noScores')}</p>`;
+                return;
+            }
+
+            leaderboard.innerHTML = scores.slice(0, 5).map((score, index) => `
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 12px;">
+                    <span>${index + 1}. Sect.${score.level}</span>
+                    <span style="color: #00d4ff;">${score.score}</span>
+                </div>
+            `).join('');
+        }
+
+        // Système de niveau
+        function levelUp() {
+            gameState.ship.level++;
+            
+            // Amélioration des capacités
+            gameState.ship.maxEnergy += 20;
+            gameState.ship.maxFuel += 15;
+            gameState.ship.maxOxygen += 10;
+            gameState.ship.maxHull += 25;
+
+            // Afficher modal de niveau
+            levelUpModal.style.display = 'block';
+            setTimeout(() => {
+                levelUpModal.style.display = 'none';
+            }, 3000);
+
+            // Spawner plus d'objets
+            spawnPlanets();
+            spawnAsteroids();
+
+            updateUI();
+        }
+
+        // Mouvement avec les touches
+        function updateMovement() {
+            if (!gameState.gameRunning || gameState.paused) return;
+            
+            let moved = false;
+            
+            if (gameState.keys['w'] || gameState.keys['arrowup']) {
+                gameState.ship.y = Math.max(30, gameState.ship.y - gameState.ship.speed);
+                moved = true;
+            }
+            if (gameState.keys['s'] || gameState.keys['arrowdown']) {
+                gameState.ship.y = Math.min(spaceField.offsetHeight - 90, gameState.ship.y + gameState.ship.speed);
+                moved = true;
+            }
+            if (gameState.keys['a'] || gameState.keys['arrowleft']) {
+                gameState.ship.x = Math.max(30, gameState.ship.x - gameState.ship.speed);
+                moved = true;
+            }
+            if (gameState.keys['d'] || gameState.keys['arrowright']) {
+                gameState.ship.x = Math.min(spaceField.offsetWidth - 90, gameState.ship.x + gameState.ship.speed);
+                moved = true;
+            }
+            
+            if (moved) {
+                // Consommer du carburant
+                gameState.ship.fuel = Math.max(0, gameState.ship.fuel - 0.05);
+                
+                // Mettre à jour la position visuelle
+                const shipElement = document.getElementById('playerShip');
+                if (shipElement) {
+                    shipElement.style.left = gameState.ship.x + 'px';
+                    shipElement.style.top = gameState.ship.y + 'px';
+                    
+                    // Créer une traînée occasionnellement
+                    if (Math.random() < 0.3) {
+                        createTrail(gameState.ship.x, gameState.ship.y);
+                    }
+                }
+            }
+        }
+
+        // Consommation de ressources
+        function updateResources() {
+            if (!gameState.gameRunning || gameState.paused) return;
+            
+            // Consommation graduelle
+            gameState.ship.oxygen = Math.max(0, gameState.ship.oxygen - 0.02);
+            gameState.ship.energy = Math.max(0, gameState.ship.energy - 0.01);
+            
+            // Vérifier les conditions de défaite
+            if (gameState.ship.fuel <= 0 || gameState.ship.oxygen <= 0 || gameState.ship.hull <= 0) {
+                gameOver();
+            }
+            
+            // Vérifier les conditions de victoire
+            if (gameState.ship.score >= gameState.ship.level * 1000) {
+                levelUp();
+            }
+        }
+
+        // Game Over
+        function gameOver() {
+            saveScore();
+            try{ parent.postMessage({ action: 'dialog', dialogType: 'alert', text: `${getText('gameOver')} ${gameState.ship.score} - ${getText('sector')}: ${gameState.ship.level}` }, '*'); }catch(e){}
+            newGame();
+        }
+
+        // Boucle de jeu principale
+        function gameLoop() {
+            if (!gameState.gameRunning) return;
+
+            if (!gameState.paused) {
+                updateMovement();
+                updateResources();
+                updateUI();
+            }
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Système de défilement de la barre latérale
+        function scrollSidebar(direction) {
+            const sidebarContent = document.getElementById('sidebarContent');
+            const scrollableContainer = document.querySelector('.sidebar-scrollable');
+            const scrollStep = 100;
+            
+            if (direction === 'up') {
+                gameState.sidebarScroll = Math.max(0, gameState.sidebarScroll - scrollStep);
+            } else if (direction === 'down') {
+                gameState.sidebarScroll = Math.min(gameState.maxSidebarScroll, gameState.sidebarScroll + scrollStep);
+            }
+            
+            sidebarContent.style.transform = `translateY(-${gameState.sidebarScroll}px)`;
+            updateScrollIndicator();
+            updateScrollButtons();
+        }
+
+        function updateScrollIndicator() {
+            const scrollThumb = document.getElementById('scrollThumb');
+            const scrollableContainer = document.querySelector('.sidebar-scrollable');
+            
+            if (gameState.maxSidebarScroll <= 0) {
+                scrollThumb.style.display = 'none';
+                return;
+            }
+            
+            scrollThumb.style.display = 'block';
+            const containerHeight = scrollableContainer.offsetHeight;
+            const thumbHeight = Math.max(20, (containerHeight / (gameState.maxSidebarScroll + containerHeight)) * containerHeight);
+            const thumbPosition = (gameState.sidebarScroll / gameState.maxSidebarScroll) * (containerHeight - thumbHeight);
+            
+            scrollThumb.style.height = thumbHeight + 'px';
+            scrollThumb.style.top = thumbPosition + 'px';
+        }
+
+        function updateScrollButtons() {
+            const scrollUpBtn = document.getElementById('scrollUpBtn');
+            const scrollDownBtn = document.getElementById('scrollDownBtn');
+            
+            scrollUpBtn.disabled = gameState.sidebarScroll <= 0;
+            scrollDownBtn.disabled = gameState.sidebarScroll >= gameState.maxSidebarScroll;
+        }
+
+        function calculateMaxScroll() {
+            const sidebarContent = document.getElementById('sidebarContent');
+            const scrollableContainer = document.querySelector('.sidebar-scrollable');
+            
+            if (sidebarContent && scrollableContainer) {
+                gameState.maxSidebarScroll = Math.max(0, sidebarContent.offsetHeight - scrollableContainer.offsetHeight);
+                updateScrollIndicator();
+                updateScrollButtons();
+            }
+        }
+
+        function updateDetailedStats() {
+            document.getElementById('speedStat').textContent = gameState.ship.speed.toFixed(1);
+            document.getElementById('powerStat').textContent = gameState.ship.maxEnergy;
+            document.getElementById('shieldStat').textContent = gameState.ship.maxHull;
+            document.getElementById('rangeStat').textContent = 150 + (gameState.ship.upgrades.scanner * 25);
+            document.getElementById('missionsStat').textContent = gameState.missionCount;
+            document.getElementById('resourcesStat').textContent = gameState.resourcesCollected;
+        }
+
+        function addLogEntry(message) {
+            const logbook = document.getElementById('logbook');
+            const entry = document.createElement('div');
+            entry.textContent = message;
+            entry.style.marginBottom = '2px';
+            logbook.insertBefore(entry, logbook.firstChild);
+            
+            // Garder seulement les 10 dernières entrées
+            while (logbook.children.length > 10) {
+                logbook.removeChild(logbook.lastChild);
+            }
+        }
+
+        // Défilement avec la molette de la souris
+        document.querySelector('.sidebar-scrollable').addEventListener('wheel', (e) => {
+            e.preventDefault();
+            if (e.deltaY > 0) {
+                scrollSidebar('down');
+            } else {
+                scrollSidebar('up');
+            }
+        });
+
+        // Recalculer le défilement lors du redimensionnement
+        window.addEventListener('resize', () => {
+            setTimeout(calculateMaxScroll, 100);
+        });
+
+        // Initialiser le jeu
+        initGame();
+        
+        // Calculer le défilement initial après un délai
+        setTimeout(() => {
+            calculateMaxScroll();
+        }, 500);
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'988b9d71f2b0e183',t:'MTc1OTQ4NTg2Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
