@@ -1,0 +1,2172 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyber Warrior - RPG Futuriste</title>
+    <style>
+        body {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #0a0a0a, #1a1a2e, #16213e);
+            color: #00ffff;
+            overflow-x: hidden;
+        }
+
+        .game-container {
+            width: 100vw;
+            height: 100vh;
+            max-height: 760px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            margin: 0 auto;
+            border: 2px solid #00ffff;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .game-header {
+            height: 80px;
+            background: linear-gradient(90deg, rgba(0, 255, 255, 0.1), rgba(255, 0, 255, 0.1));
+            border-bottom: 2px solid #00ffff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 15px;
+            box-shadow: 0 2px 20px rgba(0, 255, 255, 0.3);
+        }
+
+        .header-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .header-btn {
+            padding: 6px 12px;
+            background: linear-gradient(45deg, rgba(0, 255, 255, 0.2), rgba(255, 0, 255, 0.2));
+            border: 2px solid #00ffff;
+            color: #00ffff;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+
+        .header-btn:hover {
+            background: linear-gradient(45deg, rgba(0, 255, 255, 0.4), rgba(255, 0, 255, 0.4));
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+        }
+
+        .header-btn.active {
+            background: linear-gradient(45deg, #00ffff, #ff00ff);
+            color: #000;
+        }
+
+        .player-stats {
+            display: flex;
+            gap: 30px;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #00ffff;
+        }
+
+        .health-bar, .energy-bar, .exp-bar {
+            width: 120px;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .health-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff4757, #ff6b7a);
+            transition: width 0.3s ease;
+        }
+
+        .energy-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3742fa, #5352ed);
+            transition: width 0.3s ease;
+        }
+
+        .exp-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ffa502, #ff6348);
+            transition: width 0.3s ease;
+        }
+
+        .game-info {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .level-display {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ffa502;
+            text-shadow: 0 0 10px rgba(255, 165, 2, 0.5);
+        }
+
+        .score-display {
+            font-size: 18px;
+            color: #00ffff;
+        }
+
+        .game-main {
+            flex: 1;
+            display: flex;
+            position: relative;
+        }
+
+        .game-world {
+            width: calc(100% - 280px);
+            height: calc(100vh - 140px);
+            max-height: 560px;
+            position: relative;
+            background: 
+                radial-gradient(circle at 20% 20%, rgba(0, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 0, 255, 0.1) 0%, transparent 50%),
+                linear-gradient(135deg, #0f0f23, #1a1a2e);
+            overflow: hidden;
+        }
+
+        .grid-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(0, 255, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 255, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+        }
+
+        .player {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(45deg, #00ffff, #0099cc);
+            border-radius: 50%;
+            border: 3px solid #ffffff;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.8);
+            transition: all 0.2s ease;
+            z-index: 100;
+        }
+
+        .player::before {
+            content: '🤖';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 20px;
+        }
+
+        .enemy {
+            position: absolute;
+            width: 35px;
+            height: 35px;
+            background: linear-gradient(45deg, #ff4757, #cc3636);
+            border-radius: 50%;
+            border: 2px solid #ffffff;
+            box-shadow: 0 0 15px rgba(255, 71, 87, 0.6);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .enemy::before {
+            content: '👾';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 18px;
+        }
+
+        .enemy:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 25px rgba(255, 71, 87, 0.8);
+        }
+
+        .item {
+            position: absolute;
+            width: 25px;
+            height: 25px;
+            background: linear-gradient(45deg, #ffa502, #ff6348);
+            border-radius: 50%;
+            border: 2px solid #ffffff;
+            box-shadow: 0 0 10px rgba(255, 165, 2, 0.6);
+            cursor: pointer;
+            animation: itemPulse 2s infinite;
+        }
+
+        .item::before {
+            content: '💎';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 12px;
+        }
+
+        @keyframes itemPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
+        .sidebar {
+            width: 280px;
+            height: 100%;
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0.8), rgba(26, 26, 46, 0.9));
+            border-left: 2px solid #00ffff;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .sidebar-section {
+            padding: 15px;
+            border-bottom: 1px solid rgba(0, 255, 255, 0.3);
+        }
+
+        .sidebar-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #00ffff;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+        }
+
+        .inventory-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .inventory-slot {
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .inventory-slot:hover {
+            border-color: #00ffff;
+            background: rgba(0, 255, 255, 0.2);
+        }
+
+        .inventory-slot.filled {
+            background: rgba(0, 255, 255, 0.2);
+            border-color: #00ffff;
+        }
+
+        .quest-item {
+            background: rgba(255, 165, 2, 0.1);
+            border: 2px solid rgba(255, 165, 2, 0.5);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .quest-item:hover {
+            background: rgba(255, 165, 2, 0.2);
+            border-color: #ffa502;
+        }
+
+        .quest-title {
+            font-weight: bold;
+            color: #ffa502;
+            margin-bottom: 5px;
+        }
+
+        .quest-description {
+            font-size: 12px;
+            color: #ccc;
+        }
+
+        .game-footer {
+            height: 60px;
+            background: linear-gradient(90deg, rgba(0, 255, 255, 0.1), rgba(255, 0, 255, 0.1));
+            border-top: 2px solid #00ffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 20px;
+            box-shadow: 0 -2px 20px rgba(0, 255, 255, 0.3);
+        }
+
+        .controls-info {
+            background: rgba(0, 0, 0, 0.6);
+            padding: 12px 20px;
+            border-radius: 8px;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            font-size: 11px;
+            display: flex;
+            gap: 30px;
+            align-items: center;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .controls-info h4 {
+            margin: 0;
+            color: #00ffff;
+            font-size: 14px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .control-item {
+            font-size: 11px;
+            color: #ccc;
+            margin: 0;
+        }
+
+        .game-controls-panel {
+            position: relative;
+            background: rgba(0, 0, 0, 0.9);
+            padding: 12px;
+            border-radius: 10px;
+            border: 2px solid #00ffff;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            width: 100%;
+            margin-bottom: 15px;
+        }
+
+        .control-btn {
+            padding: 6px 10px;
+            background: linear-gradient(45deg, rgba(0, 255, 255, 0.2), rgba(255, 0, 255, 0.2));
+            border: 2px solid #00ffff;
+            color: #00ffff;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-size: 12px;
+        }
+
+        .control-btn:hover {
+            background: linear-gradient(45deg, rgba(0, 255, 255, 0.4), rgba(255, 0, 255, 0.4));
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+        }
+
+        .control-btn.active {
+            background: linear-gradient(45deg, #00ffff, #ff00ff);
+            color: #000;
+        }
+
+        .rotate-controls {
+            display: flex;
+            gap: 5px;
+        }
+
+        .rotate-btn {
+            padding: 6px 10px;
+            background: linear-gradient(45deg, rgba(255, 165, 2, 0.2), rgba(255, 99, 72, 0.2));
+            border: 2px solid #ffa502;
+            color: #ffa502;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            font-size: 12px;
+        }
+
+        .rotate-btn:hover {
+            background: linear-gradient(45deg, rgba(255, 165, 2, 0.4), rgba(255, 99, 72, 0.4));
+            box-shadow: 0 0 10px rgba(255, 165, 2, 0.5);
+        }
+
+        .language-selector {
+            position: relative;
+        }
+
+        .language-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.95);
+            border: 2px solid #00ffff;
+            border-radius: 8px;
+            display: none;
+            z-index: 1000;
+        }
+
+        .language-option {
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-bottom: 1px solid rgba(0, 255, 255, 0.3);
+        }
+
+        .language-option:hover {
+            background: rgba(0, 255, 255, 0.2);
+        }
+
+        .language-option:last-child {
+            border-bottom: none;
+        }
+
+        .level-selector {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .level-input {
+            width: 50px;
+            padding: 4px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid #00ffff;
+            color: #00ffff;
+            border-radius: 4px;
+            text-align: center;
+            font-size: 12px;
+        }
+
+        .rules-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .rules-content {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border: 2px solid #00ffff;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            color: #fff;
+        }
+
+        .rules-content h2 {
+            color: #00ffff;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .rules-content h3 {
+            color: #ffa502;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+        .rules-content ul {
+            margin-left: 20px;
+        }
+
+        .rules-content li {
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+
+        .game-rotated {
+            transform: rotate(180deg);
+            transition: transform 0.5s ease;
+        }
+
+        .paused-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 500;
+        }
+
+        .paused-text {
+            font-size: 48px;
+            color: #00ffff;
+            font-weight: bold;
+            text-shadow: 0 0 20px rgba(0, 255, 255, 0.8);
+            animation: pausePulse 2s infinite;
+        }
+
+        @keyframes pausePulse {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+
+        .combat-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .combat-interface {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border: 2px solid #00ffff;
+            border-radius: 20px;
+            padding: 30px;
+            width: 600px;
+            text-align: center;
+            box-shadow: 0 0 50px rgba(0, 255, 255, 0.3);
+        }
+
+        .combat-enemy {
+            font-size: 80px;
+            margin: 20px 0;
+            animation: enemyShake 0.5s infinite alternate;
+        }
+
+        @keyframes enemyShake {
+            0% { transform: translateX(-2px); }
+            100% { transform: translateX(2px); }
+        }
+
+        .combat-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .combat-btn {
+            padding: 15px 25px;
+            background: linear-gradient(45deg, rgba(0, 255, 255, 0.2), rgba(255, 0, 255, 0.2));
+            border: 2px solid #00ffff;
+            color: #00ffff;
+            border-radius: 10px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .combat-btn:hover {
+            background: linear-gradient(45deg, rgba(0, 255, 255, 0.4), rgba(255, 0, 255, 0.4));
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+        }
+
+        .damage-text {
+            position: absolute;
+            font-size: 24px;
+            font-weight: bold;
+            color: #ff4757;
+            pointer-events: none;
+            animation: damageFloat 1s ease-out forwards;
+            z-index: 200;
+        }
+
+        @keyframes damageFloat {
+            0% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(-50px); }
+        }
+
+        .level-up-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #ffa502, #ff6348);
+            border: 3px solid #ffffff;
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            color: #ffffff;
+            font-size: 24px;
+            font-weight: bold;
+            box-shadow: 0 0 50px rgba(255, 165, 2, 0.8);
+            z-index: 1001;
+            display: none;
+            animation: levelUpPulse 0.5s ease-out;
+        }
+
+        @keyframes levelUpPulse {
+            0% { transform: translate(-50%, -50%) scale(0.5); }
+            100% { transform: translate(-50%, -50%) scale(1); }
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #00ffff;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: particleFloat 2s linear forwards;
+        }
+
+        @keyframes particleFloat {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-100px) scale(0); }
+        }
+
+        @media (max-width: 768px) {
+            .game-container {
+                max-height: 660px;
+                width: 95vw;
+            }
+            
+            .sidebar {
+                width: 240px;
+            }
+            
+            .game-world {
+                width: calc(100% - 240px);
+                max-height: 460px;
+            }
+            
+            .game-header {
+                padding: 0 10px;
+                height: 70px;
+                flex-direction: column;
+                gap: 5px;
+            }
+            
+            .header-controls {
+                gap: 5px;
+            }
+            
+            .header-btn {
+                padding: 4px 8px;
+                font-size: 10px;
+            }
+            
+            .player-stats {
+                gap: 10px;
+            }
+            
+            .stat-value {
+                font-size: 14px;
+            }
+            
+            .health-bar, .energy-bar, .exp-bar {
+                width: 80px;
+            }
+            
+            .combat-interface {
+                width: 90%;
+                padding: 20px;
+            }
+            
+            .game-footer {
+                height: 50px;
+                padding: 0 10px;
+            }
+            
+            .controls-info {
+                font-size: 10px;
+                padding: 8px 12px;
+                gap: 15px;
+            }
+            
+            .controls-info h4 {
+                font-size: 12px;
+            }
+        }
+    </style>
+    <style>
+    /* override: consistent global close button */
+    .global-close-btn { position: fixed !important; top: 14px !important; right: 14px !important; z-index: 99999 !important; background: linear-gradient(45deg,#ff3b3b,#ff0066) !important; color: #fff !important; border: none !important; width:52px !important; height:52px !important; border-radius:50% !important; font-size:22px !important; cursor:pointer !important; display:flex !important;align-items:center !important;justify-content:center !important; box-shadow:0 8px 22px rgba(255,59,59,0.28) !important; }
+    .global-close-btn:hover{ transform: scale(1.06); }
+    </style>
+        <style>
+        /* nudge language selector left to avoid close button overlap */
+        @media (min-width:800px){
+            .language-selector{ right:80px !important; }
+        }
+        </style>
+</head>
+<body>
+    <div class="game-container">
+        <!-- En-tête du jeu -->
+        <div class="game-header">
+            <div class="player-stats">
+                <div class="stat-item">
+                    <div class="stat-label">Santé</div>
+                    <div class="stat-value" id="healthValue">100/100</div>
+                    <div class="health-bar">
+                        <div class="health-fill" id="healthFill" style="width: 100%"></div>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Énergie</div>
+                    <div class="stat-value" id="energyValue">50/50</div>
+                    <div class="energy-bar">
+                        <div class="energy-fill" id="energyFill" style="width: 100%"></div>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Expérience</div>
+                    <div class="stat-value" id="expValue">0/100</div>
+                    <div class="exp-bar">
+                        <div class="exp-fill" id="expFill" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="header-controls">
+                <button class="header-btn" id="startBtn" onclick="startGame()">🎮 <span id="startBtnText">Démarrer</span></button>
+                <button class="header-btn" id="pauseBtn" onclick="togglePause()" style="display: none;">⏸️ <span id="pauseBtnText">Pause</span></button>
+                <button class="header-btn" onclick="newGame()">🔄 <span id="newGameText">Nouveau Jeu</span></button>
+                <button class="global-close-btn" title="Fermer" aria-label="Fermer" onclick="closePlatform()">✕</button>
+                <script>
+                /* Canonical child-side overlay closer for platform pages */
+                function closePlatform(){
+                    try{ console.debug('jeux35: closePlatform called'); }catch(e){}
+                    if(window.parent && window.parent !== window){
+                        window.parent.postMessage({ action: 'close', reason: 'user-initiated', source: 'jeux35' }, '*');
+                        return;
+                    }
+                    if(window.opener && !window.opener.closed){
+                        try{ window.opener.postMessage({ action: 'child-closed', source: 'jeux35' }, '*'); }catch(e){}
+                        try{ window.close(); }catch(e){}
+                        return;
+                    }
+                    window.location.href = '/global_platform.html';
+                }
+                window.closePlatform = closePlatform;
+                </script>
+                
+                <div class="level-selector">
+                    <span id="levelSelectorText">Niveau:</span>
+                    <input type="number" class="level-input" id="levelInput" min="1" max="10" value="1" onchange="setStartLevel()">
+                </div>
+                
+                <button class="header-btn" onclick="showRules()">📋 <span id="rulesText">Règles</span></button>
+                <button class="header-btn" onclick="rotateGame()" id="rotateBtn">🔄 <span id="rotateText">Rotation</span></button>
+            </div>
+            
+            <div class="game-info">
+                <div class="level-display">Niveau <span id="levelValue">1</span></div>
+                <div class="score-display">Score: <span id="scoreValue">0</span></div>
+                <div class="language-selector">
+                    <button class="header-btn" onclick="toggleLanguageDropdown()">🌍 <span id="languageText">Français</span></button>
+                    <div class="language-dropdown" id="languageDropdown">
+                        <div class="language-option" onclick="changeLanguage('fr')">🇫🇷 Français</div>
+                        <div class="language-option" onclick="changeLanguage('en')">🇬🇧 English</div>
+                        <div class="language-option" onclick="changeLanguage('ar')">🇸🇦 العربية</div>
+                        <div class="language-option" onclick="changeLanguage('es')">🇪🇸 Español</div>
+                        <div class="language-option" onclick="changeLanguage('de')">🇩🇪 Deutsch</div>
+                        <div class="language-option" onclick="changeLanguage('zh')">🇨🇳 中文</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Zone de jeu principale -->
+        <div class="game-main">
+            <div class="game-world" id="gameWorld">
+                <div class="grid-overlay"></div>
+                <div class="player" id="player"></div>
+                
+                <!-- Overlay de pause -->
+                <div class="paused-overlay" id="pausedOverlay">
+                    <div class="paused-text" id="pausedText">PAUSE</div>
+                </div>
+            </div>
+            
+            <!-- Barre latérale -->
+            <div class="sidebar">
+
+                <div class="sidebar-section">
+                    <div class="sidebar-title">Inventaire</div>
+                    <div class="inventory-grid" id="inventoryGrid">
+                        <!-- Les slots d'inventaire seront générés dynamiquement -->
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-title">Quêtes</div>
+                    <div id="questsList">
+                        <!-- Les quêtes seront générées dynamiquement -->
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <div class="sidebar-title">Classement</div>
+                    <div id="leaderboard">
+                        <!-- Le classement sera généré dynamiquement -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pied de page avec contrôles -->
+        <div class="game-footer">
+            <div class="controls-info">
+                <h4>Contrôles</h4>
+                <div class="control-group">
+                    <div class="control-item">WASD / Flèches : Déplacer</div>
+                    <div class="control-item">Clic : Attaquer ennemi / Ramasser objet</div>
+                </div>
+                <div class="control-group">
+                    <div class="control-item">Espace : Attaque spéciale</div>
+                    <div class="control-item">I : Ouvrir inventaire</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de combat -->
+    <div class="combat-modal" id="combatModal">
+        <div class="combat-interface">
+            <h2 id="combatModalTitle">Combat !</h2>
+            <div class="combat-enemy" id="combatEnemyDisplay">👾</div>
+            <div>
+                <div><span id="enemyLabel">Ennemi</span>: <span id="enemyHealthDisplay">100</span> PV</div>
+                <div><span id="yourHealthLabel">Votre santé</span>: <span id="playerHealthDisplay">100</span> PV</div>
+            </div>
+            <div class="combat-actions">
+                <button class="combat-btn" onclick="attack()">⚔️ <span id="attackBtnText">Attaquer</span></button>
+                <button class="combat-btn" onclick="specialAttack()">💥 <span id="specialAttackBtnText">Attaque Spéciale</span></button>
+                <button class="combat-btn" onclick="flee()">🏃 <span id="fleeBtnText">Fuir</span></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de montée de niveau -->
+    <div class="level-up-modal" id="levelUpModal">
+        🎉 <span id="levelUpText">NIVEAU SUPÉRIEUR !</span> 🎉
+    </div>
+
+    <!-- Modal des règles -->
+    <div class="rules-modal" id="rulesModal">
+        <div class="rules-content">
+            <h2 id="rulesTitle">Règles du Jeu - Cyber Warrior</h2>
+            <div id="rulesContent">
+                <h3 id="objectiveTitle">🎯 Objectif</h3>
+                <p id="objectiveText">Survivez dans un monde futuriste, combattez des ennemis, collectez des objets et montez en niveau pour devenir le guerrier ultime !</p>
+                
+                <h3 id="controlsTitle">🎮 Contrôles</h3>
+                <ul id="controlsList">
+                    <li id="control1">WASD ou Flèches : Se déplacer</li>
+                    <li id="control2">Clic sur ennemi : Commencer un combat</li>
+                    <li id="control3">Clic sur objet : Ramasser l'objet</li>
+                    <li id="control4">Espace : Attaque spéciale de zone (coûte 20 énergie)</li>
+                </ul>
+                
+                <h3 id="combatTitle">⚔️ Combat</h3>
+                <ul id="combatList">
+                    <li id="combat1">Attaque normale : Dégâts de base</li>
+                    <li id="combat2">Attaque spéciale : Double dégâts (coûte 20 énergie)</li>
+                    <li id="combat3">Fuite : Quitter le combat sans récompense</li>
+                </ul>
+                
+                <h3 id="progressionTitle">📈 Progression</h3>
+                <ul id="progressionList">
+                    <li id="progression1">Gagnez de l'expérience en battant des ennemis</li>
+                    <li id="progression2">Montez de niveau pour améliorer vos statistiques</li>
+                    <li id="progression3">Complétez des quêtes pour des bonus de score</li>
+                    <li id="progression4">Collectez des objets pour des effets spéciaux</li>
+                </ul>
+                
+                <h3 id="itemsTitle">💎 Objets</h3>
+                <ul id="itemsList">
+                    <li id="item1">💊 Potion : Restaure 25 PV</li>
+                    <li id="item2">⚡ Énergie : Restaure 15 points d'énergie</li>
+                    <li id="item3">💎 Gemme : +100 points de score</li>
+                    <li id="item4">Autres objets : Effets variés</li>
+                </ul>
+            </div>
+            <button class="control-btn" onclick="hideRules()" style="margin-top: 20px; width: 100%;">
+                <span id="closeRulesText">Fermer</span>
+            </button>
+        </div>
+    </div>
+
+    <script>
+            // Traductions multilingues
+            const translations = {
+        // Système de langues
+        const languages = {
+            fr: {
+                // Interface principale
+                health: "Santé",
+                energy: "Énergie",
+                experience: "Expérience",
+                level: "Niveau",
+                score: "Score",
+                inventory: "Inventaire",
+                quests: "Quêtes",
+                leaderboard: "Classement",
+                
+                // Contrôles
+                start: "Démarrer",
+                pause: "Pause",
+                resume: "Reprendre",
+                newGame: "Nouveau Jeu",
+                levelSelector: "Niveau:",
+                language: "Français",
+                rotation: "Rotation",
+                rules: "Règles",
+                
+                // Combat
+                combat: "Combat !",
+                attack: "Attaquer",
+                specialAttack: "Attaque Spéciale",
+                flee: "Fuir",
+                enemy: "Ennemi",
+                yourHealth: "Votre santé",
+                
+                // Quêtes
+                quest1Title: "Premier Combat",
+                quest1Desc: "Vaincre 3 ennemis",
+                quest2Title: "Collectionneur",
+                quest2Desc: "Ramasser 5 objets",
+                quest3Title: "Explorateur",
+                quest3Desc: "Atteindre le niveau 3",
+                
+                // Messages
+                levelUp: "NIVEAU SUPÉRIEUR !",
+                questCompleted: "Quête terminée:",
+                gameOver: "Game Over! Score final:",
+                noScores: "Aucun score enregistré",
+                
+                // Règles
+                rulesTitle: "Règles du Jeu - Cyber Warrior",
+                objective: "🎯 Objectif",
+                objectiveText: "Survivez dans un monde futuriste, combattez des ennemis, collectez des objets et montez en niveau pour devenir le guerrier ultime !",
+                controlsTitle: "🎮 Contrôles",
+                control1: "WASD ou Flèches : Se déplacer",
+                control2: "Clic sur ennemi : Commencer un combat",
+                control3: "Clic sur objet : Ramasser l'objet",
+                control4: "Espace : Attaque spéciale de zone (coûte 20 énergie)",
+                combatTitle: "⚔️ Combat",
+                combat1: "Attaque normale : Dégâts de base",
+                combat2: "Attaque spéciale : Double dégâts (coûte 20 énergie)",
+                combat3: "Fuite : Quitter le combat sans récompense",
+                progressionTitle: "📈 Progression",
+                progression1: "Gagnez de l'expérience en battant des ennemis",
+                progression2: "Montez de niveau pour améliorer vos statistiques",
+                progression3: "Complétez des quêtes pour des bonus de score",
+                progression4: "Collectez des objets pour des effets spéciaux",
+                itemsTitle: "💎 Objets",
+                item1: "💊 Potion : Restaure 25 PV",
+                item2: "⚡ Énergie : Restaure 15 points d'énergie",
+                item3: "💎 Gemme : +100 points de score",
+                item4: "Autres objets : Effets variés",
+                close: "Fermer"
+            },
+            en: {
+                health: "Health",
+                energy: "Energy",
+                experience: "Experience",
+                level: "Level",
+                score: "Score",
+                inventory: "Inventory",
+                quests: "Quests",
+                leaderboard: "Leaderboard",
+                
+                start: "Start",
+                pause: "Pause",
+                resume: "Resume",
+                newGame: "New Game",
+                levelSelector: "Level:",
+                language: "English",
+                rotation: "Rotation",
+                rules: "Rules",
+                
+                combat: "Combat!",
+                attack: "Attack",
+                specialAttack: "Special Attack",
+                flee: "Flee",
+                enemy: "Enemy",
+                yourHealth: "Your health",
+                
+                quest1Title: "First Combat",
+                quest1Desc: "Defeat 3 enemies",
+                quest2Title: "Collector",
+                quest2Desc: "Collect 5 items",
+                quest3Title: "Explorer",
+                quest3Desc: "Reach level 3",
+                
+                levelUp: "LEVEL UP!",
+                questCompleted: "Quest completed:",
+                gameOver: "Game Over! Final score:",
+                noScores: "No scores recorded",
+                
+                rulesTitle: "Game Rules - Cyber Warrior",
+                objective: "🎯 Objective",
+                objectiveText: "Survive in a futuristic world, fight enemies, collect items and level up to become the ultimate warrior!",
+                controlsTitle: "🎮 Controls",
+                control1: "WASD or Arrows: Move",
+                control2: "Click on enemy: Start combat",
+                control3: "Click on item: Collect item",
+                control4: "Space: Area special attack (costs 20 energy)",
+                combatTitle: "⚔️ Combat",
+                combat1: "Normal attack: Base damage",
+                combat2: "Special attack: Double damage (costs 20 energy)",
+                combat3: "Flee: Leave combat without reward",
+                progressionTitle: "📈 Progression",
+                progression1: "Gain experience by defeating enemies",
+                progression2: "Level up to improve your stats",
+                progression3: "Complete quests for score bonuses",
+                progression4: "Collect items for special effects",
+                itemsTitle: "💎 Items",
+                item1: "💊 Potion: Restores 25 HP",
+                item2: "⚡ Energy: Restores 15 energy points",
+                item3: "💎 Gem: +100 score points",
+                item4: "Other items: Various effects",
+                close: "Close"
+            },
+            ar: {
+                health: "الصحة",
+                energy: "الطاقة",
+                experience: "الخبرة",
+                level: "المستوى",
+                score: "النقاط",
+                inventory: "المخزون",
+                quests: "المهام",
+                leaderboard: "المتصدرين",
+                
+                start: "ابدأ",
+                pause: "توقف",
+                resume: "استكمل",
+                newGame: "لعبة جديدة",
+                levelSelector: "المستوى:",
+                language: "العربية",
+                rotation: "دوران",
+                rules: "القواعد",
+                
+                combat: "قتال!",
+                attack: "هجوم",
+                specialAttack: "هجوم خاص",
+                flee: "اهرب",
+                enemy: "العدو",
+                yourHealth: "صحتك",
+                
+                quest1Title: "القتال الأول",
+                quest1Desc: "اهزم 3 أعداء",
+                quest2Title: "الجامع",
+                quest2Desc: "اجمع 5 عناصر",
+                quest3Title: "المستكشف",
+                quest3Desc: "اصل للمستوى 3",
+                
+                levelUp: "مستوى أعلى!",
+                questCompleted: "مهمة مكتملة:",
+                gameOver: "انتهت اللعبة! النقاط النهائية:",
+                noScores: "لا توجد نقاط مسجلة",
+                
+                rulesTitle: "قواعد اللعبة - محارب السايبر",
+                objective: "🎯 الهدف",
+                objectiveText: "انج في عالم مستقبلي، حارب الأعداء، اجمع العناصر وارتق في المستوى لتصبح المحارب الأقوى!",
+                controlsTitle: "🎮 التحكم",
+                control1: "WASD أو الأسهم: التحرك",
+                control2: "انقر على العدو: ابدأ القتال",
+                control3: "انقر على العنصر: اجمع العنصر",
+                control4: "مسافة: هجوم خاص للمنطقة (يكلف 20 طاقة)",
+                combatTitle: "⚔️ القتال",
+                combat1: "هجوم عادي: ضرر أساسي",
+                combat2: "هجوم خاص: ضرر مضاعف (يكلف 20 طاقة)",
+                combat3: "هروب: اترك القتال بدون مكافأة",
+                progressionTitle: "📈 التقدم",
+                progression1: "اكسب الخبرة بهزيمة الأعداء",
+                progression2: "ارتق في المستوى لتحسين إحصائياتك",
+                progression3: "أكمل المهام للحصول على نقاط إضافية",
+                progression4: "اجمع العناصر للحصول على تأثيرات خاصة",
+                itemsTitle: "💎 العناصر",
+                item1: "💊 جرعة: تستعيد 25 نقطة صحة",
+                item2: "⚡ طاقة: تستعيد 15 نقطة طاقة",
+                item3: "💎 جوهرة: +100 نقطة",
+                item4: "عناصر أخرى: تأثيرات متنوعة",
+                close: "إغلاق"
+            },
+            es: {
+                health: "Salud",
+                energy: "Energía",
+                experience: "Experiencia",
+                level: "Nivel",
+                score: "Puntuación",
+                inventory: "Inventario",
+                quests: "Misiones",
+                leaderboard: "Clasificación",
+                
+                start: "Iniciar",
+                pause: "Pausa",
+                resume: "Reanudar",
+                newGame: "Nuevo Juego",
+                levelSelector: "Nivel:",
+                language: "Español",
+                rotation: "Rotación",
+                rules: "Reglas",
+                
+                combat: "¡Combate!",
+                attack: "Atacar",
+                specialAttack: "Ataque Especial",
+                flee: "Huir",
+                enemy: "Enemigo",
+                yourHealth: "Tu salud",
+                
+                quest1Title: "Primer Combate",
+                quest1Desc: "Derrota 3 enemigos",
+                quest2Title: "Coleccionista",
+                quest2Desc: "Recoge 5 objetos",
+                quest3Title: "Explorador",
+                quest3Desc: "Alcanza el nivel 3",
+                
+                levelUp: "¡SUBIDA DE NIVEL!",
+                questCompleted: "Misión completada:",
+                gameOver: "¡Juego Terminado! Puntuación final:",
+                noScores: "No hay puntuaciones registradas",
+                
+                rulesTitle: "Reglas del Juego - Cyber Warrior",
+                objective: "🎯 Objetivo",
+                objectiveText: "¡Sobrevive en un mundo futurista, lucha contra enemigos, recoge objetos y sube de nivel para convertirte en el guerrero definitivo!",
+                controlsTitle: "🎮 Controles",
+                control1: "WASD o Flechas: Moverse",
+                control2: "Clic en enemigo: Iniciar combate",
+                control3: "Clic en objeto: Recoger objeto",
+                control4: "Espacio: Ataque especial de área (cuesta 20 energía)",
+                combatTitle: "⚔️ Combate",
+                combat1: "Ataque normal: Daño base",
+                combat2: "Ataque especial: Doble daño (cuesta 20 energía)",
+                combat3: "Huir: Salir del combate sin recompensa",
+                progressionTitle: "📈 Progresión",
+                progression1: "Gana experiencia derrotando enemigos",
+                progression2: "Sube de nivel para mejorar tus estadísticas",
+                progression3: "Completa misiones para bonos de puntuación",
+                progression4: "Recoge objetos para efectos especiales",
+                itemsTitle: "💎 Objetos",
+                item1: "💊 Poción: Restaura 25 PV",
+                item2: "⚡ Energía: Restaura 15 puntos de energía",
+                item3: "💎 Gema: +100 puntos de puntuación",
+                item4: "Otros objetos: Efectos variados",
+                close: "Cerrar"
+            },
+            de: {
+                health: "Gesundheit",
+                energy: "Energie",
+                experience: "Erfahrung",
+                level: "Level",
+                score: "Punkte",
+                inventory: "Inventar",
+                quests: "Quests",
+                leaderboard: "Bestenliste",
+                
+                start: "Starten",
+                pause: "Pause",
+                resume: "Fortsetzen",
+                newGame: "Neues Spiel",
+                levelSelector: "Level:",
+                language: "Deutsch",
+                rotation: "Rotation",
+                rules: "Regeln",
+                
+                combat: "Kampf!",
+                attack: "Angreifen",
+                specialAttack: "Spezialangriff",
+                flee: "Fliehen",
+                enemy: "Feind",
+                yourHealth: "Deine Gesundheit",
+                
+                quest1Title: "Erster Kampf",
+                quest1Desc: "Besiege 3 Feinde",
+                quest2Title: "Sammler",
+                quest2Desc: "Sammle 5 Gegenstände",
+                quest3Title: "Entdecker",
+                quest3Desc: "Erreiche Level 3",
+                
+                levelUp: "LEVEL AUFSTIEG!",
+                questCompleted: "Quest abgeschlossen:",
+                gameOver: "Spiel Vorbei! Endpunktzahl:",
+                noScores: "Keine Punkte aufgezeichnet",
+                
+                rulesTitle: "Spielregeln - Cyber Warrior",
+                objective: "🎯 Ziel",
+                objectiveText: "Überlebe in einer futuristischen Welt, kämpfe gegen Feinde, sammle Gegenstände und steige im Level auf, um der ultimative Krieger zu werden!",
+                controlsTitle: "🎮 Steuerung",
+                control1: "WASD oder Pfeile: Bewegen",
+                control2: "Klick auf Feind: Kampf beginnen",
+                control3: "Klick auf Gegenstand: Gegenstand sammeln",
+                control4: "Leertaste: Bereichs-Spezialangriff (kostet 20 Energie)",
+                combatTitle: "⚔️ Kampf",
+                combat1: "Normaler Angriff: Grundschaden",
+                combat2: "Spezialangriff: Doppelter Schaden (kostet 20 Energie)",
+                combat3: "Fliehen: Kampf ohne Belohnung verlassen",
+                progressionTitle: "📈 Fortschritt",
+                progression1: "Sammle Erfahrung durch das Besiegen von Feinden",
+                progression2: "Steige im Level auf, um deine Werte zu verbessern",
+                progression3: "Schließe Quests für Punkteboni ab",
+                progression4: "Sammle Gegenstände für spezielle Effekte",
+                itemsTitle: "💎 Gegenstände",
+                item1: "💊 Trank: Stellt 25 LP wieder her",
+                item2: "⚡ Energie: Stellt 15 Energiepunkte wieder her",
+                item3: "💎 Edelstein: +100 Punkte",
+                item4: "Andere Gegenstände: Verschiedene Effekte",
+                close: "Schließen"
+            },
+            zh: {
+                health: "生命值",
+                energy: "能量",
+                experience: "经验",
+                level: "等级",
+                score: "分数",
+                inventory: "背包",
+                quests: "任务",
+                leaderboard: "排行榜",
+                
+                start: "开始",
+                pause: "暂停",
+                resume: "继续",
+                newGame: "新游戏",
+                levelSelector: "等级:",
+                language: "中文",
+                rotation: "旋转",
+                rules: "规则",
+                
+                combat: "战斗！",
+                attack: "攻击",
+                specialAttack: "特殊攻击",
+                flee: "逃跑",
+                enemy: "敌人",
+                yourHealth: "你的生命值",
+                
+                quest1Title: "首次战斗",
+                quest1Desc: "击败3个敌人",
+                quest2Title: "收集者",
+                quest2Desc: "收集5个物品",
+                quest3Title: "探索者",
+                quest3Desc: "达到3级",
+                
+                levelUp: "升级！",
+                questCompleted: "任务完成:",
+                gameOver: "游戏结束！最终分数:",
+                noScores: "没有记录分数",
+                
+                rulesTitle: "游戏规则 - 网络战士",
+                objective: "🎯 目标",
+                objectiveText: "在未来世界中生存，与敌人战斗，收集物品并升级成为终极战士！",
+                controlsTitle: "🎮 控制",
+                control1: "WASD或方向键：移动",
+                control2: "点击敌人：开始战斗",
+                control3: "点击物品：收集物品",
+                control4: "空格键：区域特殊攻击（消耗20能量）",
+                combatTitle: "⚔️ 战斗",
+                combat1: "普通攻击：基础伤害",
+                combat2: "特殊攻击：双倍伤害（消耗20能量）",
+                combat3: "逃跑：无奖励离开战斗",
+                progressionTitle: "📈 进展",
+                progression1: "通过击败敌人获得经验",
+                progression2: "升级以提高你的属性",
+                progression3: "完成任务获得分数奖励",
+                progression4: "收集物品获得特殊效果",
+                itemsTitle: "💎 物品",
+                item1: "💊 药水：恢复25生命值",
+                item2: "⚡ 能量：恢复15能量点",
+                item3: "💎 宝石：+100分数点",
+                item4: "其他物品：各种效果",
+                close: "关闭"
+            }
+        };
+
+        // État du jeu
+        const gameState = {
+            player: {
+                x: 400,
+                y: 300,
+                health: 100,
+                maxHealth: 100,
+                energy: 50,
+                maxEnergy: 50,
+                level: 1,
+                exp: 0,
+                expToNext: 100,
+                score: 0,
+                inventory: [],
+                attack: 20
+            },
+            enemies: [],
+            items: [],
+            quests: [
+                { id: 1, titleKey: "quest1Title", descKey: "quest1Desc", progress: 0, target: 3, completed: false },
+                { id: 2, titleKey: "quest2Title", descKey: "quest2Desc", progress: 0, target: 5, completed: false },
+                { id: 3, titleKey: "quest3Title", descKey: "quest3Desc", progress: 1, target: 3, completed: false }
+            ],
+            currentEnemy: null,
+            inCombat: false,
+            keys: {},
+            gameRunning: false,
+            paused: false,
+            rotated: false,
+            currentLanguage: 'fr',
+            startLevel: 1
+        };
+
+        // Éléments DOM
+        const player = document.getElementById('player');
+        const gameWorld = document.getElementById('gameWorld');
+        const combatModal = document.getElementById('combatModal');
+        const levelUpModal = document.getElementById('levelUpModal');
+
+        // Fonctions de contrôle du jeu
+        function startGame() {
+            if (!gameState.gameRunning) {
+                gameState.gameRunning = true;
+                gameState.paused = false;
+                document.getElementById('startBtn').style.display = 'none';
+                document.getElementById('pauseBtn').style.display = 'inline-block';
+                document.getElementById('pausedOverlay').style.display = 'none';
+                
+                // Appliquer le niveau de départ
+                gameState.player.level = gameState.startLevel;
+                if (gameState.startLevel > 1) {
+                    // Améliorer les stats selon le niveau
+                    gameState.player.maxHealth = 100 + ((gameState.startLevel - 1) * 20);
+                    gameState.player.health = gameState.player.maxHealth;
+                    gameState.player.maxEnergy = 50 + ((gameState.startLevel - 1) * 10);
+                    gameState.player.energy = gameState.player.maxEnergy;
+                    gameState.player.attack = 20 + ((gameState.startLevel - 1) * 5);
+                    gameState.player.expToNext = Math.floor(100 * Math.pow(1.5, gameState.startLevel - 1));
+                }
+                
+                // Démarrer la génération d'ennemis et d'objets
+                spawnEnemies();
+                spawnItems();
+                
+                // Démarrer la boucle de jeu
+                gameLoop();
+                
+                updateUI();
+                updateLanguage();
+            }
+        }
+
+        function togglePause() {
+            if (!gameState.gameRunning) return;
+            
+            gameState.paused = !gameState.paused;
+            const pausedOverlay = document.getElementById('pausedOverlay');
+            const pauseBtn = document.getElementById('pauseBtn');
+            
+            if (gameState.paused) {
+                pausedOverlay.style.display = 'flex';
+                pauseBtn.innerHTML = '▶️ <span id="pauseBtnText">' + getText('resume') + '</span>';
+            } else {
+                pausedOverlay.style.display = 'none';
+                pauseBtn.innerHTML = '⏸️ <span id="pauseBtnText">' + getText('pause') + '</span>';
+            }
+        }
+
+        function newGame() {
+            // Réinitialiser l'état du jeu
+            gameState.player = {
+                x: 400,
+                y: 300,
+                health: 100,
+                maxHealth: 100,
+                energy: 50,
+                maxEnergy: 50,
+                level: gameState.startLevel,
+                exp: 0,
+                expToNext: 100,
+                score: 0,
+                inventory: [],
+                attack: 20
+            };
+            
+            // Appliquer les améliorations du niveau de départ
+            if (gameState.startLevel > 1) {
+                gameState.player.maxHealth = 100 + ((gameState.startLevel - 1) * 20);
+                gameState.player.health = gameState.player.maxHealth;
+                gameState.player.maxEnergy = 50 + ((gameState.startLevel - 1) * 10);
+                gameState.player.energy = gameState.player.maxEnergy;
+                gameState.player.attack = 20 + ((gameState.startLevel - 1) * 5);
+                gameState.player.expToNext = Math.floor(100 * Math.pow(1.5, gameState.startLevel - 1));
+            }
+            
+            // Réinitialiser les quêtes
+            gameState.quests = [
+                { id: 1, titleKey: "quest1Title", descKey: "quest1Desc", progress: 0, target: 3, completed: false },
+                { id: 2, titleKey: "quest2Title", descKey: "quest2Desc", progress: 0, target: 5, completed: false },
+                { id: 3, titleKey: "quest3Title", descKey: "quest3Desc", progress: gameState.startLevel, target: 3, completed: false }
+            ];
+            
+            // Nettoyer les ennemis et objets existants
+            gameState.enemies.forEach(enemy => {
+                if (enemy.element) enemy.element.remove();
+                if (enemy.aiInterval) clearInterval(enemy.aiInterval);
+            });
+            gameState.items.forEach(item => {
+                if (item.element) item.element.remove();
+            });
+            
+            gameState.enemies = [];
+            gameState.items = [];
+            gameState.currentEnemy = null;
+            gameState.inCombat = false;
+            gameState.gameRunning = false;
+            gameState.paused = false;
+            
+            // Fermer les modals
+            document.getElementById('combatModal').style.display = 'none';
+            document.getElementById('levelUpModal').style.display = 'none';
+            document.getElementById('pausedOverlay').style.display = 'none';
+            
+            // Réinitialiser les boutons
+            document.getElementById('startBtn').style.display = 'inline-block';
+            document.getElementById('pauseBtn').style.display = 'none';
+            
+            // Réinitialiser la position du joueur
+            player.style.left = gameState.player.x + 'px';
+            player.style.top = gameState.player.y + 'px';
+            
+            // Recréer le contenu
+            initGame();
+        }
+
+        function setStartLevel() {
+            const levelInput = document.getElementById('levelInput');
+            gameState.startLevel = Math.max(1, Math.min(10, parseInt(levelInput.value) || 1));
+            levelInput.value = gameState.startLevel;
+        }
+
+        function rotateGame() {
+            gameState.rotated = !gameState.rotated;
+            const gameContainer = document.querySelector('.game-container');
+            
+            if (gameState.rotated) {
+                gameContainer.classList.add('game-rotated');
+            } else {
+                gameContainer.classList.remove('game-rotated');
+            }
+        }
+
+        function toggleLanguageDropdown() {
+            const dropdown = document.getElementById('languageDropdown');
+            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function changeLanguage(lang) {
+            gameState.currentLanguage = lang;
+            document.getElementById('languageDropdown').style.display = 'none';
+            updateLanguage();
+        }
+
+        function getText(key) {
+            return languages[gameState.currentLanguage][key] || key;
+        }
+
+        function updateLanguage() {
+            // Mettre à jour tous les textes de l'interface
+            const elements = {
+                // Labels des stats
+                'healthLabel': getText('health'),
+                'energyLabel': getText('energy'),
+                'expLabel': getText('experience'),
+                
+                // Boutons de contrôle
+                'startBtnText': gameState.gameRunning ? getText('resume') : getText('start'),
+                'pauseBtnText': gameState.paused ? getText('resume') : getText('pause'),
+                'newGameText': getText('newGame'),
+                'levelSelectorText': getText('levelSelector'),
+                'languageText': getText('language'),
+                'rotateText': getText('rotation'),
+                'rulesText': getText('rules'),
+                
+                // Sections de la barre latérale
+                'inventoryTitle': getText('inventory'),
+                'questsTitle': getText('quests'),
+                'leaderboardTitle': getText('leaderboard'),
+                
+                // Combat
+                'combatTitle': getText('combat'),
+                'attackBtn': getText('attack'),
+                'specialAttackBtn': getText('specialAttack'),
+                'fleeBtn': getText('flee'),
+                
+                // Règles
+                'rulesTitle': getText('rulesTitle'),
+                'objectiveTitle': getText('objective'),
+                'objectiveText': getText('objectiveText'),
+                'controlsTitle': getText('controlsTitle'),
+                'control1': getText('control1'),
+                'control2': getText('control2'),
+                'control3': getText('control3'),
+                'control4': getText('control4'),
+                'combatTitle': getText('combatTitle'),
+                'combat1': getText('combat1'),
+                'combat2': getText('combat2'),
+                'combat3': getText('combat3'),
+                'progressionTitle': getText('progressionTitle'),
+                'progression1': getText('progression1'),
+                'progression2': getText('progression2'),
+                'progression3': getText('progression3'),
+                'progression4': getText('progression4'),
+                'itemsTitle': getText('itemsTitle'),
+                'item1': getText('item1'),
+                'item2': getText('item2'),
+                'item3': getText('item3'),
+                'item4': getText('item4'),
+                'closeRulesText': getText('close'),
+                
+                // Autres
+                'levelUpText': getText('levelUp'),
+                'pausedText': gameState.paused ? getText('pause').toUpperCase() : 'PAUSE'
+            };
+            
+            // Appliquer les textes
+            Object.keys(elements).forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.textContent = elements[id];
+                }
+            });
+            
+            // Mettre à jour les titres des sections
+            const sidebarTitles = document.querySelectorAll('.sidebar-title');
+            if (sidebarTitles[0]) sidebarTitles[0].textContent = getText('inventory');
+            if (sidebarTitles[1]) sidebarTitles[1].textContent = getText('quests');
+            if (sidebarTitles[2]) sidebarTitles[2].textContent = getText('leaderboard');
+            
+            // Mettre à jour les labels des stats
+            const statLabels = document.querySelectorAll('.stat-label');
+            if (statLabels[0]) statLabels[0].textContent = getText('health');
+            if (statLabels[1]) statLabels[1].textContent = getText('energy');
+            if (statLabels[2]) statLabels[2].textContent = getText('experience');
+            
+            // Mettre à jour les quêtes
+            updateQuests();
+        }
+
+        function showRules() {
+            document.getElementById('rulesModal').style.display = 'flex';
+        }
+
+        function hideRules() {
+            document.getElementById('rulesModal').style.display = 'none';
+        }
+
+        // Fermer les dropdowns en cliquant ailleurs
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.language-selector')) {
+                document.getElementById('languageDropdown').style.display = 'none';
+            }
+            if (e.target.id === 'rulesModal') {
+                hideRules();
+            }
+        });
+
+        // Initialisation du jeu
+        function initGame() {
+            createInventorySlots();
+            updateUI();
+            updateQuests();
+            loadLeaderboard();
+            updateLanguage();
+        }
+
+        // Création des slots d'inventaire
+        function createInventorySlots() {
+            const inventoryGrid = document.getElementById('inventoryGrid');
+            for (let i = 0; i < 16; i++) {
+                const slot = document.createElement('div');
+                slot.className = 'inventory-slot';
+                slot.id = `slot-${i}`;
+                inventoryGrid.appendChild(slot);
+            }
+        }
+
+        // Génération d'ennemis
+        function spawnEnemies() {
+            for (let i = 0; i < 5; i++) {
+                spawnEnemy();
+            }
+        }
+
+        function spawnEnemy() {
+            const enemy = {
+                id: Date.now() + Math.random(),
+                x: Math.random() * (gameWorld.offsetWidth - 100) + 50,
+                y: Math.random() * (gameWorld.offsetHeight - 100) + 50,
+                health: 50 + (gameState.player.level * 10),
+                maxHealth: 50 + (gameState.player.level * 10),
+                attack: 15 + (gameState.player.level * 2),
+                element: null
+            };
+
+            // Créer l'élément DOM
+            const enemyElement = document.createElement('div');
+            enemyElement.className = 'enemy';
+            enemyElement.id = `enemy-${enemy.id}`;
+            enemyElement.style.left = enemy.x + 'px';
+            enemyElement.style.top = enemy.y + 'px';
+            enemyElement.onclick = () => startCombat(enemy);
+
+            gameWorld.appendChild(enemyElement);
+            gameState.enemies.push(enemy);
+            enemy.element = enemyElement;
+
+            // IA basique pour le mouvement
+            enemy.aiInterval = setInterval(() => {
+                if (!gameState.inCombat && enemy.element) {
+                    moveEnemyAI(enemy);
+                }
+            }, 2000 + Math.random() * 3000);
+        }
+
+        // IA de mouvement des ennemis
+        function moveEnemyAI(enemy) {
+            const playerDistance = Math.sqrt(
+                Math.pow(enemy.x - gameState.player.x, 2) + 
+                Math.pow(enemy.y - gameState.player.y, 2)
+            );
+
+            if (playerDistance < 150) {
+                // Se rapprocher du joueur
+                const dx = gameState.player.x - enemy.x;
+                const dy = gameState.player.y - enemy.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                enemy.x += (dx / distance) * 20;
+                enemy.y += (dy / distance) * 20;
+            } else {
+                // Mouvement aléatoire
+                enemy.x += (Math.random() - 0.5) * 60;
+                enemy.y += (Math.random() - 0.5) * 60;
+            }
+
+            // Limites de l'écran
+            enemy.x = Math.max(20, Math.min(gameWorld.offsetWidth - 60, enemy.x));
+            enemy.y = Math.max(20, Math.min(gameWorld.offsetHeight - 60, enemy.y));
+
+            if (enemy.element) {
+                enemy.element.style.left = enemy.x + 'px';
+                enemy.element.style.top = enemy.y + 'px';
+            }
+        }
+
+        // Génération d'objets
+        function spawnItems() {
+            for (let i = 0; i < 8; i++) {
+                spawnItem();
+            }
+        }
+
+        function spawnItem() {
+            const itemTypes = ['💎', '⚡', '🛡️', '💊', '🗝️', '⭐'];
+            const item = {
+                id: Date.now() + Math.random(),
+                x: Math.random() * (gameWorld.offsetWidth - 50) + 25,
+                y: Math.random() * (gameWorld.offsetHeight - 50) + 25,
+                type: itemTypes[Math.floor(Math.random() * itemTypes.length)],
+                element: null
+            };
+
+            const itemElement = document.createElement('div');
+            itemElement.className = 'item';
+            itemElement.id = `item-${item.id}`;
+            itemElement.style.left = item.x + 'px';
+            itemElement.style.top = item.y + 'px';
+            itemElement.innerHTML = item.type;
+            itemElement.onclick = () => collectItem(item);
+
+            gameWorld.appendChild(itemElement);
+            gameState.items.push(item);
+            item.element = itemElement;
+        }
+
+        // Collecte d'objets
+        function collectItem(item) {
+            if (gameState.player.inventory.length < 16) {
+                gameState.player.inventory.push(item);
+                
+                // Effets des objets
+                switch (item.type) {
+                    case '💊':
+                        gameState.player.health = Math.min(gameState.player.maxHealth, gameState.player.health + 25);
+                        break;
+                    case '⚡':
+                        gameState.player.energy = Math.min(gameState.player.maxEnergy, gameState.player.energy + 15);
+                        break;
+                    case '💎':
+                        gameState.player.score += 100;
+                        break;
+                }
+
+                // Supprimer l'objet
+                item.element.remove();
+                gameState.items = gameState.items.filter(i => i.id !== item.id);
+
+                // Mettre à jour les quêtes
+                updateQuestProgress(2, 1);
+
+                // Créer des particules
+                createParticles(item.x, item.y);
+
+                // Respawn d'un nouvel objet
+                setTimeout(spawnItem, 3000);
+
+                updateUI();
+                updateInventoryDisplay();
+            }
+        }
+
+        // Mise à jour de l'affichage de l'inventaire
+        function updateInventoryDisplay() {
+            for (let i = 0; i < 16; i++) {
+                const slot = document.getElementById(`slot-${i}`);
+                if (gameState.player.inventory[i]) {
+                    slot.innerHTML = gameState.player.inventory[i].type;
+                    slot.classList.add('filled');
+                } else {
+                    slot.innerHTML = '';
+                    slot.classList.remove('filled');
+                }
+            }
+        }
+
+        // Système de combat
+        function startCombat(enemy) {
+            if (gameState.inCombat) return;
+
+            gameState.inCombat = true;
+            gameState.currentEnemy = enemy;
+            
+            // Mettre à jour les textes du combat
+            document.getElementById('combatModalTitle').textContent = getText('combat');
+            document.getElementById('enemyLabel').textContent = getText('enemy');
+            document.getElementById('yourHealthLabel').textContent = getText('yourHealth');
+            document.getElementById('attackBtnText').textContent = getText('attack');
+            document.getElementById('specialAttackBtnText').textContent = getText('specialAttack');
+            document.getElementById('fleeBtnText').textContent = getText('flee');
+            
+            document.getElementById('combatEnemyDisplay').textContent = '👾';
+            document.getElementById('enemyHealthDisplay').textContent = enemy.health;
+            document.getElementById('playerHealthDisplay').textContent = gameState.player.health;
+            
+            combatModal.style.display = 'flex';
+        }
+
+        function attack() {
+            if (!gameState.currentEnemy) return;
+
+            const damage = gameState.player.attack + Math.floor(Math.random() * 10);
+            gameState.currentEnemy.health -= damage;
+
+            showDamageText(damage, gameState.currentEnemy.x, gameState.currentEnemy.y);
+
+            if (gameState.currentEnemy.health <= 0) {
+                enemyDefeated();
+            } else {
+                enemyAttack();
+            }
+
+            updateCombatDisplay();
+        }
+
+        function specialAttack() {
+            if (gameState.player.energy < 20) return;
+
+            gameState.player.energy -= 20;
+            const damage = gameState.player.attack * 2 + Math.floor(Math.random() * 15);
+            gameState.currentEnemy.health -= damage;
+
+            showDamageText(damage, gameState.currentEnemy.x, gameState.currentEnemy.y, '#00ffff');
+
+            if (gameState.currentEnemy.health <= 0) {
+                enemyDefeated();
+            } else {
+                enemyAttack();
+            }
+
+            updateCombatDisplay();
+            updateUI();
+        }
+
+        function enemyAttack() {
+            const damage = gameState.currentEnemy.attack + Math.floor(Math.random() * 8);
+            gameState.player.health -= damage;
+
+            showDamageText(damage, gameState.player.x, gameState.player.y, '#ff4757');
+
+            if (gameState.player.health <= 0) {
+                gameOver();
+            }
+        }
+
+        function enemyDefeated() {
+            const enemy = gameState.currentEnemy;
+            
+            // Récompenses
+            const expGain = 25 + (gameState.player.level * 5);
+            const scoreGain = 150 + (gameState.player.level * 25);
+            
+            gameState.player.exp += expGain;
+            gameState.player.score += scoreGain;
+
+            // Vérifier montée de niveau
+            if (gameState.player.exp >= gameState.player.expToNext) {
+                levelUp();
+            }
+
+            // Supprimer l'ennemi
+            enemy.element.remove();
+            clearInterval(enemy.aiInterval);
+            gameState.enemies = gameState.enemies.filter(e => e.id !== enemy.id);
+
+            // Mettre à jour les quêtes
+            updateQuestProgress(1, 1);
+
+            // Respawn d'un nouvel ennemi
+            setTimeout(spawnEnemy, 5000);
+
+            endCombat();
+            updateUI();
+        }
+
+        function flee() {
+            endCombat();
+        }
+
+        function endCombat() {
+            gameState.inCombat = false;
+            gameState.currentEnemy = null;
+            combatModal.style.display = 'none';
+        }
+
+        function updateCombatDisplay() {
+            if (gameState.currentEnemy) {
+                document.getElementById('enemyHealthDisplay').textContent = Math.max(0, gameState.currentEnemy.health);
+            }
+            document.getElementById('playerHealthDisplay').textContent = Math.max(0, gameState.player.health);
+        }
+
+        // Système de niveau
+        function levelUp() {
+            gameState.player.level++;
+            gameState.player.exp -= gameState.player.expToNext;
+            gameState.player.expToNext = Math.floor(gameState.player.expToNext * 1.5);
+            
+            // Amélioration des stats
+            gameState.player.maxHealth += 20;
+            gameState.player.health = gameState.player.maxHealth;
+            gameState.player.maxEnergy += 10;
+            gameState.player.energy = gameState.player.maxEnergy;
+            gameState.player.attack += 5;
+
+            // Afficher modal de niveau
+            levelUpModal.style.display = 'block';
+            setTimeout(() => {
+                levelUpModal.style.display = 'none';
+            }, 2000);
+
+            // Mettre à jour les quêtes
+            updateQuestProgress(3, gameState.player.level);
+
+            updateUI();
+        }
+
+        // Système de quêtes
+        function updateQuestProgress(questId, amount) {
+            const quest = gameState.quests.find(q => q.id === questId);
+            if (quest && !quest.completed) {
+                quest.progress = Math.min(quest.target, quest.progress + amount);
+                if (quest.progress >= quest.target) {
+                    quest.completed = true;
+                    gameState.player.score += 500;
+                    const questTitle = getText(quest.titleKey);
+                    showNotification(`${getText('questCompleted')} ${questTitle}!`);
+                }
+                updateQuests();
+            }
+        }
+
+        function updateQuests() {
+            const questsList = document.getElementById('questsList');
+            questsList.innerHTML = '';
+
+            gameState.quests.forEach(quest => {
+                const questElement = document.createElement('div');
+                questElement.className = 'quest-item';
+                if (quest.completed) {
+                    questElement.style.opacity = '0.6';
+                    questElement.style.background = 'rgba(46, 204, 113, 0.2)';
+                }
+
+                const title = getText(quest.titleKey);
+                const description = getText(quest.descKey);
+
+                questElement.innerHTML = `
+                    <div class="quest-title">${title} ${quest.completed ? '✅' : ''}</div>
+                    <div class="quest-description">${description}</div>
+                    <div style="margin-top: 5px; font-size: 12px; color: #00ffff;">
+                        ${getText('progression1').split(' ')[0]}: ${quest.progress}/${quest.target}
+                    </div>
+                `;
+
+                questsList.appendChild(questElement);
+            });
+        }
+
+        // Contrôles
+        document.addEventListener('keydown', (e) => {
+            gameState.keys[e.key.toLowerCase()] = true;
+            
+            if (e.key === ' ') {
+                e.preventDefault();
+                if (!gameState.inCombat && gameState.player.energy >= 20) {
+                    // Attaque spéciale en zone
+                    areaAttack();
+                }
+            }
+        });
+
+        document.addEventListener('keyup', (e) => {
+            gameState.keys[e.key.toLowerCase()] = false;
+        });
+
+        function areaAttack() {
+            gameState.player.energy -= 20;
+            
+            gameState.enemies.forEach(enemy => {
+                const distance = Math.sqrt(
+                    Math.pow(enemy.x - gameState.player.x, 2) + 
+                    Math.pow(enemy.y - gameState.player.y, 2)
+                );
+                
+                if (distance < 100) {
+                    const damage = gameState.player.attack;
+                    enemy.health -= damage;
+                    showDamageText(damage, enemy.x, enemy.y, '#00ffff');
+                    
+                    if (enemy.health <= 0) {
+                        enemy.element.remove();
+                        clearInterval(enemy.aiInterval);
+                        gameState.enemies = gameState.enemies.filter(e => e.id !== enemy.id);
+                        
+                        gameState.player.exp += 15;
+                        gameState.player.score += 100;
+                        updateQuestProgress(1, 1);
+                        
+                        setTimeout(spawnEnemy, 3000);
+                    }
+                }
+            });
+            
+            createParticles(gameState.player.x, gameState.player.y, '#00ffff', 20);
+            updateUI();
+        }
+
+        // Mouvement du joueur
+        function movePlayer() {
+            if (gameState.paused || !gameState.gameRunning) return;
+            
+            const speed = 5;
+            let moved = false;
+
+            if (gameState.keys['w'] || gameState.keys['arrowup']) {
+                gameState.player.y = Math.max(10, gameState.player.y - speed);
+                moved = true;
+            }
+            if (gameState.keys['s'] || gameState.keys['arrowdown']) {
+                gameState.player.y = Math.min(gameWorld.offsetHeight - 50, gameState.player.y + speed);
+                moved = true;
+            }
+            if (gameState.keys['a'] || gameState.keys['arrowleft']) {
+                gameState.player.x = Math.max(10, gameState.player.x - speed);
+                moved = true;
+            }
+            if (gameState.keys['d'] || gameState.keys['arrowright']) {
+                gameState.player.x = Math.min(gameWorld.offsetWidth - 50, gameState.player.x + speed);
+                moved = true;
+            }
+
+            if (moved) {
+                player.style.left = gameState.player.x + 'px';
+                player.style.top = gameState.player.y + 'px';
+            }
+        }
+
+        // Effets visuels
+        function showDamageText(damage, x, y, color = '#ff4757') {
+            const damageElement = document.createElement('div');
+            damageElement.className = 'damage-text';
+            damageElement.textContent = `-${damage}`;
+            damageElement.style.left = x + 'px';
+            damageElement.style.top = y + 'px';
+            damageElement.style.color = color;
+
+            gameWorld.appendChild(damageElement);
+
+            setTimeout(() => {
+                damageElement.remove();
+            }, 1000);
+        }
+
+        function createParticles(x, y, color = '#00ffff', count = 10) {
+            for (let i = 0; i < count; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = (x + Math.random() * 40 - 20) + 'px';
+                particle.style.top = (y + Math.random() * 40 - 20) + 'px';
+                particle.style.background = color;
+                particle.style.animationDelay = (Math.random() * 0.5) + 's';
+
+                gameWorld.appendChild(particle);
+
+                setTimeout(() => {
+                    particle.remove();
+                }, 2000);
+            }
+        }
+
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.style.position = 'fixed';
+            notification.style.top = '20px';
+            notification.style.right = '20px';
+            notification.style.background = 'linear-gradient(45deg, #00ffff, #0099cc)';
+            notification.style.color = '#ffffff';
+            notification.style.padding = '15px 20px';
+            notification.style.borderRadius = '10px';
+            notification.style.fontWeight = 'bold';
+            notification.style.zIndex = '1002';
+            notification.style.animation = 'slideIn 0.5s ease-out';
+            notification.textContent = message;
+
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // Mise à jour de l'interface
+        function updateUI() {
+            document.getElementById('healthValue').textContent = `${gameState.player.health}/${gameState.player.maxHealth}`;
+            document.getElementById('energyValue').textContent = `${gameState.player.energy}/${gameState.player.maxEnergy}`;
+            document.getElementById('expValue').textContent = `${gameState.player.exp}/${gameState.player.expToNext}`;
+            document.getElementById('levelValue').textContent = gameState.player.level;
+            document.getElementById('scoreValue').textContent = gameState.player.score;
+
+            // Barres de progression
+            document.getElementById('healthFill').style.width = (gameState.player.health / gameState.player.maxHealth * 100) + '%';
+            document.getElementById('energyFill').style.width = (gameState.player.energy / gameState.player.maxEnergy * 100) + '%';
+            document.getElementById('expFill').style.width = (gameState.player.exp / gameState.player.expToNext * 100) + '%';
+        }
+
+        // Système de classement
+        function saveScore() {
+            const scores = JSON.parse(localStorage.getItem('cyberWarriorScores') || '[]');
+            scores.push({
+                score: gameState.player.score,
+                level: gameState.player.level,
+                date: new Date().toLocaleDateString()
+            });
+            scores.sort((a, b) => b.score - a.score);
+            scores.splice(10); // Garder seulement le top 10
+            localStorage.setItem('cyberWarriorScores', JSON.stringify(scores));
+        }
+
+        function loadLeaderboard() {
+            const scores = JSON.parse(localStorage.getItem('cyberWarriorScores') || '[]');
+            const leaderboard = document.getElementById('leaderboard');
+            
+            if (scores.length === 0) {
+                leaderboard.innerHTML = `<p style="color: #888; font-size: 12px;">${getText('noScores')}</p>`;
+                return;
+            }
+
+            leaderboard.innerHTML = scores.slice(0, 5).map((score, index) => `
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 12px;">
+                    <span>${index + 1}. ${getText('level').substring(0, 3)}.${score.level}</span>
+                    <span style="color: #00ffff;">${score.score}</span>
+                </div>
+            `).join('');
+        }
+
+        // Régénération d'énergie
+        function regenerateEnergy() {
+            if (gameState.player.energy < gameState.player.maxEnergy) {
+                gameState.player.energy = Math.min(gameState.player.maxEnergy, gameState.player.energy + 1);
+                updateUI();
+            }
+        }
+
+        // Game Over
+        function gameOver() {
+            saveScore();
+            try{ parent.postMessage({ action: 'dialog', dialogType: 'alert', text: `${getText('gameOver')} ${gameState.player.score} - ${getText('level')}: ${gameState.player.level}` }, '*'); }catch(e){}
+            newGame();
+        }
+
+        // Boucle de jeu principale
+        function gameLoop() {
+            if (!gameState.gameRunning) return;
+
+            if (!gameState.inCombat && !gameState.paused) {
+                movePlayer();
+            }
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Régénération d'énergie toutes les 2 secondes
+        setInterval(regenerateEnergy, 2000);
+
+        // Initialiser le jeu
+        initGame();
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'988b587a669be183',t:'MTc1OTQ4MzAzNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
