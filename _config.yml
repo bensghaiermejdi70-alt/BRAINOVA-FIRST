@@ -1,0 +1,26 @@
+# GitHub Pages Jekyll configuration
+# For static site deployment via GitHub Pages
+
+# Site settings
+title: "Jeux Brise-Glace"
+description: "Plateforme de 37 jeux brise-glace pour animer vos événements"
+baseurl: "" # the subpath of your site, e.g. /blog
+url: "" # the base hostname & protocol for your site
+
+# Build settings
+markdown: kramdown
+theme: minima
+
+# Exclude from processing
+exclude:
+  - README.md
+  - HOSTING.md
+  - .gitignore
+  - netlify.toml
+  - vercel.json
+
+# Include files
+include:
+  - index.html
+  - styles.css
+  - script.js
