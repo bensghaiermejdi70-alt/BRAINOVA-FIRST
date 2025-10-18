@@ -1,0 +1,2830 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔥 Brainova Quantum Dames - IA Futuriste</title>
+    <script>
+        (function(){
+            if(window.__platform_nonblocking_dialogs) return; window.__platform_nonblocking_dialogs=true;
+            try{
+                const _alert = window.alert.bind(window);
+                const _confirm = window.confirm.bind(window);
+                const _prompt = window.prompt.bind(window);
+                function send(type,text){ try{ if(window.parent && window.parent!==window) parent.postMessage({action:'dialog', dialogType:type, text:String(text||'')}, '*'); }catch(e){} }
+                window.alert = function(msg){ if(window.parent && window.parent!==window){ send('alert', msg); } else { _alert(msg); } };
+                window.confirm = function(msg){ if(window.parent && window.parent!==window){ send('confirm', msg); return true; } else { return _confirm(msg); } };
+                window.prompt = function(msg, def){ if(window.parent && window.parent!==window){ send('prompt', msg+'\n(default: '+(def||'')+')'); return def||null; } else { return _prompt(msg, def); } };
+            }catch(e){ }
+        })();
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            box-sizing: border-box;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a3a 30%, #2d1b69 70%, #4c1d95 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Particules quantiques d'arrière-plan */
+        .quantum-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .quantum-particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #ff6b35;
+            border-radius: 50%;
+            animation: quantumFloat 15s infinite linear;
+            box-shadow: 0 0 12px #ff6b35, 0 0 24px #ff6b35;
+        }
+
+        @keyframes quantumFloat {
+            0% {
+                transform: translateY(100vh) translateX(0) rotate(0deg) scale(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+                transform: translateY(90vh) translateX(30px) rotate(45deg) scale(1);
+            }
+            50% {
+                transform: translateY(50vh) translateX(-40px) rotate(180deg) scale(1.8);
+            }
+            90% {
+                opacity: 1;
+                transform: translateY(10vh) translateX(60px) rotate(315deg) scale(1);
+            }
+            100% {
+                transform: translateY(-10vh) translateX(120px) rotate(360deg) scale(0);
+                opacity: 0;
+            }
+        }
+
+        /* Lignes d'énergie futuristes */
+        .energy-lines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        .energy-line {
+            position: absolute;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, #ff6b35, transparent);
+            animation: energyFlow 10s infinite linear;
+            box-shadow: 0 0 15px #ff6b35;
+        }
+
+        @keyframes energyFlow {
+            0% {
+                transform: translateX(-100%);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateX(100vw);
+                opacity: 0;
+            }
+        }
+
+        /* Cercles d'énergie pulsants */
+        .energy-circles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .energy-circle {
+            position: absolute;
+            border: 3px solid rgba(255, 107, 53, 0.4);
+            border-radius: 50%;
+            animation: energyPulse 8s infinite ease-in-out;
+        }
+
+        @keyframes energyPulse {
+            0% {
+                transform: scale(0) rotate(0deg);
+                opacity: 1;
+                border-color: rgba(255, 107, 53, 0.9);
+            }
+            50% {
+                transform: scale(1.2) rotate(180deg);
+                opacity: 0.6;
+                border-color: rgba(255, 107, 53, 0.5);
+            }
+            100% {
+                transform: scale(2.5) rotate(360deg);
+                opacity: 0;
+                border-color: rgba(255, 107, 53, 0.1);
+            }
+        }
+
+        /* Grille quantique de fond */
+        .quantum-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(255, 107, 53, 0.15) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 107, 53, 0.15) 1px, transparent 1px);
+            background-size: 80px 80px;
+            animation: quantumGridMove 30s linear infinite;
+            z-index: 1;
+        }
+
+        @keyframes quantumGridMove {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            50% { transform: translate(40px, 40px) rotate(2deg); }
+            100% { transform: translate(80px, 80px) rotate(0deg); }
+        }
+
+        /* Rayons laser */
+        .laser-beams {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .laser-beam {
+            position: absolute;
+            width: 3px;
+            height: 100vh;
+            background: linear-gradient(to bottom, 
+                transparent 0%, 
+                rgba(255, 107, 53, 0.9) 20%, 
+                rgba(255, 107, 53, 0.5) 50%, 
+                rgba(255, 107, 53, 0.9) 80%, 
+                transparent 100%);
+            animation: laserScan 15s infinite linear;
+            box-shadow: 0 0 25px rgba(255, 107, 53, 0.7);
+        }
+
+        @keyframes laserScan {
+            0% {
+                transform: translateX(-15px);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateX(100vw);
+                opacity: 0;
+            }
+        }
+
+        /* Container principal */
+        .quantum-dames-container {
+            position: relative;
+            z-index: 10;
+            display: grid;
+            grid-template-columns: 180px 1fr 180px;
+            gap: 12px;
+            min-height: 100vh;
+            padding: 10px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding-top: 15px;
+        }
+
+        .left-panel, .right-panel {
+            background: linear-gradient(145deg, 
+                rgba(30, 30, 58, 0.95) 0%,
+                rgba(45, 27, 105, 0.95) 50%,
+                rgba(76, 29, 149, 0.95) 100%);
+            backdrop-filter: blur(30px);
+            border-radius: 15px;
+            padding: 12px;
+            height: fit-content;
+            box-shadow: 
+                0 15px 30px rgba(0, 0, 0, 0.7),
+                0 0 60px rgba(255, 107, 53, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 107, 53, 0.5);
+            animation: quantumPanelGlow 5s ease-in-out infinite alternate;
+        }
+
+        .game-panel {
+            background: linear-gradient(145deg, 
+                rgba(30, 30, 58, 0.95) 0%,
+                rgba(45, 27, 105, 0.95) 50%,
+                rgba(76, 29, 149, 0.95) 100%);
+            backdrop-filter: blur(30px);
+            border-radius: 20px;
+            padding: 20px;
+            width: 100%;
+            height: fit-content;
+            box-shadow: 
+                0 25px 50px rgba(0, 0, 0, 0.7),
+                0 0 100px rgba(255, 107, 53, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 107, 53, 0.5);
+            animation: quantumPanelGlow 5s ease-in-out infinite alternate;
+        }
+
+        @keyframes quantumPanelGlow {
+            from { 
+                box-shadow: 
+                    0 25px 50px rgba(0, 0, 0, 0.7),
+                    0 0 100px rgba(255, 107, 53, 0.2),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            }
+            to { 
+                box-shadow: 
+                    0 30px 60px rgba(0, 0, 0, 0.7),
+                    0 0 120px rgba(255, 107, 53, 0.3),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            }
+        }
+
+        /* En-tête du jeu */
+        .quantum-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(255, 107, 53, 0.5);
+        }
+
+        .quantum-title {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .quantum-title h1 {
+            color: #ff6b35;
+            margin: 0;
+            font-size: 18px;
+            font-weight: 700;
+            text-shadow: 0 0 30px rgba(255, 107, 53, 0.9);
+            animation: quantumTitlePulse 4s infinite alternate;
+        }
+
+        @keyframes quantumTitlePulse {
+            from { 
+                text-shadow: 0 0 30px rgba(255, 107, 53, 0.9);
+                transform: scale(1);
+            }
+            to { 
+                text-shadow: 0 0 40px rgba(255, 107, 53, 1);
+                transform: scale(1.03);
+            }
+        }
+
+        .quantum-icon {
+            font-size: 28px;
+            animation: quantumIconSpin 8s linear infinite;
+            filter: drop-shadow(0 0 20px #ff6b35);
+            color: #fbbf24;
+            text-shadow: 
+                0 0 15px rgba(251, 191, 36, 0.9),
+                0 0 30px rgba(251, 191, 36, 0.7),
+                0 0 45px rgba(251, 191, 36, 0.5);
+        }
+
+        @keyframes quantumIconSpin {
+            0% { transform: rotate(0deg) scale(1); }
+            25% { transform: rotate(90deg) scale(1.15); }
+            50% { transform: rotate(180deg) scale(1); }
+            75% { transform: rotate(270deg) scale(1.15); }
+            100% { transform: rotate(360deg) scale(1); }
+        }
+
+        .quantum-badge {
+            background: linear-gradient(45deg, #ff6b35, #f59e0b, #ef4444, #8b5cf6);
+            background-size: 400% 400%;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: bold;
+            animation: quantumBadgeShine 5s ease-in-out infinite;
+            box-shadow: 0 0 25px rgba(255, 107, 53, 0.7);
+        }
+
+        @keyframes quantumBadgeShine {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .close-btn {
+            background: rgba(255, 0, 0, 0.25);
+            border: 2px solid rgba(255, 0, 0, 0.6);
+            color: #ff4757;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-btn:hover {
+            background: rgba(255, 0, 0, 0.5);
+            transform: scale(1.15) rotate(90deg);
+            box-shadow: 0 0 30px rgba(255, 71, 87, 0.9);
+        }
+
+        /* Sélecteur de langue */
+        .language-selector {
+            background: linear-gradient(145deg, #ff6b35, #f59e0b);
+            color: white;
+            border: 2px solid rgba(255, 107, 53, 0.5);
+            border-radius: 15px;
+            padding: 12px 18px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 25px rgba(255, 107, 53, 0.5);
+            backdrop-filter: blur(15px);
+            min-width: 160px;
+            max-height: 220px;
+            overflow-y: auto;
+        }
+
+        .language-selector:hover {
+            background: linear-gradient(145deg, #ff8c42, #fbbf24);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(255, 107, 53, 0.7);
+            border-color: rgba(255, 107, 53, 0.7);
+        }
+
+        .language-selector:focus {
+            outline: none;
+            box-shadow: 0 0 35px rgba(255, 107, 53, 0.9);
+            border-color: rgba(255, 107, 53, 0.9);
+        }
+
+        .language-selector option {
+            background: #1e1e3a;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            font-size: 13px;
+        }
+
+        .language-selector option:hover {
+            background: #ff6b35;
+        }
+
+        /* Contrôles de mode de jeu */
+        .game-mode-controls {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 12px;
+            border: 2px solid rgba(255, 107, 53, 0.4);
+        }
+
+        .mode-btn {
+            padding: 12px 20px;
+            background: linear-gradient(145deg, #ff6b35, #f59e0b);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            min-width: 130px;
+        }
+
+        .mode-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .mode-btn:hover::before {
+            left: 100%;
+        }
+
+        .mode-btn:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 35px rgba(255, 107, 53, 0.6);
+            background: linear-gradient(145deg, #ff8c42, #fbbf24);
+        }
+
+        .mode-btn.active {
+            background: linear-gradient(145deg, #8b5cf6, #7c3aed);
+            box-shadow: 0 0 30px rgba(139, 92, 246, 0.7);
+        }
+
+        .mode-btn.active:hover {
+            background: linear-gradient(145deg, #a78bfa, #8b5cf6);
+        }
+
+        /* Plateau de dames quantique */
+        .quantum-dameboard-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 15px;
+            position: relative;
+            margin-top: 15px;
+        }
+
+        .quantum-dameboard {
+            width: 480px;
+            height: 480px;
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            grid-template-rows: repeat(8, 1fr);
+            border: 4px solid rgba(255, 107, 53, 0.9);
+            border-radius: 18px;
+            box-shadow: 
+                0 0 35px rgba(255, 107, 53, 0.7),
+                0 0 70px rgba(255, 107, 53, 0.4),
+                inset 0 0 25px rgba(255, 107, 53, 0.25);
+            animation: quantumBoardGlow 6s ease-in-out infinite alternate;
+            position: relative;
+            overflow: hidden;
+        }
+
+        @keyframes quantumBoardGlow {
+            from { 
+                box-shadow: 
+                    0 0 30px rgba(255, 107, 53, 0.5),
+                    0 0 60px rgba(255, 107, 53, 0.3),
+                    inset 0 0 20px rgba(255, 107, 53, 0.2);
+            }
+            to { 
+                box-shadow: 
+                    0 0 40px rgba(255, 107, 53, 0.7),
+                    0 0 80px rgba(255, 107, 53, 0.4),
+                    inset 0 0 30px rgba(255, 107, 53, 0.25);
+            }
+        }
+
+        .dame-square {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 107, 53, 0.4);
+            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .dame-square.light {
+            background: linear-gradient(145deg, #f3f4f6, #d1d5db);
+            box-shadow: 
+                inset 0 0 20px rgba(255, 255, 255, 0.5),
+                inset 0 0 12px rgba(255, 107, 53, 0.2);
+        }
+
+        .dame-square.dark {
+            background: linear-gradient(145deg, #374151, #1f2937);
+            box-shadow: 
+                inset 0 0 20px rgba(0, 0, 0, 0.7),
+                inset 0 0 12px rgba(255, 107, 53, 0.3);
+        }
+
+        .dame-square:hover {
+            transform: scale(1.08);
+            z-index: 15;
+            box-shadow: 
+                0 0 30px rgba(255, 107, 53, 0.9),
+                inset 0 0 25px rgba(255, 107, 53, 0.3);
+            border: 2px solid rgba(255, 107, 53, 0.7);
+        }
+
+        .dame-square.selected {
+            background: linear-gradient(145deg, #fbbf24, #f59e0b) !important;
+            box-shadow: 
+                0 0 35px rgba(251, 191, 36, 1),
+                inset 0 0 25px rgba(251, 191, 36, 0.4),
+                0 0 60px rgba(251, 191, 36, 0.6);
+            transform: scale(1.12);
+            z-index: 25;
+            border: 3px solid #fbbf24;
+            animation: selectedPulse 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes selectedPulse {
+            from { 
+                box-shadow: 
+                    0 0 35px rgba(251, 191, 36, 1),
+                    inset 0 0 25px rgba(251, 191, 36, 0.4),
+                    0 0 60px rgba(251, 191, 36, 0.6);
+            }
+            to { 
+                box-shadow: 
+                    0 0 45px rgba(251, 191, 36, 1),
+                    inset 0 0 35px rgba(251, 191, 36, 0.5),
+                    0 0 80px rgba(251, 191, 36, 0.8);
+            }
+        }
+
+        .dame-square.possible-move {
+            background: linear-gradient(145deg, #10b981, #059669) !important;
+            box-shadow: 
+                0 0 25px rgba(16, 185, 129, 0.9),
+                inset 0 0 20px rgba(16, 185, 129, 0.3);
+            border: 2px solid #10b981;
+            animation: possibleMovePulse 2.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes possibleMovePulse {
+            from { 
+                box-shadow: 
+                    0 0 25px rgba(16, 185, 129, 0.9),
+                    inset 0 0 20px rgba(16, 185, 129, 0.3);
+            }
+            to { 
+                box-shadow: 
+                    0 0 35px rgba(16, 185, 129, 1),
+                    inset 0 0 30px rgba(16, 185, 129, 0.4);
+            }
+        }
+
+        .dame-square.quantum-state {
+            background: linear-gradient(145deg, #ec4899, #db2777) !important;
+            box-shadow: 
+                0 0 30px rgba(236, 72, 153, 1),
+                inset 0 0 25px rgba(236, 72, 153, 0.4);
+            animation: quantumPulse 1.2s infinite alternate;
+            border: 2px solid #ec4899;
+        }
+
+        @keyframes quantumPulse {
+            from { transform: scale(1); }
+            to { transform: scale(1.08); }
+        }
+
+        /* Pions de dames */
+        .dame-piece {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 900;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 10;
+            border: 2px solid rgba(0, 0, 0, 0.3);
+            box-shadow: 
+                0 6px 12px rgba(0, 0, 0, 0.4),
+                inset 0 2px 4px rgba(255, 255, 255, 0.3);
+        }
+
+        .dame-piece:hover {
+            transform: scale(1.2);
+            z-index: 20;
+            box-shadow: 
+                0 12px 24px rgba(0, 0, 0, 0.5),
+                0 0 25px currentColor,
+                inset 0 2px 4px rgba(255, 255, 255, 0.4);
+            animation: pieceGlow 0.6s ease-in-out;
+        }
+
+        @keyframes pieceGlow {
+            0% { transform: scale(1.2); }
+            50% { transform: scale(1.25); }
+            100% { transform: scale(1.2); }
+        }
+
+        .dame-piece.white {
+            background: linear-gradient(145deg, #fbbf24, #f59e0b);
+            color: #1f2937;
+            text-shadow: 
+                2px 2px 4px rgba(0, 0, 0, 0.3),
+                0 0 15px rgba(251, 191, 36, 0.8);
+            border-color: rgba(31, 41, 55, 0.4);
+        }
+
+        .dame-piece.white:hover {
+            background: linear-gradient(145deg, #fcd34d, #fbbf24);
+            text-shadow: 
+                2px 2px 4px rgba(0, 0, 0, 0.4),
+                0 0 20px rgba(252, 211, 77, 1);
+        }
+
+        .dame-piece.black {
+            background: linear-gradient(145deg, #ef4444, #dc2626);
+            color: #f9fafb;
+            text-shadow: 
+                2px 2px 4px rgba(0, 0, 0, 0.6),
+                0 0 15px rgba(239, 68, 68, 0.8);
+            border-color: rgba(249, 250, 251, 0.4);
+        }
+
+        .dame-piece.black:hover {
+            background: linear-gradient(145deg, #f87171, #ef4444);
+            text-shadow: 
+                2px 2px 4px rgba(0, 0, 0, 0.7),
+                0 0 20px rgba(248, 113, 113, 1);
+        }
+
+        .dame-piece.king {
+            font-size: 24px;
+            border-width: 3px;
+            box-shadow: 
+                0 8px 16px rgba(0, 0, 0, 0.5),
+                0 0 25px currentColor,
+                inset 0 3px 6px rgba(255, 255, 255, 0.4);
+        }
+
+        /* Panneau de titre des sections */
+        .panel-title {
+            color: #ff6b35;
+            font-size: 13px;
+            font-weight: bold;
+            margin-bottom: 12px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            text-shadow: 0 0 15px rgba(255, 107, 53, 0.9);
+            border-bottom: 2px solid rgba(255, 107, 53, 0.5);
+            padding-bottom: 8px;
+        }
+
+        /* Contrôles quantiques */
+        .quantum-controls {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .quantum-btn {
+            padding: 10px 14px;
+            background: linear-gradient(145deg, #ff6b35, #f59e0b);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+        }
+
+        .quantum-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .quantum-btn:hover::before {
+            left: 100%;
+        }
+
+        .quantum-btn:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 30px rgba(255, 107, 53, 0.5);
+            background: linear-gradient(145deg, #ff8c42, #fbbf24);
+        }
+
+        .quantum-btn:active {
+            transform: translateY(-2px);
+        }
+
+        .quantum-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Boutons spécialisés */
+        .ai-btn {
+            background: linear-gradient(145deg, #8b5cf6, #7c3aed);
+        }
+
+        .ai-btn:hover {
+            background: linear-gradient(145deg, #a78bfa, #8b5cf6);
+        }
+
+        .reset-btn {
+            background: linear-gradient(145deg, #ef4444, #dc2626);
+        }
+
+        .reset-btn:hover {
+            background: linear-gradient(145deg, #f87171, #ef4444);
+        }
+
+        .quantum-special-btn {
+            background: linear-gradient(145deg, #ec4899, #db2777);
+        }
+
+        .quantum-special-btn:hover {
+            background: linear-gradient(145deg, #f472b6, #ec4899);
+        }
+
+        /* Bouton statut du joueur */
+        .player-status-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 18px;
+            background: linear-gradient(145deg, #ff6b35, #f59e0b);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-weight: bold;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.5);
+            border: 2px solid rgba(255, 107, 53, 0.4);
+        }
+
+        .player-status-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .player-status-btn:hover::before {
+            left: 100%;
+        }
+
+        .player-status-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(255, 107, 53, 0.7);
+            background: linear-gradient(145deg, #ff8c42, #fbbf24);
+            border-color: rgba(255, 107, 53, 0.6);
+        }
+
+        .player-status-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .player-status-btn.yellow-player {
+            background: linear-gradient(145deg, #fef08a, #fbbf24);
+            border-color: rgba(254, 240, 138, 0.6);
+            color: #1f2937;
+            text-shadow: 0 0 10px rgba(254, 240, 138, 0.9);
+        }
+
+        .player-status-btn.yellow-player:hover {
+            background: linear-gradient(145deg, #fefce8, #fef08a);
+            border-color: rgba(254, 240, 138, 0.8);
+            box-shadow: 0 10px 30px rgba(254, 240, 138, 0.7);
+        }
+
+        .player-status-btn.red-player {
+            background: linear-gradient(145deg, #ef4444, #dc2626);
+            border-color: rgba(239, 68, 68, 0.6);
+            color: white;
+        }
+
+        .player-status-btn.red-player:hover {
+            background: linear-gradient(145deg, #f87171, #ef4444);
+            border-color: rgba(239, 68, 68, 0.8);
+            box-shadow: 0 10px 30px rgba(239, 68, 68, 0.7);
+        }
+
+        .player-status-btn #currentPlayer {
+            font-size: 18px;
+            text-shadow: 0 0 12px rgba(255, 255, 255, 0.9);
+        }
+
+        /* IA Quantique Status */
+        .quantum-ai-status {
+            margin-bottom: 18px;
+            text-align: center;
+            min-height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .ai-thinking {
+            display: inline-flex;
+            align-items: center;
+            gap: 15px;
+            color: #ff6b35;
+            font-size: 15px;
+            opacity: 0;
+            transition: opacity 0.6s ease;
+            background: rgba(255, 107, 53, 0.2);
+            padding: 12px 25px;
+            border-radius: 30px;
+            border: 1px solid rgba(255, 107, 53, 0.5);
+        }
+
+        .ai-thinking.active {
+            opacity: 1;
+        }
+
+        .quantum-pulse {
+            width: 15px;
+            height: 15px;
+            background: #ff6b35;
+            border-radius: 50%;
+            animation: quantumAIPulse 2.5s infinite;
+            box-shadow: 0 0 20px #ff6b35;
+        }
+
+        @keyframes quantumAIPulse {
+            0%, 100% { 
+                transform: scale(1); 
+                opacity: 1; 
+            }
+            50% { 
+                transform: scale(2); 
+                opacity: 0.4; 
+            }
+        }
+
+        /* Statistiques du jeu */
+        .game-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .stat-item {
+            background: rgba(255, 107, 53, 0.15);
+            padding: 8px;
+            border-radius: 12px;
+            text-align: center;
+            border: 2px solid rgba(255, 107, 53, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 107, 53, 0.3), transparent);
+            animation: statQuantumScan 5s linear infinite;
+        }
+
+        @keyframes statQuantumScan {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .stat-label {
+            display: block;
+            color: #9ca3af;
+            font-size: 10px;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+        }
+
+        .stat-value {
+            display: block;
+            color: #ff6b35;
+            font-size: 16px;
+            font-weight: bold;
+            text-shadow: 0 0 15px rgba(255, 107, 53, 0.9);
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Historique des coups */
+        .move-history {
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid rgba(255, 107, 53, 0.4);
+            border-radius: 12px;
+            padding: 10px;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .move-item {
+            color: #ff6b35;
+            font-size: 12px;
+            padding: 5px 10px;
+            margin-bottom: 5px;
+            background: rgba(255, 107, 53, 0.15);
+            border-radius: 8px;
+            border-left: 3px solid #ff6b35;
+        }
+
+        /* Responsive */
+        @media (max-width: 1100px) {
+            .quantum-dames-container {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .left-panel, .right-panel {
+                display: none;
+            }
+            
+            .quantum-dameboard {
+                width: 450px;
+                height: 450px;
+            }
+            
+            .dame-piece {
+                width: 38px;
+                height: 38px;
+                font-size: 18px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .game-panel {
+                padding: 15px;
+                margin: 8px;
+            }
+            
+            .game-mode-controls {
+                flex-direction: column;
+                gap: 12px;
+            }
+            
+            .quantum-title h1 {
+                font-size: 16px;
+            }
+            
+            .quantum-dameboard {
+                width: 480px;
+                height: 480px;
+            }
+            
+            .dame-piece {
+                width: 40px;
+                height: 40px;
+                font-size: 20px;
+            }
+        }
+
+        @media (max-width: 520px) {
+            .quantum-dameboard {
+                width: 400px;
+                height: 400px;
+            }
+            
+            .dame-piece {
+                width: 35px;
+                height: 35px;
+                font-size: 18px;
+            }
+            
+            .game-stats {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Particules quantiques d'arrière-plan -->
+    <div class="quantum-particles" id="quantumParticles"></div>
+    
+    <!-- Grille quantique -->
+    <div class="quantum-grid"></div>
+    
+    <!-- Lignes d'énergie futuristes -->
+    <div class="energy-lines" id="energyLines"></div>
+    
+    <!-- Cercles d'énergie pulsants -->
+    <div class="energy-circles" id="energyCircles"></div>
+    
+    <!-- Rayons laser -->
+    <div class="laser-beams" id="laserBeams"></div>
+    
+    <!-- Container principal -->
+    <div class="quantum-dames-container">
+        <!-- Panneau gauche -->
+        <div class="left-panel">
+            <div class="panel-section">
+                <div class="panel-title" id="controlsTitle">🎮 Contrôles Quantiques</div>
+                <div class="quantum-controls">
+                    <button class="quantum-btn" onclick="undoMove()" id="undoBtn">
+                        ↶ <span id="undoText">Annuler Coup</span>
+                    </button>
+                    <button class="quantum-btn quantum-special-btn" onclick="activateQuantumMode()" id="quantumBtn">
+                        ⚛️ <span id="quantumModeText">Mode Quantique</span>
+                    </button>
+                    <button class="quantum-btn reset-btn" onclick="resetGame()">
+                        🔄 <span id="newGameText">Nouvelle Partie</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <div class="panel-title" id="statsTitle">📊 Statistiques</div>
+                <div class="game-stats">
+                    <div class="stat-item">
+                        <span class="stat-label" id="movesLabel">Coups Joués</span>
+                        <span class="stat-value" id="moveCount">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label" id="aiLevelLabel">Niveau IA</span>
+                        <span class="stat-value" id="aiLevel">5</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label" id="timeLabel">Temps</span>
+                        <span class="stat-value" id="gameTime">00:00</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label" id="scoreLabel">Score</span>
+                        <span class="stat-value" id="gameScore">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panneau central -->
+        <div class="game-panel">
+            <!-- En-tête -->
+            <div class="quantum-header">
+                <div class="quantum-title">
+                    <span class="quantum-icon">🔥</span>
+                    <h1 id="gameTitle">Brainova Quantum Dames</h1>
+                    <span class="quantum-badge" id="quantumBadge">🚀 IA QUANTIQUE</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 18px;">
+                    <select id="languageSelector" onchange="changeLanguage()" class="language-selector">
+                        <option value="fr">🇫🇷 Français</option>
+                        <option value="en">🇺🇸 English</option>
+                        <option value="ar">🇸🇦 العربية</option>
+                        <option value="es">🇪🇸 Español</option>
+                        <option value="de">🇩🇪 Deutsch</option>
+                        <option value="zh">🇨🇳 中文</option>
+                    </select>
+                    <button class="close-btn" onclick="window.close()" id="closeBtn" title="Fermer">✕</button>
+                </div>
+            </div>
+
+
+
+            <!-- Contrôles de jeu en haut -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <!-- Bouton Pause/Reprendre à gauche -->
+                <button class="quantum-btn" id="pauseBtn" onclick="togglePause()" style="background: linear-gradient(145deg, #8b5cf6, #7c3aed);">
+                    ⏸️ <span id="pauseText">Pause</span>
+                </button>
+                
+                <!-- Bouton statut du joueur au centre -->
+                <button class="player-status-btn yellow-player" id="playerStatusBtn" onclick="switchPlayer()">
+                    <span id="currentPlayer">🔥</span>
+                    <span id="playerName">Joueur Jaune</span>
+                </button>
+                
+                <!-- Bouton IA Quantique à droite -->
+                <button class="quantum-btn ai-btn" onclick="makeAIMove()" id="aiMoveBtn">
+                    🤖 <span id="aiMoveText">Coup IA Quantique</span>
+                </button>
+            </div>
+
+            <!-- Plateau de dames quantique -->
+            <div class="quantum-dameboard-container" style="margin-top: 5px;">
+                <div class="quantum-dameboard" id="dameboard">
+                    <!-- Les cases seront générées dynamiquement -->
+                </div>
+            </div>
+
+            <!-- Statut IA Quantique -->
+            <div class="quantum-ai-status">
+                <div class="ai-thinking" id="aiThinking">
+                    <span class="quantum-pulse"></span>
+                    <span id="aiMessage">IA Quantique en analyse...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panneau droit -->
+        <div class="right-panel">
+            <div class="panel-section">
+                <div class="panel-title" id="historyTitle">📜 Historique</div>
+                <div class="move-history" id="moveHistory">
+                    <div class="move-item" id="gameStarted"></div>
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <div class="panel-title" id="gameModeTitle">🎮 Mode de Jeu</div>
+                <div class="quantum-controls">
+                    <button class="mode-btn active" onclick="setGameMode('ai')" id="aiModeBtn">
+                        🤖 <span id="aiModeText">Jouer vs IA</span>
+                    </button>
+                    <button class="mode-btn" onclick="setGameMode('human')" id="humanModeBtn">
+                        👥 <span id="humanModeText">2 Joueurs</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <div class="panel-title" id="optionsTitle">⚙️ Options IA</div>
+                <div class="quantum-controls">
+                    <button class="quantum-btn" onclick="changeDifficulty()" id="difficultyBtn">
+                        🎯 <span id="difficultyText">Difficulté: Expert</span>
+                    </button>
+                    <button class="quantum-btn ai-btn" onclick="toggleAIAnalysis()" id="analysisBtn">
+                        🔍 <span id="analysisText">Analyse IA</span>
+                    </button>
+                    <button class="quantum-btn quantum-special-btn" onclick="showBestMoves()" id="hintBtn">
+                        💡 <span id="hintText">Meilleurs Coups</span>
+                    </button>
+                    <button class="quantum-btn" onclick="saveGame()" id="saveBtn">
+                        💾 <span id="saveText">Sauvegarder</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Traductions multilingues
+        const translations = {
+            fr: {
+                gameTitle: "Brainova Quantum Dames",
+                quantumBadge: "🚀 IA QUANTIQUE",
+                controlsTitle: "🎮 Contrôles Quantiques",
+                gameModeTitle: "🎮 Mode de Jeu",
+                aiMoveText: "Coup IA Quantique",
+                undoText: "Annuler Coup",
+                quantumModeText: "Mode Quantique",
+                newGameText: "Nouvelle Partie",
+                statsTitle: "📊 Statistiques",
+                movesLabel: "Coups Joués",
+                aiLevelLabel: "Niveau IA",
+                timeLabel: "Temps",
+                scoreLabel: "Score",
+                aiModeText: "Jouer vs IA",
+                humanModeText: "2 Joueurs",
+                gameStatus: "Nouvelle partie - Jaunes commencent",
+                playerYellow: "Joueur Jaune",
+                playerRed: "Joueur Rouge",
+                aiPlayer: "IA Quantique",
+                historyTitle: "📜 Historique",
+                gameStarted: "Partie commencée",
+                optionsTitle: "⚙️ Options IA",
+                difficultyText: "Difficulté: Expert",
+                analysisText: "Analyse IA",
+                hintText: "Meilleurs Coups",
+                saveText: "Sauvegarder",
+                aiThinking: "IA Quantique en analyse...",
+                closeBtn: "Fermer",
+                turnOf: "Tour du",
+                gameEnded: "Partie terminée",
+                newGameStarted: "Nouvelle partie commencée",
+                quantumActivated: "Mode Quantique activé ! Les pions peuvent se téléporter !",
+                quantumDeactivated: "Mode Quantique désactivé",
+                gameSaved: "Partie sauvegardée !",
+                gameLoaded: "Partie chargée !",
+                loadSavedGame: "Voulez-vous charger la partie sauvegardée ?",
+                welcome: "Bienvenue dans Brainova Quantum Dames ! Choisissez votre mode de jeu.",
+                aiCalculating: "IA Quantique calcule le meilleur coup...",
+                undoInDevelopment: "Fonction d'annulation en développement",
+                aiAnalyzing: "Analyse IA en cours...",
+                bestMovesCalculating: "Calcul des meilleurs coups...",
+                suggestion: "Suggestion:",
+                noMovesAvailable: "Aucun coup disponible",
+                difficultyChanged: "Difficulté changée:",
+                yellowAdvantage: "Avantage significatif aux Jaunes",
+                redAdvantage: "Avantage significatif aux Rouges",
+                slightYellowAdvantage: "Léger avantage aux Jaunes",
+                slightRedAdvantage: "Léger avantage aux Rouges",
+                balancedPosition: "Position équilibrée",
+                victory: "Victoire des",
+                yellows: "Jaunes",
+                reds: "Rouges",
+                difficulties: {
+                    easy: "facile",
+                    normal: "normal",
+                    hard: "difficile",
+                    expert: "expert"
+                },
+                mustCapture: "Vous devez prendre un pion adverse !",
+                invalidMove: "Mouvement invalide !",
+                piecePromoted: "Pion promu en Dame !",
+                multipleCaptures: "Captures multiples possibles !",
+                allPiecesCaptured: "Toutes les pièces capturées",
+                noMovesLeft: "Aucun mouvement possible",
+                morePieces: "Plus de pièces restantes",
+                strategicAdvantage: "Avantage stratégique",
+                reason: "Raison",
+                finalScore: "Score Final",
+                totalMoves: "Total Coups",
+                pauseText: "Pause",
+                resumeText: "Reprendre",
+                gamePaused: "Jeu en pause",
+                gameResumed: "Jeu repris"
+            },
+            en: {
+                gameTitle: "Brainova Quantum Checkers",
+                quantumBadge: "🚀 QUANTUM AI",
+                controlsTitle: "🎮 Quantum Controls",
+                gameModeTitle: "🎮 Game Mode",
+                aiMoveText: "Quantum AI Move",
+                undoText: "Undo Move",
+                quantumModeText: "Quantum Mode",
+                newGameText: "New Game",
+                statsTitle: "📊 Statistics",
+                movesLabel: "Moves Played",
+                aiLevelLabel: "AI Level",
+                timeLabel: "Time",
+                scoreLabel: "Score",
+                aiModeText: "Play vs AI",
+                humanModeText: "2 Players",
+                gameStatus: "New game - Yellow starts",
+                playerYellow: "Yellow Player",
+                playerRed: "Red Player",
+                aiPlayer: "Quantum AI",
+                historyTitle: "📜 History",
+                gameStarted: "Game started",
+                optionsTitle: "⚙️ AI Options",
+                difficultyText: "Difficulty: Expert",
+                analysisText: "AI Analysis",
+                hintText: "Best Moves",
+                saveText: "Save Game",
+                aiThinking: "Quantum AI analyzing...",
+                closeBtn: "Close",
+                turnOf: "Turn of",
+                gameEnded: "Game ended",
+                newGameStarted: "New game started",
+                quantumActivated: "Quantum Mode activated! Pieces can teleport!",
+                quantumDeactivated: "Quantum Mode deactivated",
+                gameSaved: "Game saved!",
+                gameLoaded: "Game loaded!",
+                loadSavedGame: "Do you want to load the saved game?",
+                welcome: "Welcome to Brainova Quantum Checkers! Choose your game mode.",
+                aiCalculating: "Quantum AI calculating best move...",
+                undoInDevelopment: "Undo function in development",
+                aiAnalyzing: "AI analysis in progress...",
+                bestMovesCalculating: "Calculating best moves...",
+                suggestion: "Suggestion:",
+                noMovesAvailable: "No moves available",
+                difficultyChanged: "Difficulty changed:",
+                yellowAdvantage: "Significant advantage to Yellow",
+                redAdvantage: "Significant advantage to Red",
+                slightYellowAdvantage: "Slight advantage to Yellow",
+                slightRedAdvantage: "Slight advantage to Red",
+                balancedPosition: "Balanced position",
+                victory: "Victory for",
+                yellows: "Yellow",
+                reds: "Red",
+                difficulties: {
+                    easy: "easy",
+                    normal: "normal",
+                    hard: "hard",
+                    expert: "expert"
+                },
+                mustCapture: "You must capture an opponent piece!",
+                invalidMove: "Invalid move!",
+                piecePromoted: "Piece promoted to King!",
+                multipleCaptures: "Multiple captures possible!",
+                allPiecesCaptured: "All pieces captured",
+                noMovesLeft: "No moves left",
+                morePieces: "More pieces remaining",
+                strategicAdvantage: "Strategic advantage",
+                reason: "Reason",
+                finalScore: "Final Score",
+                totalMoves: "Total Moves",
+                pauseText: "Pause",
+                resumeText: "Resume",
+                gamePaused: "Game paused",
+                gameResumed: "Game resumed"
+            },
+            ar: {
+                gameTitle: "برينوفا الداما الكمية",
+                quantumBadge: "🚀 ذكاء كمي",
+                controlsTitle: "🎮 تحكم كمي",
+                gameModeTitle: "🎮 وضع اللعب",
+                aiMoveText: "حركة الذكاء الكمي",
+                undoText: "تراجع عن الحركة",
+                quantumModeText: "الوضع الكمي",
+                newGameText: "لعبة جديدة",
+                statsTitle: "📊 إحصائيات",
+                movesLabel: "الحركات المُلعبة",
+                aiLevelLabel: "مستوى الذكاء",
+                timeLabel: "الوقت",
+                scoreLabel: "النقاط",
+                aiModeText: "العب ضد الذكاء",
+                humanModeText: "لاعبان",
+                gameStatus: "لعبة جديدة - الأصفر يبدأ",
+                playerYellow: "اللاعب الأصفر",
+                playerRed: "اللاعب الأحمر",
+                aiPlayer: "الذكاء الكمي",
+                historyTitle: "📜 التاريخ",
+                gameStarted: "بدأت اللعبة",
+                optionsTitle: "⚙️ خيارات الذكاء",
+                difficultyText: "الصعوبة: خبير",
+                analysisText: "تحليل الذكاء",
+                hintText: "أفضل الحركات",
+                saveText: "حفظ اللعبة",
+                aiThinking: "الذكاء الكمي يحلل...",
+                closeBtn: "إغلاق",
+                turnOf: "دور",
+                gameEnded: "انتهت اللعبة",
+                newGameStarted: "بدأت لعبة جديدة",
+                quantumActivated: "تم تفعيل الوضع الكمي! يمكن للقطع الانتقال الفوري!",
+                quantumDeactivated: "تم إلغاء الوضع الكمي",
+                gameSaved: "تم حفظ اللعبة!",
+                gameLoaded: "تم تحميل اللعبة!",
+                loadSavedGame: "هل تريد تحميل اللعبة المحفوظة؟",
+                welcome: "مرحباً بك في برينوفا الداما الكمية! اختر وضع اللعب.",
+                aiCalculating: "الذكاء الكمي يحسب أفضل حركة...",
+                undoInDevelopment: "وظيفة التراجع قيد التطوير",
+                aiAnalyzing: "تحليل الذكاء جاري...",
+                bestMovesCalculating: "حساب أفضل الحركات...",
+                suggestion: "اقتراح:",
+                noMovesAvailable: "لا توجد حركات متاحة",
+                difficultyChanged: "تم تغيير الصعوبة:",
+                yellowAdvantage: "ميزة كبيرة للأصفر",
+                redAdvantage: "ميزة كبيرة للأحمر",
+                slightYellowAdvantage: "ميزة طفيفة للأصفر",
+                slightRedAdvantage: "ميزة طفيفة للأحمر",
+                balancedPosition: "موقف متوازن",
+                victory: "انتصار",
+                yellows: "الأصفر",
+                reds: "الأحمر",
+                difficulties: {
+                    easy: "سهل",
+                    normal: "عادي",
+                    hard: "صعب",
+                    expert: "خبير"
+                },
+                mustCapture: "يجب أن تأخذ قطعة الخصم!",
+                invalidMove: "حركة غير صحيحة!",
+                piecePromoted: "تم ترقية القطعة إلى ملك!",
+                multipleCaptures: "عدة التقاطات ممكنة!",
+                allPiecesCaptured: "تم أسر جميع القطع",
+                noMovesLeft: "لا توجد حركات متبقية",
+                morePieces: "قطع أكثر متبقية",
+                strategicAdvantage: "ميزة استراتيجية",
+                reason: "السبب",
+                finalScore: "النتيجة النهائية",
+                totalMoves: "إجمالي الحركات",
+                pauseText: "إيقاف",
+                resumeText: "استئناف",
+                gamePaused: "اللعبة متوقفة",
+                gameResumed: "تم استئناف اللعبة"
+            },
+            es: {
+                gameTitle: "Brainova Damas Cuánticas",
+                quantumBadge: "🚀 IA CUÁNTICA",
+                controlsTitle: "🎮 Controles Cuánticos",
+                gameModeTitle: "🎮 Modo de Juego",
+                aiMoveText: "Movimiento IA Cuántica",
+                undoText: "Deshacer Movimiento",
+                quantumModeText: "Modo Cuántico",
+                newGameText: "Nueva Partida",
+                statsTitle: "📊 Estadísticas",
+                movesLabel: "Movimientos Jugados",
+                aiLevelLabel: "Nivel IA",
+                timeLabel: "Tiempo",
+                scoreLabel: "Puntuación",
+                aiModeText: "Jugar vs IA",
+                humanModeText: "2 Jugadores",
+                gameStatus: "Nueva partida - Amarillo empieza",
+                playerYellow: "Jugador Amarillo",
+                playerRed: "Jugador Rojo",
+                aiPlayer: "IA Cuántica",
+                historyTitle: "📜 Historial",
+                gameStarted: "Partida iniciada",
+                optionsTitle: "⚙️ Opciones IA",
+                difficultyText: "Dificultad: Experto",
+                analysisText: "Análisis IA",
+                hintText: "Mejores Movimientos",
+                saveText: "Guardar Partida",
+                aiThinking: "IA Cuántica analizando...",
+                closeBtn: "Cerrar",
+                turnOf: "Turno de",
+                gameEnded: "Partida terminada",
+                newGameStarted: "Nueva partida iniciada",
+                quantumActivated: "¡Modo Cuántico activado! ¡Las piezas pueden teletransportarse!",
+                quantumDeactivated: "Modo Cuántico desactivado",
+                gameSaved: "¡Partida guardada!",
+                gameLoaded: "¡Partida cargada!",
+                loadSavedGame: "¿Quieres cargar la partida guardada?",
+                welcome: "¡Bienvenido a Brainova Damas Cuánticas! Elige tu modo de juego.",
+                aiCalculating: "IA Cuántica calculando mejor movimiento...",
+                undoInDevelopment: "Función de deshacer en desarrollo",
+                aiAnalyzing: "Análisis IA en progreso...",
+                bestMovesCalculating: "Calculando mejores movimientos...",
+                suggestion: "Sugerencia:",
+                noMovesAvailable: "No hay movimientos disponibles",
+                difficultyChanged: "Dificultad cambiada:",
+                yellowAdvantage: "Ventaja significativa para Amarillo",
+                redAdvantage: "Ventaja significativa para Rojo",
+                slightYellowAdvantage: "Ligera ventaja para Amarillo",
+                slightRedAdvantage: "Ligera ventaja para Rojo",
+                balancedPosition: "Posición equilibrada",
+                victory: "Victoria de",
+                yellows: "Amarillo",
+                reds: "Rojo",
+                difficulties: {
+                    easy: "fácil",
+                    normal: "normal",
+                    hard: "difícil",
+                    expert: "experto"
+                },
+                mustCapture: "¡Debes capturar una pieza oponente!",
+                invalidMove: "¡Movimiento inválido!",
+                piecePromoted: "¡Pieza promovida a Rey!",
+                multipleCaptures: "¡Múltiples capturas posibles!",
+                allPiecesCaptured: "Todas las piezas capturadas",
+                noMovesLeft: "No quedan movimientos",
+                morePieces: "Más piezas restantes",
+                strategicAdvantage: "Ventaja estratégica",
+                reason: "Razón",
+                finalScore: "Puntuación Final",
+                totalMoves: "Movimientos Totales",
+                pauseText: "Pausa",
+                resumeText: "Reanudar",
+                gamePaused: "Juego pausado",
+                gameResumed: "Juego reanudado"
+            },
+            de: {
+                gameTitle: "Brainova Quanten-Dame",
+                quantumBadge: "🚀 QUANTEN-KI",
+                controlsTitle: "🎮 Quanten-Steuerung",
+                gameModeTitle: "🎮 Spielmodus",
+                aiMoveText: "Quanten-KI Zug",
+                undoText: "Zug rückgängig",
+                quantumModeText: "Quanten-Modus",
+                newGameText: "Neues Spiel",
+                statsTitle: "📊 Statistiken",
+                movesLabel: "Gespielte Züge",
+                aiLevelLabel: "KI-Level",
+                timeLabel: "Zeit",
+                scoreLabel: "Punkte",
+                aiModeText: "Gegen KI spielen",
+                humanModeText: "2 Spieler",
+                gameStatus: "Neues Spiel - Gelb beginnt",
+                playerYellow: "Gelber Spieler",
+                playerRed: "Roter Spieler",
+                aiPlayer: "Quanten-KI",
+                historyTitle: "📜 Verlauf",
+                gameStarted: "Spiel gestartet",
+                optionsTitle: "⚙️ KI-Optionen",
+                difficultyText: "Schwierigkeit: Experte",
+                analysisText: "KI-Analyse",
+                hintText: "Beste Züge",
+                saveText: "Spiel speichern",
+                aiThinking: "Quanten-KI analysiert...",
+                closeBtn: "Schließen",
+                turnOf: "Zug von",
+                gameEnded: "Spiel beendet",
+                newGameStarted: "Neues Spiel gestartet",
+                quantumActivated: "Quanten-Modus aktiviert! Figuren können sich teleportieren!",
+                quantumDeactivated: "Quanten-Modus deaktiviert",
+                gameSaved: "Spiel gespeichert!",
+                gameLoaded: "Spiel geladen!",
+                loadSavedGame: "Möchten Sie das gespeicherte Spiel laden?",
+                welcome: "Willkommen bei Brainova Quanten-Dame! Wählen Sie Ihren Spielmodus.",
+                aiCalculating: "Quanten-KI berechnet besten Zug...",
+                undoInDevelopment: "Rückgängig-Funktion in Entwicklung",
+                aiAnalyzing: "KI-Analyse läuft...",
+                bestMovesCalculating: "Berechne beste Züge...",
+                suggestion: "Vorschlag:",
+                noMovesAvailable: "Keine Züge verfügbar",
+                difficultyChanged: "Schwierigkeit geändert:",
+                yellowAdvantage: "Signifikanter Vorteil für Gelb",
+                redAdvantage: "Signifikanter Vorteil für Rot",
+                slightYellowAdvantage: "Leichter Vorteil für Gelb",
+                slightRedAdvantage: "Leichter Vorteil für Rot",
+                balancedPosition: "Ausgeglichene Position",
+                victory: "Sieg für",
+                yellows: "Gelb",
+                reds: "Rot",
+                difficulties: {
+                    easy: "einfach",
+                    normal: "normal",
+                    hard: "schwer",
+                    expert: "experte"
+                },
+                mustCapture: "Sie müssen eine gegnerische Figur schlagen!",
+                invalidMove: "Ungültiger Zug!",
+                piecePromoted: "Figur zur Dame befördert!",
+                multipleCaptures: "Mehrere Schläge möglich!",
+                allPiecesCaptured: "Alle Figuren geschlagen",
+                noMovesLeft: "Keine Züge übrig",
+                morePieces: "Mehr Figuren übrig",
+                strategicAdvantage: "Strategischer Vorteil",
+                reason: "Grund",
+                finalScore: "Endpunktzahl",
+                totalMoves: "Gesamtzüge",
+                pauseText: "Pause",
+                resumeText: "Fortsetzen",
+                gamePaused: "Spiel pausiert",
+                gameResumed: "Spiel fortgesetzt"
+            },
+            zh: {
+                gameTitle: "脑诺瓦量子跳棋",
+                quantumBadge: "🚀 量子人工智能",
+                controlsTitle: "🎮 量子控制",
+                gameModeTitle: "🎮 游戏模式",
+                aiMoveText: "量子AI走棋",
+                undoText: "撤销走棋",
+                quantumModeText: "量子模式",
+                newGameText: "新游戏",
+                statsTitle: "📊 统计数据",
+                movesLabel: "已走步数",
+                aiLevelLabel: "AI等级",
+                timeLabel: "时间",
+                scoreLabel: "得分",
+                aiModeText: "对战AI",
+                humanModeText: "双人对战",
+                gameStatus: "新游戏 - 黄方先行",
+                playerYellow: "黄方玩家",
+                playerRed: "红方玩家",
+                aiPlayer: "量子AI",
+                historyTitle: "📜 历史记录",
+                gameStarted: "游戏开始",
+                optionsTitle: "⚙️ AI选项",
+                difficultyText: "难度：专家",
+                analysisText: "AI分析",
+                hintText: "最佳走法",
+                saveText: "保存游戏",
+                aiThinking: "量子AI分析中...",
+                closeBtn: "关闭",
+                turnOf: "轮到",
+                gameEnded: "游戏结束",
+                newGameStarted: "新游戏开始",
+                quantumActivated: "量子模式已激活！棋子可以瞬移！",
+                quantumDeactivated: "量子模式已关闭",
+                gameSaved: "游戏已保存！",
+                gameLoaded: "游戏已加载！",
+                loadSavedGame: "您要加载保存的游戏吗？",
+                welcome: "欢迎来到脑诺瓦量子跳棋！选择您的游戏模式。",
+                aiCalculating: "量子AI正在计算最佳走法...",
+                undoInDevelopment: "撤销功能开发中",
+                aiAnalyzing: "AI分析进行中...",
+                bestMovesCalculating: "计算最佳走法中...",
+                suggestion: "建议：",
+                noMovesAvailable: "无可用走法",
+                difficultyChanged: "难度已更改：",
+                yellowAdvantage: "黄方显著优势",
+                redAdvantage: "红方显著优势",
+                slightYellowAdvantage: "黄方轻微优势",
+                slightRedAdvantage: "红方轻微优势",
+                balancedPosition: "平衡局面",
+                victory: "获胜方",
+                yellows: "黄方",
+                reds: "红方",
+                difficulties: {
+                    easy: "简单",
+                    normal: "普通",
+                    hard: "困难",
+                    expert: "专家"
+                },
+                mustCapture: "您必须吃掉对方棋子！",
+                invalidMove: "无效移动！",
+                piecePromoted: "棋子升级为王！",
+                multipleCaptures: "可以连续吃子！",
+                allPiecesCaptured: "所有棋子被吃",
+                noMovesLeft: "无剩余走法",
+                morePieces: "剩余棋子更多",
+                strategicAdvantage: "战略优势",
+                reason: "原因",
+                finalScore: "最终得分",
+                totalMoves: "总步数",
+                pauseText: "暂停",
+                resumeText: "继续",
+                gamePaused: "游戏已暂停",
+                gameResumed: "游戏已继续"
+            }
+        };
+
+        // État du jeu
+        let gameState = {
+            board: [],
+            currentPlayer: 'yellow',
+            gameMode: 'ai', // 'ai' ou 'human'
+            selectedSquare: null,
+            possibleMoves: [],
+            moveHistory: [],
+            moveCount: 0,
+            startTime: null,
+            timer: null,
+            aiLevel: 5,
+            score: 0,
+            isGameActive: true,
+            quantumMode: false,
+            aiThinking: false,
+            difficulty: 'expert',
+            capturedPieces: { yellow: [], red: [] },
+            currentLanguage: 'fr',
+            mustCapture: false,
+            captureSequence: [],
+            isPaused: false
+        };
+
+        // Position initiale des pions
+        const initialBoard = [
+            [null, '🔴', null, '🔴', null, '🔴', null, '🔴'],
+            ['🔴', null, '🔴', null, '🔴', null, '🔴', null],
+            [null, '🔴', null, '🔴', null, '🔴', null, '🔴'],
+            [null, null, null, null, null, null, null, null],
+            [null, null, null, null, null, null, null, null],
+            ['🟡', null, '🟡', null, '🟡', null, '🟡', null],
+            [null, '🟡', null, '🟡', null, '🟡', null, '🟡'],
+            ['🟡', null, '🟡', null, '🟡', null, '🟡', null]
+        ];
+
+        // Fonction de changement de langue
+        function changeLanguage() {
+            const selector = document.getElementById('languageSelector');
+            const selectedLang = selector.value;
+            gameState.currentLanguage = selectedLang;
+            
+            const t = translations[selectedLang];
+            
+            // Mettre à jour tous les textes
+            document.getElementById('gameTitle').textContent = t.gameTitle;
+            document.getElementById('quantumBadge').textContent = t.quantumBadge;
+            document.getElementById('controlsTitle').textContent = t.controlsTitle;
+            if(document.getElementById('gameModeTitle')) {
+                document.getElementById('gameModeTitle').textContent = t.gameModeTitle;
+            }
+            document.getElementById('aiMoveText').textContent = t.aiMoveText;
+            document.getElementById('undoText').textContent = t.undoText;
+            document.getElementById('quantumModeText').textContent = t.quantumModeText;
+            document.getElementById('newGameText').textContent = t.newGameText;
+            document.getElementById('statsTitle').textContent = t.statsTitle;
+            document.getElementById('movesLabel').textContent = t.movesLabel;
+            document.getElementById('aiLevelLabel').textContent = t.aiLevelLabel;
+            document.getElementById('timeLabel').textContent = t.timeLabel;
+            document.getElementById('scoreLabel').textContent = t.scoreLabel;
+            document.getElementById('aiModeText').textContent = t.aiModeText;
+            document.getElementById('humanModeText').textContent = t.humanModeText;
+            document.getElementById('historyTitle').textContent = t.historyTitle;
+            document.getElementById('optionsTitle').textContent = t.optionsTitle;
+            document.getElementById('analysisText').textContent = t.analysisText;
+            document.getElementById('hintText').textContent = t.hintText;
+            document.getElementById('saveText').textContent = t.saveText;
+            document.getElementById('closeBtn').title = t.closeBtn;
+            
+            // Mettre à jour le texte de difficulté
+            const diffText = t.difficultyText.replace('Expert', t.difficulties[gameState.difficulty]);
+            document.getElementById('difficultyText').textContent = diffText;
+            
+            // Mettre à jour le message "Partie commencée" dans l'historique
+            const gameStartedElement = document.getElementById('gameStarted');
+            if(gameStartedElement) {
+                gameStartedElement.textContent = t.gameStarted;
+            }
+            
+            // Mettre à jour le bouton pause
+            const pauseTextElement = document.getElementById('pauseText');
+            if(pauseTextElement) {
+                pauseTextElement.textContent = gameState.isPaused ? t.resumeText : t.pauseText;
+            }
+            
+            updateUI();
+        }
+
+        // Créer les particules quantiques
+        function createQuantumParticles() {
+            const container = document.getElementById('quantumParticles');
+            
+            for(let i = 0; i < 35; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'quantum-particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 15 + 's';
+                particle.style.animationDuration = (15 + Math.random() * 8) + 's';
+                container.appendChild(particle);
+            }
+        }
+
+        // Créer les lignes d'énergie
+        function createEnergyLines() {
+            const container = document.getElementById('energyLines');
+            
+            for(let i = 0; i < 10; i++) {
+                const line = document.createElement('div');
+                line.className = 'energy-line';
+                line.style.top = Math.random() * 100 + '%';
+                line.style.width = (250 + Math.random() * 500) + 'px';
+                line.style.animationDelay = Math.random() * 10 + 's';
+                line.style.animationDuration = (10 + Math.random() * 5) + 's';
+                container.appendChild(line);
+            }
+        }
+
+        // Créer les cercles d'énergie
+        function createEnergyCircles() {
+            const container = document.getElementById('energyCircles');
+            
+            for(let i = 0; i < 8; i++) {
+                const circle = document.createElement('div');
+                circle.className = 'energy-circle';
+                circle.style.left = Math.random() * 100 + '%';
+                circle.style.top = Math.random() * 100 + '%';
+                circle.style.width = (60 + Math.random() * 120) + 'px';
+                circle.style.height = circle.style.width;
+                circle.style.animationDelay = Math.random() * 8 + 's';
+                circle.style.animationDuration = (8 + Math.random() * 4) + 's';
+                container.appendChild(circle);
+            }
+        }
+
+        // Créer les rayons laser
+        function createLaserBeams() {
+            const container = document.getElementById('laserBeams');
+            
+            for(let i = 0; i < 6; i++) {
+                const beam = document.createElement('div');
+                beam.className = 'laser-beam';
+                beam.style.left = Math.random() * 100 + '%';
+                beam.style.animationDelay = Math.random() * 15 + 's';
+                beam.style.animationDuration = (15 + Math.random() * 8) + 's';
+                container.appendChild(beam);
+            }
+        }
+
+        // Initialiser tous les effets futuristes
+        function initFuturisticEffects() {
+            createQuantumParticles();
+            createEnergyLines();
+            createEnergyCircles();
+            createLaserBeams();
+        }
+
+        // Initialiser le jeu
+        function initGame() {
+            gameState.board = initialBoard.map(row => [...row]);
+            gameState.currentPlayer = 'yellow';
+            gameState.selectedSquare = null;
+            gameState.possibleMoves = [];
+            gameState.moveHistory = [];
+            gameState.moveCount = 0;
+            gameState.startTime = Date.now();
+            gameState.isGameActive = true;
+            gameState.quantumMode = false;
+            gameState.mustCapture = false;
+            gameState.captureSequence = [];
+            
+            createDameboard();
+            updateUI();
+            startTimer();
+            
+            const t = translations[gameState.currentLanguage];
+            
+            // Vider l'historique et ajouter le message de début
+            const historyElement = document.getElementById('moveHistory');
+            historyElement.innerHTML = '';
+            const gameStartedElement = document.createElement('div');
+            gameStartedElement.className = 'move-item';
+            gameStartedElement.id = 'gameStarted';
+            gameStartedElement.textContent = t.gameStarted;
+            historyElement.appendChild(gameStartedElement);
+        }
+
+        // Créer le plateau de dames
+        function createDameboard() {
+            const dameboard = document.getElementById('dameboard');
+            dameboard.innerHTML = '';
+            
+            for(let row = 0; row < 8; row++) {
+                for(let col = 0; col < 8; col++) {
+                    const square = document.createElement('div');
+                    square.className = `dame-square ${(row + col) % 2 === 0 ? 'light' : 'dark'}`;
+                    square.dataset.row = row;
+                    square.dataset.col = col;
+                    square.onclick = () => handleSquareClick(row, col);
+                    
+                    const piece = gameState.board[row][col];
+                    if(piece) {
+                        const pieceElement = document.createElement('div');
+                        pieceElement.className = `dame-piece ${getPieceColor(piece)} ${isKing(piece) ? 'king' : ''}`;
+                        pieceElement.textContent = piece;
+                        square.appendChild(pieceElement);
+                    }
+                    
+                    dameboard.appendChild(square);
+                }
+            }
+        }
+
+        // Obtenir la couleur d'une pièce
+        function getPieceColor(piece) {
+            if(piece === '🟡' || piece === '👑') return 'yellow';
+            if(piece === '🔴' || piece === '♛') return 'red';
+            return null;
+        }
+
+        // Vérifier si une pièce est un roi/dame
+        function isKing(piece) {
+            return piece === '👑' || piece === '♛';
+        }
+
+        // Gérer le clic sur une case
+        function handleSquareClick(row, col) {
+            if(!gameState.isGameActive || gameState.aiThinking || gameState.isPaused) return;
+            
+            const piece = gameState.board[row][col];
+            
+            // Si on est en mode capture multiple, seul le pion qui capture peut bouger
+            if(gameState.mustCapture && gameState.captureSequence.length > 0) {
+                const lastCapture = gameState.captureSequence[gameState.captureSequence.length - 1];
+                
+                // Si on clique sur une case de mouvement possible pour continuer la capture
+                if(gameState.selectedSquare && 
+                   gameState.selectedSquare.row === lastCapture.row && 
+                   gameState.selectedSquare.col === lastCapture.col &&
+                   gameState.possibleMoves.some(move => move.row === row && move.col === col)) {
+                    makeMove(gameState.selectedSquare.row, gameState.selectedSquare.col, row, col);
+                    return;
+                }
+                
+                // Sinon, on ne peut sélectionner que le pion qui doit continuer à capturer
+                if(row === lastCapture.row && col === lastCapture.col) {
+                    selectSquare(row, col);
+                } else {
+                    // Message d'erreur si on essaie de sélectionner autre chose
+                    const t = translations[gameState.currentLanguage];
+                    showAIMessage(t.mustCapture || "Vous devez continuer avec le même pion !", 2000);
+                }
+                return;
+            }
+            
+            // Si aucune pièce n'est sélectionnée
+            if(!gameState.selectedSquare) {
+                if(piece && getPieceColor(piece) === gameState.currentPlayer) {
+                    selectSquare(row, col);
+                }
+                return;
+            }
+            
+            // Si on clique sur la même case
+            if(gameState.selectedSquare.row === row && gameState.selectedSquare.col === col) {
+                deselectSquare();
+                return;
+            }
+            
+            // Si on clique sur une case de mouvement possible
+            if(gameState.possibleMoves.some(move => move.row === row && move.col === col)) {
+                makeMove(gameState.selectedSquare.row, gameState.selectedSquare.col, row, col);
+                return;
+            }
+            
+            // Si on clique sur une autre pièce de la même couleur (et pas en capture multiple)
+            if(piece && getPieceColor(piece) === gameState.currentPlayer && !gameState.mustCapture) {
+                deselectSquare();
+                selectSquare(row, col);
+                return;
+            }
+            
+            // Sinon, désélectionner
+            deselectSquare();
+        }
+
+        // Sélectionner une case
+        function selectSquare(row, col) {
+            gameState.selectedSquare = { row, col };
+            gameState.possibleMoves = calculatePossibleMoves(row, col);
+            
+            // Mettre en évidence la case sélectionnée
+            const square = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+            square.classList.add('selected');
+            
+            // Mettre en évidence les mouvements possibles
+            gameState.possibleMoves.forEach(move => {
+                const moveSquare = document.querySelector(`[data-row="${move.row}"][data-col="${move.col}"]`);
+                moveSquare.classList.add('possible-move');
+            });
+        }
+
+        // Désélectionner une case
+        function deselectSquare() {
+            if(gameState.selectedSquare) {
+                const square = document.querySelector(`[data-row="${gameState.selectedSquare.row}"][data-col="${gameState.selectedSquare.col}"]`);
+                square.classList.remove('selected');
+            }
+            
+            // Enlever la mise en évidence des mouvements possibles
+            document.querySelectorAll('.possible-move').forEach(square => {
+                square.classList.remove('possible-move');
+            });
+            
+            gameState.selectedSquare = null;
+            gameState.possibleMoves = [];
+        }
+
+        // Calculer les mouvements possibles pour une pièce
+        function calculatePossibleMoves(row, col) {
+            const piece = gameState.board[row][col];
+            if(!piece) return [];
+            
+            const moves = [];
+            const color = getPieceColor(piece);
+            const king = isKing(piece);
+            
+            // Directions de mouvement
+            let directions = [];
+            if(king) {
+                directions = [[-1, -1], [-1, 1], [1, -1], [1, 1]]; // Toutes les diagonales
+            } else if(color === 'yellow') {
+                directions = [[-1, -1], [-1, 1]]; // Vers le haut
+            } else {
+                directions = [[1, -1], [1, 1]]; // Vers le bas
+            }
+            
+            // Vérifier les captures obligatoires d'abord
+            const captures = [];
+            for(let [drow, dcol] of directions) {
+                if(king) {
+                    // Pour les dames : vérifier les captures à longue distance
+                    const longCaptures = checkLongRangeCapture(row, col, drow, dcol);
+                    captures.push(...longCaptures);
+                } else {
+                    // Pour les pions : capture simple
+                    const captureMove = checkCapture(row, col, drow, dcol);
+                    if(captureMove) {
+                        captures.push(captureMove);
+                    }
+                }
+            }
+            
+            // Si des captures sont possibles, elles sont obligatoires
+            if(captures.length > 0) {
+                return captures;
+            }
+            
+            // Sinon, mouvements normaux
+            if(king) {
+                // Les dames peuvent se déplacer sur toute la diagonale
+                for(let [drow, dcol] of directions) {
+                    for(let distance = 1; distance < 8; distance++) {
+                        const newRow = row + drow * distance;
+                        const newCol = col + dcol * distance;
+                        
+                        if(newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) {
+                            if(!gameState.board[newRow][newCol]) {
+                                moves.push({ row: newRow, col: newCol, type: 'move' });
+                            } else {
+                                break; // Arrêter si on rencontre une pièce
+                            }
+                        } else {
+                            break; // Arrêter si on sort du plateau
+                        }
+                    }
+                }
+            } else {
+                // Les pions ne peuvent se déplacer que d'une case
+                for(let [drow, dcol] of directions) {
+                    const newRow = row + drow;
+                    const newCol = col + dcol;
+                    
+                    if(newRow >= 0 && newRow < 8 && newCol >= 0 && newCol < 8) {
+                        if(!gameState.board[newRow][newCol]) {
+                            moves.push({ row: newRow, col: newCol, type: 'move' });
+                        }
+                    }
+                }
+            }
+            
+            return moves;
+        }
+
+        // Vérifier une capture possible (pour les pions)
+        function checkCapture(row, col, drow, dcol) {
+            const jumpRow = row + drow;
+            const jumpCol = col + dcol;
+            const landRow = row + 2 * drow;
+            const landCol = col + 2 * dcol;
+            
+            // Vérifier les limites
+            if(landRow < 0 || landRow >= 8 || landCol < 0 || landCol >= 8) return null;
+            
+            const jumpPiece = gameState.board[jumpRow][jumpCol];
+            const landSquare = gameState.board[landRow][landCol];
+            
+            // Il doit y avoir une pièce adverse à sauter et une case vide pour atterrir
+            if(jumpPiece && getPieceColor(jumpPiece) !== gameState.currentPlayer && !landSquare) {
+                return { 
+                    row: landRow, 
+                    col: landCol, 
+                    type: 'capture',
+                    capturedRow: jumpRow,
+                    capturedCol: jumpCol
+                };
+            }
+            
+            return null;
+        }
+
+        // Vérifier les captures à longue distance (pour les dames)
+        function checkLongRangeCapture(row, col, drow, dcol) {
+            const captures = [];
+            let foundEnemy = false;
+            let enemyRow = -1;
+            let enemyCol = -1;
+            let capturedPieces = [];
+            
+            // Parcourir la diagonale
+            for(let distance = 1; distance < 8; distance++) {
+                const checkRow = row + drow * distance;
+                const checkCol = col + dcol * distance;
+                
+                // Vérifier les limites
+                if(checkRow < 0 || checkRow >= 8 || checkCol < 0 || checkCol >= 8) break;
+                
+                const piece = gameState.board[checkRow][checkCol];
+                
+                if(piece) {
+                    if(getPieceColor(piece) !== gameState.currentPlayer) {
+                        // Pièce ennemie trouvée
+                        if(foundEnemy) {
+                            // Déjà une pièce ennemie trouvée, arrêter
+                            break;
+                        }
+                        foundEnemy = true;
+                        enemyRow = checkRow;
+                        enemyCol = checkCol;
+                        capturedPieces.push({ row: checkRow, col: checkCol });
+                    } else {
+                        // Pièce alliée, arrêter
+                        break;
+                    }
+                } else if(foundEnemy) {
+                    // Case vide après une pièce ennemie = capture possible
+                    // Continuer à chercher d'autres cases vides
+                    captures.push({
+                        row: checkRow,
+                        col: checkCol,
+                        type: 'capture',
+                        capturedPieces: [...capturedPieces]
+                    });
+                }
+            }
+            
+            return captures;
+        }
+
+        // Effectuer un mouvement
+        function makeMove(fromRow, fromCol, toRow, toCol) {
+            const piece = gameState.board[fromRow][fromCol];
+            const move = gameState.possibleMoves.find(m => m.row === toRow && m.col === toCol);
+            
+            if(!move) return;
+            
+            // Effectuer le mouvement
+            gameState.board[toRow][toCol] = piece;
+            gameState.board[fromRow][fromCol] = null;
+            
+            let moveNotation = `${piece} ${String.fromCharCode(97 + fromCol)}${8 - fromRow} → ${String.fromCharCode(97 + toCol)}${8 - toRow}`;
+            let continueCapturing = false;
+            
+            // Gérer les captures
+            if(move.type === 'capture') {
+                // Capturer toutes les pièces dans le chemin (pour les dames)
+                if(move.capturedPieces) {
+                    move.capturedPieces.forEach(captured => {
+                        const capturedPiece = gameState.board[captured.row][captured.col];
+                        gameState.board[captured.row][captured.col] = null;
+                        
+                        const capturedColor = getPieceColor(capturedPiece);
+                        gameState.capturedPieces[capturedColor].push(capturedPiece);
+                        gameState.score += isKing(capturedPiece) ? 3 : 1;
+                        moveNotation += ` (capture ${capturedPiece})`;
+                    });
+                } else {
+                    // Capture simple (pion normal)
+                    const capturedPiece = gameState.board[move.capturedRow][move.capturedCol];
+                    gameState.board[move.capturedRow][move.capturedCol] = null;
+                    
+                    const capturedColor = getPieceColor(capturedPiece);
+                    gameState.capturedPieces[capturedColor].push(capturedPiece);
+                    gameState.score += isKing(capturedPiece) ? 3 : 1;
+                    moveNotation += ` (capture ${capturedPiece})`;
+                }
+                
+                // Vérifier les captures multiples avec LE MÊME PION
+                const additionalCaptures = calculatePossibleMoves(toRow, toCol).filter(m => m.type === 'capture');
+                if(additionalCaptures.length > 0) {
+                    gameState.mustCapture = true;
+                    gameState.captureSequence.push({ row: toRow, col: toCol });
+                    continueCapturing = true;
+                    
+                    // Sélectionner automatiquement LA MÊME pièce pour continuer
+                    setTimeout(() => {
+                        selectSquare(toRow, toCol);
+                        const t = translations[gameState.currentLanguage];
+                        showAIMessage(t.multipleCaptures, 2500);
+                    }, 300);
+                }
+            }
+            
+            // Promotion en dame/roi
+            if(!isKing(piece)) {
+                if((getPieceColor(piece) === 'yellow' && toRow === 0) || 
+                   (getPieceColor(piece) === 'red' && toRow === 7)) {
+                    gameState.board[toRow][toCol] = getPieceColor(piece) === 'yellow' ? '👑' : '♛';
+                    const t = translations[gameState.currentLanguage];
+                    showAIMessage(t.piecePromoted, 2000);
+                }
+            }
+            
+            // Ajouter à l'historique
+            addMoveToHistory(moveNotation);
+            gameState.moveCount++;
+            
+            // Si pas de capture multiple, terminer le tour
+            if(!continueCapturing) {
+                gameState.mustCapture = false;
+                gameState.captureSequence = [];
+                deselectSquare();
+                
+                // Changer de joueur seulement si pas de capture multiple
+                gameState.currentPlayer = gameState.currentPlayer === 'yellow' ? 'red' : 'yellow';
+            } else {
+                // Ne pas désélectionner si capture multiple avec LE MÊME PION
+                // Le joueur actuel garde la main avec le même pion
+            }
+            
+            createDameboard();
+            
+            // Vérifier la fin de partie
+            if(isGameOver()) {
+                endGame();
+                return;
+            }
+            
+            updateUI();
+            
+            // Si c'est le tour de l'IA en mode IA ET pas de capture multiple
+            if(gameState.gameMode === 'ai' && gameState.currentPlayer === 'red' && gameState.isGameActive && !continueCapturing) {
+                setTimeout(() => {
+                    if(gameState.isGameActive && gameState.currentPlayer === 'red') {
+                        makeAIMove();
+                    }
+                }, 1200);
+            }
+            
+            // Si l'IA doit continuer une capture multiple avec le même pion
+            if(gameState.gameMode === 'ai' && gameState.currentPlayer === 'red' && gameState.isGameActive && continueCapturing) {
+                setTimeout(() => {
+                    if(gameState.isGameActive && gameState.currentPlayer === 'red' && gameState.mustCapture) {
+                        makeAIMove();
+                    }
+                }, 1500);
+            }
+        }
+
+        // Ajouter un coup à l'historique
+        function addMoveToHistory(move) {
+            gameState.moveHistory.push(move);
+            const historyElement = document.getElementById('moveHistory');
+            const moveElement = document.createElement('div');
+            moveElement.className = 'move-item';
+            moveElement.textContent = `${gameState.moveHistory.length}. ${move}`;
+            historyElement.appendChild(moveElement);
+            historyElement.scrollTop = historyElement.scrollHeight;
+        }
+
+        // Coup de l'IA
+        function makeAIMove() {
+            if(gameState.currentPlayer !== 'red' || !gameState.isGameActive || gameState.gameMode !== 'ai' || gameState.isPaused) return;
+            
+            gameState.aiThinking = true;
+            const t = translations[gameState.currentLanguage];
+            showAIMessage(t.aiCalculating, 0);
+            
+            setTimeout(() => {
+                if(gameState.isGameActive && gameState.currentPlayer === 'red' && gameState.gameMode === 'ai') {
+                    const bestMove = calculateBestMove();
+                    if(bestMove) {
+                        // Simuler la sélection et le mouvement de l'IA
+                        gameState.selectedSquare = { row: bestMove.fromRow, col: bestMove.fromCol };
+                        gameState.possibleMoves = calculatePossibleMoves(bestMove.fromRow, bestMove.fromCol);
+                        makeMove(bestMove.fromRow, bestMove.fromCol, bestMove.toRow, bestMove.toCol);
+                    }
+                }
+                gameState.aiThinking = false;
+                hideAIMessage();
+            }, 1800 + Math.random() * 2500);
+        }
+
+        // Calculer le meilleur coup pour l'IA
+        function calculateBestMove() {
+            const allMoves = [];
+            
+            // Générer tous les coups possibles pour les pièces rouges
+            for(let row = 0; row < 8; row++) {
+                for(let col = 0; col < 8; col++) {
+                    const piece = gameState.board[row][col];
+                    if(piece && getPieceColor(piece) === 'red') {
+                        const moves = calculatePossibleMoves(row, col);
+                        moves.forEach(move => {
+                            allMoves.push({
+                                fromRow: row,
+                                fromCol: col,
+                                toRow: move.row,
+                                toCol: move.col,
+                                type: move.type,
+                                score: evaluateMove(row, col, move.row, move.col, move)
+                            });
+                        });
+                    }
+                }
+            }
+            
+            if(allMoves.length === 0) return null;
+            
+            // Prioriser les captures
+            const captures = allMoves.filter(m => m.type === 'capture');
+            if(captures.length > 0) {
+                captures.sort((a, b) => b.score - a.score);
+                return captures[0];
+            }
+            
+            // Trier par score et prendre le meilleur
+            allMoves.sort((a, b) => b.score - a.score);
+            
+            // Ajouter un peu d'aléatoire selon la difficulté
+            const randomFactor = gameState.difficulty === 'easy' ? 0.6 : 
+                                 gameState.difficulty === 'normal' ? 0.3 : 0.1;
+            
+            if(Math.random() < randomFactor) {
+                return allMoves[Math.floor(Math.random() * Math.min(4, allMoves.length))];
+            }
+            
+            return allMoves[0];
+        }
+
+        // Évaluer un coup
+        function evaluateMove(fromRow, fromCol, toRow, toCol, move) {
+            let score = 0;
+            
+            // Bonus énorme pour les captures
+            if(move.type === 'capture') {
+                const capturedPiece = gameState.board[move.capturedRow][move.capturedCol];
+                score += isKing(capturedPiece) ? 30 : 10;
+            }
+            
+            // Bonus pour avancer vers la promotion
+            if(!isKing(gameState.board[fromRow][fromCol])) {
+                score += (toRow - fromRow) * 2; // Plus on avance, mieux c'est
+            }
+            
+            // Bonus pour contrôler le centre
+            const centerDistance = Math.abs(toRow - 3.5) + Math.abs(toCol - 3.5);
+            score += (7 - centerDistance) * 1.5;
+            
+            // Bonus pour la sécurité (éviter les bords)
+            if(toRow > 0 && toRow < 7 && toCol > 0 && toCol < 7) {
+                score += 2;
+            }
+            
+            return score + Math.random() * 3;
+        }
+
+        // Vérifier la fin de partie
+        function isGameOver() {
+            // Compter les pièces
+            let yellowPieces = 0;
+            let redPieces = 0;
+            let yellowMoves = 0;
+            let redMoves = 0;
+            
+            for(let row = 0; row < 8; row++) {
+                for(let col = 0; col < 8; col++) {
+                    const piece = gameState.board[row][col];
+                    if(piece) {
+                        if(getPieceColor(piece) === 'yellow') {
+                            yellowPieces++;
+                            yellowMoves += calculatePossibleMoves(row, col).length;
+                        } else {
+                            redPieces++;
+                            redMoves += calculatePossibleMoves(row, col).length;
+                        }
+                    }
+                }
+            }
+            
+            // Fin de partie si plus de pièces ou plus de mouvements possibles
+            return yellowPieces === 0 || redPieces === 0 || 
+                   (gameState.currentPlayer === 'yellow' && yellowMoves === 0) ||
+                   (gameState.currentPlayer === 'red' && redMoves === 0);
+        }
+
+        // Terminer la partie
+        function endGame() {
+            gameState.isGameActive = false;
+            clearInterval(gameState.timer);
+            
+            const t = translations[gameState.currentLanguage];
+            
+            // Déterminer le gagnant
+            let yellowPieces = 0;
+            let redPieces = 0;
+            let yellowMoves = 0;
+            let redMoves = 0;
+            
+            for(let row = 0; row < 8; row++) {
+                for(let col = 0; col < 8; col++) {
+                    const piece = gameState.board[row][col];
+                    if(piece) {
+                        if(getPieceColor(piece) === 'yellow') {
+                            yellowPieces++;
+                            yellowMoves += calculatePossibleMoves(row, col).length;
+                        } else {
+                            redPieces++;
+                            redMoves += calculatePossibleMoves(row, col).length;
+                        }
+                    }
+                }
+            }
+            
+            let winner;
+            let reason = "";
+            
+            // Déterminer la raison de la victoire
+            if(yellowPieces === 0) {
+                winner = t.reds;
+                reason = t.allPiecesCaptured || "Toutes les pièces capturées";
+            } else if(redPieces === 0) {
+                winner = t.yellows;
+                reason = t.allPiecesCaptured || "Toutes les pièces capturées";
+            } else if(gameState.currentPlayer === 'yellow' && yellowMoves === 0) {
+                winner = t.reds;
+                reason = t.noMovesLeft || "Aucun mouvement possible";
+            } else if(gameState.currentPlayer === 'red' && redMoves === 0) {
+                winner = t.yellows;
+                reason = t.noMovesLeft || "Aucun mouvement possible";
+            } else if(yellowPieces > redPieces) {
+                winner = t.yellows;
+                reason = t.morePieces || "Plus de pièces";
+            } else if(redPieces > yellowPieces) {
+                winner = t.reds;
+                reason = t.morePieces || "Plus de pièces";
+            } else {
+                winner = gameState.currentPlayer === 'yellow' ? t.reds : t.yellows;
+                reason = t.strategicAdvantage || "Avantage stratégique";
+            }
+            
+            // Afficher un message de fin de partie détaillé
+            const finalMessage = `🏆 ${t.gameEnded}!\n\n${t.victory}: ${winner}\n${t.reason || "Raison"}: ${reason}\n\n${t.finalScore || "Score final"}: ${gameState.score} points\n${t.totalMoves || "Total coups"}: ${gameState.moveCount}`;
+            
+            // Afficher le message avec style
+            showGameEndMessage(finalMessage);
+            
+            // Ajouter à l'historique
+            addMoveToHistory(`🏆 ${t.victory}: ${winner} (${reason})`);
+        }
+        
+        // Afficher le message de fin de partie avec style
+        function showGameEndMessage(message) {
+            // Créer une overlay pour le message de fin
+            const overlay = document.createElement('div');
+            overlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.8);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 1000;
+                backdrop-filter: blur(10px);
+            `;
+            
+            const messageBox = document.createElement('div');
+            messageBox.style.cssText = `
+                background: linear-gradient(145deg, rgba(30, 30, 58, 0.95), rgba(76, 29, 149, 0.95));
+                border: 3px solid #ff6b35;
+                border-radius: 20px;
+                padding: 40px;
+                text-align: center;
+                color: white;
+                font-size: 18px;
+                font-weight: bold;
+                max-width: 500px;
+                box-shadow: 0 0 50px rgba(255, 107, 53, 0.7);
+                animation: gameEndPulse 2s ease-in-out infinite alternate;
+                white-space: pre-line;
+            `;
+            
+            messageBox.textContent = message;
+            
+            const closeButton = document.createElement('button');
+            closeButton.textContent = '✨ Nouvelle Partie';
+            closeButton.style.cssText = `
+                margin-top: 30px;
+                padding: 15px 30px;
+                background: linear-gradient(145deg, #ff6b35, #f59e0b);
+                color: white;
+                border: none;
+                border-radius: 15px;
+                font-size: 16px;
+                font-weight: bold;
+                cursor: pointer;
+                transition: all 0.3s ease;
+            `;
+            
+            closeButton.onmouseover = () => {
+                closeButton.style.transform = 'scale(1.1)';
+                closeButton.style.boxShadow = '0 10px 30px rgba(255, 107, 53, 0.7)';
+            };
+            
+            closeButton.onmouseout = () => {
+                closeButton.style.transform = 'scale(1)';
+                closeButton.style.boxShadow = 'none';
+            };
+            
+            closeButton.onclick = () => {
+                document.body.removeChild(overlay);
+                resetGame();
+            };
+            
+            messageBox.appendChild(closeButton);
+            overlay.appendChild(messageBox);
+            document.body.appendChild(overlay);
+            
+            // Ajouter l'animation CSS
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes gameEndPulse {
+                    from { 
+                        box-shadow: 0 0 50px rgba(255, 107, 53, 0.7);
+                        transform: scale(1);
+                    }
+                    to { 
+                        box-shadow: 0 0 80px rgba(255, 107, 53, 1);
+                        transform: scale(1.02);
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        // Afficher un message IA
+        function showAIMessage(message, duration = 2500) {
+            const aiThinking = document.getElementById('aiThinking');
+            const aiMessage = document.getElementById('aiMessage');
+            
+            aiMessage.textContent = message;
+            aiThinking.classList.add('active');
+            
+            if(duration > 0) {
+                setTimeout(() => {
+                    aiThinking.classList.remove('active');
+                }, duration);
+            }
+        }
+
+        // Masquer le message IA
+        function hideAIMessage() {
+            const aiThinking = document.getElementById('aiThinking');
+            aiThinking.classList.remove('active');
+        }
+
+        // Démarrer le timer
+        function startTimer() {
+            if(gameState.timer) {
+                clearInterval(gameState.timer);
+            }
+            
+            gameState.timer = setInterval(() => {
+                if(gameState.isGameActive) {
+                    updateUI();
+                }
+            }, 1000);
+        }
+
+        // Mettre à jour l'interface utilisateur
+        function updateUI() {
+            document.getElementById('moveCount').textContent = gameState.moveCount;
+            document.getElementById('aiLevel').textContent = gameState.aiLevel;
+            document.getElementById('gameScore').textContent = gameState.score;
+            
+            // Mettre à jour le temps
+            if(gameState.startTime) {
+                const elapsedTime = Date.now() - gameState.startTime;
+                const minutes = Math.floor(elapsedTime / 60000);
+                const seconds = Math.floor((elapsedTime % 60000) / 1000);
+                document.getElementById('gameTime').textContent = 
+                    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
+            
+            // Mettre à jour le bouton statut du joueur
+            const t = translations[gameState.currentLanguage];
+            const playerName = gameState.currentPlayer === 'yellow' ? t.playerYellow : 
+                              (gameState.gameMode === 'ai' ? t.aiPlayer : t.playerRed);
+            const playerIcon = gameState.currentPlayer === 'yellow' ? '🔥' : '🤖';
+            
+            document.getElementById('currentPlayer').textContent = playerIcon;
+            document.getElementById('playerName').textContent = playerName;
+            
+            // Changer la couleur du bouton selon le joueur
+            const playerBtn = document.getElementById('playerStatusBtn');
+            playerBtn.classList.remove('yellow-player', 'red-player');
+            if(gameState.currentPlayer === 'yellow') {
+                playerBtn.classList.add('yellow-player');
+            } else {
+                playerBtn.classList.add('red-player');
+            }
+        }
+
+        // Fonction pour changer de joueur manuellement (mode 2 joueurs uniquement)
+        function switchPlayer() {
+            if(gameState.gameMode === 'human' && gameState.isGameActive && !gameState.aiThinking) {
+                gameState.currentPlayer = gameState.currentPlayer === 'yellow' ? 'red' : 'yellow';
+                deselectSquare();
+                updateUI();
+                
+                const t = translations[gameState.currentLanguage];
+                showAIMessage(`${t.turnOf} ${gameState.currentPlayer === 'yellow' ? t.playerYellow : t.playerRed}`, 1800);
+            }
+        }
+
+        // Fonctions des boutons
+        function setGameMode(mode) {
+            gameState.gameMode = mode;
+            
+            const aiBtn = document.getElementById('aiModeBtn');
+            const humanBtn = document.getElementById('humanModeBtn');
+            
+            if(mode === 'ai') {
+                aiBtn.classList.add('active');
+                humanBtn.classList.remove('active');
+            } else {
+                humanBtn.classList.add('active');
+                aiBtn.classList.remove('active');
+            }
+            
+            resetGame();
+        }
+
+        function undoMove() {
+            if(gameState.moveHistory.length <= 1) return;
+            
+            const t = translations[gameState.currentLanguage];
+            showAIMessage(t.undoInDevelopment, 2500);
+        }
+
+        function activateQuantumMode() {
+            gameState.quantumMode = !gameState.quantumMode;
+            const btn = document.getElementById('quantumBtn');
+            const t = translations[gameState.currentLanguage];
+            
+            if(gameState.quantumMode) {
+                btn.style.background = 'linear-gradient(145deg, #10b981, #059669)';
+                showAIMessage(t.quantumActivated, 3500);
+                
+                // Ajouter des effets visuels quantiques
+                document.querySelectorAll('.dame-square').forEach(square => {
+                    if(Math.random() < 0.12) {
+                        square.classList.add('quantum-state');
+                        setTimeout(() => {
+                            square.classList.remove('quantum-state');
+                        }, 2500);
+                    }
+                });
+            } else {
+                btn.style.background = 'linear-gradient(145deg, #ec4899, #db2777)';
+                showAIMessage(t.quantumDeactivated, 2500);
+            }
+        }
+
+        function resetGame() {
+            const t = translations[gameState.currentLanguage];
+            showAIMessage(t.newGameStarted, 2500);
+            initGame();
+        }
+
+        function changeDifficulty() {
+            const difficulties = ['easy', 'normal', 'hard', 'expert'];
+            const currentIndex = difficulties.indexOf(gameState.difficulty);
+            const nextIndex = (currentIndex + 1) % difficulties.length;
+            gameState.difficulty = difficulties[nextIndex];
+            
+            gameState.aiLevel = nextIndex + 2;
+            
+            const t = translations[gameState.currentLanguage];
+            const diffText = t.difficultyText.replace('Expert', t.difficulties[gameState.difficulty]);
+            document.getElementById('difficultyText').textContent = diffText;
+            
+            showAIMessage(`${t.difficultyChanged} ${t.difficulties[gameState.difficulty]}`, 2500);
+        }
+
+        function toggleAIAnalysis() {
+            const t = translations[gameState.currentLanguage];
+            showAIMessage(t.aiAnalyzing, 3500);
+            
+            setTimeout(() => {
+                const analysis = analyzePosition();
+                showAIMessage(analysis, 6000);
+            }, 2500);
+        }
+
+        function analyzePosition() {
+            let yellowScore = 0;
+            let redScore = 0;
+            
+            for(let row = 0; row < 8; row++) {
+                for(let col = 0; col < 8; col++) {
+                    const piece = gameState.board[row][col];
+                    if(piece) {
+                        const value = isKing(piece) ? 3 : 1;
+                        if(getPieceColor(piece) === 'yellow') {
+                            yellowScore += value;
+                        } else {
+                            redScore += value;
+                        }
+                    }
+                }
+            }
+            
+            const t = translations[gameState.currentLanguage];
+            const advantage = yellowScore - redScore;
+            if(advantage > 4) return t.yellowAdvantage;
+            if(advantage < -4) return t.redAdvantage;
+            if(advantage > 0) return t.slightYellowAdvantage;
+            if(advantage < 0) return t.slightRedAdvantage;
+            return t.balancedPosition;
+        }
+
+        function showBestMoves() {
+            const t = translations[gameState.currentLanguage];
+            showAIMessage(t.bestMovesCalculating, 2500);
+            
+            setTimeout(() => {
+                const moves = calculateBestMove();
+                if(moves) {
+                    const suggestion = `${t.suggestion} ${String.fromCharCode(97 + moves.fromCol)}${8 - moves.fromRow} → ${String.fromCharCode(97 + moves.toCol)}${8 - moves.toRow}`;
+                    showAIMessage(suggestion, 5000);
+                } else {
+                    showAIMessage(t.noMovesAvailable, 2500);
+                }
+            }, 2500);
+        }
+
+        function saveGame() {
+            const saveData = {
+                board: gameState.board,
+                currentPlayer: gameState.currentPlayer,
+                gameMode: gameState.gameMode,
+                moveHistory: gameState.moveHistory,
+                moveCount: gameState.moveCount,
+                score: gameState.score,
+                difficulty: gameState.difficulty,
+                currentLanguage: gameState.currentLanguage
+            };
+            
+            localStorage.setItem('quantumDamesSave', JSON.stringify(saveData));
+            const t = translations[gameState.currentLanguage];
+            showAIMessage(t.gameSaved, 2500);
+        }
+
+        function loadGame() {
+            const saveData = localStorage.getItem('quantumDamesSave');
+            if(saveData) {
+                const data = JSON.parse(saveData);
+                gameState.board = data.board;
+                gameState.currentPlayer = data.currentPlayer;
+                gameState.gameMode = data.gameMode;
+                gameState.moveHistory = data.moveHistory;
+                gameState.moveCount = data.moveCount;
+                gameState.score = data.score;
+                gameState.difficulty = data.difficulty;
+                if(data.currentLanguage) {
+                    gameState.currentLanguage = data.currentLanguage;
+                    document.getElementById('languageSelector').value = data.currentLanguage;
+                    changeLanguage();
+                }
+                
+                createDameboard();
+                updateUI();
+                const t = translations[gameState.currentLanguage];
+                showAIMessage(t.gameLoaded, 2500);
+            }
+        }
+
+        // Fonction pour basculer pause/reprendre
+        function togglePause() {
+            const t = translations[gameState.currentLanguage];
+            const pauseBtn = document.getElementById('pauseBtn');
+            const pauseTextElement = document.getElementById('pauseText');
+            
+            gameState.isPaused = !gameState.isPaused;
+            
+            if(gameState.isPaused) {
+                // Mettre en pause
+                pauseBtn.innerHTML = '▶️ <span id="pauseText">' + t.resumeText + '</span>';
+                pauseBtn.style.background = 'linear-gradient(145deg, #10b981, #059669)';
+                showAIMessage(t.gamePaused, 2000);
+                
+                // Arrêter le timer
+                if(gameState.timer) {
+                    clearInterval(gameState.timer);
+                }
+            } else {
+                // Reprendre
+                pauseBtn.innerHTML = '⏸️ <span id="pauseText">' + t.pauseText + '</span>';
+                pauseBtn.style.background = 'linear-gradient(145deg, #8b5cf6, #7c3aed)';
+                showAIMessage(t.gameResumed, 2000);
+                
+                // Redémarrer le timer
+                startTimer();
+            }
+        }
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            initFuturisticEffects();
+            initGame();
+            
+            // Charger une sauvegarde si elle existe
+            if(localStorage.getItem('quantumDamesSave')) {
+                setTimeout(() => {
+                    const t = translations[gameState.currentLanguage];
+                    if(confirm(t.loadSavedGame)) {
+                        loadGame();
+                    }
+                }, 1200);
+            }
+            
+            // Message de bienvenue
+            setTimeout(() => {
+                const t = translations[gameState.currentLanguage];
+                showAIMessage(t.welcome, 5000);
+            }, 1200);
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'984959ce0269777e',t:'MTc1ODc5MTAzMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
