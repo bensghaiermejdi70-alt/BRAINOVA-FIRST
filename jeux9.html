@@ -1,0 +1,2100 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔮 Cyber Checker - Connexion Quantique</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            box-sizing: border-box;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0a1f 0%, #1a0a3e 30%, #2e1065 70%, #4c1d95 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Particules quantiques d'arrière-plan */
+        .quantum-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .quantum-particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #8b5cf6;
+            border-radius: 50%;
+            animation: quantumFloat 15s infinite linear;
+            box-shadow: 0 0 15px #8b5cf6, 0 0 30px #a855f7;
+        }
+
+        @keyframes quantumFloat {
+            0% {
+                transform: translateY(100vh) translateX(0) rotate(0deg) scale(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+                transform: translateY(90vh) translateX(30px) rotate(60deg) scale(1);
+            }
+            50% {
+                transform: translateY(50vh) translateX(-40px) rotate(180deg) scale(1.5);
+            }
+            90% {
+                opacity: 1;
+                transform: translateY(10vh) translateX(50px) rotate(300deg) scale(1);
+            }
+            100% {
+                transform: translateY(-10vh) translateX(100px) rotate(360deg) scale(0);
+                opacity: 0;
+            }
+        }
+
+        /* Grille quantique de fond */
+        .quantum-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(139, 92, 246, 0.15) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(139, 92, 246, 0.15) 1px, transparent 1px);
+            background-size: 80px 80px;
+            animation: quantumGridPulse 20s linear infinite;
+            z-index: 1;
+        }
+
+        @keyframes quantumGridPulse {
+            0%, 100% { 
+                transform: translate(0, 0) scale(1);
+                opacity: 0.3;
+            }
+            50% { 
+                transform: translate(40px, 40px) scale(1.05);
+                opacity: 0.6;
+            }
+        }
+
+        /* Container principal */
+        .cyber-checker-container {
+            position: relative;
+            z-index: 10;
+            display: grid;
+            grid-template-columns: 280px 1fr 280px;
+            grid-template-rows: 1fr;
+            gap: 20px;
+            min-height: 100vh;
+            padding: 20px;
+            max-width: 100%;
+            margin: 0;
+        }
+
+        .game-panel {
+            background: linear-gradient(145deg, 
+                rgba(30, 20, 60, 0.95) 0%,
+                rgba(50, 25, 100, 0.95) 50%,
+                rgba(76, 29, 149, 0.95) 100%);
+            backdrop-filter: blur(30px);
+            border-radius: 25px;
+            padding: 25px;
+            width: 100%;
+            height: fit-content;
+            box-shadow: 
+                0 30px 60px rgba(0, 0, 0, 0.8),
+                0 0 120px rgba(139, 92, 246, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            border: 3px solid rgba(139, 92, 246, 0.5);
+            animation: quantumPanelGlow 5s ease-in-out infinite alternate;
+            grid-column: 2;
+        }
+
+        .left-panel, .right-panel {
+            background: linear-gradient(145deg, 
+                rgba(30, 20, 60, 0.95) 0%,
+                rgba(50, 25, 100, 0.95) 50%,
+                rgba(76, 29, 149, 0.95) 100%);
+            backdrop-filter: blur(30px);
+            border-radius: 20px;
+            padding: 20px;
+            height: fit-content;
+            box-shadow: 
+                0 20px 40px rgba(0, 0, 0, 0.6),
+                0 0 80px rgba(139, 92, 246, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            border: 3px solid rgba(139, 92, 246, 0.4);
+        }
+
+        .right-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .panel-section {
+            margin-bottom: 25px;
+        }
+
+        @keyframes quantumPanelGlow {
+            from { 
+                box-shadow: 
+                    0 30px 60px rgba(0, 0, 0, 0.8),
+                    0 0 120px rgba(139, 92, 246, 0.3),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            }
+            to { 
+                box-shadow: 
+                    0 35px 70px rgba(0, 0, 0, 0.8),
+                    0 0 150px rgba(139, 92, 246, 0.4),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            }
+        }
+
+        /* En-tête du jeu */
+        .quantum-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 25px;
+            border-bottom: 3px solid rgba(139, 92, 246, 0.5);
+        }
+
+        .quantum-title {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+        }
+
+        .quantum-title h1 {
+            color: #8b5cf6;
+            margin: 0;
+            font-size: 28px;
+            font-weight: 700;
+            text-shadow: 0 0 40px rgba(139, 92, 246, 0.9);
+            animation: quantumTitlePulse 4s infinite alternate;
+        }
+
+        @keyframes quantumTitlePulse {
+            from { 
+                text-shadow: 0 0 40px rgba(139, 92, 246, 0.9);
+                transform: scale(1);
+            }
+            to { 
+                text-shadow: 0 0 50px rgba(139, 92, 246, 1);
+                transform: scale(1.05);
+            }
+        }
+
+        .quantum-icon {
+            font-size: 36px;
+            animation: quantumIconRotate 6s ease-in-out infinite;
+            filter: drop-shadow(0 0 25px #8b5cf6);
+        }
+
+        @keyframes quantumIconRotate {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            25% { transform: scale(1.2) rotate(90deg); }
+            50% { transform: scale(1.1) rotate(180deg); }
+            75% { transform: scale(1.2) rotate(270deg); }
+        }
+
+        .quantum-badge {
+            background: linear-gradient(45deg, #8b5cf6, #a855f7, #c084fc, #e879f9);
+            background-size: 400% 400%;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 25px;
+            font-size: 13px;
+            font-weight: bold;
+            animation: quantumBadgeShine 5s ease-in-out infinite;
+            box-shadow: 0 0 30px rgba(139, 92, 246, 0.7);
+        }
+
+        @keyframes quantumBadgeShine {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        /* Sélecteur de langue personnalisé */
+        .language-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .language-selector {
+            background: linear-gradient(145deg, 
+                rgba(30, 20, 60, 0.95) 0%,
+                rgba(50, 25, 100, 0.95) 30%,
+                rgba(76, 29, 149, 0.95) 70%,
+                rgba(139, 92, 246, 0.95) 100%);
+            color: #8b5cf6;
+            border: 3px solid rgba(139, 92, 246, 0.6);
+            border-radius: 20px;
+            padding: 15px 22px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 15px;
+            transition: all 0.4s ease;
+            box-shadow: 
+                0 0 30px rgba(139, 92, 246, 0.4),
+                0 0 50px rgba(168, 85, 247, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            min-width: 180px;
+            text-shadow: 0 0 15px rgba(139, 92, 246, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .language-selector:hover {
+            background: linear-gradient(145deg, 
+                rgba(139, 92, 246, 0.9) 0%,
+                rgba(168, 85, 247, 0.9) 30%,
+                rgba(192, 132, 252, 0.9) 70%,
+                rgba(232, 121, 249, 0.9) 100%);
+            transform: translateY(-3px);
+            box-shadow: 
+                0 10px 30px rgba(139, 92, 246, 0.6),
+                0 0 60px rgba(168, 85, 247, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            color: white;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+        }
+
+        .language-dropdown-arrow {
+            font-size: 12px;
+            transition: transform 0.3s ease;
+        }
+
+        .language-dropdown.open .language-dropdown-arrow {
+            transform: rotate(180deg);
+        }
+
+        .language-dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: linear-gradient(145deg, 
+                rgba(30, 20, 60, 0.98) 0%,
+                rgba(50, 25, 100, 0.98) 50%,
+                rgba(76, 29, 149, 0.98) 100%);
+            backdrop-filter: blur(30px);
+            border: 3px solid rgba(139, 92, 246, 0.6);
+            border-radius: 15px;
+            box-shadow: 
+                0 20px 40px rgba(0, 0, 0, 0.8),
+                0 0 60px rgba(139, 92, 246, 0.4);
+            min-width: 200px;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .language-dropdown.open .language-dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .language-option {
+            padding: 15px 20px;
+            color: #8b5cf6;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-bottom: 1px solid rgba(139, 92, 246, 0.2);
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .language-option:last-child {
+            border-bottom: none;
+            border-radius: 0 0 12px 12px;
+        }
+
+        .language-option:first-child {
+            border-radius: 12px 12px 0 0;
+        }
+
+        .language-option:hover {
+            background: rgba(139, 92, 246, 0.3);
+            color: white;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+        }
+
+        .language-option.active {
+            background: rgba(139, 92, 246, 0.5);
+            color: white;
+        }
+
+        /* Panneau de titre des sections */
+        .panel-title {
+            color: #8b5cf6;
+            font-size: 17px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 20px rgba(139, 92, 246, 0.9);
+            border-bottom: 3px solid rgba(139, 92, 246, 0.4);
+            padding-bottom: 12px;
+        }
+
+        /* Plateau hexagonal */
+        .hex-board {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 15px;
+            border: 3px solid rgba(139, 92, 246, 0.6);
+            box-shadow: 
+                0 0 40px rgba(139, 92, 246, 0.4),
+                inset 0 0 20px rgba(139, 92, 246, 0.1);
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .hex-row {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+        }
+
+        .hex-cell {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(145deg, #374151, #1f2937);
+            clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid transparent;
+            font-size: 16px;
+        }
+
+        .hex-cell:hover {
+            background: linear-gradient(145deg, #6b21a8, #7c3aed);
+            box-shadow: 0 0 25px rgba(139, 92, 246, 0.6);
+            transform: scale(1.1);
+        }
+
+        .hex-cell.player {
+            background: linear-gradient(145deg, #3b82f6, #1d4ed8);
+            box-shadow: 0 0 25px rgba(59, 130, 246, 0.8);
+            color: white;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+        }
+
+        .hex-cell.ai {
+            background: linear-gradient(145deg, #ef4444, #dc2626);
+            box-shadow: 0 0 25px rgba(239, 68, 68, 0.8);
+            color: white;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+        }
+
+        .hex-cell.connected {
+            animation: connectionPulse 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes connectionPulse {
+            from { 
+                box-shadow: 0 0 25px rgba(139, 92, 246, 0.8);
+                transform: scale(1);
+            }
+            to { 
+                box-shadow: 0 0 35px rgba(139, 92, 246, 1);
+                transform: scale(1.05);
+            }
+        }
+
+        .hex-cell.winning-path {
+            background: linear-gradient(145deg, #fbbf24, #f59e0b);
+            box-shadow: 0 0 30px rgba(251, 191, 36, 1);
+            animation: winningGlow 1s ease-in-out infinite alternate;
+        }
+
+        @keyframes winningGlow {
+            from { 
+                box-shadow: 0 0 30px rgba(251, 191, 36, 1);
+            }
+            to { 
+                box-shadow: 0 0 40px rgba(251, 191, 36, 1.2);
+            }
+        }
+
+        /* Contrôles du jeu */
+        .game-controls {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            margin-top: 25px;
+        }
+
+        .quantum-btn {
+            padding: 18px 35px;
+            background: linear-gradient(145deg, #8b5cf6, #7c3aed);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            min-width: 160px;
+            box-shadow: 0 0 25px rgba(139, 92, 246, 0.4);
+        }
+
+        .compact-btn {
+            padding: 12px 20px;
+            font-size: 13px;
+            min-width: 120px;
+            letter-spacing: 0.5px;
+        }
+
+        .quantum-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .quantum-btn:hover::before {
+            left: 100%;
+        }
+
+        .quantum-btn:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 30px rgba(139, 92, 246, 0.6);
+            background: linear-gradient(145deg, #7c3aed, #6b21a8);
+        }
+
+        .quantum-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .new-game-btn {
+            background: linear-gradient(145deg, #10b981, #059669);
+        }
+
+        .new-game-btn:hover {
+            background: linear-gradient(145deg, #059669, #047857);
+        }
+
+        .hint-btn {
+            background: linear-gradient(145deg, #f59e0b, #d97706);
+        }
+
+        .hint-btn:hover {
+            background: linear-gradient(145deg, #d97706, #b45309);
+        }
+
+        /* Statistiques du jeu */
+        .game-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .stat-item {
+            background: rgba(139, 92, 246, 0.15);
+            padding: 15px;
+            border-radius: 15px;
+            text-align: center;
+            border: 3px solid rgba(139, 92, 246, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.3), transparent);
+            animation: statQuantumScan 5s linear infinite;
+        }
+
+        @keyframes statQuantumScan {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .stat-label {
+            display: block;
+            color: #a1a1aa;
+            font-size: 12px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-value {
+            display: block;
+            color: #8b5cf6;
+            font-size: 20px;
+            font-weight: bold;
+            text-shadow: 0 0 20px rgba(139, 92, 246, 0.9);
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Messages de jeu */
+        .game-message {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 12px;
+            background: rgba(139, 92, 246, 0.15);
+            border: 2px solid rgba(139, 92, 246, 0.3);
+            color: #8b5cf6;
+            font-weight: bold;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        /* IA Status */
+        .ai-thinking {
+            animation: aiThinking 2s ease-in-out infinite;
+        }
+
+        @keyframes aiThinking {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .cyber-checker-container {
+                grid-template-columns: 220px 1fr 220px;
+                gap: 15px;
+                padding: 15px;
+            }
+        }
+
+        @media (max-width: 900px) {
+            .cyber-checker-container {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto auto;
+                gap: 15px;
+            }
+            
+            .left-panel {
+                grid-row: 2;
+            }
+            
+            .right-panel {
+                grid-row: 3;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .game-panel {
+                padding: 20px;
+            }
+            
+            .quantum-title h1 {
+                font-size: 20px;
+            }
+            
+            .hex-board {
+                max-width: 400px;
+                padding: 15px;
+            }
+            
+            .hex-cell {
+                width: 35px;
+                height: 35px;
+                font-size: 16px;
+            }
+            
+            .game-controls {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .quantum-btn {
+                min-width: 140px;
+                padding: 15px 25px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hex-board {
+                max-width: 320px;
+            }
+            
+            .hex-cell {
+                width: 30px;
+                height: 30px;
+                font-size: 14px;
+            }
+            
+            .quantum-title {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .quantum-title h1 {
+                font-size: 18px;
+            }
+        }
+
+        /* Animations de victoire */
+        .victory-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(20px);
+        }
+
+        .victory-content {
+            background: linear-gradient(145deg, rgba(30, 20, 60, 0.95), rgba(76, 29, 149, 0.95));
+            border: 4px solid #8b5cf6;
+            border-radius: 25px;
+            padding: 50px;
+            text-align: center;
+            color: white;
+            font-size: 22px;
+            font-weight: bold;
+            max-width: 600px;
+            box-shadow: 0 0 60px rgba(139, 92, 246, 0.8);
+            animation: victoryPulse 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes victoryPulse {
+            from { 
+                box-shadow: 0 0 60px rgba(139, 92, 246, 0.8);
+                transform: scale(1);
+            }
+            to { 
+                box-shadow: 0 0 80px rgba(139, 92, 246, 1);
+                transform: scale(1.05);
+            }
+        }
+
+        /* Lignes de connexion */
+        .connection-line {
+            position: absolute;
+            height: 3px;
+            background: linear-gradient(90deg, #8b5cf6, #a855f7);
+            box-shadow: 0 0 10px rgba(139, 92, 246, 0.8);
+            z-index: 5;
+            animation: connectionGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes connectionGlow {
+            from { 
+                box-shadow: 0 0 10px rgba(139, 92, 246, 0.8);
+            }
+            to { 
+                box-shadow: 0 0 20px rgba(139, 92, 246, 1);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Particules quantiques d'arrière-plan -->
+    <div class="quantum-particles" id="quantumParticles"></div>
+    
+    <!-- Grille quantique -->
+    <div class="quantum-grid"></div>
+    
+    <!-- Container principal -->
+    <div class="cyber-checker-container">
+        <!-- Panneau gauche -->
+        <div class="left-panel">
+            <div class="panel-section">
+                <div class="panel-title" id="controlsTitle">⚡ Contrôles Quantiques</div>
+                <div style="display: grid; gap: 15px;">
+                    <button class="quantum-btn new-game-btn compact-btn" onclick="newGame()">
+                        🎮 <span id="newGameText">Nouvelle Partie</span>
+                    </button>
+                    <button class="quantum-btn hint-btn compact-btn" onclick="getHint()" id="hintBtn">
+                        💡 <span id="hintText">Conseil</span>
+                    </button>
+                    <button class="quantum-btn compact-btn" onclick="undoMove()" id="undoBtn">
+                        ↶ <span id="undoText">Annuler</span>
+                    </button>
+                    <button class="quantum-btn compact-btn" onclick="surrenderGame()" id="surrenderBtn">
+                        🏳️ <span id="surrenderText">Abandonner</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <div class="panel-title" id="gameModeTitle">🎮 Mode de Jeu</div>
+                <select id="gameModeSelector" onchange="changeGameMode()" class="language-selector" style="width: 100%; text-align: center; margin-bottom: 15px;">
+                    <option value="ai" selected>🤖 Contre IA</option>
+                    <option value="human">👥 2 Joueurs</option>
+                </select>
+            </div>
+
+            <div class="panel-section">
+                <div class="panel-title" id="statsTitle">📊 Statistiques</div>
+                <div class="game-stats">
+                    <div class="stat-item">
+                        <span class="stat-label" id="playerNodesLabel">Vos Nœuds</span>
+                        <span class="stat-value" id="playerNodesValue">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label" id="aiNodesLabel">Nœuds IA</span>
+                        <span class="stat-value" id="aiNodesValue">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label" id="playerConnectionsLabel">Connexions</span>
+                        <span class="stat-value" id="playerConnectionsValue">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label" id="aiConnectionsLabel">IA Connexions</span>
+                        <span class="stat-value" id="aiConnectionsValue">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-section" id="difficultySection">
+                <div class="panel-title" id="difficultyTitle">🎯 Niveau IA</div>
+                <select id="difficultySelector" onchange="changeDifficulty()" class="language-selector" style="width: 100%; text-align: center;">
+                    <option value="easy">🟢 Débutant</option>
+                    <option value="medium" selected>🟡 Intermédiaire</option>
+                    <option value="hard">🔴 Expert</option>
+                    <option value="quantum">🔮 Quantique</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Panneau central -->
+        <div class="game-panel">
+            <!-- En-tête -->
+            <div class="quantum-header">
+                <div class="quantum-title">
+                    <span class="quantum-icon">🔮</span>
+                    <h1 id="gameTitle">Cyber Checker</h1>
+                    <span class="quantum-badge" id="quantumBadge">🤖 IA QUANTIQUE</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 25px;">
+                    <div class="language-dropdown" id="languageDropdown">
+                        <div class="language-selector" onclick="toggleLanguageDropdown()">
+                            <span id="selectedLanguage">🇫🇷 Français</span>
+                            <span class="language-dropdown-arrow">▼</span>
+                        </div>
+                        <div class="language-dropdown-menu" id="languageMenu">
+                            <div class="language-option active" onclick="selectLanguage('fr', '🇫🇷 Français')">🇫🇷 Français</div>
+                            <div class="language-option" onclick="selectLanguage('en', '🇺🇸 English')">🇺🇸 English</div>
+                            <div class="language-option" onclick="selectLanguage('ar', '🇸🇦 العربية')">🇸🇦 العربية</div>
+                            <div class="language-option" onclick="selectLanguage('es', '🇪🇸 Español')">🇪🇸 Español</div>
+                            <div class="language-option" onclick="selectLanguage('de', '🇩🇪 Deutsch')">🇩🇪 Deutsch</div>
+                            <div class="language-option" onclick="selectLanguage('zh', '🇨🇳 中文')">🇨🇳 中文</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Message de jeu -->
+            <div class="game-message" id="gameMessage">
+                <span id="welcomeMessage">🔵 À votre tour - Placez un nœud quantique</span>
+            </div>
+
+            <!-- Plateau hexagonal -->
+            <div class="hex-board" id="hexBoard">
+                <!-- Les hexagones seront générés par JavaScript -->
+            </div>
+        </div>
+
+        <!-- Panneau droit -->
+        <div class="right-panel">
+            <div class="panel-section">
+                <div class="panel-title" id="rulesTitle">📖 Règles Quantiques</div>
+                <div style="color: #a1a1aa; font-size: 14px; line-height: 1.8;">
+                    <p id="rulesText">
+                        • Placez vos nœuds sur les hexagones<br>
+                        • Créez une chaîne continue de bord à bord<br>
+                        • Bleu: connexion horizontale<br>
+                        • Rouge: connexion verticale<br>
+                        • L'IA quantique prédit vos mouvements
+                    </p>
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <div class="panel-title" id="objectiveTitle">🎯 Objectifs</div>
+                <div style="color: #a1a1aa; font-size: 13px; line-height: 1.7;">
+                    <div style="margin-bottom: 10px;">
+                        <span style="color: #3b82f6;">🔵</span> <span id="playerObjectiveText">Connectez gauche-droite</span>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <span style="color: #ef4444;">🔴</span> <span id="aiObjectiveText">IA connecte haut-bas</span>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <span style="color: #10b981;">⚡</span> <span id="strategyText">Bloquez l'adversaire</span>
+                    </div>
+                    <div style="margin-bottom: 10px;">
+                        <span style="color: #fbbf24;">🧠</span> <span id="tacticsText">Anticipez les coups</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <div class="panel-title" id="aiStatusTitle">🤖 État IA</div>
+                <div id="aiStatus" style="color: #8b5cf6; font-size: 14px; text-align: center; padding: 15px;">
+                    <span id="aiStatusText">IA Quantique Prête</span>
+                </div>
+                <div style="color: #a1a1aa; font-size: 12px; text-align: center; margin-top: 12px;" id="aiAnalysis">
+                    <span id="aiAnalysisText">Analyse des connexions...</span>
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <div class="panel-title" id="historyTitle">📜 Historique</div>
+                <div id="moveHistory" style="color: #a1a1aa; font-size: 11px; max-height: 120px; overflow-y: auto; line-height: 1.4;">
+                    <div id="historyContent">Aucun coup joué</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .global-close-btn { position: fixed; top: 14px; right: 14px; z-index: 99999; background: #ff3b3b; color: #fff; border: none; width:52px; height:52px; border-radius:50%; font-size:22px; cursor:pointer; box-shadow:0 6px 18px rgba(255,59,59,0.3);} 
+        .global-close-btn:hover{ transform: scale(1.05); }
+    </style>
+    <button class="global-close-btn" title="Fermer" aria-label="Fermer" onclick="closePlatform()">✕</button>
+    <script>
+        function closePlatform(){
+            try{ console.debug('jeux9: closePlatform called'); }catch(e){}
+            try{
+                if(window.parent && window.parent !== window){
+                    window.parent.postMessage({ action: 'close', reason: 'user-initiated', source: 'jeux9' }, '*');
+                    return;
+                }
+            }catch(e){}
+            try{
+                if(window.opener && !window.opener.closed){
+                    try{ window.opener.postMessage({ action: 'child-closed', source: 'jeux9' }, '*'); }catch(e){}
+                    try{ window.close(); }catch(e){}
+                    return;
+                }
+            }catch(e){}
+            try{ window.location.href = '/global_platform.html'; }catch(e){}
+        }
+    </script>
+    <script>
+        // Traductions multilingues
+        const translations = {
+            fr: {
+                gameTitle: "Cyber Checker",
+                quantumBadge: "🤖 IA QUANTIQUE",
+                controlsTitle: "⚡ Contrôles",
+                statsTitle: "📊 Statistiques",
+                gameModeTitle: "🎮 Mode de Jeu",
+                difficultyTitle: "🎯 Niveau IA",
+                rulesTitle: "📖 Règles",
+                objectiveTitle: "🎯 Objectifs",
+                aiStatusTitle: "🤖 État IA",
+                historyTitle: "📜 Historique",
+                newGameText: "Nouvelle Partie",
+                hintText: "Conseil",
+                undoText: "Annuler",
+                surrenderText: "Abandonner",
+                playerNodesLabel: "Vos Nœuds",
+                aiNodesLabel: "Nœuds IA",
+                playerConnectionsLabel: "Vos Liens",
+                aiConnectionsLabel: "Liens IA",
+                welcomeMessage: "🔵 À votre tour - Placez un nœud quantique",
+                rulesText: "• Placez nœuds sur hexagones<br>• Créez chaîne bord à bord<br>• Bleu: horizontal<br>• Rouge: vertical<br>• IA prédit mouvements",
+                playerObjectiveText: "Connectez gauche-droite",
+                aiObjectiveText: "IA connecte haut-bas",
+                strategyText: "Bloquez adversaire",
+                tacticsText: "Anticipez coups",
+                aiStatusText: "IA Prête",
+                aiAnalysisText: "Analyse...",
+                yourTurn: "🔵 À votre tour - Placez un nœud quantique",
+                aiTurn: "🔴 L'IA calcule sa stratégie optimale...",
+                aiThinking: "🤖 IA en analyse stratégique profonde...",
+                playerWins: "🎉 VICTOIRE QUANTIQUE ! Vous avez créé une connexion complète !",
+                aiWins: "🤖 DÉFAITE ! L'IA a établi sa connexion stratégique !",
+                draw: "🤝 ÉGALITÉ QUANTIQUE ! Plateau saturé sans vainqueur !",
+                easyLevel: "🟢 Novice",
+                mediumLevel: "🟡 Stratège",
+                hardLevel: "🔴 Maître",
+                quantumLevel: "🔮 Quantique",
+                hintMessage: "💡 Conseil Stratégique: Position optimale",
+                noHint: "❌ Aucun conseil disponible actuellement",
+                historyEmpty: "Aucun mouvement",
+                boardFull: "⚡ Plateau saturé - Égalité quantique !",
+                goodMove: "✨ Placement stratégique excellent !",
+                blockingMove: "🛡️ Mouvement défensif efficace !",
+                connectingMove: "🔗 Connexion quantique en formation...",
+                undoFunction: "Fonction d'annulation en développement",
+                surrenderConfirm: "Êtes-vous sûr de vouloir abandonner ?",
+                victoryTitle: "🎉 VICTOIRE ! 🎉",
+                defeatTitle: "🤖 DÉFAITE 🤖",
+                drawTitle: "🤝 MATCH NUL 🤝",
+                victoryMessage: "Félicitations ! Vous avez créé une connexion complète !",
+                defeatMessage: "L'IA quantique a créé sa connexion en premier !",
+                drawMessage: "Le plateau est plein sans connexion complète !",
+                nodesPlaced: "Nœuds placés: Vous",
+                newGameButton: "🎮 Nouvelle Partie",
+                difficultyChanged: "Niveau IA:",
+                gameModeAI: "🤖 Contre IA",
+                gameModeHuman: "👥 2 Joueurs",
+                player1Turn: "🔵 Joueur 1 - Placez un nœud quantique",
+                player2Turn: "🔴 Joueur 2 - Placez un nœud quantique",
+                player1Wins: "🎉 VICTOIRE JOUEUR 1 ! Connexion complète créée !",
+                player2Wins: "🎉 VICTOIRE JOUEUR 2 ! Connexion complète créée !",
+                player1Nodes: "Joueur 1",
+                player2Nodes: "Joueur 2"
+            },
+            en: {
+                gameTitle: "Cyber Checker",
+                quantumBadge: "🤖 QUANTUM AI",
+                controlsTitle: "⚡ Controls",
+                statsTitle: "📊 Statistics",
+                gameModeTitle: "🎮 Game Mode",
+                difficultyTitle: "🎯 AI Level",
+                rulesTitle: "📖 Rules",
+                objectiveTitle: "🎯 Objectives",
+                aiStatusTitle: "🤖 AI Status",
+                historyTitle: "📜 History",
+                newGameText: "New Game",
+                hintText: "Hint",
+                undoText: "Undo",
+                surrenderText: "Surrender",
+                playerNodesLabel: "Your Nodes",
+                aiNodesLabel: "AI Nodes",
+                playerConnectionsLabel: "Your Links",
+                aiConnectionsLabel: "AI Links",
+                welcomeMessage: "🔵 Your turn - Place a quantum node",
+                rulesText: "• Place nodes on hexagons<br>• Create chain edge to edge<br>• Blue: horizontal<br>• Red: vertical<br>• AI predicts moves",
+                playerObjectiveText: "Connect left-right",
+                aiObjectiveText: "AI connects top-bottom",
+                strategyText: "Block opponent",
+                tacticsText: "Anticipate moves",
+                aiStatusText: "AI Ready",
+                aiAnalysisText: "Analyzing...",
+                yourTurn: "🔵 Your turn - Place a quantum node",
+                aiTurn: "🔴 AI calculating optimal strategy...",
+                aiThinking: "🤖 AI in deep strategic analysis...",
+                playerWins: "🎉 QUANTUM VICTORY! You created a complete connection!",
+                aiWins: "🤖 DEFEAT! AI established its strategic connection!",
+                draw: "🤝 QUANTUM DRAW! Board saturated with no winner!",
+                easyLevel: "🟢 Novice",
+                mediumLevel: "🟡 Strategist",
+                hardLevel: "🔴 Master",
+                quantumLevel: "🔮 Quantum",
+                hintMessage: "💡 Strategic Hint: Optimal position",
+                noHint: "❌ No hint currently available",
+                historyEmpty: "📜 No moves recorded",
+                boardFull: "⚡ Board saturated - Quantum draw!",
+                goodMove: "✨ Excellent strategic placement!",
+                blockingMove: "🛡️ Effective defensive move!",
+                connectingMove: "🔗 Quantum connection forming...",
+                undoFunction: "Undo function in development",
+                surrenderConfirm: "Are you sure you want to surrender?",
+                victoryTitle: "🎉 VICTORY! 🎉",
+                defeatTitle: "🤖 DEFEAT 🤖",
+                drawTitle: "🤝 DRAW 🤝",
+                victoryMessage: "Congratulations! You created a complete connection!",
+                defeatMessage: "The quantum AI created its connection first!",
+                drawMessage: "The board is full with no complete connection!",
+                nodesPlaced: "Nodes placed: You",
+                newGameButton: "🎮 New Game",
+                difficultyChanged: "AI Level:",
+                gameModeAI: "🤖 vs AI",
+                gameModeHuman: "👥 2 Players",
+                player1Turn: "🔵 Player 1 - Place a quantum node",
+                player2Turn: "🔴 Player 2 - Place a quantum node",
+                player1Wins: "🎉 PLAYER 1 VICTORY! Complete connection created!",
+                player2Wins: "🎉 PLAYER 2 VICTORY! Complete connection created!",
+                player1Nodes: "Player 1",
+                player2Nodes: "Player 2"
+            },
+            ar: {
+                gameTitle: "سايبر تشيكر",
+                quantumBadge: "🤖 ذكاء كمي",
+                controlsTitle: "⚡ تحكم",
+                statsTitle: "📊 إحصائيات",
+                difficultyTitle: "🎯 مستوى ذكاء",
+                rulesTitle: "📖 قواعد",
+                objectiveTitle: "🎯 أهداف",
+                aiStatusTitle: "🤖 حالة ذكاء",
+                historyTitle: "📜 تاريخ",
+                newGameText: "لعبة جديدة",
+                hintText: "تلميح",
+                undoText: "تراجع",
+                surrenderText: "استسلام",
+                playerNodesLabel: "عقدك",
+                aiNodesLabel: "عقد ذكاء",
+                playerConnectionsLabel: "روابطك",
+                aiConnectionsLabel: "روابط ذكاء",
+                welcomeMessage: "🔵 دورك - ضع عقدة كمية",
+                rulesText: "• ضع عقد على سداسيات<br>• أنشئ سلسلة حافة لحافة<br>• أزرق: أفقي<br>• أحمر: عمودي<br>• ذكاء يتنبأ حركات",
+                playerObjectiveText: "اربط يسار-يمين",
+                aiObjectiveText: "ذكاء يربط أعلى-أسفل",
+                strategyText: "احجب خصم",
+                tacticsText: "توقع حركات",
+                aiStatusText: "ذكاء جاهز",
+                aiAnalysisText: "تحليل...",
+                yourTurn: "🔵 دورك - ضع عقدة كمية",
+                aiTurn: "🔴 الذكاء يحسب الاستراتيجية المثلى...",
+                aiThinking: "🤖 الذكاء في تحليل استراتيجي عميق...",
+                playerWins: "🎉 نصر كمي! لقد أنشأت اتصالاً كاملاً!",
+                aiWins: "🤖 هزيمة! الذكاء أنشأ اتصاله الاستراتيجي!",
+                draw: "🤝 تعادل كمي! اللوحة مشبعة بدون فائز!",
+                easyLevel: "🟢 مبتدئ",
+                mediumLevel: "🟡 استراتيجي",
+                hardLevel: "🔴 خبير",
+                quantumLevel: "🔮 كمي",
+                hintMessage: "💡 تلميح استراتيجي: موضع مثالي",
+                noHint: "❌ لا يوجد تلميح متاح حالياً",
+                historyEmpty: "📜 لم يتم تسجيل حركات",
+                boardFull: "⚡ اللوحة مشبعة - تعادل كمي!",
+                goodMove: "✨ وضع استراتيجي ممتاز!",
+                blockingMove: "🛡️ حركة دفاعية فعالة!",
+                connectingMove: "🔗 اتصال كمي في التكوين...",
+                undoFunction: "وظيفة التراجع قيد التطوير",
+                surrenderConfirm: "هل أنت متأكد من الاستسلام؟",
+                victoryTitle: "🎉 نصر! 🎉",
+                defeatTitle: "🤖 هزيمة 🤖",
+                drawTitle: "🤝 تعادل 🤝",
+                victoryMessage: "تهانينا! لقد أنشأت اتصالاً كاملاً!",
+                defeatMessage: "الذكاء الكمي أنشأ اتصاله أولاً!",
+                drawMessage: "اللوحة ممتلئة بدون اتصال كامل!",
+                nodesPlaced: "العقد الموضوعة: أنت",
+                newGameButton: "🎮 لعبة جديدة",
+                difficultyChanged: "مستوى الذكاء:"
+            },
+            es: {
+                gameTitle: "Cyber Checker",
+                quantumBadge: "🤖 IA CUÁNTICA",
+                controlsTitle: "⚡ Controles",
+                statsTitle: "📊 Estadísticas",
+                difficultyTitle: "🎯 Nivel IA",
+                rulesTitle: "📖 Reglas",
+                objectiveTitle: "🎯 Objetivos",
+                aiStatusTitle: "🤖 Estado IA",
+                historyTitle: "📜 Historial",
+                newGameText: "Nuevo Juego",
+                hintText: "Pista",
+                undoText: "Deshacer",
+                surrenderText: "Rendirse",
+                playerNodesLabel: "Tus Nodos",
+                aiNodesLabel: "Nodos IA",
+                playerConnectionsLabel: "Tus Enlaces",
+                aiConnectionsLabel: "Enlaces IA",
+                welcomeMessage: "🔵 Tu turno - Coloca un nodo cuántico",
+                rulesText: "• Coloca nodos en hexágonos<br>• Crea cadena borde a borde<br>• Azul: horizontal<br>• Rojo: vertical<br>• IA predice movimientos",
+                playerObjectiveText: "Conecta izquierda-derecha",
+                aiObjectiveText: "IA conecta arriba-abajo",
+                strategyText: "Bloquea oponente",
+                tacticsText: "Anticipa movimientos",
+                aiStatusText: "IA Lista",
+                aiAnalysisText: "Analizando...",
+                yourTurn: "🔵 Tu turno - Coloca un nodo cuántico",
+                aiTurn: "🔴 IA calculando estrategia óptima...",
+                aiThinking: "🤖 IA en análisis estratégico profundo...",
+                playerWins: "🎉 ¡VICTORIA CUÁNTICA! ¡Creaste una conexión completa!",
+                aiWins: "🤖 ¡DERROTA! ¡La IA estableció su conexión estratégica!",
+                draw: "🤝 ¡EMPATE CUÁNTICO! ¡Tablero saturado sin ganador!",
+                easyLevel: "🟢 Novato",
+                mediumLevel: "🟡 Estratega",
+                hardLevel: "🔴 Maestro",
+                quantumLevel: "🔮 Cuántico",
+                hintMessage: "💡 Pista Estratégica: Posición óptima",
+                noHint: "❌ No hay pista disponible actualmente",
+                historyEmpty: "📜 No hay movimientos registrados",
+                boardFull: "⚡ Tablero saturado - ¡Empate cuántico!",
+                goodMove: "✨ ¡Colocación estratégica excelente!",
+                blockingMove: "🛡️ ¡Movimiento defensivo efectivo!",
+                connectingMove: "🔗 Conexión cuántica formándose...",
+                undoFunction: "Función de deshacer en desarrollo",
+                surrenderConfirm: "¿Estás seguro de que quieres rendirte?",
+                victoryTitle: "🎉 ¡VICTORIA! 🎉",
+                defeatTitle: "🤖 DERROTA 🤖",
+                drawTitle: "🤝 EMPATE 🤝",
+                victoryMessage: "¡Felicidades! ¡Creaste una conexión completa!",
+                defeatMessage: "¡La IA cuántica creó su conexión primero!",
+                drawMessage: "¡El tablero está lleno sin conexión completa!",
+                nodesPlaced: "Nodos colocados: Tú",
+                newGameButton: "🎮 Nuevo Juego",
+                difficultyChanged: "Nivel IA:"
+            },
+            de: {
+                gameTitle: "Cyber Checker",
+                quantumBadge: "🤖 QUANTEN-KI",
+                controlsTitle: "⚡ Steuerung",
+                statsTitle: "📊 Statistiken",
+                difficultyTitle: "🎯 KI-Level",
+                rulesTitle: "📖 Regeln",
+                objectiveTitle: "🎯 Ziele",
+                aiStatusTitle: "🤖 KI-Status",
+                historyTitle: "📜 Historie",
+                newGameText: "Neues Spiel",
+                hintText: "Hinweis",
+                undoText: "Rückgängig",
+                surrenderText: "Aufgeben",
+                playerNodesLabel: "Deine Knoten",
+                aiNodesLabel: "KI-Knoten",
+                playerConnectionsLabel: "Deine Verbindungen",
+                aiConnectionsLabel: "KI-Verbindungen",
+                welcomeMessage: "🔵 Dein Zug - Platziere einen Quanten-Knoten",
+                rulesText: "• Platziere Knoten auf Hexagonen<br>• Erstelle Kette Rand zu Rand<br>• Blau: horizontal<br>• Rot: vertikal<br>• KI sagt Züge voraus",
+                playerObjectiveText: "Verbinde links-rechts",
+                aiObjectiveText: "KI verbindet oben-unten",
+                strategyText: "Blockiere Gegner",
+                tacticsText: "Antizipiere Züge",
+                aiStatusText: "KI Bereit",
+                aiAnalysisText: "Analysiere...",
+                yourTurn: "🔵 Dein Zug - Platziere einen Quanten-Knoten",
+                aiTurn: "🔴 KI berechnet optimale Strategie...",
+                aiThinking: "🤖 KI in tiefer strategischer Analyse...",
+                playerWins: "🎉 QUANTEN-SIEG! Du hast eine vollständige Verbindung erstellt!",
+                aiWins: "🤖 NIEDERLAGE! KI hat ihre strategische Verbindung etabliert!",
+                draw: "🤝 QUANTEN-UNENTSCHIEDEN! Brett gesättigt ohne Gewinner!",
+                easyLevel: "🟢 Anfänger",
+                mediumLevel: "🟡 Stratege",
+                hardLevel: "🔴 Meister",
+                quantumLevel: "🔮 Quanten",
+                hintMessage: "💡 Strategischer Hinweis: Optimale Position",
+                noHint: "❌ Derzeit kein Hinweis verfügbar",
+                historyEmpty: "📜 Keine Züge aufgezeichnet",
+                boardFull: "⚡ Brett gesättigt - Quanten-Unentschieden!",
+                goodMove: "✨ Ausgezeichnete strategische Platzierung!",
+                blockingMove: "🛡️ Effektiver Verteidigungszug!",
+                connectingMove: "🔗 Quanten-Verbindung bildet sich...",
+                undoFunction: "Rückgängig-Funktion in Entwicklung",
+                surrenderConfirm: "Bist du sicher, dass du aufgeben möchtest?",
+                victoryTitle: "🎉 SIEG! 🎉",
+                defeatTitle: "🤖 NIEDERLAGE 🤖",
+                drawTitle: "🤝 UNENTSCHIEDEN 🤝",
+                victoryMessage: "Glückwunsch! Du hast eine vollständige Verbindung erstellt!",
+                defeatMessage: "Die Quanten-KI hat ihre Verbindung zuerst erstellt!",
+                drawMessage: "Das Brett ist voll ohne vollständige Verbindung!",
+                nodesPlaced: "Knoten platziert: Du",
+                newGameButton: "🎮 Neues Spiel",
+                difficultyChanged: "KI-Level:"
+            },
+            zh: {
+                gameTitle: "网络跳棋",
+                quantumBadge: "🤖 量子人工智能",
+                controlsTitle: "⚡ 控制",
+                statsTitle: "📊 统计",
+                difficultyTitle: "🎯 AI等级",
+                rulesTitle: "📖 规则",
+                objectiveTitle: "🎯 目标",
+                aiStatusTitle: "🤖 AI状态",
+                historyTitle: "📜 历史",
+                newGameText: "新游戏",
+                hintText: "提示",
+                undoText: "撤销",
+                surrenderText: "投降",
+                playerNodesLabel: "你的节点",
+                aiNodesLabel: "AI节点",
+                playerConnectionsLabel: "你的连接",
+                aiConnectionsLabel: "AI连接",
+                welcomeMessage: "🔵 你的回合 - 放置量子节点",
+                rulesText: "• 在六角形上放置节点<br>• 创建链边到边<br>• 蓝色：水平<br>• 红色：垂直<br>• AI预测移动",
+                playerObjectiveText: "连接左右",
+                aiObjectiveText: "AI连接上下",
+                strategyText: "阻止对手",
+                tacticsText: "预测移动",
+                aiStatusText: "AI准备就绪",
+                aiAnalysisText: "分析中...",
+                yourTurn: "🔵 你的回合 - 放置量子节点",
+                aiTurn: "🔴 AI计算最优策略...",
+                aiThinking: "🤖 AI深度战略分析中...",
+                playerWins: "🎉 量子胜利！你创建了完整连接！",
+                aiWins: "🤖 失败！AI建立了战略连接！",
+                draw: "🤝 量子平局！棋盘饱和无获胜者！",
+                easyLevel: "🟢 新手",
+                mediumLevel: "🟡 策略家",
+                hardLevel: "🔴 大师",
+                quantumLevel: "🔮 量子",
+                hintMessage: "💡 战略提示：最优位置",
+                noHint: "❌ 当前无可用提示",
+                historyEmpty: "📜 无移动记录",
+                boardFull: "⚡ 棋盘饱和 - 量子平局！",
+                goodMove: "✨ 优秀的战略放置！",
+                blockingMove: "🛡️ 有效的防御移动！",
+                connectingMove: "🔗 量子连接形成中...",
+                undoFunction: "撤销功能开发中",
+                surrenderConfirm: "你确定要投降吗？",
+                victoryTitle: "🎉 胜利！🎉",
+                defeatTitle: "🤖 失败 🤖",
+                drawTitle: "🤝 平局 🤝",
+                victoryMessage: "恭喜！你创建了完整连接！",
+                defeatMessage: "量子AI首先创建了连接！",
+                drawMessage: "棋盘已满但无完整连接！",
+                nodesPlaced: "已放置节点：你",
+                newGameButton: "🎮 新游戏",
+                difficultyChanged: "AI等级："
+            }
+        };
+
+        // État du jeu
+        let gameState = {
+            currentLanguage: 'fr',
+            board: [],
+            boardSize: 10,
+            currentPlayer: 'player', // 'player' ou 'ai' ou 'player1' ou 'player2'
+            gameMode: 'ai', // 'ai' ou 'human'
+            playerNodes: 0,
+            aiNodes: 0,
+            playerConnections: 0,
+            aiConnections: 0,
+            difficulty: 'medium',
+            gameOver: false,
+            moveHistory: [],
+            winningPath: []
+        };
+
+        // Créer les particules quantiques
+        function createQuantumParticles() {
+            const container = document.getElementById('quantumParticles');
+            
+            for(let i = 0; i < 40; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'quantum-particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 15 + 's';
+                particle.style.animationDuration = (15 + Math.random() * 8) + 's';
+                container.appendChild(particle);
+            }
+        }
+
+        // Fonctions du sélecteur de langue personnalisé
+        function toggleLanguageDropdown() {
+            const dropdown = document.getElementById('languageDropdown');
+            dropdown.classList.toggle('open');
+        }
+
+        function selectLanguage(langCode, langText) {
+            gameState.currentLanguage = langCode;
+            document.getElementById('selectedLanguage').textContent = langText;
+            
+            // Mettre à jour les options actives
+            const options = document.querySelectorAll('.language-option');
+            options.forEach(option => option.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Fermer le dropdown
+            document.getElementById('languageDropdown').classList.remove('open');
+            
+            // Appliquer les traductions
+            changeLanguage();
+        }
+
+        // Fermer le dropdown si on clique ailleurs
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('languageDropdown');
+            if (dropdown && !dropdown.contains(event.target)) {
+                dropdown.classList.remove('open');
+            }
+        });
+
+        // Fonction de changement de langue
+        function changeLanguage() {
+            const selectedLang = gameState.currentLanguage;
+            
+            const t = translations[selectedLang];
+            
+            // Mettre à jour tous les textes
+            document.getElementById('gameTitle').textContent = t.gameTitle;
+            document.getElementById('quantumBadge').textContent = t.quantumBadge;
+            document.getElementById('controlsTitle').textContent = t.controlsTitle;
+            document.getElementById('statsTitle').textContent = t.statsTitle;
+            document.getElementById('gameModeTitle').textContent = t.gameModeTitle;
+            document.getElementById('difficultyTitle').textContent = t.difficultyTitle;
+            document.getElementById('rulesTitle').textContent = t.rulesTitle;
+            document.getElementById('objectiveTitle').textContent = t.objectiveTitle;
+            document.getElementById('aiStatusTitle').textContent = t.aiStatusTitle;
+            document.getElementById('historyTitle').textContent = t.historyTitle;
+            
+            document.getElementById('newGameText').textContent = t.newGameText;
+            document.getElementById('hintText').textContent = t.hintText;
+            document.getElementById('undoText').textContent = t.undoText;
+            document.getElementById('surrenderText').textContent = t.surrenderText;
+            
+            document.getElementById('playerNodesLabel').textContent = t.playerNodesLabel;
+            document.getElementById('aiNodesLabel').textContent = t.aiNodesLabel;
+            document.getElementById('playerConnectionsLabel').textContent = t.playerConnectionsLabel;
+            document.getElementById('aiConnectionsLabel').textContent = t.aiConnectionsLabel;
+            
+            document.getElementById('welcomeMessage').textContent = t.welcomeMessage;
+            document.getElementById('rulesText').innerHTML = t.rulesText;
+            document.getElementById('playerObjectiveText').textContent = t.playerObjectiveText;
+            document.getElementById('aiObjectiveText').textContent = t.aiObjectiveText;
+            document.getElementById('strategyText').textContent = t.strategyText;
+            document.getElementById('tacticsText').textContent = t.tacticsText;
+            document.getElementById('aiStatusText').textContent = t.aiStatusText;
+            document.getElementById('aiAnalysisText').textContent = t.aiAnalysisText;
+            
+            // Mettre à jour les sélecteurs
+            updateGameModeSelector();
+            updateDifficultySelector();
+            
+            // Mettre à jour le message de jeu
+            updateGameMessage();
+        }
+
+        // Mettre à jour le sélecteur de difficulté
+        function updateDifficultySelector() {
+            const t = translations[gameState.currentLanguage];
+            const selector = document.getElementById('difficultySelector');
+            selector.innerHTML = `
+                <option value="easy">${t.easyLevel}</option>
+                <option value="medium">${t.mediumLevel}</option>
+                <option value="hard">${t.hardLevel}</option>
+                <option value="quantum">${t.quantumLevel}</option>
+            `;
+            selector.value = gameState.difficulty;
+        }
+
+        // Mettre à jour le sélecteur de mode de jeu
+        function updateGameModeSelector() {
+            const t = translations[gameState.currentLanguage];
+            const selector = document.getElementById('gameModeSelector');
+            selector.innerHTML = `
+                <option value="ai">${t.gameModeAI}</option>
+                <option value="human">${t.gameModeHuman}</option>
+            `;
+            selector.value = gameState.gameMode;
+        }
+
+        // Changer le mode de jeu
+        function changeGameMode() {
+            const selector = document.getElementById('gameModeSelector');
+            gameState.gameMode = selector.value;
+            
+            // Afficher/masquer la section difficulté selon le mode
+            const difficultySection = document.getElementById('difficultySection');
+            if (gameState.gameMode === 'ai') {
+                difficultySection.style.display = 'block';
+            } else {
+                difficultySection.style.display = 'none';
+            }
+            
+            // Redémarrer la partie avec le nouveau mode
+            newGame();
+        }
+
+        // Changer la difficulté
+        function changeDifficulty() {
+            const selector = document.getElementById('difficultySelector');
+            gameState.difficulty = selector.value;
+            
+            const t = translations[gameState.currentLanguage];
+            showMessage(`${t.difficultyChanged} ${selector.options[selector.selectedIndex].text}`, 2000);
+        }
+
+        // Initialiser le plateau hexagonal
+        function initializeBoard() {
+            gameState.board = [];
+            const size = gameState.boardSize;
+            
+            // Créer un plateau hexagonal
+            for(let row = 0; row < size; row++) {
+                gameState.board[row] = [];
+                for(let col = 0; col < size; col++) {
+                    gameState.board[row][col] = null;
+                }
+            }
+        }
+
+        // Créer le plateau visuel hexagonal
+        function createHexBoard() {
+            const boardElement = document.getElementById('hexBoard');
+            boardElement.innerHTML = '';
+            const size = gameState.boardSize;
+            
+            for(let row = 0; row < size; row++) {
+                const hexRow = document.createElement('div');
+                hexRow.className = 'hex-row';
+                
+                // Décalage pour créer la forme hexagonale
+                const offset = Math.abs(Math.floor(size/2) - row);
+                hexRow.style.marginLeft = offset * 22 + 'px';
+                
+                const cellsInRow = size - offset;
+                
+                for(let col = 0; col < cellsInRow; col++) {
+                    const actualCol = col + Math.floor(offset/2);
+                    const cell = document.createElement('div');
+                    cell.className = 'hex-cell';
+                    cell.dataset.row = row;
+                    cell.dataset.col = actualCol;
+                    
+                    cell.addEventListener('click', () => handleCellClick(row, actualCol));
+                    
+                    // Ajouter le contenu de la cellule
+                    const piece = gameState.board[row] && gameState.board[row][actualCol];
+                    if(piece) {
+                        if(gameState.gameMode === 'ai') {
+                            cell.classList.add(piece);
+                            cell.textContent = piece === 'player' ? '🔵' : '🔴';
+                        } else {
+                            // Mode 2 joueurs
+                            cell.classList.add(piece === 'player1' ? 'player' : 'ai');
+                            cell.textContent = piece === 'player1' ? '🔵' : '🔴';
+                        }
+                    }
+                    
+                    hexRow.appendChild(cell);
+                }
+                
+                boardElement.appendChild(hexRow);
+            }
+        }
+
+        // Gérer le clic sur une cellule
+        function handleCellClick(row, col) {
+            if(gameState.gameOver) return;
+            
+            // Vérifier si c'est le bon tour selon le mode de jeu
+            if(gameState.gameMode === 'ai' && gameState.currentPlayer !== 'player') return;
+            if(gameState.gameMode === 'human' && (gameState.currentPlayer !== 'player1' && gameState.currentPlayer !== 'player2')) return;
+            
+            // Vérifier si la cellule est valide et vide
+            if(!gameState.board[row] || gameState.board[row][col] !== null) return;
+            
+            // Placer le nœud selon le mode de jeu
+            if(gameState.gameMode === 'ai') {
+                makeMove(row, col, 'player');
+            } else {
+                makeMove(row, col, gameState.currentPlayer);
+            }
+        }
+
+        // Effectuer un mouvement
+        function makeMove(row, col, player) {
+            gameState.board[row][col] = player;
+            
+            // Mettre à jour les compteurs selon le mode de jeu
+            if(gameState.gameMode === 'ai') {
+                if(player === 'player') {
+                    gameState.playerNodes++;
+                } else {
+                    gameState.aiNodes++;
+                }
+            } else {
+                // Mode 2 joueurs
+                if(player === 'player1') {
+                    gameState.playerNodes++;
+                } else {
+                    gameState.aiNodes++;
+                }
+            }
+            
+            // Ajouter à l'historique
+            addToHistory(row, col, player);
+            
+            // Mettre à jour l'affichage
+            createHexBoard();
+            updateStats();
+            
+            // Vérifier la victoire
+            if(checkWin(player)) {
+                endGame(player);
+                return;
+            }
+            
+            // Vérifier si le plateau est plein
+            if(isBoardFull()) {
+                endGame('draw');
+                return;
+            }
+            
+            // Changer de joueur selon le mode
+            if(gameState.gameMode === 'ai') {
+                gameState.currentPlayer = player === 'player' ? 'ai' : 'player';
+            } else {
+                gameState.currentPlayer = player === 'player1' ? 'player2' : 'player1';
+            }
+            
+            updateGameMessage();
+            
+            // Tour de l'IA si mode IA
+            if(gameState.gameMode === 'ai' && gameState.currentPlayer === 'ai') {
+                setTimeout(() => {
+                    aiMove();
+                }, 1000);
+            }
+        }
+
+        // Mouvement de l'IA
+        function aiMove() {
+            const t = translations[gameState.currentLanguage];
+            showMessage(t.aiThinking);
+            document.getElementById('aiStatus').classList.add('ai-thinking');
+            
+            setTimeout(() => {
+                const bestMove = getBestAIMove();
+                if(bestMove) {
+                    makeMove(bestMove.row, bestMove.col, 'ai');
+                }
+                
+                document.getElementById('aiStatus').classList.remove('ai-thinking');
+            }, 1500);
+        }
+
+        // Obtenir le meilleur coup pour l'IA
+        function getBestAIMove() {
+            const emptyCells = [];
+            const size = gameState.boardSize;
+            
+            // Trouver toutes les cellules vides
+            for(let row = 0; row < size; row++) {
+                if(!gameState.board[row]) continue;
+                for(let col = 0; col < size; col++) {
+                    if(gameState.board[row][col] === null) {
+                        emptyCells.push({row, col});
+                    }
+                }
+            }
+            
+            if(emptyCells.length === 0) return null;
+            
+            // Stratégie selon la difficulté
+            switch(gameState.difficulty) {
+                case 'easy':
+                    return emptyCells[Math.floor(Math.random() * emptyCells.length)];
+                
+                case 'medium':
+                    return getMediumAIMove(emptyCells);
+                
+                case 'hard':
+                case 'quantum':
+                    return getAdvancedAIMove(emptyCells);
+            }
+        }
+
+        // IA niveau moyen
+        function getMediumAIMove(emptyCells) {
+            // Préférer les positions centrales
+            const centerRow = Math.floor(gameState.boardSize / 2);
+            const centerCells = emptyCells.filter(cell => 
+                Math.abs(cell.row - centerRow) <= 2
+            );
+            
+            if(centerCells.length > 0) {
+                return centerCells[Math.floor(Math.random() * centerCells.length)];
+            }
+            
+            return emptyCells[Math.floor(Math.random() * emptyCells.length)];
+        }
+
+        // IA avancée
+        function getAdvancedAIMove(emptyCells) {
+            let bestMove = null;
+            let bestScore = -Infinity;
+            
+            for(const cell of emptyCells) {
+                let score = evaluatePosition(cell.row, cell.col, 'ai');
+                
+                // Bonus pour bloquer le joueur
+                const blockScore = evaluatePosition(cell.row, cell.col, 'player');
+                score += blockScore * 0.8;
+                
+                // Ajouter de l'aléatoire
+                score += Math.random() * 10;
+                
+                if(score > bestScore) {
+                    bestScore = score;
+                    bestMove = cell;
+                }
+            }
+            
+            return bestMove || emptyCells[0];
+        }
+
+        // Évaluer une position
+        function evaluatePosition(row, col, player) {
+            let score = 0;
+            
+            // Bonus pour les positions qui créent des connexions
+            const neighbors = getNeighbors(row, col);
+            const friendlyNeighbors = neighbors.filter(n => 
+                gameState.board[n.row] && gameState.board[n.row][n.col] === player
+            ).length;
+            
+            score += friendlyNeighbors * 20;
+            
+            // Bonus pour les positions stratégiques
+            if(player === 'ai') {
+                // IA veut connecter haut-bas
+                if(row === 0 || row === gameState.boardSize - 1) {
+                    score += 30;
+                }
+            } else {
+                // Joueur veut connecter gauche-droite
+                if(col === 0 || col === gameState.boardSize - 1) {
+                    score += 30;
+                }
+            }
+            
+            return score;
+        }
+
+        // Obtenir les voisins d'une cellule hexagonale
+        function getNeighbors(row, col) {
+            const neighbors = [];
+            const directions = [
+                [-1, -1], [-1, 0], [0, -1], [0, 1], [1, 0], [1, 1]
+            ];
+            
+            for(const [dRow, dCol] of directions) {
+                const newRow = row + dRow;
+                const newCol = col + dCol;
+                
+                if(newRow >= 0 && newRow < gameState.boardSize && 
+                   newCol >= 0 && newCol < gameState.boardSize &&
+                   gameState.board[newRow]) {
+                    neighbors.push({row: newRow, col: newCol});
+                }
+            }
+            
+            return neighbors;
+        }
+
+        // Vérifier la victoire
+        function checkWin(player) {
+            if(gameState.gameMode === 'ai') {
+                if(player === 'player') {
+                    // Le joueur doit connecter gauche-droite
+                    return hasPath(player, 'horizontal');
+                } else {
+                    // L'IA doit connecter haut-bas
+                    return hasPath(player, 'vertical');
+                }
+            } else {
+                // Mode 2 joueurs
+                if(player === 'player1') {
+                    // Joueur 1 (bleu) doit connecter gauche-droite
+                    return hasPath(player, 'horizontal');
+                } else {
+                    // Joueur 2 (rouge) doit connecter haut-bas
+                    return hasPath(player, 'vertical');
+                }
+            }
+        }
+
+        // Vérifier s'il y a un chemin
+        function hasPath(player, direction) {
+            const visited = new Set();
+            const size = gameState.boardSize;
+            
+            // Points de départ selon la direction
+            const startPoints = [];
+            if(direction === 'horizontal') {
+                // Chercher sur le bord gauche
+                for(let row = 0; row < size; row++) {
+                    if(gameState.board[row] && gameState.board[row][0] === player) {
+                        startPoints.push({row, col: 0});
+                    }
+                }
+            } else {
+                // Chercher sur le bord haut
+                for(let col = 0; col < size; col++) {
+                    if(gameState.board[0] && gameState.board[0][col] === player) {
+                        startPoints.push({row: 0, col});
+                    }
+                }
+            }
+            
+            // DFS pour chaque point de départ
+            for(const start of startPoints) {
+                const path = [];
+                if(dfsPath(start.row, start.col, player, direction, visited, path)) {
+                    gameState.winningPath = path;
+                    return true;
+                }
+            }
+            
+            return false;
+        }
+
+        // DFS pour trouver un chemin
+        function dfsPath(row, col, player, direction, visited, path) {
+            const key = `${row},${col}`;
+            if(visited.has(key)) return false;
+            
+            if(!gameState.board[row] || gameState.board[row][col] !== player) {
+                return false;
+            }
+            
+            visited.add(key);
+            path.push({row, col});
+            
+            // Vérifier si on a atteint le bord opposé
+            const size = gameState.boardSize;
+            if(direction === 'horizontal' && col === size - 1) {
+                return true;
+            }
+            if(direction === 'vertical' && row === size - 1) {
+                return true;
+            }
+            
+            // Explorer les voisins
+            const neighbors = getNeighbors(row, col);
+            for(const neighbor of neighbors) {
+                if(dfsPath(neighbor.row, neighbor.col, player, direction, visited, path)) {
+                    return true;
+                }
+            }
+            
+            path.pop();
+            return false;
+        }
+
+        // Vérifier si le plateau est plein
+        function isBoardFull() {
+            const size = gameState.boardSize;
+            for(let row = 0; row < size; row++) {
+                if(!gameState.board[row]) continue;
+                for(let col = 0; col < size; col++) {
+                    if(gameState.board[row][col] === null) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        // Fin de partie
+        function endGame(winner) {
+            gameState.gameOver = true;
+            const t = translations[gameState.currentLanguage];
+            
+            let message;
+            if(gameState.gameMode === 'ai') {
+                if(winner === 'player') {
+                    message = t.playerWins;
+                    highlightWinningPath();
+                } else if(winner === 'ai') {
+                    message = t.aiWins;
+                    highlightWinningPath();
+                } else {
+                    message = t.boardFull;
+                }
+            } else {
+                // Mode 2 joueurs
+                if(winner === 'player1') {
+                    message = t.player1Wins;
+                    highlightWinningPath();
+                } else if(winner === 'player2') {
+                    message = t.player2Wins;
+                    highlightWinningPath();
+                } else {
+                    message = t.boardFull;
+                }
+            }
+            
+            showMessage(message);
+            
+            // Afficher l'écran de victoire après un délai
+            setTimeout(() => {
+                showVictoryScreen(winner);
+            }, 2000);
+        }
+
+        // Mettre en évidence le chemin gagnant
+        function highlightWinningPath() {
+            const cells = document.querySelectorAll('.hex-cell');
+            cells.forEach(cell => {
+                const row = parseInt(cell.dataset.row);
+                const col = parseInt(cell.dataset.col);
+                
+                const isInPath = gameState.winningPath.some(p => p.row === row && p.col === col);
+                if(isInPath) {
+                    cell.classList.add('winning-path');
+                }
+            });
+        }
+
+        // Afficher l'écran de victoire
+        function showVictoryScreen(winner) {
+            const t = translations[gameState.currentLanguage];
+            
+            const overlay = document.createElement('div');
+            overlay.className = 'victory-animation';
+            
+            const content = document.createElement('div');
+            content.className = 'victory-content';
+            
+            let title, message, scoreText;
+            
+            if(gameState.gameMode === 'ai') {
+                if(winner === 'player') {
+                    title = t.victoryTitle;
+                    message = t.victoryMessage;
+                } else if(winner === 'ai') {
+                    title = t.defeatTitle;
+                    message = t.defeatMessage;
+                } else {
+                    title = t.drawTitle;
+                    message = t.drawMessage;
+                }
+                scoreText = `${t.nodesPlaced} ${gameState.playerNodes} - IA ${gameState.aiNodes}`;
+            } else {
+                // Mode 2 joueurs
+                if(winner === 'player1') {
+                    title = t.victoryTitle;
+                    message = t.player1Wins;
+                } else if(winner === 'player2') {
+                    title = t.victoryTitle;
+                    message = t.player2Wins;
+                } else {
+                    title = t.drawTitle;
+                    message = t.drawMessage;
+                }
+                scoreText = `${t.player1Nodes}: ${gameState.playerNodes} - ${t.player2Nodes}: ${gameState.aiNodes}`;
+            }
+            
+            content.innerHTML = `
+                <h2>${title}</h2>
+                <p style="margin: 25px 0;">${message}</p>
+                <p style="margin: 20px 0; color: #8b5cf6;">${scoreText}</p>
+                <button onclick="newGame(); document.body.removeChild(document.querySelector('.victory-animation'))" style="
+                    margin: 25px 15px 15px 15px;
+                    padding: 18px 35px;
+                    background: linear-gradient(145deg, #8b5cf6, #7c3aed);
+                    color: white;
+                    border: none;
+                    border-radius: 20px;
+                    font-size: 16px;
+                    font-weight: bold;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                ">${t.newGameButton}</button>
+            `;
+            
+            overlay.appendChild(content);
+            document.body.appendChild(overlay);
+        }
+
+        // Nouvelle partie
+        function newGame() {
+            // Fermer l'overlay de victoire s'il existe
+            const overlay = document.querySelector('.victory-animation');
+            if(overlay) {
+                document.body.removeChild(overlay);
+            }
+            
+            // Réinitialiser l'état du jeu selon le mode
+            if(gameState.gameMode === 'ai') {
+                gameState.currentPlayer = 'player';
+            } else {
+                gameState.currentPlayer = 'player1';
+            }
+            
+            gameState.playerNodes = 0;
+            gameState.aiNodes = 0;
+            gameState.playerConnections = 0;
+            gameState.aiConnections = 0;
+            gameState.gameOver = false;
+            gameState.moveHistory = [];
+            gameState.winningPath = [];
+            
+            // Réinitialiser le plateau
+            initializeBoard();
+            createHexBoard();
+            updateStats();
+            updateHistoryDisplay();
+            updateGameMessage();
+            
+            const t = translations[gameState.currentLanguage];
+            if(gameState.gameMode === 'ai') {
+                showMessage(t.welcomeMessage);
+            } else {
+                showMessage(t.player1Turn);
+            }
+        }
+
+        // Obtenir un indice
+        function getHint() {
+            if(gameState.currentPlayer !== 'player' || gameState.gameOver) return;
+            
+            const t = translations[gameState.currentLanguage];
+            const bestMove = getBestAIMove();
+            
+            if(!bestMove) {
+                showMessage(t.noHint);
+                return;
+            }
+            
+            showMessage(`${t.hintMessage} (${bestMove.row}, ${bestMove.col})`, 4000);
+            
+            // Mettre en évidence la position suggérée
+            const cells = document.querySelectorAll('.hex-cell');
+            cells.forEach(cell => {
+                if(parseInt(cell.dataset.row) === bestMove.row && 
+                   parseInt(cell.dataset.col) === bestMove.col) {
+                    cell.style.border = '3px solid #fbbf24';
+                    cell.style.boxShadow = '0 0 25px rgba(251, 191, 36, 0.8)';
+                    
+                    setTimeout(() => {
+                        cell.style.border = '2px solid transparent';
+                        cell.style.boxShadow = '';
+                    }, 3000);
+                }
+            });
+        }
+
+        // Annuler le dernier coup
+        function undoMove() {
+            const t = translations[gameState.currentLanguage];
+            showMessage(t.undoFunction, 2000);
+        }
+
+        // Abandonner la partie
+        function surrenderGame() {
+            if(gameState.gameOver) return;
+            
+            const t = translations[gameState.currentLanguage];
+            // Non-blocking: post dialog request to parent and proceed as if confirmed
+            try{ parent.postMessage({ action: 'dialog', dialogType: 'confirm', text: t.surrenderConfirm }, '*'); }catch(e){}
+            endGame('ai');
+        }
+
+        // Ajouter à l'historique
+        function addToHistory(row, col, player) {
+            const playerName = player === 'player' ? 'Joueur' : 'IA';
+            const position = `(${row}, ${col})`;
+            
+            gameState.moveHistory.push(`${playerName} → ${position}`);
+            
+            // Limiter l'historique à 10 coups
+            if(gameState.moveHistory.length > 10) {
+                gameState.moveHistory.shift();
+            }
+            
+            updateHistoryDisplay();
+        }
+
+        // Mettre à jour l'affichage de l'historique
+        function updateHistoryDisplay() {
+            const historyElement = document.getElementById('historyContent');
+            const t = translations[gameState.currentLanguage];
+            
+            if(gameState.moveHistory.length === 0) {
+                historyElement.textContent = t.historyEmpty;
+            } else {
+                historyElement.innerHTML = gameState.moveHistory
+                    .slice(-5) // Afficher les 5 derniers coups
+                    .map(move => `<div style="margin-bottom: 5px;">${move}</div>`)
+                    .join('');
+            }
+        }
+
+        // Mettre à jour les statistiques
+        function updateStats() {
+            document.getElementById('playerNodesValue').textContent = gameState.playerNodes;
+            document.getElementById('aiNodesValue').textContent = gameState.aiNodes;
+            document.getElementById('playerConnectionsValue').textContent = gameState.playerConnections;
+            document.getElementById('aiConnectionsValue').textContent = gameState.aiConnections;
+        }
+
+        // Mettre à jour le message de jeu
+        function updateGameMessage() {
+            const t = translations[gameState.currentLanguage];
+            const messageElement = document.getElementById('gameMessage');
+            
+            if(gameState.gameOver) return;
+            
+            if(gameState.gameMode === 'ai') {
+                if(gameState.currentPlayer === 'player') {
+                    messageElement.innerHTML = `<span>${t.yourTurn}</span>`;
+                } else {
+                    messageElement.innerHTML = `<span>${t.aiTurn}</span>`;
+                }
+            } else {
+                // Mode 2 joueurs
+                if(gameState.currentPlayer === 'player1') {
+                    messageElement.innerHTML = `<span>${t.player1Turn}</span>`;
+                } else {
+                    messageElement.innerHTML = `<span>${t.player2Turn}</span>`;
+                }
+            }
+        }
+
+        // Afficher un message temporaire
+        function showMessage(message, duration = 0) {
+            const messageElement = document.getElementById('gameMessage');
+            messageElement.innerHTML = `<span>${message}</span>`;
+            
+            if(duration > 0) {
+                setTimeout(() => {
+                    updateGameMessage();
+                }, duration);
+            }
+        }
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            createQuantumParticles();
+            initializeBoard();
+            createHexBoard();
+            updateStats();
+            updateHistoryDisplay();
+            updateDifficultySelector();
+            updateGameModeSelector();
+            updateGameMessage();
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'985230952519e246',t:'MTc1ODg4MzcxNS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
