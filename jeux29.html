@@ -1,0 +1,1246 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Genius Quest - Quiz Multilingue</title>
+    <style>
+        body {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 25%, #16213e 50%, #0f3460 75%, #533483 100%);
+            color: #00ffff;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Particules d'étoiles animées */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 15px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .title {
+            font-size: 2.8rem;
+            font-weight: 900;
+            background: linear-gradient(45deg, #00ffff, #ff00ff, #ffff00, #00ff00, #ff0066);
+            background-size: 500% 500%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            animation: gradientShift 4s ease-in-out infinite;
+            text-shadow: 0 0 40px rgba(0, 255, 255, 0.6);
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: #888;
+            margin-bottom: 20px;
+            animation: fadeInUp 1.5s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Sélecteur de langue */
+        .language-selector {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 25px;
+        }
+
+        .language-select {
+            padding: 12px 20px;
+            background: linear-gradient(45deg, rgba(26, 26, 46, 0.9), rgba(22, 33, 62, 0.9));
+            border: 2px solid #00ffff;
+            color: #00ffff;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.5s ease;
+            font-size: 1rem;
+            font-weight: 600;
+            backdrop-filter: blur(15px);
+            min-width: 200px;
+            text-align: center;
+            outline: none;
+        }
+
+        .language-select:hover {
+            background: linear-gradient(45deg, #00ffff, #0088ff);
+            color: #000;
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(0, 255, 255, 0.5);
+        }
+
+        .language-select option {
+            background: #1a1a2e;
+            color: #00ffff;
+            padding: 10px;
+        }
+
+        /* Support RTL pour l'arabe */
+        .rtl {
+            direction: rtl;
+            text-align: right;
+        }
+
+        .rtl .language-selector {
+            direction: ltr;
+        }
+
+        /* Zone de jeu */
+        .game-area {
+            background: rgba(0, 0, 0, 0.85);
+            border: 3px solid;
+            border-image: linear-gradient(45deg, #00ffff, #ff00ff, #ffff00, #00ff00) 1;
+            border-radius: 25px;
+            padding: 25px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 0 60px rgba(0, 255, 255, 0.4);
+            position: relative;
+        }
+
+        /* Contrôles */
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            background: linear-gradient(45deg, #ff00ff, #8000ff);
+            border: none;
+            color: white;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: all 0.5s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 6px 20px rgba(255, 0, 255, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 15px 40px rgba(255, 0, 255, 0.6);
+        }
+
+        .btn.start { 
+            background: linear-gradient(45deg, #00ff00, #00aa00);
+            box-shadow: 0 8px 25px rgba(0, 255, 0, 0.4);
+        }
+        .btn.pause { 
+            background: linear-gradient(45deg, #ffaa00, #ff6600);
+            box-shadow: 0 8px 25px rgba(255, 170, 0, 0.4);
+        }
+        .btn.restart { 
+            background: linear-gradient(45deg, #ff0066, #cc0044);
+            box-shadow: 0 8px 25px rgba(255, 0, 102, 0.4);
+        }
+
+        /* Statistiques */
+        .game-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .stat {
+            text-align: center;
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.15), rgba(255, 0, 255, 0.15));
+            padding: 15px;
+            border-radius: 15px;
+            border: 2px solid rgba(0, 255, 255, 0.4);
+            backdrop-filter: blur(15px);
+            transition: all 0.4s ease;
+        }
+
+        .stat:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 15px 35px rgba(0, 255, 255, 0.3);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #00ffff;
+            text-shadow: 0 0 15px rgba(0, 255, 255, 0.6);
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 1.1rem;
+            color: #aaa;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+
+        /* Zone de question */
+        .question-area {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(0, 255, 255, 0.08));
+            border-radius: 20px;
+            padding: 25px;
+            text-align: center;
+            min-height: 250px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            position: relative;
+            backdrop-filter: blur(10px);
+        }
+
+        .question {
+            font-size: 1.4rem;
+            margin-bottom: 25px;
+            line-height: 1.6;
+            color: #ffffff;
+            text-shadow: 0 3px 6px rgba(0, 0, 0, 0.6);
+            animation: questionAppear 0.8s ease-out;
+            font-weight: 600;
+        }
+
+        @keyframes questionAppear {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* Réponses */
+        .answers {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .answer-btn {
+            padding: 15px 20px;
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.12), rgba(0, 150, 255, 0.12));
+            border: 2px solid #00ffff;
+            color: #00ffff;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.5s ease;
+            font-size: 1rem;
+            font-weight: 600;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(8px);
+        }
+
+        .answer-btn:hover {
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.25), rgba(0, 150, 255, 0.25));
+            transform: scale(1.05) translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 255, 255, 0.4);
+        }
+
+        .answer-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.9;
+        }
+
+        .answer-btn.correct {
+            background: linear-gradient(135deg, rgba(0, 255, 0, 0.4), rgba(0, 200, 0, 0.4));
+            border-color: #00ff00;
+            color: #00ff00;
+            animation: correctPulse 1s ease-out;
+        }
+
+        .answer-btn.incorrect {
+            background: linear-gradient(135deg, rgba(255, 0, 0, 0.4), rgba(200, 0, 0, 0.4));
+            border-color: #ff0000;
+            color: #ff0000;
+            animation: incorrectShake 1s ease-out;
+        }
+
+        @keyframes correctPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes incorrectShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        /* Feedback */
+        .feedback {
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin: 30px 0;
+            padding: 25px;
+            border-radius: 20px;
+            animation: feedbackSlide 0.8s ease-out;
+            backdrop-filter: blur(15px);
+        }
+
+        @keyframes feedbackSlide {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .feedback.correct {
+            background: linear-gradient(135deg, rgba(0, 255, 0, 0.25), rgba(0, 200, 0, 0.15));
+            color: #00ff00;
+            border: 3px solid #00ff00;
+        }
+
+        .feedback.incorrect {
+            background: linear-gradient(135deg, rgba(255, 0, 0, 0.25), rgba(200, 0, 0, 0.15));
+            color: #ff0000;
+            border: 3px solid #ff0000;
+        }
+
+        .feedback.timeout {
+            background: linear-gradient(135deg, rgba(255, 165, 0, 0.25), rgba(255, 140, 0, 0.15));
+            color: #ffa500;
+            border: 3px solid #ffa500;
+        }
+
+        /* Indicateurs */
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            margin: 25px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ff00, #ffff00, #ff6600, #ff0000);
+            border-radius: 6px;
+            transition: width 1s linear;
+        }
+
+        .category-indicator {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            background: rgba(0, 255, 255, 0.25);
+            border: 2px solid #00ffff;
+            border-radius: 25px;
+            font-size: 1rem;
+            color: #00ffff;
+            font-weight: bold;
+            backdrop-filter: blur(10px);
+        }
+
+        .combo-indicator {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            padding: 12px 20px;
+            background: linear-gradient(45deg, #ff00ff, #8000ff);
+            border-radius: 25px;
+            font-size: 1rem;
+            color: white;
+            font-weight: bold;
+        }
+
+        .achievement {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            padding: 20px 30px;
+            background: linear-gradient(45deg, #ffd700, #ffaa00);
+            color: #000;
+            border-radius: 15px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            z-index: 1000;
+            animation: achievementSlide 4s ease-out forwards;
+        }
+
+        @keyframes achievementSlide {
+            0% { transform: translateX(500px); opacity: 0; }
+            15%, 85% { transform: translateX(0); opacity: 1; }
+            100% { transform: translateX(500px); opacity: 0; }
+        }
+
+        .timer-warning {
+            color: #ff0000 !important;
+            animation: timerBlink 0.6s infinite;
+        }
+
+        @keyframes timerBlink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0.6; }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .title { font-size: 2.2rem; }
+            .controls { flex-direction: column; align-items: center; }
+            .game-stats { grid-template-columns: repeat(2, 1fr); }
+            .answers { grid-template-columns: 1fr; }
+            .question { font-size: 1.2rem; }
+        }
+
+        @media (max-width: 480px) {
+            .title { font-size: 1.8rem; }
+            .game-area { padding: 15px; }
+            .question { font-size: 1.1rem; }
+        }
+    </style>
+    <style>
+    /* override: consistent global close button */
+    .global-close-btn { position: fixed !important; top: 14px !important; right: 14px !important; z-index: 99999 !important; background: linear-gradient(45deg,#ff3b3b,#ff0066) !important; color: #fff !important; border: none !important; width:52px !important; height:52px !important; border-radius:50% !important; font-size:22px !important; cursor:pointer !important; display:flex !important;align-items:center !important;justify-content:center !important; box-shadow:0 8px 22px rgba(255,59,59,0.28) !important; }
+    .global-close-btn:hover{ transform: scale(1.06); }
+    </style>
+</head>
+<body>
+    <div class="stars" id="stars"></div>
+    
+    <div class="container">
+        <div class="header">
+            <h1 class="title">GENIUS QUEST</h1>
+            <p class="subtitle" id="subtitle">Quiz Multilingue Révolutionnaire - Défiez votre intelligence !</p>
+            <button class="global-close-btn" title="Fermer" aria-label="Fermer" onclick="(function(){ try{ if(window.parent && window.parent !== window){ window.parent.postMessage({action:'close', source:'jeux29'}, '*'); } else { window.location.href = 'global_platform.html'; } }catch(e){ window.location.href = 'global_platform.html'; } })()">✕</button>
+            
+            <div class="language-selector">
+                <select id="languageSelect" class="language-select">
+                    <option value="fr">🇫🇷 Français</option>
+                    <option value="en">🇬🇧 English</option>
+                    <option value="es">🇪🇸 Español</option>
+                    <option value="de">🇩🇪 Deutsch</option>
+                    <option value="ar">🇸🇦 العربية</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="game-area">
+            <div class="controls">
+                <button class="btn start" id="startBtn">🚀 Démarrer</button>
+                <button class="btn pause hidden" id="pauseBtn">⏸️ Pause</button>
+                <button class="btn restart hidden" id="restartBtn">🔄 Recommencer</button>
+            </div>
+
+            <div class="game-stats">
+                <div class="stat">
+                    <div class="stat-value" id="level">1</div>
+                    <div class="stat-label" id="levelLabel">Niveau</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="score">0</div>
+                    <div class="stat-label" id="scoreLabel">Score</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="time">30</div>
+                    <div class="stat-label" id="timeLabel">Temps</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="streak">0</div>
+                    <div class="stat-label" id="streakLabel">Série</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="accuracy">100%</div>
+                    <div class="stat-label" id="accuracyLabel">Précision</div>
+                </div>
+            </div>
+
+            <div class="question-area" id="questionArea">
+                <div class="category-indicator hidden" id="categoryIndicator"></div>
+                <div class="combo-indicator hidden" id="comboIndicator"></div>
+                
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill" style="width: 100%"></div>
+                </div>
+                
+                <div class="question" id="question">Cliquez sur "Démarrer" pour commencer votre aventure quiz révolutionnaire !</div>
+                <div class="answers hidden" id="answers"></div>
+                <div class="feedback hidden" id="feedback"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    <style>
+        .global-close-btn { position: fixed; top: 14px; right: 14px; z-index: 99999; background: #ff3b3b; color: #fff; border: none; width:52px; height:52px; border-radius:50%; font-size:22px; cursor:pointer; box-shadow:0 6px 18px rgba(255,59,59,0.3);} 
+        .global-close-btn:hover{ transform: scale(1.05); }
+    </style>
+    <button class="global-close-btn" title="Fermer" aria-label="Fermer" onclick="(function(){ try{ if(window.parent && window.parent !== window){ window.parent.postMessage({action:'close'}, '*'); } else { window.location.href = './brainova.html'; } }catch(e){ window.location.href = './brainova.html'; } })()">✕</button>
+        <style>
+            .global-close-btn { position: fixed; top: 14px; right: 14px; z-index: 99999; background: #ff3b3b; color: #fff; border: none; width:52px; height:52px; border-radius:50%; font-size:22px; cursor:pointer; box-shadow:0 6px 18px rgba(255,59,59,0.3);} 
+            .global-close-btn:hover{ transform: scale(1.05); }
+        </style>
+    <button class="global-close-btn" title="Fermer" aria-label="Fermer" onclick="(function(){ try{ if(window.parent && window.parent !== window){ window.parent.postMessage({action:'close'}, '*'); } else { window.location.href = './global_platform_canonical.html'; } }catch(e){ window.location.href = './global_platform_canonical.html'; } })()">✕</button>
+        <script>
+            // Traductions multilingues
+            const translations = {
+        // Créer les étoiles
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            for (let i = 0; i < 100; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 3 + 's';
+                starsContainer.appendChild(star);
+            }
+        }
+
+        // Traductions complètes
+        const translations = {
+            fr: {
+                subtitle: "Quiz Multilingue Révolutionnaire - Défiez votre intelligence !",
+                startBtn: "🚀 Démarrer",
+                pauseBtn: "⏸️ Pause",
+                restartBtn: "🔄 Recommencer",
+                levelLabel: "Niveau",
+                scoreLabel: "Score",
+                timeLabel: "Temps",
+                streakLabel: "Série",
+                accuracyLabel: "Précision",
+                startMessage: "Cliquez sur \"Démarrer\" pour commencer votre aventure quiz révolutionnaire !",
+                correctFeedback: "🎉 Excellent ! Bonne réponse !",
+                incorrectFeedback: "❌ Incorrect ! La bonne réponse était : ",
+                timeoutFeedback: "⏰ Temps écoulé ! La bonne réponse était : ",
+                comboText: "Combo x",
+                categories: {
+                    math: "Mathématiques",
+                    geography: "Géographie", 
+                    science: "Sciences",
+                    history: "Histoire",
+                    culture: "Culture"
+                },
+                achievements: {
+                    firstCorrect: "🎯 Premier succès !",
+                    streak5: "🔥 Série de 5 !",
+                    streak10: "⚡ Série de 10 !",
+                    level5: "🌟 Niveau 5 atteint !",
+                    level10: "💎 Niveau 10 atteint !",
+                    perfectRound: "🏆 Manche parfaite !"
+                }
+            },
+            en: {
+                subtitle: "Revolutionary Multilingual Quiz - Challenge your intelligence!",
+                startBtn: "🚀 Start",
+                pauseBtn: "⏸️ Pause", 
+                restartBtn: "🔄 Restart",
+                levelLabel: "Level",
+                scoreLabel: "Score",
+                timeLabel: "Time",
+                streakLabel: "Streak",
+                accuracyLabel: "Accuracy",
+                startMessage: "Click \"Start\" to begin your revolutionary quiz adventure!",
+                correctFeedback: "🎉 Excellent! Correct answer!",
+                incorrectFeedback: "❌ Incorrect! The correct answer was: ",
+                timeoutFeedback: "⏰ Time's up! The correct answer was: ",
+                comboText: "Combo x",
+                categories: {
+                    math: "Mathematics",
+                    geography: "Geography",
+                    science: "Science", 
+                    history: "History",
+                    culture: "Culture"
+                },
+                achievements: {
+                    firstCorrect: "🎯 First success!",
+                    streak5: "🔥 5 streak!",
+                    streak10: "⚡ 10 streak!",
+                    level5: "🌟 Level 5 reached!",
+                    level10: "💎 Level 10 reached!",
+                    perfectRound: "🏆 Perfect round!"
+                }
+            },
+            es: {
+                subtitle: "Quiz Multilingüe Revolucionario - ¡Desafía tu inteligencia!",
+                startBtn: "🚀 Empezar",
+                pauseBtn: "⏸️ Pausa",
+                restartBtn: "🔄 Reiniciar", 
+                levelLabel: "Nivel",
+                scoreLabel: "Puntuación",
+                timeLabel: "Tiempo",
+                streakLabel: "Racha",
+                accuracyLabel: "Precisión",
+                startMessage: "¡Haz clic en \"Empezar\" para comenzar tu aventura de quiz revolucionaria!",
+                correctFeedback: "🎉 ¡Excelente! ¡Respuesta correcta!",
+                incorrectFeedback: "❌ ¡Incorrecto! La respuesta correcta era: ",
+                timeoutFeedback: "⏰ ¡Se acabó el tiempo! La respuesta correcta era: ",
+                comboText: "Combo x",
+                categories: {
+                    math: "Matemáticas",
+                    geography: "Geografía",
+                    science: "Ciencias",
+                    history: "Historia", 
+                    culture: "Cultura"
+                },
+                achievements: {
+                    firstCorrect: "🎯 ¡Primer éxito!",
+                    streak5: "🔥 ¡Racha de 5!",
+                    streak10: "⚡ ¡Racha de 10!",
+                    level5: "🌟 ¡Nivel 5 alcanzado!",
+                    level10: "💎 ¡Nivel 10 alcanzado!",
+                    perfectRound: "🏆 ¡Ronda perfecta!"
+                }
+            },
+            de: {
+                subtitle: "Revolutionäres Mehrsprachiges Quiz - Fordere deine Intelligenz heraus!",
+                startBtn: "🚀 Starten",
+                pauseBtn: "⏸️ Pause",
+                restartBtn: "🔄 Neustart",
+                levelLabel: "Level",
+                scoreLabel: "Punkte",
+                timeLabel: "Zeit",
+                streakLabel: "Serie",
+                accuracyLabel: "Genauigkeit",
+                startMessage: "Klicke auf \"Starten\" um dein revolutionäres Quiz-Abenteuer zu beginnen!",
+                correctFeedback: "🎉 Ausgezeichnet! Richtige Antwort!",
+                incorrectFeedback: "❌ Falsch! Die richtige Antwort war: ",
+                timeoutFeedback: "⏰ Zeit abgelaufen! Die richtige Antwort war: ",
+                comboText: "Combo x",
+                categories: {
+                    math: "Mathematik",
+                    geography: "Geographie",
+                    science: "Wissenschaft",
+                    history: "Geschichte",
+                    culture: "Kultur"
+                },
+                achievements: {
+                    firstCorrect: "🎯 Erster Erfolg!",
+                    streak5: "🔥 5er Serie!",
+                    streak10: "⚡ 10er Serie!",
+                    level5: "🌟 Level 5 erreicht!",
+                    level10: "💎 Level 10 erreicht!",
+                    perfectRound: "🏆 Perfekte Runde!"
+                }
+            },
+            ar: {
+                subtitle: "كويز متعدد اللغات ثوري - تحدى ذكاءك!",
+                startBtn: "🚀 ابدأ",
+                pauseBtn: "⏸️ توقف",
+                restartBtn: "🔄 إعادة البدء",
+                levelLabel: "المستوى",
+                scoreLabel: "النقاط",
+                timeLabel: "الوقت", 
+                streakLabel: "السلسلة",
+                accuracyLabel: "الدقة",
+                startMessage: "انقر على \"ابدأ\" لبدء مغامرة الكويز الثورية!",
+                correctFeedback: "🎉 ممتاز! إجابة صحيحة!",
+                incorrectFeedback: "❌ خطأ! الإجابة الصحيحة كانت: ",
+                timeoutFeedback: "⏰ انتهى الوقت! الإجابة الصحيحة كانت: ",
+                comboText: "كومبو x",
+                categories: {
+                    math: "الرياضيات",
+                    geography: "الجغرافيا",
+                    science: "العلوم",
+                    history: "التاريخ",
+                    culture: "الثقافة"
+                },
+                achievements: {
+                    firstCorrect: "🎯 أول نجاح!",
+                    streak5: "🔥 سلسلة من 5!",
+                    streak10: "⚡ سلسلة من 10!",
+                    level5: "🌟 وصلت للمستوى 5!",
+                    level10: "💎 وصلت للمستوى 10!",
+                    perfectRound: "🏆 جولة مثالية!"
+                }
+            }
+        };
+
+        // Base de données de questions par langue
+        const questionDatabase = {
+            fr: {
+                math: [
+                    { q: "Combien font 12 × 7 ?", a: ["84", "74", "94", "64"], c: 0 },
+                    { q: "Quelle est la racine carrée de 169 ?", a: ["13", "12", "14", "15"], c: 0 },
+                    { q: "Combien font 30% de 150 ?", a: ["45", "40", "50", "35"], c: 0 },
+                    { q: "Combien font 5⁴ (5 puissance 4) ?", a: ["625", "500", "750", "525"], c: 0 },
+                    { q: "Si 2x - 8 = 14, que vaut x ?", a: ["11", "10", "12", "9"], c: 0 }
+                ],
+                geography: [
+                    { q: "Quelle est la capitale de la France ?", a: ["Paris", "Lyon", "Marseille", "Toulouse"], c: 0 },
+                    { q: "Quel est le plus haut sommet d'Europe ?", a: ["Mont Blanc", "Mont-Blanc", "Cervin", "Elbrouz"], c: 3 },
+                    { q: "Quelle région française produit le champagne ?", a: ["Bourgogne", "Champagne", "Bordeaux", "Loire"], c: 1 },
+                    { q: "Combien de départements compte la France ?", a: ["95", "101", "98", "103"], c: 1 },
+                    { q: "Quelle ville française est surnommée la 'Cité phocéenne' ?", a: ["Nice", "Marseille", "Cannes", "Toulon"], c: 1 }
+                ],
+                science: [
+                    { q: "Qui a découvert la radioactivité ?", a: ["Marie Curie", "Pierre Curie", "Henri Becquerel", "Einstein"], c: 2 },
+                    { q: "Quel est l'élément le plus abondant dans l'univers ?", a: ["Oxygène", "Hydrogène", "Carbone", "Hélium"], c: 1 },
+                    { q: "À quelle vitesse se déplace la lumière ?", a: ["300 000 km/s", "250 000 km/s", "350 000 km/s", "200 000 km/s"], c: 0 },
+                    { q: "Combien d'os compte le squelette humain adulte ?", a: ["206", "208", "204", "210"], c: 0 },
+                    { q: "Quel scientifique français a créé la pasteurisation ?", a: ["Pasteur", "Lavoisier", "Curie", "Becquerel"], c: 0 }
+                ],
+                history: [
+                    { q: "En quelle année a eu lieu la prise de la Bastille ?", a: ["1789", "1792", "1799", "1804"], c: 0 },
+                    { q: "Qui était Napoléon Bonaparte ?", a: ["Roi de France", "Empereur des Français", "Président", "Premier ministre"], c: 1 },
+                    { q: "Quelle bataille a eu lieu en 1515 ?", a: ["Azincourt", "Marignan", "Bouvines", "Valmy"], c: 1 },
+                    { q: "Qui était le Roi-Soleil ?", a: ["Louis XIII", "Louis XIV", "Louis XV", "Louis XVI"], c: 1 },
+                    { q: "En quelle année la France a-t-elle aboli l'esclavage définitivement ?", a: ["1794", "1848", "1802", "1815"], c: 1 }
+                ],
+                culture: [
+                    { q: "Qui a écrit 'Notre-Dame de Paris' ?", a: ["Victor Hugo", "Émile Zola", "Gustave Flaubert", "Balzac"], c: 0 },
+                    { q: "Quel peintre français a créé 'Les Nymphéas' ?", a: ["Renoir", "Monet", "Degas", "Cézanne"], c: 1 },
+                    { q: "Quelle chanson est devenue l'hymne national français ?", a: ["La Marseillaise", "Le Chant du départ", "Ça ira", "La Carmagnole"], c: 0 },
+                    { q: "Qui a composé 'Carmen' ?", a: ["Debussy", "Bizet", "Ravel", "Berlioz"], c: 1 },
+                    { q: "Quel festival de cinéma se déroule chaque année sur la Côte d'Azur ?", a: ["Cannes", "Deauville", "Annecy", "La Rochelle"], c: 0 }
+                ]
+            },
+            en: {
+                math: [
+                    { q: "What is 13 × 9?", a: ["117", "127", "107", "137"], c: 0 },
+                    { q: "What is the square root of 196?", a: ["14", "13", "15", "16"], c: 0 },
+                    { q: "What is 40% of 250?", a: ["100", "90", "110", "80"], c: 0 },
+                    { q: "What is 6⁴ (6 to the power of 4)?", a: ["1296", "1256", "1336", "1216"], c: 0 },
+                    { q: "If 3x + 12 = 27, what is x?", a: ["5", "4", "6", "3"], c: 0 }
+                ],
+                geography: [
+                    { q: "What is the capital of the United Kingdom?", a: ["London", "Edinburgh", "Cardiff", "Belfast"], c: 0 },
+                    { q: "Which is the longest river in the UK?", a: ["Thames", "Severn", "Trent", "Mersey"], c: 1 },
+                    { q: "How many states are there in the USA?", a: ["48", "50", "52", "49"], c: 1 },
+                    { q: "What is the highest mountain in North America?", a: ["Mount McKinley", "Denali", "Mount Whitney", "Mount Elbert"], c: 1 },
+                    { q: "Which city is known as the 'Big Apple'?", a: ["Los Angeles", "New York", "Chicago", "Boston"], c: 1 }
+                ],
+                science: [
+                    { q: "Who developed the theory of evolution?", a: ["Newton", "Darwin", "Einstein", "Mendel"], c: 1 },
+                    { q: "What is the hardest natural substance?", a: ["Gold", "Diamond", "Iron", "Quartz"], c: 1 },
+                    { q: "How many chambers does a human heart have?", a: ["2", "4", "3", "6"], c: 1 },
+                    { q: "What gas do plants absorb from the atmosphere?", a: ["Oxygen", "Carbon dioxide", "Nitrogen", "Hydrogen"], c: 1 },
+                    { q: "Who invented the telephone?", a: ["Edison", "Bell", "Tesla", "Marconi"], c: 1 }
+                ],
+                history: [
+                    { q: "In which year did World War II end?", a: ["1944", "1945", "1946", "1943"], c: 1 },
+                    { q: "Who was the first President of the United States?", a: ["Jefferson", "Washington", "Adams", "Franklin"], c: 1 },
+                    { q: "In which year did the Titanic sink?", a: ["1910", "1912", "1914", "1911"], c: 1 },
+                    { q: "Which English king had six wives?", a: ["Henry VII", "Henry VIII", "Henry VI", "Edward VIII"], c: 1 },
+                    { q: "When did the American Civil War begin?", a: ["1860", "1861", "1862", "1859"], c: 1 }
+                ],
+                culture: [
+                    { q: "Who wrote 'Romeo and Juliet'?", a: ["Dickens", "Shakespeare", "Austen", "Byron"], c: 1 },
+                    { q: "Which band released 'Bohemian Rhapsody'?", a: ["The Beatles", "Queen", "Led Zeppelin", "Pink Floyd"], c: 1 },
+                    { q: "Who painted 'The Great Wave'?", a: ["Monet", "Hokusai", "Van Gogh", "Picasso"], c: 1 },
+                    { q: "What is the most famous work by Charles Dickens?", a: ["Oliver Twist", "A Christmas Carol", "Great Expectations", "David Copperfield"], c: 1 },
+                    { q: "Which movie won the first Academy Award for Best Picture?", a: ["Wings", "Sunrise", "The Jazz Singer", "Metropolis"], c: 0 }
+                ]
+            },
+            es: {
+                math: [
+                    { q: "¿Cuánto es 14 × 6?", a: ["84", "74", "94", "64"], c: 0 },
+                    { q: "¿Cuál es la raíz cuadrada de 225?", a: ["15", "14", "16", "13"], c: 0 },
+                    { q: "¿Cuánto es el 35% de 200?", a: ["70", "60", "80", "65"], c: 0 },
+                    { q: "¿Cuánto es 4⁵ (4 elevado a 5)?", a: ["1024", "1000", "1044", "1004"], c: 0 },
+                    { q: "Si 4x - 16 = 20, ¿cuál es x?", a: ["9", "8", "10", "7"], c: 0 }
+                ],
+                geography: [
+                    { q: "¿Cuál es la capital de España?", a: ["Madrid", "Barcelona", "Sevilla", "Valencia"], c: 0 },
+                    { q: "¿Cuál es el río más largo de España?", a: ["Ebro", "Tajo", "Duero", "Guadalquivir"], c: 1 },
+                    { q: "¿Cuántas comunidades autónomas tiene España?", a: ["15", "17", "19", "16"], c: 1 },
+                    { q: "¿Qué cordillera separa España de Francia?", a: ["Pirineos", "Cordillera Cantábrica", "Sierra Nevada", "Sistema Central"], c: 0 },
+                    { q: "¿Cuál es la isla más grande de España?", a: ["Tenerife", "Mallorca", "Gran Canaria", "Ibiza"], c: 1 }
+                ],
+                science: [
+                    { q: "¿Quién descubrió América?", a: ["Magallanes", "Cristóbal Colón", "Vasco da Gama", "Cortés"], c: 1 },
+                    { q: "¿Cuál es el metal más abundante en la corteza terrestre?", a: ["Hierro", "Aluminio", "Cobre", "Zinc"], c: 1 },
+                    { q: "¿Cuántos huesos tiene un bebé al nacer?", a: ["206", "270", "300", "250"], c: 1 },
+                    { q: "¿Qué órgano produce la insulina?", a: ["Hígado", "Páncreas", "Riñón", "Estómago"], c: 1 },
+                    { q: "¿Quién propuso la teoría de la relatividad?", a: ["Newton", "Einstein", "Galileo", "Darwin"], c: 1 }
+                ],
+                history: [
+                    { q: "¿En qué año comenzó la Guerra Civil Española?", a: ["1935", "1936", "1937", "1934"], c: 1 },
+                    { q: "¿Quién fue el primer rey de España?", a: ["Carlos I", "Felipe II", "Fernando el Católico", "Alfonso XIII"], c: 0 },
+                    { q: "¿En qué año se descubrió América?", a: ["1490", "1492", "1494", "1491"], c: 1 },
+                    { q: "¿Cuándo terminó la dictadura de Franco?", a: ["1974", "1975", "1976", "1973"], c: 1 },
+                    { q: "¿En qué batalla derrotó Napoleón a los españoles?", a: ["Bailén", "Austerlitz", "Trafalgar", "Waterloo"], c: 0 }
+                ],
+                culture: [
+                    { q: "¿Quién escribió 'Don Quijote de la Mancha'?", a: ["Cervantes", "Lope de Vega", "Calderón", "Góngora"], c: 0 },
+                    { q: "¿Quién pintó 'Guernica'?", a: ["Dalí", "Picasso", "Miró", "Goya"], c: 1 },
+                    { q: "¿Cuál es el baile típico de Andalucía?", a: ["Sardana", "Flamenco", "Jota", "Fandango"], c: 1 },
+                    { q: "¿Quién compuso 'Concierto de Aranjuez'?", a: ["Albéniz", "Rodrigo", "Granados", "Falla"], c: 1 },
+                    { q: "¿Qué director español ganó el Oscar por 'El laberinto del fauno'?", a: ["Almodóvar", "Del Toro", "Amenábar", "Buñuel"], c: 1 }
+                ]
+            },
+            de: {
+                math: [
+                    { q: "Was ist 16 × 5?", a: ["80", "70", "90", "60"], c: 0 },
+                    { q: "Was ist die Quadratwurzel von 256?", a: ["16", "15", "17", "14"], c: 0 },
+                    { q: "Was sind 45% von 180?", a: ["81", "71", "91", "61"], c: 0 },
+                    { q: "Was ist 3⁶ (3 hoch 6)?", a: ["729", "700", "750", "680"], c: 0 },
+                    { q: "Wenn 5x + 10 = 35, was ist x?", a: ["5", "4", "6", "3"], c: 0 }
+                ],
+                geography: [
+                    { q: "Was ist die Hauptstadt von Deutschland?", a: ["Berlin", "München", "Hamburg", "Köln"], c: 0 },
+                    { q: "Welcher ist der längste Fluss Deutschlands?", a: ["Elbe", "Rhein", "Donau", "Weser"], c: 1 },
+                    { q: "Wie viele Bundesländer hat Deutschland?", a: ["14", "16", "18", "15"], c: 1 },
+                    { q: "Welches ist der höchste Berg Deutschlands?", a: ["Feldberg", "Zugspitze", "Brocken", "Watzmann"], c: 1 },
+                    { q: "Welche Stadt wird 'Elbflorenz' genannt?", a: ["Hamburg", "Dresden", "Leipzig", "Magdeburg"], c: 1 }
+                ],
+                science: [
+                    { q: "Wer entdeckte die Röntgenstrahlen?", a: ["Einstein", "Röntgen", "Planck", "Heisenberg"], c: 1 },
+                    { q: "Was ist das häufigste Element im menschlichen Körper?", a: ["Kohlenstoff", "Sauerstoff", "Wasserstoff", "Stickstoff"], c: 1 },
+                    { q: "Wie viele Zähne hat ein erwachsener Mensch?", a: ["30", "32", "28", "34"], c: 1 },
+                    { q: "Welches Organ filtert das Blut?", a: ["Leber", "Niere", "Lunge", "Herz"], c: 1 },
+                    { q: "Wer entwickelte die Relativitätstheorie?", a: ["Newton", "Einstein", "Planck", "Bohr"], c: 1 }
+                ],
+                history: [
+                    { q: "In welchem Jahr fiel die Berliner Mauer?", a: ["1988", "1989", "1990", "1987"], c: 1 },
+                    { q: "Wer war der erste deutsche Kaiser?", a: ["Wilhelm I", "Wilhelm II", "Friedrich III", "Otto I"], c: 0 },
+                    { q: "Wann begann der Zweite Weltkrieg?", a: ["1938", "1939", "1940", "1937"], c: 1 },
+                    { q: "Wer war Martin Luther?", a: ["Philosoph", "Reformator", "Kaiser", "Dichter"], c: 1 },
+                    { q: "In welchem Jahr wurde die BRD gegründet?", a: ["1948", "1949", "1950", "1947"], c: 1 }
+                ],
+                culture: [
+                    { q: "Wer schrieb 'Faust'?", a: ["Schiller", "Goethe", "Heine", "Lessing"], c: 1 },
+                    { q: "Wer komponierte die '9. Symphonie'?", a: ["Mozart", "Beethoven", "Bach", "Brahms"], c: 1 },
+                    { q: "Welches Fest wird in München gefeiert?", a: ["Karneval", "Oktoberfest", "Weihnachtsmarkt", "Schützenfest"], c: 1 },
+                    { q: "Wer malte 'Der Schrei'?", a: ["Dürer", "Munch", "Klee", "Ernst"], c: 1 },
+                    { q: "Welcher deutsche Regisseur gewann mehrere Oscars?", a: ["Herzog", "Wenders", "Petersen", "Emmerich"], c: 1 }
+                ]
+            },
+            ar: {
+                math: [
+                    { q: "كم يساوي 18 × 4؟", a: ["72", "62", "82", "52"], c: 0 },
+                    { q: "ما هو الجذر التربيعي لـ 289؟", a: ["17", "16", "18", "15"], c: 0 },
+                    { q: "كم يساوي 60% من 120؟", a: ["72", "62", "82", "52"], c: 0 },
+                    { q: "كم يساوي 2⁸ (2 أس 8)؟", a: ["256", "246", "266", "236"], c: 0 },
+                    { q: "إذا كان 6س + 18 = 42، فما قيمة س؟", a: ["4", "3", "5", "2"], c: 0 }
+                ],
+                geography: [
+                    { q: "ما هي عاصمة المملكة العربية السعودية؟", a: ["الرياض", "جدة", "مكة", "الدمام"], c: 0 },
+                    { q: "ما هو أطول نهر في العالم العربي؟", a: ["الفرات", "النيل", "دجلة", "الأردن"], c: 1 },
+                    { q: "كم عدد الدول العربية؟", a: ["20", "22", "24", "18"], c: 1 },
+                    { q: "أين تقع جامعة الأزهر؟", a: ["الرياض", "القاهرة", "بغداد", "دمشق"], c: 1 },
+                    { q: "ما هي أكبر دولة عربية من حيث المساحة؟", a: ["السعودية", "الجزائر", "السودان", "ليبيا"], c: 1 }
+                ],
+                science: [
+                    { q: "من هو عالم الرياضيات العربي الذي أسس علم الجبر؟", a: ["ابن سينا", "الخوارزمي", "الكندي", "الرازي"], c: 1 },
+                    { q: "ما هو أقوى عضو في جسم الإنسان؟", a: ["القلب", "اللسان", "الفك", "الساق"], c: 1 },
+                    { q: "كم عدد أسنان الإنسان البالغ؟", a: ["30", "32", "28", "34"], c: 1 },
+                    { q: "أي عضو ينتج الأنسولين؟", a: ["الكبد", "البنكرياس", "الكلى", "المعدة"], c: 1 },
+                    { q: "من اخترع الكاميرا؟", a: ["ابن الهيثم", "الجاحظ", "ابن خلدون", "الفارابي"], c: 0 }
+                ],
+                history: [
+                    { q: "في أي عام بدأت الدعوة الإسلامية؟", a: ["610", "612", "615", "608"], c: 0 },
+                    { q: "من هو أول خليفة راشد؟", a: ["عمر بن الخطاب", "أبو بكر الصديق", "عثمان بن عفان", "علي بن أبي طالب"], c: 1 },
+                    { q: "في أي عام فُتحت مكة؟", a: ["6 هـ", "8 هـ", "10 هـ", "7 هـ"], c: 1 },
+                    { q: "من بنى قبة الصخرة؟", a: ["عمر بن الخطاب", "عبد الملك بن مروان", "هارون الرشيد", "صلاح الدين"], c: 1 },
+                    { q: "متى انتهت الخلافة العثمانية؟", a: ["1922", "1924", "1920", "1918"], c: 1 }
+                ],
+                culture: [
+                    { q: "من كتب 'ألف ليلة وليلة'؟", a: ["الجاحظ", "مؤلف مجهول", "ابن المقفع", "الحريري"], c: 1 },
+                    { q: "من هو شاعر الرسول؟", a: ["حسان بن ثابت", "كعب بن زهير", "النابغة", "الأعشى"], c: 0 },
+                    { q: "ما هي أقدم جامعة في العالم؟", a: ["الأزهر", "القرويين", "بيت الحكمة", "دار العلوم"], c: 1 },
+                    { q: "من ألف 'مقامات الحريري'؟", a: ["الجاحظ", "الحريري", "ابن المقفع", "الهمذاني"], c: 1 },
+                    { q: "ما هو أشهر كتاب لابن خلدون؟", a: ["التاريخ", "المقدمة", "الفهرست", "الأغاني"], c: 1 }
+                ]
+            }
+        };
+
+        // Variables du jeu
+        let currentLanguage = 'fr';
+        let gameState = {
+            isPlaying: false,
+            isPaused: false,
+            level: 1,
+            score: 0,
+            streak: 0,
+            totalQuestions: 0,
+            correctAnswers: 0,
+            timeLeft: 30,
+            currentQuestion: null,
+            currentCategory: null,
+            timer: null,
+            usedQuestions: new Set()
+        };
+
+        // Éléments DOM
+        const elements = {
+            languageSelect: document.getElementById('languageSelect'),
+            subtitle: document.getElementById('subtitle'),
+            startBtn: document.getElementById('startBtn'),
+            pauseBtn: document.getElementById('pauseBtn'),
+            restartBtn: document.getElementById('restartBtn'),
+            level: document.getElementById('level'),
+            score: document.getElementById('score'),
+            time: document.getElementById('time'),
+            streak: document.getElementById('streak'),
+            accuracy: document.getElementById('accuracy'),
+            levelLabel: document.getElementById('levelLabel'),
+            scoreLabel: document.getElementById('scoreLabel'),
+            timeLabel: document.getElementById('timeLabel'),
+            streakLabel: document.getElementById('streakLabel'),
+            accuracyLabel: document.getElementById('accuracyLabel'),
+            question: document.getElementById('question'),
+            answers: document.getElementById('answers'),
+            feedback: document.getElementById('feedback'),
+            categoryIndicator: document.getElementById('categoryIndicator'),
+            comboIndicator: document.getElementById('comboIndicator'),
+            progressFill: document.getElementById('progressFill')
+        };
+
+        // Initialisation
+        function init() {
+            createStars();
+            updateLanguage();
+            
+            elements.languageSelect.addEventListener('change', (e) => {
+                currentLanguage = e.target.value;
+                updateLanguage();
+                if (currentLanguage === 'ar') {
+                    document.body.classList.add('rtl');
+                } else {
+                    document.body.classList.remove('rtl');
+                }
+            });
+
+            elements.startBtn.addEventListener('click', startGame);
+            elements.pauseBtn.addEventListener('click', togglePause);
+            elements.restartBtn.addEventListener('click', restartGame);
+        }
+
+        // Mise à jour de la langue
+        function updateLanguage() {
+            const t = translations[currentLanguage];
+            
+            elements.subtitle.textContent = t.subtitle;
+            elements.startBtn.textContent = t.startBtn;
+            elements.pauseBtn.textContent = t.pauseBtn;
+            elements.restartBtn.textContent = t.restartBtn;
+            elements.levelLabel.textContent = t.levelLabel;
+            elements.scoreLabel.textContent = t.scoreLabel;
+            elements.timeLabel.textContent = t.timeLabel;
+            elements.streakLabel.textContent = t.streakLabel;
+            elements.accuracyLabel.textContent = t.accuracyLabel;
+            
+            if (!gameState.isPlaying) {
+                elements.question.textContent = t.startMessage;
+            }
+        }
+
+        // Démarrer le jeu
+        function startGame() {
+            gameState.isPlaying = true;
+            gameState.isPaused = false;
+            gameState.timeLeft = 30;
+            
+            elements.startBtn.classList.add('hidden');
+            elements.pauseBtn.classList.remove('hidden');
+            elements.restartBtn.classList.remove('hidden');
+            
+            nextQuestion();
+            startTimer();
+        }
+
+        // Question suivante
+        function nextQuestion() {
+            if (gameState.isPaused) return;
+            
+            const categories = Object.keys(questionDatabase[currentLanguage]);
+            const category = categories[Math.floor(Math.random() * categories.length)];
+            const questions = questionDatabase[currentLanguage][category];
+            
+            // Éviter les questions répétées
+            let availableQuestions = questions.filter((_, index) => 
+                !gameState.usedQuestions.has(`${category}-${index}`)
+            );
+            
+            if (availableQuestions.length === 0) {
+                gameState.usedQuestions.clear();
+                availableQuestions = questions;
+            }
+            
+            const questionIndex = Math.floor(Math.random() * availableQuestions.length);
+            const originalIndex = questions.indexOf(availableQuestions[questionIndex]);
+            gameState.usedQuestions.add(`${category}-${originalIndex}`);
+            
+            gameState.currentQuestion = availableQuestions[questionIndex];
+            gameState.currentCategory = category;
+            
+            displayQuestion();
+        }
+
+        // Afficher la question
+        function displayQuestion() {
+            const t = translations[currentLanguage];
+            
+            elements.question.textContent = gameState.currentQuestion.q;
+            elements.categoryIndicator.textContent = t.categories[gameState.currentCategory];
+            elements.categoryIndicator.classList.remove('hidden');
+            
+            if (gameState.streak >= 3) {
+                elements.comboIndicator.textContent = `${t.comboText}${gameState.streak}`;
+                elements.comboIndicator.classList.remove('hidden');
+            } else {
+                elements.comboIndicator.classList.add('hidden');
+            }
+            
+            elements.answers.innerHTML = '';
+            elements.answers.classList.remove('hidden');
+            elements.feedback.classList.add('hidden');
+            
+            gameState.currentQuestion.a.forEach((answer, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'answer-btn';
+                btn.textContent = answer;
+                btn.addEventListener('click', () => selectAnswer(index));
+                elements.answers.appendChild(btn);
+            });
+        }
+
+        // Sélectionner une réponse
+        function selectAnswer(selectedIndex) {
+            const t = translations[currentLanguage];
+            const isCorrect = selectedIndex === gameState.currentQuestion.c;
+            
+            // Désactiver tous les boutons
+            const answerBtns = elements.answers.querySelectorAll('.answer-btn');
+            answerBtns.forEach((btn, index) => {
+                btn.disabled = true;
+                if (index === gameState.currentQuestion.c) {
+                    btn.classList.add('correct');
+                } else if (index === selectedIndex && !isCorrect) {
+                    btn.classList.add('incorrect');
+                }
+            });
+            
+            gameState.totalQuestions++;
+            
+            if (isCorrect) {
+                gameState.correctAnswers++;
+                gameState.streak++;
+                gameState.score += 10 * gameState.level * (gameState.streak > 1 ? gameState.streak : 1);
+                
+                elements.feedback.textContent = t.correctFeedback;
+                elements.feedback.className = 'feedback correct';
+                
+                // Vérifier les succès
+                checkAchievements();
+                
+                // Augmenter le niveau
+                if (gameState.totalQuestions % 5 === 0) {
+                    gameState.level++;
+                    gameState.timeLeft = Math.max(15, 30 - gameState.level);
+                }
+                
+            } else {
+                gameState.streak = 0;
+                elements.feedback.textContent = t.incorrectFeedback + gameState.currentQuestion.a[gameState.currentQuestion.c];
+                elements.feedback.className = 'feedback incorrect';
+            }
+            
+            elements.feedback.classList.remove('hidden');
+            updateStats();
+            
+            setTimeout(() => {
+                nextQuestion();
+            }, 2000);
+        }
+
+        // Timer
+        function startTimer() {
+            gameState.timer = setInterval(() => {
+                if (gameState.isPaused) return;
+                
+                gameState.timeLeft--;
+                elements.time.textContent = gameState.timeLeft;
+                
+                // Mise à jour de la barre de progression
+                const progress = (gameState.timeLeft / (30 - gameState.level + 1)) * 100;
+                elements.progressFill.style.width = progress + '%';
+                
+                // Avertissement temps
+                if (gameState.timeLeft <= 5) {
+                    elements.time.classList.add('timer-warning');
+                } else {
+                    elements.time.classList.remove('timer-warning');
+                }
+                
+                if (gameState.timeLeft <= 0) {
+                    timeOut();
+                }
+            }, 1000);
+        }
+
+        // Temps écoulé
+        function timeOut() {
+            const t = translations[currentLanguage];
+            
+            gameState.totalQuestions++;
+            gameState.streak = 0;
+            
+            elements.feedback.textContent = t.timeoutFeedback + gameState.currentQuestion.a[gameState.currentQuestion.c];
+            elements.feedback.className = 'feedback timeout';
+            elements.feedback.classList.remove('hidden');
+            
+            // Désactiver les boutons
+            const answerBtns = elements.answers.querySelectorAll('.answer-btn');
+            answerBtns.forEach((btn, index) => {
+                btn.disabled = true;
+                if (index === gameState.currentQuestion.c) {
+                    btn.classList.add('correct');
+                }
+            });
+            
+            updateStats();
+            
+            setTimeout(() => {
+                nextQuestion();
+                gameState.timeLeft = Math.max(15, 30 - gameState.level);
+            }, 2000);
+        }
+
+        // Mettre à jour les statistiques
+        function updateStats() {
+            elements.level.textContent = gameState.level;
+            elements.score.textContent = gameState.score;
+            elements.time.textContent = gameState.timeLeft;
+            elements.streak.textContent = gameState.streak;
+            
+            const accuracy = gameState.totalQuestions > 0 
+                ? Math.round((gameState.correctAnswers / gameState.totalQuestions) * 100)
+                : 100;
+            elements.accuracy.textContent = accuracy + '%';
+        }
+
+        // Vérifier les succès
+        function checkAchievements() {
+            const t = translations[currentLanguage];
+            
+            if (gameState.correctAnswers === 1) {
+                showAchievement(t.achievements.firstCorrect);
+            } else if (gameState.streak === 5) {
+                showAchievement(t.achievements.streak5);
+            } else if (gameState.streak === 10) {
+                showAchievement(t.achievements.streak10);
+            } else if (gameState.level === 5) {
+                showAchievement(t.achievements.level5);
+            } else if (gameState.level === 10) {
+                showAchievement(t.achievements.level10);
+            }
+        }
+
+        // Afficher un succès
+        function showAchievement(text) {
+            const achievement = document.createElement('div');
+            achievement.className = 'achievement';
+            achievement.textContent = text;
+            document.body.appendChild(achievement);
+            
+            setTimeout(() => {
+                document.body.removeChild(achievement);
+            }, 4000);
+        }
+
+        // Pause/Reprendre
+        function togglePause() {
+            const t = translations[currentLanguage];
+            
+            gameState.isPaused = !gameState.isPaused;
+            
+            if (gameState.isPaused) {
+                elements.pauseBtn.textContent = '▶️ ' + (currentLanguage === 'fr' ? 'Reprendre' : 
+                    currentLanguage === 'en' ? 'Resume' :
+                    currentLanguage === 'es' ? 'Reanudar' :
+                    currentLanguage === 'de' ? 'Fortsetzen' : 'استئناف');
+                elements.question.textContent = currentLanguage === 'fr' ? 'Jeu en pause...' :
+                    currentLanguage === 'en' ? 'Game paused...' :
+                    currentLanguage === 'es' ? 'Juego pausado...' :
+                    currentLanguage === 'de' ? 'Spiel pausiert...' : 'اللعبة متوقفة...';
+                elements.answers.classList.add('hidden');
+            } else {
+                elements.pauseBtn.textContent = t.pauseBtn;
+                displayQuestion();
+            }
+        }
+
+        // Recommencer
+        function restartGame() {
+            clearInterval(gameState.timer);
+            
+            gameState = {
+                isPlaying: false,
+                isPaused: false,
+                level: 1,
+                score: 0,
+                streak: 0,
+                totalQuestions: 0,
+                correctAnswers: 0,
+                timeLeft: 30,
+                currentQuestion: null,
+                currentCategory: null,
+                timer: null,
+                usedQuestions: new Set()
+            };
+            
+            elements.startBtn.classList.remove('hidden');
+            elements.pauseBtn.classList.add('hidden');
+            elements.restartBtn.classList.add('hidden');
+            elements.answers.classList.add('hidden');
+            elements.feedback.classList.add('hidden');
+            elements.categoryIndicator.classList.add('hidden');
+            elements.comboIndicator.classList.add('hidden');
+            elements.time.classList.remove('timer-warning');
+            elements.progressFill.style.width = '100%';
+            
+            updateStats();
+            updateLanguage();
+        }
+
+        // Démarrer l'application
+        init();
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'987f18815748e1e4',t:'MTc1OTM1NDU4OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
