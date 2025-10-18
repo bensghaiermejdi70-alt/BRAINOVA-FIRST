@@ -1,0 +1,1554 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Pipes</title>
+    <script>
+        (function(){
+            if(window.__platform_nonblocking_dialogs) return; window.__platform_nonblocking_dialogs=true;
+            try{
+                const _alert = window.alert.bind(window);
+                const _confirm = window.confirm.bind(window);
+                const _prompt = window.prompt.bind(window);
+                function send(type,text){ try{ if(window.parent && window.parent!==window) parent.postMessage({action:'dialog', dialogType:type, text:String(text||'')}, '*'); }catch(e){} }
+                window.alert = function(msg){ if(window.parent && window.parent!==window){ send('alert', msg); } else { _alert(msg); } };
+                window.confirm = function(msg){ if(window.parent && window.parent!==window){ send('confirm', msg); return true; } else { return _confirm(msg); } };
+                window.prompt = function(msg, def){ if(window.parent && window.parent!==window){ send('prompt', msg+'\n(default: '+(def||'')+')'); return def||null; } else { return _prompt(msg, def); } };
+            }catch(e){ }
+        })();
+    </script>
+    <style>
+        body {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .title-section {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .game-logo {
+            font-size: 4rem;
+            animation: quantumGlow 3s ease-in-out infinite;
+        }
+
+        .title {
+            font-size: 3rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #00ffff, #ff00ff, #ffff00);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: quantumGlow 3s ease-in-out infinite;
+            text-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
+            margin-bottom: 10px;
+        }
+
+        @keyframes quantumGlow {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: #00ffff;
+            opacity: 0.8;
+            margin-bottom: 30px;
+        }
+
+        .game-layout {
+            display: flex;
+            gap: 30px;
+            align-items: flex-start;
+        }
+
+        .left-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            min-width: 200px;
+        }
+
+        .right-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            min-width: 200px;
+        }
+
+        .language-selector {
+            position: relative;
+        }
+
+        .language-btn {
+            background: linear-gradient(45deg, #1e3c72, #2a5298);
+            border: 2px solid #00ffff;
+            color: #ffffff;
+            padding: 12px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 255, 255, 0.3);
+        }
+
+        .language-btn:hover {
+            background: linear-gradient(45deg, #2a5298, #1e3c72);
+            box-shadow: 0 6px 20px rgba(0, 255, 255, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .language-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            border: 2px solid #00ffff;
+            border-radius: 15px;
+            margin-top: 5px;
+            display: none;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .language-dropdown.show {
+            display: block;
+        }
+
+        .language-option {
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            border-radius: 10px;
+            margin: 5px;
+        }
+
+        .language-option:hover {
+            background: rgba(0, 255, 255, 0.2);
+        }
+
+        .rules-btn, .start-btn {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            border: none;
+            color: #ffffff;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+        }
+
+        .start-btn {
+            background: linear-gradient(45deg, #00ff88, #00cc6a);
+            box-shadow: 0 4px 15px rgba(0, 255, 136, 0.3);
+        }
+
+        .rules-btn:hover, .start-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.5);
+        }
+
+        .start-btn:hover {
+            box-shadow: 0 6px 20px rgba(0, 255, 136, 0.5);
+        }
+
+        .level-selector {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .level-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border: 2px solid #ffffff;
+            color: #ffffff;
+            padding: 10px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            width: 100%;
+            text-align: center;
+        }
+
+        .solution-btn {
+            background: linear-gradient(45deg, #ffa500, #ff8c00);
+            border: none;
+            color: #ffffff;
+            padding: 12px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 165, 0, 0.3);
+            width: 100%;
+        }
+
+        .solution-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 165, 0, 0.5);
+        }
+
+        .level-btn:hover, .level-btn.active {
+            background: linear-gradient(45deg, #764ba2, #667eea);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.5);
+            transform: translateY(-2px);
+        }
+
+        .game-area {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid #00ffff;
+            border-radius: 20px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 255, 255, 0.1);
+            flex: 1;
+        }
+
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 8px;
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 15px;
+        }
+
+        .pipe-cell {
+            width: 65px;
+            height: 65px;
+            background: linear-gradient(45deg, #1a1a2e, #16213e);
+            border: 2px solid #333;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pipe-cell:hover {
+            border-color: #00ffff;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+        }
+
+        .pipe-cell.source {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            box-shadow: 0 0 20px rgba(255, 107, 107, 0.5);
+        }
+
+        .pipe-cell.target {
+            background: linear-gradient(45deg, #00ff88, #00cc6a);
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+        }
+
+        .pipe-cell.connected {
+            background: linear-gradient(45deg, #00ffff, #0099cc);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.7);
+        }
+
+        .pipe-cell.solution-path {
+            background: linear-gradient(45deg, #ffd700, #ffb347) !important;
+            box-shadow: 0 0 25px rgba(255, 215, 0, 0.8) !important;
+            animation: solutionPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes solutionPulse {
+            0%, 100% { 
+                box-shadow: 0 0 25px rgba(255, 215, 0, 0.8);
+                transform: scale(1);
+            }
+            50% { 
+                box-shadow: 0 0 35px rgba(255, 215, 0, 1);
+                transform: scale(1.05);
+            }
+        }
+
+        .pipe-symbol {
+            font-size: 2rem;
+            font-weight: bold;
+            text-shadow: 0 0 10px currentColor;
+        }
+
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .info-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 20px;
+            border-radius: 15px;
+            border: 1px solid #00ffff;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border: 2px solid #00ffff;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal h2 {
+            color: #00ffff;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: #ff6b6b;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .ai-hint {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border: none;
+            color: #ffffff;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin-top: 10px;
+        }
+
+        .pause-btn {
+            background: linear-gradient(45deg, #ff9500, #ff7b00);
+            border: none;
+            color: #ffffff;
+            padding: 12px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 149, 0, 0.3);
+            width: 100%;
+        }
+
+        .pause-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 149, 0, 0.5);
+        }
+
+        .new-game-btn {
+            background: linear-gradient(45deg, #9c27b0, #673ab7);
+            border: none;
+            color: #ffffff;
+            padding: 12px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(156, 39, 176, 0.3);
+            width: 100%;
+        }
+
+        .new-game-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(156, 39, 176, 0.5);
+        }
+
+        @media (max-width: 768px) {
+            .title {
+                font-size: 2rem;
+            }
+            
+            .game-logo {
+                font-size: 3rem;
+            }
+            
+            .header {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .game-layout {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .left-controls, .right-controls {
+                min-width: auto;
+                width: 100%;
+            }
+            
+            .level-selector {
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+            
+            .level-btn {
+                flex: 1;
+                min-width: 80px;
+            }
+            
+            .game-grid {
+                grid-template-columns: repeat(4, 1fr);
+                max-width: 320px;
+            }
+            
+            .pipe-cell {
+                width: 50px;
+                height: 50px;
+            }
+        }
+    </style>
+    <style>
+    /* override: consistent global close button */
+    .global-close-btn { position: fixed !important; top: 14px !important; right: 14px !important; z-index: 99999 !important; background: linear-gradient(45deg,#ff3b3b,#ff0066) !important; color: #fff !important; border: none !important; width:52px !important; height:52px !important; border-radius:50% !important; font-size:22px !important; cursor:pointer !important; display:flex !important;align-items:center !important;justify-content:center !important; box-shadow:0 8px 22px rgba(255,59,59,0.28) !important; }
+    .global-close-btn:hover{ transform: scale(1.06); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="title-section">
+                <div class="game-logo">⚛️</div>
+                <div>
+                    <h1 class="title">QUANTUM PIPES</h1>
+                    <p class="subtitle" id="subtitle">Connectez les conduits quantiques avec l'IA</p>
+                </div>
+            </div>
+            <button class="global-close-btn" title="Fermer" aria-label="Fermer" onclick="closePlatform()">✕</button>
+            <div class="language-selector">
+                <button class="language-btn" id="languageBtn">🌐 Français</button>
+                <div class="language-dropdown" id="languageDropdown">
+                    <div class="language-option" data-lang="fr">🇫🇷 Français</div>
+                    <div class="language-option" data-lang="en">🇬🇧 English</div>
+                    <div class="language-option" data-lang="ar">🇸🇦 العربية</div>
+                    <div class="language-option" data-lang="es">🇪🇸 Español</div>
+                    <div class="language-option" data-lang="de">🇩🇪 Deutsch</div>
+                    <div class="language-option" data-lang="zh">🇨🇳 中文</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="game-layout">
+            <div class="left-controls">
+                <h3 style="color: #00ffff; margin-bottom: 15px;" id="levelsTitle">Niveaux</h3>
+                <div class="level-selector">
+                    <button class="level-btn active" data-level="1" id="level1">Niveau 1</button>
+                    <button class="level-btn" data-level="2" id="level2">Niveau 2</button>
+                    <button class="level-btn" data-level="3" id="level3">Niveau 3</button>
+                </div>
+                <button class="solution-btn" id="solutionBtn">💡 Solution</button>
+            </div>
+
+            <div class="game-area">
+                <div class="game-info">
+                    <div class="info-item">
+                        <span id="movesLabel">Mouvements:</span> <span id="moves">0</span>
+                    </div>
+                    <div class="info-item">
+                        <span id="timeLabel">Temps:</span> <span id="time">00:00</span>
+                    </div>
+                    <div class="info-item">
+                        <span id="levelLabel">Niveau:</span> <span id="currentLevel">1</span>
+                    </div>
+
+                    <button class="ai-hint" id="aiHint">🤖 Indice IA</button>
+                </div>
+                <div class="game-grid" id="gameGrid"></div>
+            </div>
+
+            <div class="right-controls">
+                <h3 style="color: #00ffff; margin-bottom: 15px;" id="actionsTitle">Actions</h3>
+                <button class="rules-btn" id="rulesBtn">📋 Règles</button>
+                <button class="start-btn" id="startBtn">🚀 Commencer</button>
+                <button class="pause-btn" id="pauseBtn">⏸️ Pause</button>
+                <button class="new-game-btn" id="newGameBtn">🎮 Nouvelle Partie</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal des règles -->
+    <div class="modal" id="rulesModal">
+        <div class="modal-content">
+            <button class="close-btn" id="closeRules">&times;</button>
+            <h2 id="rulesTitle">Règles du Jeu</h2>
+            <div id="rulesContent">
+                <p><strong>Objectif:</strong> Connectez la source quantique (🔴) à la cible (🟢) en faisant tourner les conduits.</p>
+                <p><strong>Comment jouer:</strong></p>
+                <ul>
+                    <li>Cliquez sur les conduits pour les faire tourner</li>
+                    <li>Créez un chemin continu de la source à la cible</li>
+                    <li>Utilisez l'IA pour obtenir des indices</li>
+                    <li>Terminez en moins de mouvements possible</li>
+                </ul>
+                <p><strong>Symboles:</strong></p>
+                <ul>
+                    <li>🔴 Source quantique</li>
+                    <li>🟢 Cible quantique</li>
+                    <li>━ ┃ ┏ ┓ ┗ ┛ Conduits directionnels</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Traductions
+        const translations = {
+            fr: {
+                subtitle: "Connectez les conduits quantiques avec l'IA",
+                rules: "📋 Règles",
+                start: "🚀 Commencer",
+                level: "Niveau",
+
+                moves: "Mouvements:",
+                time: "Temps:",
+                aiHint: "🤖 Indice IA",
+                solution: "💡 Solution",
+                pause: "⏸️ Pause",
+                resume: "▶️ Reprendre",
+                newGame: "🎮 Nouvelle Partie",
+                levels: "Niveaux",
+                actions: "Actions",
+                rulesTitle: "Règles du Jeu",
+                gamePaused: "Jeu en pause",
+                nextLevel: "Niveau suivant",
+                rulesContent: `
+                    <p><strong>Objectif:</strong> Connectez la source quantique (🔴) à la cible (🟢) en faisant tourner les conduits.</p>
+                    <p><strong>Comment jouer:</strong></p>
+                    <ul>
+                        <li>Cliquez sur les conduits pour les faire tourner</li>
+                        <li>Créez un chemin continu de la source à la cible</li>
+                        <li>Utilisez l'IA pour obtenir des indices</li>
+                        <li>Terminez en moins de mouvements possible</li>
+                    </ul>
+                    <p><strong>Symboles:</strong></p>
+                    <ul>
+                        <li>🔴 Source quantique</li>
+                        <li>🟢 Cible quantique</li>
+                        <li>━ ┃ ┏ ┓ ┗ ┛ Conduits directionnels</li>
+                    </ul>
+                `
+            },
+            en: {
+                subtitle: "Connect quantum pipes with AI assistance",
+                rules: "📋 Rules",
+                start: "🚀 Start",
+                level: "Level",
+
+                moves: "Moves:",
+                time: "Time:",
+                aiHint: "🤖 AI Hint",
+                solution: "💡 Solution",
+                pause: "⏸️ Pause",
+                resume: "▶️ Resume",
+                newGame: "🎮 New Game",
+                levels: "Levels",
+                actions: "Actions",
+                rulesTitle: "Game Rules",
+                gamePaused: "Game Paused",
+                nextLevel: "Next Level",
+                rulesContent: `
+                    <p><strong>Objective:</strong> Connect the quantum source (🔴) to the target (🟢) by rotating pipes.</p>
+                    <p><strong>How to play:</strong></p>
+                    <ul>
+                        <li>Click on pipes to rotate them</li>
+                        <li>Create a continuous path from source to target</li>
+                        <li>Use AI for hints</li>
+                        <li>Complete with minimum moves</li>
+                    </ul>
+                    <p><strong>Symbols:</strong></p>
+                    <ul>
+                        <li>🔴 Quantum source</li>
+                        <li>🟢 Quantum target</li>
+                        <li>━ ┃ ┏ ┓ ┗ ┛ Directional pipes</li>
+                    </ul>
+                `
+            },
+            ar: {
+                subtitle: "اربط الأنابيب الكمية بمساعدة الذكاء الاصطناعي",
+                rules: "📋 القواعد",
+                start: "🚀 ابدأ",
+                level: "المستوى",
+                game: "اللعبة:",
+                moves: "الحركات:",
+                time: "الوقت:",
+                aiHint: "🤖 تلميح الذكاء الاصطناعي",
+                solution: "💡 الحل",
+                pause: "⏸️ إيقاف",
+                resume: "▶️ استئناف",
+                newGame: "🎮 لعبة جديدة",
+                levels: "المستويات",
+                actions: "الإجراءات",
+                rulesTitle: "قواعد اللعبة",
+                gamePaused: "اللعبة متوقفة",
+                nextLevel: "المستوى التالي",
+                rulesContent: `
+                    <p><strong>الهدف:</strong> اربط المصدر الكمي (🔴) بالهدف (🟢) عن طريق تدوير الأنابيب.</p>
+                    <p><strong>كيفية اللعب:</strong></p>
+                    <ul>
+                        <li>انقر على الأنابيب لتدويرها</li>
+                        <li>أنشئ مسارًا مستمرًا من المصدر إلى الهدف</li>
+                        <li>استخدم الذكاء الاصطناعي للحصول على تلميحات</li>
+                        <li>أكمل بأقل عدد من الحركات</li>
+                    </ul>
+                    <p><strong>الرموز:</strong></p>
+                    <ul>
+                        <li>🔴 المصدر الكمي</li>
+                        <li>🟢 الهدف الكمي</li>
+                        <li>━ ┃ ┏ ┓ ┗ ┛ أنابيب اتجاهية</li>
+                    </ul>
+                `
+            },
+            es: {
+                subtitle: "Conecta tuberías cuánticas con asistencia de IA",
+                rules: "📋 Reglas",
+                start: "🚀 Comenzar",
+                level: "Nivel",
+                game: "Partida:",
+                moves: "Movimientos:",
+                time: "Tiempo:",
+                aiHint: "🤖 Pista IA",
+                solution: "💡 Solución",
+                pause: "⏸️ Pausa",
+                resume: "▶️ Reanudar",
+                newGame: "🎮 Nuevo Juego",
+                levels: "Niveles",
+                actions: "Acciones",
+                rulesTitle: "Reglas del Juego",
+                gamePaused: "Juego Pausado",
+                nextLevel: "Siguiente Nivel",
+                rulesContent: `
+                    <p><strong>Objetivo:</strong> Conecta la fuente cuántica (🔴) al objetivo (🟢) rotando tuberías.</p>
+                    <p><strong>Cómo jugar:</strong></p>
+                    <ul>
+                        <li>Haz clic en las tuberías para rotarlas</li>
+                        <li>Crea un camino continuo desde la fuente al objetivo</li>
+                        <li>Usa la IA para obtener pistas</li>
+                        <li>Completa con el mínimo de movimientos</li>
+                    </ul>
+                    <p><strong>Símbolos:</strong></p>
+                    <ul>
+                        <li>🔴 Fuente cuántica</li>
+                        <li>🟢 Objetivo cuántico</li>
+                        <li>━ ┃ ┏ ┓ ┗ ┛ Tuberías direccionales</li>
+                    </ul>
+                `
+            },
+            de: {
+                subtitle: "Verbinde Quantenrohre mit KI-Unterstützung",
+                rules: "📋 Regeln",
+                start: "🚀 Starten",
+                level: "Level",
+                game: "Spiel:",
+                moves: "Züge:",
+                time: "Zeit:",
+                aiHint: "🤖 KI-Hinweis",
+                solution: "💡 Lösung",
+                pause: "⏸️ Pause",
+                resume: "▶️ Fortsetzen",
+                newGame: "🎮 Neues Spiel",
+                levels: "Level",
+                actions: "Aktionen",
+                rulesTitle: "Spielregeln",
+                gamePaused: "Spiel Pausiert",
+                nextLevel: "Nächstes Level",
+                rulesContent: `
+                    <p><strong>Ziel:</strong> Verbinde die Quantenquelle (🔴) mit dem Ziel (🟢) durch Drehen der Rohre.</p>
+                    <p><strong>Spielweise:</strong></p>
+                    <ul>
+                        <li>Klicke auf Rohre, um sie zu drehen</li>
+                        <li>Erstelle einen durchgehenden Pfad von der Quelle zum Ziel</li>
+                        <li>Nutze die KI für Hinweise</li>
+                        <li>Beende mit minimalen Zügen</li>
+                    </ul>
+                    <p><strong>Symbole:</strong></p>
+                    <ul>
+                        <li>🔴 Quantenquelle</li>
+                        <li>🟢 Quantenziel</li>
+                        <li>━ ┃ ┏ ┓ ┗ ┛ Richtungsrohre</li>
+                    </ul>
+                `
+            },
+            zh: {
+                subtitle: "在AI协助下连接量子管道",
+                rules: "📋 规则",
+                start: "🚀 开始",
+                level: "等级",
+                game: "游戏:",
+                moves: "移动:",
+                time: "时间:",
+                aiHint: "🤖 AI提示",
+                solution: "💡 解决方案",
+                pause: "⏸️ 暂停",
+                resume: "▶️ 继续",
+                newGame: "🎮 新游戏",
+                levels: "等级",
+                actions: "操作",
+                rulesTitle: "游戏规则",
+                gamePaused: "游戏暂停",
+                nextLevel: "下一关",
+                rulesContent: `
+                    <p><strong>目标:</strong> 通过旋转管道将量子源(🔴)连接到目标(🟢)。</p>
+                    <p><strong>游戏方法:</strong></p>
+                    <ul>
+                        <li>点击管道来旋转它们</li>
+                        <li>创建从源到目标的连续路径</li>
+                        <li>使用AI获取提示</li>
+                        <li>用最少的移动完成</li>
+                    </ul>
+                    <p><strong>符号:</strong></p>
+                    <ul>
+                        <li>🔴 量子源</li>
+                        <li>🟢 量子目标</li>
+                        <li>━ ┃ ┏ ┓ ┗ ┛ 方向管道</li>
+                    </ul>
+                `
+            }
+        };
+
+        // Variables du jeu
+        let currentLanguage = 'fr';
+        let currentLevel = 1;
+        let moves = 0;
+        let gameTime = 0;
+        let gameTimer = null;
+        let gameGrid = [];
+        let gridSize = { rows: 6, cols: 6 };
+        let gamePaused = false;
+        let gameNumber = 1;
+        let maxGamesPerLevel = 100;
+
+        // Types de conduits avec leurs connexions
+        const pipeTypes = [
+            { symbol: '━', connections: ['left', 'right'] },
+            { symbol: '┃', connections: ['top', 'bottom'] },
+            { symbol: '┏', connections: ['right', 'bottom'] },
+            { symbol: '┓', connections: ['left', 'bottom'] },
+            { symbol: '┗', connections: ['top', 'right'] },
+            { symbol: '┛', connections: ['top', 'left'] }
+        ];
+        
+        // État du jeu
+        let gameStarted = false;
+        let levelCompleted = false;
+        
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeGame();
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            // Sélecteur de langue
+            document.getElementById('languageBtn').addEventListener('click', function() {
+                const dropdown = document.getElementById('languageDropdown');
+                dropdown.classList.toggle('show');
+            });
+
+            // Options de langue
+            document.querySelectorAll('.language-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    const lang = this.dataset.lang;
+                    changeLanguage(lang);
+                    document.getElementById('languageDropdown').classList.remove('show');
+                });
+            });
+
+            // Boutons de niveau
+            document.querySelectorAll('.level-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.level-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    currentLevel = parseInt(this.dataset.level);
+                    document.getElementById('currentLevel').textContent = currentLevel;
+                    gameNumber = 1; // Réinitialiser le compteur pour le nouveau niveau
+                    generateLevel();
+                });
+            });
+
+            // Boutons de contrôle
+            document.getElementById('rulesBtn').addEventListener('click', showRules);
+            document.getElementById('startBtn').addEventListener('click', startNewGame);
+            document.getElementById('closeRules').addEventListener('click', hideRules);
+            document.getElementById('aiHint').addEventListener('click', showAIHint);
+            document.getElementById('solutionBtn').addEventListener('click', showSolution);
+            document.getElementById('pauseBtn').addEventListener('click', togglePause);
+            document.getElementById('newGameBtn').addEventListener('click', startNewGame);
+
+            // Fermer dropdown en cliquant ailleurs
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.language-selector')) {
+                    document.getElementById('languageDropdown').classList.remove('show');
+                }
+            });
+        }
+
+        function changeLanguage(lang) {
+            currentLanguage = lang;
+            const t = translations[lang];
+            
+            // Mettre à jour les textes
+            document.getElementById('subtitle').textContent = t.subtitle;
+            document.getElementById('rulesBtn').innerHTML = t.rules;
+            document.getElementById('startBtn').innerHTML = t.start;
+            document.getElementById('movesLabel').textContent = t.moves;
+            document.getElementById('timeLabel').textContent = t.time;
+            document.getElementById('levelLabel').textContent = t.level + ':';
+            document.getElementById('aiHint').innerHTML = t.aiHint;
+            document.getElementById('solutionBtn').innerHTML = t.solution;
+            document.getElementById('pauseBtn').innerHTML = gamePaused ? t.resume : t.pause;
+            document.getElementById('newGameBtn').innerHTML = t.newGame;
+            document.getElementById('levelsTitle').textContent = t.levels;
+            document.getElementById('actionsTitle').textContent = t.actions;
+            
+            // Mettre à jour les boutons de niveau
+            for (let i = 1; i <= 3; i++) {
+                document.getElementById(`level${i}`).textContent = `${t.level} ${i}`;
+            }
+            
+            // Mettre à jour le bouton de langue
+            const flags = { fr: '🇫🇷', en: '🇬🇧', ar: '🇸🇦', es: '🇪🇸', de: '🇩🇪', zh: '🇨🇳' };
+            const names = { fr: 'Français', en: 'English', ar: 'العربية', es: 'Español', de: 'Deutsch', zh: '中文' };
+            document.getElementById('languageBtn').innerHTML = `🌐 ${names[lang]}`;
+        }
+
+        function initializeGame() {
+            generateLevel();
+            updateDisplay();
+        }
+
+        function generateLevel() {
+            const gridElement = document.getElementById('gameGrid');
+            gridElement.innerHTML = '';
+            
+            // Ajuster la taille de la grille selon le niveau
+            const sizes = [
+                { rows: 4, cols: 4 },
+                { rows: 5, cols: 5 },
+                { rows: 6, cols: 6 }
+            ];
+            
+            gridSize = sizes[currentLevel - 1];
+            gridElement.style.gridTemplateColumns = `repeat(${gridSize.cols}, 1fr)`;
+            
+            // Générer un niveau simple avec variation limitée
+            generateSimpleLevel();
+            resetGame();
+        }
+
+
+
+        function generateSimpleLevel() {
+            // Générer un niveau simple avec variation limitée
+            const sourcePos = 0;
+            const targetPos = gridSize.rows * gridSize.cols - 1;
+            
+            gameGrid = [];
+            const gridElement = document.getElementById('gameGrid');
+            gridElement.innerHTML = '';
+            
+            for (let i = 0; i < gridSize.rows * gridSize.cols; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'pipe-cell';
+                cell.dataset.index = i;
+                
+                let cellData;
+                
+                if (i === sourcePos) {
+                    cell.classList.add('source');
+                    cell.innerHTML = '<span class="pipe-symbol">🔴</span>';
+                    cellData = {
+                        type: 'source',
+                        symbol: '🔴',
+                        connections: ['right', 'bottom'],
+                        rotation: 0,
+                        connected: false,
+                        isFixed: true
+                    };
+                } else if (i === targetPos) {
+                    cell.classList.add('target');
+                    cell.innerHTML = '<span class="pipe-symbol">🟢</span>';
+                    cellData = {
+                        type: 'target',
+                        symbol: '🟢',
+                        connections: ['left', 'top'],
+                        rotation: 0,
+                        connected: false,
+                        isFixed: true
+                    };
+                } else {
+                    // Variation simple basée sur le numéro de partie (limité à 100)
+                    const variation = (gameNumber - 1) % maxGamesPerLevel;
+                    const pipeIndex = (i + variation) % 3; // Seulement les 3 premiers types
+                    const pipe = pipeTypes[pipeIndex];
+                    const rotation = ((i * variation) % 4) * 90; // Rotation basée sur position et variation
+                    
+                    cell.innerHTML = `<span class="pipe-symbol">${pipe.symbol}</span>`;
+                    cell.addEventListener('click', () => rotatePipe(i));
+                    
+                    cellData = {
+                        type: 'pipe',
+                        symbol: pipe.symbol,
+                        connections: rotateConnections(pipe.connections, rotation / 90),
+                        rotation: rotation,
+                        connected: false,
+                        isFixed: false,
+                        pipeIndex: pipeIndex
+                    };
+                    
+                    cell.style.transform = `rotate(${rotation}deg)`;
+                }
+                
+                gridElement.appendChild(cell);
+                gameGrid.push(cellData);
+            }
+        }
+
+        function rotateConnections(connections, rotations) {
+            let result = [...connections];
+            for (let i = 0; i < rotations; i++) {
+                result = result.map(conn => {
+                    switch(conn) {
+                        case 'top': return 'right';
+                        case 'right': return 'bottom';
+                        case 'bottom': return 'left';
+                        case 'left': return 'top';
+                        default: return conn;
+                    }
+                });
+            }
+            return result;
+        }
+
+
+
+        function togglePause() {
+            if (!gameStarted) return;
+            
+            gamePaused = !gamePaused;
+            const t = translations[currentLanguage];
+            
+            if (gamePaused) {
+                if (gameTimer) clearInterval(gameTimer);
+                document.getElementById('pauseBtn').innerHTML = t.resume;
+                
+                // Désactiver les interactions avec la grille
+                document.querySelectorAll('.pipe-cell').forEach(cell => {
+                    cell.style.pointerEvents = 'none';
+                    cell.style.opacity = '0.5';
+                });
+                
+                try{ parent.postMessage({ action: 'dialog', dialogType: 'alert', text: t.gamePaused }, '*'); }catch(e){}
+            } else {
+                gameTimer = setInterval(() => {
+                    gameTime++;
+                    updateDisplay();
+                }, 1000);
+                document.getElementById('pauseBtn').innerHTML = t.pause;
+                
+                // Réactiver les interactions avec la grille
+                document.querySelectorAll('.pipe-cell').forEach(cell => {
+                    cell.style.pointerEvents = 'auto';
+                    cell.style.opacity = '1';
+                });
+            }
+        }
+
+        function rotatePipe(index) {
+            if (gamePaused || levelCompleted) return;
+            
+            if (!gameStarted) {
+                gameStarted = true;
+                if (gameTimer) clearInterval(gameTimer);
+                gameTimer = setInterval(() => {
+                    if (!gamePaused) {
+                        gameTime++;
+                        updateDisplay();
+                    }
+                }, 1000);
+            }
+            
+            if (gameGrid[index].type === 'pipe' && !gameGrid[index].isFixed && !levelCompleted) {
+                // Faire tourner les connexions de 90 degrés
+                const connections = gameGrid[index].connections;
+                const rotatedConnections = connections.map(conn => {
+                    switch(conn) {
+                        case 'top': return 'right';
+                        case 'right': return 'bottom';
+                        case 'bottom': return 'left';
+                        case 'left': return 'top';
+                        default: return conn;
+                    }
+                });
+                
+                gameGrid[index].connections = rotatedConnections;
+                gameGrid[index].rotation = (gameGrid[index].rotation + 90) % 360;
+                
+                const cell = document.querySelector(`[data-index="${index}"]`);
+                cell.style.transform = `rotate(${gameGrid[index].rotation}deg)`;
+                
+                // Effet visuel de rotation
+                cell.style.transition = 'transform 0.3s ease';
+                setTimeout(() => {
+                    cell.style.transition = '';
+                }, 300);
+                
+                moves++;
+                updateDisplay();
+                checkConnections();
+            }
+        }
+
+        function checkConnections() {
+            // Réinitialiser toutes les connexions
+            gameGrid.forEach((cell, index) => {
+                cell.connected = false;
+                const cellElement = document.querySelector(`[data-index="${index}"]`);
+                cellElement.classList.remove('connected', 'solution-path');
+            });
+            
+            // Algorithme de recherche en profondeur pour trouver le chemin
+            const visited = new Set();
+            const connectedCells = new Set();
+            const solutionPath = [];
+            
+            function dfs(index, path = []) {
+                if (visited.has(index)) return false;
+                visited.add(index);
+                connectedCells.add(index);
+                path.push(index);
+                
+                const cell = gameGrid[index];
+                const row = Math.floor(index / gridSize.cols);
+                const col = index % gridSize.cols;
+                
+                // Vérifier les connexions dans toutes les directions
+                const directions = [
+                    { name: 'top', row: row - 1, col: col, opposite: 'bottom' },
+                    { name: 'right', row: row, col: col + 1, opposite: 'left' },
+                    { name: 'bottom', row: row + 1, col: col, opposite: 'top' },
+                    { name: 'left', row: row, col: col - 1, opposite: 'right' }
+                ];
+                
+                for (const dir of directions) {
+                    if (dir.row >= 0 && dir.row < gridSize.rows && 
+                        dir.col >= 0 && dir.col < gridSize.cols) {
+                        
+                        const neighborIndex = dir.row * gridSize.cols + dir.col;
+                        const neighbor = gameGrid[neighborIndex];
+                        
+                        // Vérifier si cette cellule a une connexion dans cette direction
+                        if (cell.connections.includes(dir.name) && 
+                            neighbor.connections.includes(dir.opposite)) {
+                            
+                            if (neighbor.type === 'target') {
+                                solutionPath.push(...path, neighborIndex);
+                                return true; // Chemin trouvé vers la cible!
+                            }
+                            
+                            if (!visited.has(neighborIndex)) {
+                                if (dfs(neighborIndex, [...path])) {
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                return false;
+            }
+            
+            // Commencer la recherche depuis la source
+            const sourceIndex = 0;
+            const pathFound = dfs(sourceIndex);
+            
+            // Marquer visuellement les cellules connectées
+            if (pathFound && solutionPath.length > 0) {
+                // Chemin de solution trouvé - utiliser la couleur dorée
+                solutionPath.forEach(index => {
+                    gameGrid[index].connected = true;
+                    const cellElement = document.querySelector(`[data-index="${index}"]`);
+                    cellElement.classList.add('solution-path');
+                });
+                
+                levelCompleted = true;
+                if (gameTimer) clearInterval(gameTimer);
+                
+                setTimeout(() => {
+                    const t = translations[currentLanguage];
+                    const message = currentLanguage === 'fr' ? 
+                        `🎉 Niveau ${currentLevel} terminé en ${moves} mouvements et ${Math.floor(gameTime/60)}:${(gameTime%60).toString().padStart(2,'0')}!` :
+                        currentLanguage === 'en' ?
+                        `🎉 Level ${currentLevel} completed in ${moves} moves and ${Math.floor(gameTime/60)}:${(gameTime%60).toString().padStart(2,'0')}!` :
+                        currentLanguage === 'es' ?
+                        `🎉 Nivel ${currentLevel} completado en ${moves} movimientos y ${Math.floor(gameTime/60)}:${(gameTime%60).toString().padStart(2,'0')}!` :
+                        currentLanguage === 'de' ?
+                        `🎉 Level ${currentLevel} abgeschlossen in ${moves} Zügen und ${Math.floor(gameTime/60)}:${(gameTime%60).toString().padStart(2,'0')}!` :
+                        currentLanguage === 'zh' ?
+                        `🎉 第${currentLevel}关完成，用时${moves}步和${Math.floor(gameTime/60)}:${(gameTime%60).toString().padStart(2,'0')}!` :
+                        currentLanguage === 'ar' ?
+                        `🎉 المستوى ${currentLevel} مكتمل في ${moves} حركات و ${Math.floor(gameTime/60)}:${(gameTime%60).toString().padStart(2,'0')}!` :
+                        `🎉 Niveau ${currentLevel} terminé en ${moves} mouvements!`;
+                    
+                    try{ parent.postMessage({ action: 'dialog', dialogType: 'alert', text: message }, '*'); }catch(e){}
+                    
+                    // Auto-avancer au niveau suivant si disponible
+                    if (currentLevel < 3) {
+                        setTimeout(() => {
+                            const t = translations[currentLanguage];
+                            if (confirm(`${t.nextLevel} ${currentLevel + 1}?`)) {
+                                const nextLevelBtn = document.querySelector(`[data-level="${currentLevel + 1}"]`);
+                                if (nextLevelBtn) {
+                                    nextLevelBtn.click();
+                                }
+                            }
+                        }, 1000);
+                    }
+                }, 500);
+            } else {
+                // Pas de solution complète - marquer seulement les connexions partielles en bleu
+                connectedCells.forEach(index => {
+                    gameGrid[index].connected = true;
+                    const cellElement = document.querySelector(`[data-index="${index}"]`);
+                    cellElement.classList.add('connected');
+                });
+            }
+        }
+
+        function startNewGame() {
+            levelCompleted = false;
+            gameStarted = false;
+            
+            // Vérifier la limite de 100 parties par niveau
+            if (gameNumber >= maxGamesPerLevel) {
+                const limitMessages = {
+                    fr: `⚠️ Limite atteinte! Maximum ${maxGamesPerLevel} parties par niveau. Changez de niveau pour continuer.`,
+                    en: `⚠️ Limit reached! Maximum ${maxGamesPerLevel} games per level. Change level to continue.`,
+                    ar: `⚠️ تم الوصول للحد الأقصى! الحد الأقصى ${maxGamesPerLevel} لعبة لكل مستوى. غير المستوى للمتابعة.`,
+                    es: `⚠️ ¡Límite alcanzado! Máximo ${maxGamesPerLevel} juegos por nivel. Cambia de nivel para continuar.`,
+                    de: `⚠️ Limit erreicht! Maximum ${maxGamesPerLevel} Spiele pro Level. Level wechseln um fortzufahren.`,
+                    zh: `⚠️ 已达到限制！每关最多${maxGamesPerLevel}个游戏。更换关卡以继续。`
+                };
+                
+                const message = limitMessages[currentLanguage] || limitMessages.fr;
+                try{ parent.postMessage({ action: 'dialog', dialogType: 'alert', text: message }, '*'); }catch(e){}
+                return;
+            }
+            
+            gameNumber++; // Incrémenter pour générer un nouveau niveau
+            generateLevel();
+        }
+
+        function resetGame() {
+            moves = 0;
+            gameTime = 0;
+            gameStarted = false;
+            levelCompleted = false;
+            gamePaused = false;
+            if (gameTimer) clearInterval(gameTimer);
+            
+            // Réinitialiser le bouton pause
+            const t = translations[currentLanguage];
+            document.getElementById('pauseBtn').innerHTML = t.pause;
+            
+            updateDisplay();
+        }
+
+        function updateDisplay() {
+            document.getElementById('moves').textContent = moves;
+            document.getElementById('currentLevel').textContent = currentLevel;
+            
+            const minutes = Math.floor(gameTime / 60);
+            const seconds = gameTime % 60;
+            document.getElementById('time').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function showRules() {
+            const modal = document.getElementById('rulesModal');
+            const t = translations[currentLanguage];
+            
+            document.getElementById('rulesTitle').textContent = t.rulesTitle;
+            document.getElementById('rulesContent').innerHTML = t.rulesContent;
+            
+            modal.style.display = 'block';
+        }
+
+        function hideRules() {
+            document.getElementById('rulesModal').style.display = 'none';
+        }
+
+        function showAIHint() {
+            if (levelCompleted) return;
+            
+            // Analyser la grille pour donner un indice intelligent
+            const sourceIndex = 0;
+            const targetIndex = gridSize.rows * gridSize.cols - 1;
+            
+            // Trouver les cellules adjacentes à la source
+            const sourceRow = Math.floor(sourceIndex / gridSize.cols);
+            const sourceCol = sourceIndex % gridSize.cols;
+            
+            const adjacentCells = [];
+            const directions = [
+                { name: 'right', row: sourceRow, col: sourceCol + 1, dir: 'droite' },
+                { name: 'bottom', row: sourceRow + 1, col: sourceCol, dir: 'bas' }
+            ];
+            
+            for (const dir of directions) {
+                if (dir.row >= 0 && dir.row < gridSize.rows && 
+                    dir.col >= 0 && dir.col < gridSize.cols) {
+                    const index = dir.row * gridSize.cols + dir.col;
+                    adjacentCells.push({ index, direction: dir.dir, name: dir.name });
+                }
+            }
+            
+            // Analyser les connexions actuelles
+            let bestHint = null;
+            for (const adj of adjacentCells) {
+                const cell = gameGrid[adj.index];
+                if (cell.type === 'pipe') {
+                    const needsConnection = adj.name === 'right' ? 'left' : 'top';
+                    if (!cell.connections.includes(needsConnection)) {
+                        bestHint = adj;
+                        break;
+                    }
+                }
+            }
+            
+            const hints = {
+                fr: {
+                    general: [
+                        "💡 Commencez par connecter la source rouge aux conduits adjacents",
+                        "🤖 Cherchez un chemin direct vers la cible verte",
+                        "⚡ Les conduits doivent s'aligner parfaitement pour se connecter",
+                        "🔮 Essayez de créer un chemin continu sans interruption"
+                    ],
+                    specific: bestHint ? `🎯 Essayez de faire tourner le conduit à ${bestHint.direction} de la source` : null
+                },
+                en: {
+                    general: [
+                        "💡 Start by connecting the red source to adjacent pipes",
+                        "🤖 Look for a direct path to the green target",
+                        "⚡ Pipes must align perfectly to connect",
+                        "🔮 Try to create a continuous path without interruption"
+                    ],
+                    specific: bestHint ? `🎯 Try rotating the pipe to the ${bestHint.direction === 'droite' ? 'right' : 'bottom'} of the source` : null
+                },
+                ar: {
+                    general: [
+                        "💡 ابدأ بربط المصدر الأحمر بالأنابيب المجاورة",
+                        "🤖 ابحث عن مسار مباشر إلى الهدف الأخضر",
+                        "⚡ يجب أن تتماشى الأنابيب تماماً للاتصال",
+                        "🔮 حاول إنشاء مسار مستمر بدون انقطاع"
+                    ],
+                    specific: bestHint ? `🎯 حاول تدوير الأنبوب ${bestHint.direction === 'droite' ? 'يمين' : 'أسفل'} المصدر` : null
+                },
+                es: {
+                    general: [
+                        "💡 Comienza conectando la fuente roja a tuberías adyacentes",
+                        "🤖 Busca un camino directo al objetivo verde",
+                        "⚡ Las tuberías deben alinearse perfectamente para conectar",
+                        "🔮 Intenta crear un camino continuo sin interrupciones"
+                    ],
+                    specific: bestHint ? `🎯 Intenta rotar la tubería a la ${bestHint.direction === 'droite' ? 'derecha' : 'abajo'} de la fuente` : null
+                },
+                de: {
+                    general: [
+                        "💡 Beginne damit, die rote Quelle mit benachbarten Rohren zu verbinden",
+                        "🤖 Suche einen direkten Pfad zum grünen Ziel",
+                        "⚡ Rohre müssen perfekt ausgerichtet sein, um sich zu verbinden",
+                        "🔮 Versuche einen kontinuierlichen Pfad ohne Unterbrechung zu erstellen"
+                    ],
+                    specific: bestHint ? `🎯 Versuche das Rohr ${bestHint.direction === 'droite' ? 'rechts' : 'unten'} von der Quelle zu drehen` : null
+                },
+                zh: {
+                    general: [
+                        "💡 从连接红色源到相邻管道开始",
+                        "🤖 寻找到绿色目标的直接路径",
+                        "⚡ 管道必须完美对齐才能连接",
+                        "🔮 尝试创建一个连续的路径"
+                    ],
+                    specific: bestHint ? `🎯 尝试旋转源${bestHint.direction === 'droite' ? '右侧' : '下方'}的管道` : null
+                }
+            };
+            
+            const langHints = hints[currentLanguage] || hints.fr;
+            let hintMessage;
+            
+            if (langHints.specific && Math.random() > 0.3) {
+                hintMessage = langHints.specific;
+            } else {
+                hintMessage = langHints.general[Math.floor(Math.random() * langHints.general.length)];
+            }
+            
+            try{ parent.postMessage({ action: 'dialog', dialogType: 'alert', text: hintMessage }, '*'); }catch(e){}
+        }
+
+        function showSolution() {
+            if (levelCompleted) return;
+            
+            const solutionMessages = {
+                fr: "🤖 Résolution automatique du niveau " + currentLevel + "...",
+                en: "🤖 Automatically solving level " + currentLevel + "...",
+                ar: "🤖 حل تلقائي للمستوى " + currentLevel + "...",
+                es: "🤖 Resolviendo automáticamente el nivel " + currentLevel + "...",
+                de: "🤖 Automatisches Lösen von Level " + currentLevel + "...",
+                zh: "🤖 自动解决第" + currentLevel + "关..."
+            };
+            
+            const message = solutionMessages[currentLanguage] || solutionMessages.fr;
+            try{ parent.postMessage({ action: 'dialog', dialogType: 'alert', text: message }, '*'); }catch(e){}
+            
+            // Démarrer le jeu si pas encore commencé
+            if (!gameStarted) {
+                gameStarted = true;
+                if (gameTimer) clearInterval(gameTimer);
+                gameTimer = setInterval(() => {
+                    gameTime++;
+                    updateDisplay();
+                }, 1000);
+            }
+            
+            // Algorithme de résolution automatique
+            setTimeout(() => {
+                solvePuzzleAutomatically();
+            }, 1000);
+        }
+
+        function solvePuzzleAutomatically() {
+            // Démarrer le jeu si pas encore commencé
+            if (!gameStarted) {
+                gameStarted = true;
+                if (gameTimer) clearInterval(gameTimer);
+                gameTimer = setInterval(() => {
+                    gameTime++;
+                    updateDisplay();
+                }, 1000);
+            }
+            
+            // Algorithme de résolution avec limite de 150 coups maximum
+            let attempts = 0;
+            const maxAttempts = 200; // Augmenter les tentatives
+            const maxSolutionMoves = 150; // Limite de coups pour la solution uniquement
+            const initialMoves = moves; // Sauvegarder le nombre de coups initial
+            let solutionMoves = 0; // Compteur séparé pour les coups de solution
+            
+            function testSolution() {
+                const visited = new Set();
+                
+                function dfs(index) {
+                    if (visited.has(index)) return false;
+                    visited.add(index);
+                    
+                    const cell = gameGrid[index];
+                    const row = Math.floor(index / gridSize.cols);
+                    const col = index % gridSize.cols;
+                    
+                    const directions = [
+                        { name: 'top', row: row - 1, col: col, opposite: 'bottom' },
+                        { name: 'right', row: row, col: col + 1, opposite: 'left' },
+                        { name: 'bottom', row: row + 1, col: col, opposite: 'top' },
+                        { name: 'left', row: row, col: col - 1, opposite: 'right' }
+                    ];
+                    
+                    for (const dir of directions) {
+                        if (dir.row >= 0 && dir.row < gridSize.rows && 
+                            dir.col >= 0 && dir.col < gridSize.cols) {
+                            
+                            const neighborIndex = dir.row * gridSize.cols + dir.col;
+                            const neighbor = gameGrid[neighborIndex];
+                            
+                            if (cell.connections.includes(dir.name) && 
+                                neighbor.connections.includes(dir.opposite)) {
+                                
+                                if (neighbor.type === 'target') {
+                                    return true;
+                                }
+                                
+                                if (!visited.has(neighborIndex)) {
+                                    if (dfs(neighborIndex)) {
+                                        return true;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    return false;
+                }
+                
+                return dfs(0);
+            }
+            
+            function solve() {
+                // Vérifier si on a dépassé la limite de coups de solution
+                if (solutionMoves >= maxSolutionMoves) {
+                    const limitMessages = {
+                        fr: `⚠️ Limite de ${maxSolutionMoves} coups atteinte! Solution arrêtée.`,
+                        en: `⚠️ ${maxSolutionMoves} moves limit reached! Solution stopped.`,
+                        ar: `⚠️ تم الوصول لحد ${maxSolutionMoves} حركة! توقف الحل.`,
+                        es: `⚠️ ¡Límite de ${maxSolutionMoves} movimientos alcanzado! Solución detenida.`,
+                        de: `⚠️ ${maxSolutionMoves} Züge-Limit erreicht! Lösung gestoppt.`,
+                        zh: `⚠️ 已达到${maxSolutionMoves}步限制！解决方案已停止。`
+                    };
+                    try{ parent.postMessage({ action: 'dialog', dialogType: 'alert', text: (limitMessages[currentLanguage] || limitMessages.fr) }, '*'); }catch(e){}
+                    return;
+                }
+                
+                if (attempts >= maxAttempts) {
+                    const failMessages = {
+                        fr: `❌ Solution non trouvée en ${maxSolutionMoves} coups max. Essayez manuellement!`,
+                        en: `❌ Solution not found within ${maxSolutionMoves} moves. Try manually!`,
+                        ar: `❌ لم يتم العثور على حل في ${maxSolutionMoves} حركة كحد أقصى. جرب يدوياً!`,
+                        es: `❌ Solución no encontrada en máximo ${maxSolutionMoves} movimientos. ¡Inténtalo manualmente!`,
+                        de: `❌ Lösung nicht in max. ${maxSolutionMoves} Zügen gefunden. Versuche es manuell!`,
+                        zh: `❌ 在最多${maxSolutionMoves}步内未找到解决方案。请手动尝试！`
+                    };
+                    try{ parent.postMessage({ action: 'dialog', dialogType: 'alert', text: (failMessages[currentLanguage] || failMessages.fr) }, '*'); }catch(e){}
+                    return;
+                }
+                
+                attempts++;
+                
+                if (testSolution()) {
+                    checkConnections();
+                    
+                    // Afficher le nombre de coups utilisés pour la solution
+                    const successMessages = {
+                        fr: `✅ Solution trouvée en ${solutionMoves} coups!`,
+                        en: `✅ Solution found in ${solutionMoves} moves!`,
+                        ar: `✅ تم العثور على الحل في ${solutionMoves} حركة!`,
+                        es: `✅ ¡Solución encontrada en ${solutionMoves} movimientos!`,
+                        de: `✅ Lösung in ${solutionMoves} Zügen gefunden!`,
+                        zh: `✅ 在${solutionMoves}步内找到解决方案！`
+                    };
+                    
+                    setTimeout(() => {
+                        try{ parent.postMessage({ action: 'dialog', dialogType: 'alert', text: (successMessages[currentLanguage] || successMessages.fr) }, '*'); }catch(e){}
+                    }, 1000);
+                    return;
+                }
+                
+                // Faire tourner un conduit aléatoire
+                const pipeIndices = [];
+                gameGrid.forEach((cell, index) => {
+                    if (cell.type === 'pipe' && !cell.isFixed) {
+                        pipeIndices.push(index);
+                    }
+                });
+                
+                if (pipeIndices.length > 0) {
+                    const randomPipeIndex = pipeIndices[Math.floor(Math.random() * pipeIndices.length)];
+                    
+                    // Faire la rotation manuellement pour contrôler le comptage
+                    if (gameGrid[randomPipeIndex].type === 'pipe' && !gameGrid[randomPipeIndex].isFixed) {
+                        // Faire tourner les connexions de 90 degrés
+                        const connections = gameGrid[randomPipeIndex].connections;
+                        const rotatedConnections = connections.map(conn => {
+                            switch(conn) {
+                                case 'top': return 'right';
+                                case 'right': return 'bottom';
+                                case 'bottom': return 'left';
+                                case 'left': return 'top';
+                                default: return conn;
+                            }
+                        });
+                        
+                        gameGrid[randomPipeIndex].connections = rotatedConnections;
+                        gameGrid[randomPipeIndex].rotation = (gameGrid[randomPipeIndex].rotation + 90) % 360;
+                        
+                        const cell = document.querySelector(`[data-index="${randomPipeIndex}"]`);
+                        cell.style.transform = `rotate(${gameGrid[randomPipeIndex].rotation}deg)`;
+                        cell.style.transition = 'transform 0.1s ease';
+                        
+                        // Incrémenter seulement le compteur de solution
+                        solutionMoves++;
+                        moves++; // Aussi le compteur global pour l'affichage
+                        updateDisplay();
+                    }
+                    
+                    setTimeout(solve, 50); // Réduire le délai pour plus de fluidité
+                }
+            }
+            
+            solve();
+        }
+
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9874168571c611be',t:'MTc1OTIzOTE2My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
+
+<script>
+    // canonical close handler for platform overlay (jeux22)
+    function closePlatform(){
+        try{ console.debug('jeux22: closePlatform called'); }catch(e){}
+        try{
+            if(window.parent && window.parent !== window){
+                window.parent.postMessage({ action:'close', reason:'user-initiated', source:'jeux22' }, '*');
+                return;
+            }
+        }catch(e){}
+        try{
+            if(window.opener && !window.opener.closed){
+                try{ window.opener.postMessage({ action:'child-closed', source:'jeux22' }, '*'); }catch(e){}
+                try{ window.close(); }catch(e){}
+                return;
+            }
+        }catch(e){}
+        // final fallback: absolute path to platform
+    window.location.href = '/brainova.html';
+    }
+    window.closePlatform = closePlatform;
+</script>
