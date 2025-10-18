@@ -1,0 +1,1776 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blackjack Quantum 2077</title>
+    <style>
+        body {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Orbitron', monospace;
+            background: linear-gradient(135deg, #0a0a0a, #1a1a2e, #16213e, #0f3460);
+            color: #00ffff;
+            height: 100%;
+            overflow-x: hidden;
+            animation: backgroundPulse 8s ease-in-out infinite;
+        }
+
+        /* Personnalisation de la barre de défilement */
+        body::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        body::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+        }
+
+        body::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #00ffff, #ff00ff);
+            border-radius: 10px;
+            border: 2px solid rgba(0, 0, 0, 0.3);
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        }
+
+        body::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #00cccc, #cc00cc);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.8);
+        }
+
+        @keyframes backgroundPulse {
+            0%, 100% { background: linear-gradient(135deg, #0a0a0a, #1a1a2e, #16213e, #0f3460); }
+            50% { background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460, #533483); }
+        }
+
+        .game-header {
+            text-align: center;
+            padding: 15px;
+            position: relative;
+        }
+
+        .game-title {
+            font-size: 36px;
+            margin: 0;
+            text-shadow: 0 0 20px #00ffff;
+            background: linear-gradient(45deg, #00ffff, #ff00ff, #ffff00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: titleGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes titleGlow {
+            0%, 100% { text-shadow: 0 0 30px #00ffff; }
+            50% { text-shadow: 0 0 50px #ff00ff, 0 0 70px #00ffff; }
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: #888;
+            margin-top: 5px;
+            letter-spacing: 2px;
+        }
+
+        .controls-header {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: flex-end;
+        }
+
+        .top-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .language-selector select {
+            padding: 8px 12px;
+            background: rgba(0, 0, 0, 0.8);
+            color: #00ffff;
+            border: 2px solid #00ffff;
+            border-radius: 8px;
+            font-size: 14px;
+            min-width: 120px;
+        }
+
+        .close-btn {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(45deg, #ff0000, #ff4444);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.6);
+        }
+
+        .rules-btn {
+            padding: 8px 16px;
+            background: linear-gradient(45deg, #00ffff, #0080ff);
+            border: 2px solid #00ffff;
+            border-radius: 8px;
+            color: #000;
+            font-weight: bold;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .rules-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 255, 255, 0.4);
+        }
+
+        .game-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 20px;
+            padding: 15px;
+            min-height: calc(100vh - 100px);
+        }
+
+        .side-panel {
+            width: 200px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .stats-panel {
+            background: rgba(0, 255, 255, 0.1);
+            border: 2px solid #00ffff;
+            border-radius: 10px;
+            padding: 8px;
+            text-align: center;
+        }
+
+        .stat-item {
+            margin: 4px 0;
+            font-size: 11px;
+        }
+
+        .stat-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #ff00ff;
+            text-shadow: 0 0 10px #ff00ff;
+        }
+
+        .controls-panel {
+            background: rgba(255, 0, 255, 0.1);
+            border: 2px solid #ff00ff;
+            border-radius: 10px;
+            padding: 8px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 6px;
+            margin: 3px 0;
+            background: linear-gradient(45deg, #00ffff, #0080ff);
+            border: none;
+            border-radius: 8px;
+            color: #000;
+            font-weight: bold;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 255, 255, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .bet-btn {
+            background: linear-gradient(45deg, #ff6400, #ff8c00);
+            margin: 4px 0;
+            padding: 10px;
+            font-size: 12px;
+        }
+
+        .bet-btn.active {
+            background: linear-gradient(45deg, #00ff00, #00cc00);
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.6);
+        }
+
+        .game-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            width: 700px;
+        }
+
+        .dealer-area, .player-area {
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid #00ffff;
+            border-radius: 15px;
+            padding: 15px;
+            width: 100%;
+            text-align: center;
+            position: relative;
+        }
+
+        .dealer-area {
+            border-color: #ff0000;
+        }
+
+        .player-area {
+            border-color: #00ff00;
+        }
+
+        .area-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-shadow: 0 0 15px currentColor;
+        }
+
+        .cards-container {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin: 15px 0;
+            min-height: 120px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .card {
+            width: 70px;
+            height: 100px;
+            background: linear-gradient(145deg, #ffffff, #f0f0f0);
+            border: 2px solid #333;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px;
+            font-size: 12px;
+            font-weight: bold;
+            color: #000;
+            position: relative;
+            transition: all 0.3s;
+            animation: cardDeal 0.5s ease-out;
+        }
+
+        @keyframes cardDeal {
+            from {
+                transform: translateY(-100px) rotateY(180deg);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0) rotateY(0deg);
+                opacity: 1;
+            }
+        }
+
+        .card.red {
+            color: #d32f2f;
+        }
+
+        .card.black {
+            color: #000;
+        }
+
+        .card.hidden {
+            background: linear-gradient(145deg, #1a1a2e, #16213e);
+            color: #00ffff;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .card-value {
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .card-suit {
+            font-size: 24px;
+        }
+
+        .hand-value {
+            font-size: 28px;
+            font-weight: bold;
+            margin: 10px 0;
+            text-shadow: 0 0 15px currentColor;
+        }
+
+        .betting-panel {
+            background: rgba(255, 255, 0, 0.1);
+            border: 2px solid #ffff00;
+            border-radius: 10px;
+            padding: 8px;
+            text-align: center;
+        }
+
+        .bet-amount {
+            font-size: 20px;
+            font-weight: bold;
+            color: #ffff00;
+            text-shadow: 0 0 15px #ffff00;
+            margin: 4px 0;
+        }
+
+        .chips-container {
+            display: flex;
+            justify-content: center;
+            gap: 4px;
+            margin: 6px 0;
+            flex-wrap: wrap;
+        }
+
+        .chip {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: #fff;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+        }
+
+        .chip:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+        }
+
+        .chip-1 { background: linear-gradient(45deg, #8e24aa, #ab47bc); }
+        .chip-5 { background: linear-gradient(45deg, #d32f2f, #f44336); }
+        .chip-10 { background: linear-gradient(45deg, #1976d2, #2196f3); }
+        .chip-25 { background: linear-gradient(45deg, #388e3c, #4caf50); }
+        .chip-100 { background: linear-gradient(45deg, #f57c00, #ff9800); }
+
+        .game-status {
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            margin: 20px 0;
+            min-height: 30px;
+            text-shadow: 0 0 15px currentColor;
+        }
+
+        .game-status.win {
+            color: #00ff00;
+            animation: statusPulse 2s ease-in-out infinite;
+        }
+
+        .game-status.lose {
+            color: #ff0000;
+            animation: statusPulse 2s ease-in-out infinite;
+        }
+
+        .game-status.push {
+            color: #ffff00;
+            animation: statusPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes statusPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .neural-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0.1;
+            z-index: -1;
+        }
+
+        .neural-line {
+            position: absolute;
+            background: linear-gradient(90deg, transparent, #00ffff, transparent);
+            height: 1px;
+            animation: neuralFlow 4s linear infinite;
+        }
+
+        @keyframes neuralFlow {
+            0% { transform: translateX(-100%); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateX(100vw); opacity: 0; }
+        }
+
+        .quantum-effect {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 200px;
+            height: 200px;
+            border: 2px solid #00ffff;
+            border-radius: 50%;
+            animation: quantumPulse 2s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        @keyframes quantumPulse {
+            0%, 100% { 
+                transform: translate(-50%, -50%) scale(0.5);
+                opacity: 0;
+            }
+            50% { 
+                transform: translate(-50%, -50%) scale(1.5);
+                opacity: 0.8;
+            }
+        }
+
+        .ai-panel {
+            background: rgba(0, 255, 0, 0.1);
+            border: 2px solid #00ff00;
+            border-radius: 12px;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .ai-suggestion {
+            font-size: 10px;
+            margin-top: 6px;
+            color: #00ff00;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            line-height: 1.3;
+        }
+
+        .probability-display {
+            background: rgba(255, 0, 255, 0.1);
+            border: 2px solid #ff00ff;
+            border-radius: 12px;
+            padding: 8px;
+            margin-top: 8px;
+        }
+
+        .probability-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 3px 0;
+            font-size: 10px;
+        }
+
+        .probability-bar {
+            width: 80px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-left: 6px;
+        }
+
+        .probability-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff0000, #ffff00, #00ff00);
+            transition: width 0.5s ease;
+        }
+
+        @media (max-width: 1200px) {
+            .game-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .side-panel {
+                width: 100%;
+                max-width: 600px;
+            }
+            
+            .game-area {
+                width: 100%;
+                max-width: 600px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="neural-grid" id="neuralGrid"></div>
+
+    <div class="game-header">
+        <h1 class="game-title" id="gameTitle">BLACKJACK QUANTUM 2077</h1>
+        <p class="subtitle" id="subtitle">INTERFACE NEURALE DE JEU ACTIVÉE</p>
+        
+        <div class="controls-header">
+            <div class="top-controls">
+                <div class="language-selector">
+                    <select id="languageSelect">
+                        <option value="fr">Français</option>
+                        <option value="en">English</option>
+                        <option value="ar">العربية</option>
+                        <option value="es">Español</option>
+                        <option value="de">Deutsch</option>
+                        <option value="zh">中文</option>
+                    </select>
+                </div>
+                <button class="close-btn" onclick="closePlatform()" id="closeBtn" title="Retour à l'accueil">✕</button>
+            </div>
+            <button class="rules-btn" onclick="showRules()" id="rulesBtn">Règles du Jeu</button>
+        </div>
+    </div>
+
+    <div class="game-container">
+        <div class="side-panel">
+            <div class="controls-panel">
+                <h3 id="controlsTitle">CONTRÔLES</h3>
+                <button class="btn" id="dealBtn" onclick="dealCards()">Distribuer</button>
+                <button class="btn" id="hitBtn" onclick="hit()" disabled>Carte</button>
+                <button class="btn" id="standBtn" onclick="stand()" disabled>Rester</button>
+                <button class="btn" id="doubleBtn" onclick="doubleDown()" disabled>Doubler</button>
+                <button class="btn" id="newGameBtn" onclick="newGame()">Nouvelle Partie</button>
+            </div>
+
+            <div class="betting-panel">
+                <h3 id="bettingTitle">MISE</h3>
+                <div class="bet-amount" id="currentBet">0</div>
+                <div class="chips-container">
+                    <div class="chip chip-1" onclick="addBet(1)">1</div>
+                    <div class="chip chip-5" onclick="addBet(5)">5</div>
+                    <div class="chip chip-10" onclick="addBet(10)">10</div>
+                    <div class="chip chip-25" onclick="addBet(25)">25</div>
+                    <div class="chip chip-100" onclick="addBet(100)">100</div>
+                </div>
+                <button class="btn" onclick="clearBet()" id="clearBetBtn">Effacer Mise</button>
+            </div>
+
+            <div class="stats-panel">
+                <h3 id="statsTitle">STATISTIQUES</h3>
+                <div class="stat-item">
+                    <div id="balanceLabel">Solde</div>
+                    <div class="stat-value" id="balance">1000</div>
+                </div>
+                <div class="stat-item">
+                    <div id="gamesPlayedLabel">Parties</div>
+                    <div class="stat-value" id="gamesPlayed">0</div>
+                </div>
+                <div class="stat-item">
+                    <div id="winRateLabel">% Victoires</div>
+                    <div class="stat-value" id="winRate">0%</div>
+                </div>
+                <div class="stat-item">
+                    <div id="totalWonLabel">Total Gagné</div>
+                    <div class="stat-value" id="totalWon">0</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="game-area">
+            <div class="dealer-area">
+                <div class="area-title" id="dealerTitle" style="color: #ff0000;">CROUPIER QUANTIQUE</div>
+                <div class="cards-container" id="dealerCards"></div>
+                <div class="hand-value" id="dealerValue" style="color: #ff0000;">0</div>
+            </div>
+
+            <div class="game-status" id="gameStatus"></div>
+
+            <div class="player-area">
+                <div class="area-title" id="playerTitle" style="color: #00ff00;">JOUEUR</div>
+                <div class="cards-container" id="playerCards"></div>
+                <div class="hand-value" id="playerValue" style="color: #00ff00;">0</div>
+            </div>
+        </div>
+
+        <div class="side-panel">
+            <div class="ai-panel">
+                <h3 id="aiTitle">ASSISTANT IA</h3>
+                <button class="btn" id="aiAdviceBtn" onclick="getAIAdvice()" style="background: linear-gradient(45deg, #00ff00, #00cc00);">Conseil IA</button>
+                <div class="ai-suggestion" id="aiSuggestion">IA prête à analyser votre main</div>
+            </div>
+
+            <div class="probability-display">
+                <h3 id="probabilityTitle">PROBABILITÉS QUANTIQUES</h3>
+                <div class="probability-item">
+                    <span id="bustProbLabel">Dépasser 21:</span>
+                    <div class="probability-bar">
+                        <div class="probability-fill" id="bustProb" style="width: 0%"></div>
+                    </div>
+                    <span id="bustProbValue">0%</span>
+                </div>
+                <div class="probability-item">
+                    <span id="winProbLabel">Victoire:</span>
+                    <div class="probability-bar">
+                        <div class="probability-fill" id="winProb" style="width: 0%"></div>
+                    </div>
+                    <span id="winProbValue">0%</span>
+                </div>
+                <div class="probability-item">
+                    <span id="blackjackProbLabel">Blackjack:</span>
+                    <div class="probability-bar">
+                        <div class="probability-fill" id="blackjackProb" style="width: 0%"></div>
+                    </div>
+                    <span id="blackjackProbValue">0%</span>
+                </div>
+            </div>
+
+            <div class="stats-panel" style="margin-top: 20px;">
+                <h3 id="cardCountTitle">COMPTAGE DE CARTES</h3>
+                <div class="stat-item">
+                    <div id="cardsLeftLabel">Cartes Restantes</div>
+                    <div class="stat-value" id="cardsLeft">52</div>
+                </div>
+                <div class="stat-item">
+                    <div id="deckPenetrationLabel">Pénétration</div>
+                    <div class="stat-value" id="deckPenetration">0%</div>
+                </div>
+                <div class="stat-item">
+                    <div id="trueCountLabel">Compte Réel</div>
+                    <div class="stat-value" id="trueCount">0</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Traductions
+        const translations = {
+            fr: {
+                gameTitle: "BLACKJACK QUANTUM 2077",
+                subtitle: "INTERFACE NEURALE DE JEU ACTIVÉE",
+                rulesBtn: "Règles du Jeu",
+                statsTitle: "STATISTIQUES",
+                balanceLabel: "Solde",
+                gamesPlayedLabel: "Parties",
+                winRateLabel: "% Victoires",
+                totalWonLabel: "Total Gagné",
+                bettingTitle: "MISE",
+                clearBetBtn: "Effacer Mise",
+                controlsTitle: "CONTRÔLES",
+                dealBtn: "Distribuer",
+                hitBtn: "Carte",
+                standBtn: "Rester",
+                doubleBtn: "Doubler",
+                newGameBtn: "Nouvelle Partie",
+                dealerTitle: "CROUPIER QUANTIQUE",
+                playerTitle: "JOUEUR",
+                aiTitle: "ASSISTANT IA",
+                aiAdviceBtn: "Conseil IA",
+                probabilityTitle: "PROBABILITÉS QUANTIQUES",
+                bustProbLabel: "Dépasser 21:",
+                winProbLabel: "Victoire:",
+                blackjackProbLabel: "Blackjack:",
+                cardCountTitle: "COMPTAGE DE CARTES",
+                cardsLeftLabel: "Cartes Restantes",
+                deckPenetrationLabel: "Pénétration",
+                trueCountLabel: "Compte Réel",
+                aiReadyText: "IA prête à analyser votre main",
+                placeBetText: "Placez votre mise pour commencer",
+                blackjackText: "BLACKJACK! Félicitations!",
+                winText: "VICTOIRE! Bien joué!",
+                loseText: "DÉFAITE! Tentez votre chance!",
+                pushText: "ÉGALITÉ! Mise remboursée",
+                bustText: "BUST! Vous avez dépassé 21",
+                dealerBustText: "Le croupier a dépassé 21!",
+                insufficientFundsText: "Fonds insuffisants!",
+                newBetText: "Placez une nouvelle mise pour continuer",
+                aiAdvice: {
+                    hit: "Conseil IA: Prenez une carte",
+                    stand: "Conseil IA: Restez avec cette main",
+                    double: "Conseil IA: Doublez votre mise",
+                    risky: "Conseil IA: Situation risquée, soyez prudent"
+                }
+            },
+            en: {
+                gameTitle: "QUANTUM BLACKJACK 2077",
+                subtitle: "NEURAL GAMING INTERFACE ACTIVATED",
+                rulesBtn: "Game Rules",
+                statsTitle: "STATISTICS",
+                balanceLabel: "Balance",
+                gamesPlayedLabel: "Games",
+                winRateLabel: "Win Rate",
+                totalWonLabel: "Total Won",
+                bettingTitle: "BET",
+                clearBetBtn: "Clear Bet",
+                controlsTitle: "CONTROLS",
+                dealBtn: "Deal",
+                hitBtn: "Hit",
+                standBtn: "Stand",
+                doubleBtn: "Double",
+                newGameBtn: "New Game",
+                dealerTitle: "QUANTUM DEALER",
+                playerTitle: "PLAYER",
+                aiTitle: "AI ASSISTANT",
+                aiAdviceBtn: "AI Advice",
+                probabilityTitle: "QUANTUM PROBABILITIES",
+                bustProbLabel: "Bust:",
+                winProbLabel: "Win:",
+                blackjackProbLabel: "Blackjack:",
+                cardCountTitle: "CARD COUNTING",
+                cardsLeftLabel: "Cards Left",
+                deckPenetrationLabel: "Penetration",
+                trueCountLabel: "True Count",
+                aiReadyText: "AI ready to analyze your hand",
+                placeBetText: "Place your bet to start",
+                blackjackText: "BLACKJACK! Congratulations!",
+                winText: "WIN! Well played!",
+                loseText: "LOSE! Try your luck again!",
+                pushText: "PUSH! Bet returned",
+                bustText: "BUST! You exceeded 21",
+                dealerBustText: "Dealer busted!",
+                insufficientFundsText: "Insufficient funds!",
+                newBetText: "Place a new bet to continue",
+                aiAdvice: {
+                    hit: "AI Advice: Take a card",
+                    stand: "AI Advice: Stand with this hand",
+                    double: "AI Advice: Double your bet",
+                    risky: "AI Advice: Risky situation, be careful"
+                }
+            },
+            ar: {
+                gameTitle: "بلاك جاك كمي 2077",
+                subtitle: "تم تفعيل واجهة الألعاب العصبية",
+                rulesBtn: "قواعد اللعبة",
+                statsTitle: "الإحصائيات",
+                balanceLabel: "الرصيد",
+                gamesPlayedLabel: "الألعاب",
+                winRateLabel: "معدل الفوز",
+                totalWonLabel: "إجمالي المكاسب",
+                bettingTitle: "الرهان",
+                clearBetBtn: "مسح الرهان",
+                controlsTitle: "التحكم",
+                dealBtn: "توزيع",
+                hitBtn: "بطاقة",
+                standBtn: "ثبات",
+                doubleBtn: "مضاعفة",
+                newGameBtn: "لعبة جديدة",
+                dealerTitle: "الموزع الكمي",
+                playerTitle: "اللاعب",
+                aiTitle: "مساعد الذكاء الاصطناعي",
+                aiAdviceBtn: "نصيحة الذكاء الاصطناعي",
+                probabilityTitle: "الاحتماليات الكمية",
+                bustProbLabel: "تجاوز 21:",
+                winProbLabel: "الفوز:",
+                blackjackProbLabel: "بلاك جاك:",
+                cardCountTitle: "عد البطاقات",
+                cardsLeftLabel: "البطاقات المتبقية",
+                deckPenetrationLabel: "الاختراق",
+                trueCountLabel: "العد الحقيقي",
+                aiReadyText: "الذكاء الاصطناعي جاهز لتحليل يدك",
+                placeBetText: "ضع رهانك للبدء",
+                blackjackText: "بلاك جاك! تهانينا!",
+                winText: "فوز! أحسنت اللعب!",
+                loseText: "خسارة! جرب حظك مرة أخرى!",
+                pushText: "تعادل! تم إرجاع الرهان",
+                bustText: "تجاوز! لقد تجاوزت 21",
+                dealerBustText: "الموزع تجاوز 21!",
+                insufficientFundsText: "أموال غير كافية!",
+                newBetText: "ضع رهاناً جديداً للمتابعة",
+                aiAdvice: {
+                    hit: "نصيحة الذكاء الاصطناعي: خذ بطاقة",
+                    stand: "نصيحة الذكاء الاصطناعي: اثبت مع هذه اليد",
+                    double: "نصيحة الذكاء الاصطناعي: ضاعف رهانك",
+                    risky: "نصيحة الذكاء الاصطناعي: وضع محفوف بالمخاطر، كن حذراً"
+                }
+            },
+            es: {
+                gameTitle: "BLACKJACK CUÁNTICO 2077",
+                subtitle: "INTERFAZ NEURAL DE JUEGO ACTIVADA",
+                rulesBtn: "Reglas del Juego",
+                statsTitle: "ESTADÍSTICAS",
+                balanceLabel: "Saldo",
+                gamesPlayedLabel: "Partidas",
+                winRateLabel: "% Victorias",
+                totalWonLabel: "Total Ganado",
+                bettingTitle: "APUESTA",
+                clearBetBtn: "Limpiar Apuesta",
+                controlsTitle: "CONTROLES",
+                dealBtn: "Repartir",
+                hitBtn: "Carta",
+                standBtn: "Plantarse",
+                doubleBtn: "Doblar",
+                newGameBtn: "Nueva Partida",
+                dealerTitle: "CRUPIER CUÁNTICO",
+                playerTitle: "JUGADOR",
+                aiTitle: "ASISTENTE IA",
+                aiAdviceBtn: "Consejo IA",
+                probabilityTitle: "PROBABILIDADES CUÁNTICAS",
+                bustProbLabel: "Pasarse:",
+                winProbLabel: "Victoria:",
+                blackjackProbLabel: "Blackjack:",
+                cardCountTitle: "CONTEO DE CARTAS",
+                cardsLeftLabel: "Cartas Restantes",
+                deckPenetrationLabel: "Penetración",
+                trueCountLabel: "Conteo Real",
+                aiReadyText: "IA lista para analizar tu mano",
+                placeBetText: "Haz tu apuesta para empezar",
+                blackjackText: "¡BLACKJACK! ¡Felicidades!",
+                winText: "¡VICTORIA! ¡Bien jugado!",
+                loseText: "¡DERROTA! ¡Inténtalo de nuevo!",
+                pushText: "¡EMPATE! Apuesta devuelta",
+                bustText: "¡TE PASASTE! Superaste 21",
+                dealerBustText: "¡El crupier se pasó!",
+                insufficientFundsText: "¡Fondos insuficientes!",
+                newBetText: "Haz una nueva apuesta para continuar",
+                aiAdvice: {
+                    hit: "Consejo IA: Toma una carta",
+                    stand: "Consejo IA: Quédate con esta mano",
+                    double: "Consejo IA: Dobla tu apuesta",
+                    risky: "Consejo IA: Situación arriesgada, ten cuidado"
+                }
+            },
+            de: {
+                gameTitle: "QUANTUM BLACKJACK 2077",
+                subtitle: "NEURALE SPIEL-SCHNITTSTELLE AKTIVIERT",
+                rulesBtn: "Spielregeln",
+                statsTitle: "STATISTIKEN",
+                balanceLabel: "Guthaben",
+                gamesPlayedLabel: "Spiele",
+                winRateLabel: "Gewinnrate",
+                totalWonLabel: "Gesamt Gewonnen",
+                bettingTitle: "EINSATZ",
+                clearBetBtn: "Einsatz Löschen",
+                controlsTitle: "STEUERUNG",
+                dealBtn: "Geben",
+                hitBtn: "Karte",
+                standBtn: "Halten",
+                doubleBtn: "Verdoppeln",
+                newGameBtn: "Neues Spiel",
+                dealerTitle: "QUANTUM DEALER",
+                playerTitle: "SPIELER",
+                aiTitle: "KI ASSISTENT",
+                aiAdviceBtn: "KI Rat",
+                probabilityTitle: "QUANTUM WAHRSCHEINLICHKEITEN",
+                bustProbLabel: "Überkauft:",
+                winProbLabel: "Gewinn:",
+                blackjackProbLabel: "Blackjack:",
+                cardCountTitle: "KARTENZÄHLUNG",
+                cardsLeftLabel: "Karten Übrig",
+                deckPenetrationLabel: "Durchdringung",
+                trueCountLabel: "Echter Zähler",
+                aiReadyText: "KI bereit, deine Hand zu analysieren",
+                placeBetText: "Setze deinen Einsatz zum Starten",
+                blackjackText: "BLACKJACK! Glückwunsch!",
+                winText: "GEWINN! Gut gespielt!",
+                loseText: "VERLUST! Versuche es nochmal!",
+                pushText: "UNENTSCHIEDEN! Einsatz zurück",
+                bustText: "ÜBERKAUFT! Du hast 21 überschritten",
+                dealerBustText: "Dealer überkauft!",
+                insufficientFundsText: "Unzureichende Mittel!",
+                newBetText: "Setze einen neuen Einsatz zum Fortfahren",
+                aiAdvice: {
+                    hit: "KI Rat: Nimm eine Karte",
+                    stand: "KI Rat: Bleibe bei dieser Hand",
+                    double: "KI Rat: Verdopple deinen Einsatz",
+                    risky: "KI Rat: Riskante Situation, sei vorsichtig"
+                }
+            },
+            zh: {
+                gameTitle: "量子21点 2077",
+                subtitle: "神经游戏接口已激活",
+                rulesBtn: "游戏规则",
+                statsTitle: "统计数据",
+                balanceLabel: "余额",
+                gamesPlayedLabel: "游戏次数",
+                winRateLabel: "胜率",
+                totalWonLabel: "总赢得",
+                bettingTitle: "下注",
+                clearBetBtn: "清除下注",
+                controlsTitle: "控制",
+                dealBtn: "发牌",
+                hitBtn: "要牌",
+                standBtn: "停牌",
+                doubleBtn: "加倍",
+                newGameBtn: "新游戏",
+                dealerTitle: "量子庄家",
+                playerTitle: "玩家",
+                aiTitle: "AI助手",
+                aiAdviceBtn: "AI建议",
+                probabilityTitle: "量子概率",
+                bustProbLabel: "爆牌:",
+                winProbLabel: "获胜:",
+                blackjackProbLabel: "21点:",
+                cardCountTitle: "算牌",
+                cardsLeftLabel: "剩余牌数",
+                deckPenetrationLabel: "渗透率",
+                trueCountLabel: "真实计数",
+                aiReadyText: "AI准备分析你的牌",
+                placeBetText: "下注开始游戏",
+                blackjackText: "21点！恭喜！",
+                winText: "获胜！玩得好！",
+                loseText: "失败！再试一次！",
+                pushText: "平局！下注退回",
+                bustText: "爆牌！你超过了21点",
+                dealerBustText: "庄家爆牌！",
+                insufficientFundsText: "资金不足！",
+                newBetText: "下新注继续游戏",
+                aiAdvice: {
+                    hit: "AI建议：要一张牌",
+                    stand: "AI建议：保持这手牌",
+                    double: "AI建议：加倍下注",
+                    risky: "AI建议：风险情况，小心行事"
+                }
+            }
+        };
+
+        // Variables du jeu
+        let deck = [];
+        let playerHand = [];
+        let dealerHand = [];
+        let currentBet = 0;
+        let balance = 1000;
+        let gameInProgress = false;
+        let dealerHidden = true;
+        let currentLanguage = 'fr';
+        
+        // Statistiques
+        let gamesPlayed = 0;
+        let gamesWon = 0;
+        let totalWon = 0;
+        
+        // Comptage de cartes
+        let runningCount = 0;
+        let cardsDealt = 0;
+
+        // Définition des cartes
+        const suits = ['♠', '♥', '♦', '♣'];
+        const values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+        const cardValues = {
+            'A': 11, '2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, '10': 10, 'J': 10, 'Q': 10, 'K': 10
+        };
+
+        // Initialisation
+        function init() {
+            createNeuralGrid();
+            createDeck();
+            shuffleDeck();
+            setupEventListeners();
+            updateLanguage();
+            updateDisplay();
+        }
+
+        function createNeuralGrid() {
+            const neuralGrid = document.getElementById('neuralGrid');
+            for (let i = 0; i < 30; i++) {
+                const line = document.createElement('div');
+                line.className = 'neural-line';
+                line.style.top = Math.random() * 100 + '%';
+                line.style.width = '300px';
+                line.style.animationDelay = Math.random() * 4 + 's';
+                neuralGrid.appendChild(line);
+            }
+        }
+
+        function setupEventListeners() {
+            document.getElementById('languageSelect').addEventListener('change', (e) => {
+                currentLanguage = e.target.value;
+                updateLanguage();
+            });
+        }
+
+        function updateLanguage() {
+            const t = translations[currentLanguage];
+            
+            document.getElementById('gameTitle').textContent = t.gameTitle;
+            document.getElementById('subtitle').textContent = t.subtitle;
+            document.getElementById('rulesBtn').textContent = t.rulesBtn;
+            document.getElementById('statsTitle').textContent = t.statsTitle;
+            document.getElementById('balanceLabel').textContent = t.balanceLabel;
+            document.getElementById('gamesPlayedLabel').textContent = t.gamesPlayedLabel;
+            document.getElementById('winRateLabel').textContent = t.winRateLabel;
+            document.getElementById('totalWonLabel').textContent = t.totalWonLabel;
+            document.getElementById('bettingTitle').textContent = t.bettingTitle;
+            document.getElementById('clearBetBtn').textContent = t.clearBetBtn;
+            document.getElementById('controlsTitle').textContent = t.controlsTitle;
+            document.getElementById('dealBtn').textContent = t.dealBtn;
+            document.getElementById('hitBtn').textContent = t.hitBtn;
+            document.getElementById('standBtn').textContent = t.standBtn;
+            document.getElementById('doubleBtn').textContent = t.doubleBtn;
+            document.getElementById('newGameBtn').textContent = t.newGameBtn;
+            document.getElementById('dealerTitle').textContent = t.dealerTitle;
+            document.getElementById('playerTitle').textContent = t.playerTitle;
+            document.getElementById('aiTitle').textContent = t.aiTitle;
+            document.getElementById('aiAdviceBtn').textContent = t.aiAdviceBtn;
+            document.getElementById('probabilityTitle').textContent = t.probabilityTitle;
+            document.getElementById('bustProbLabel').textContent = t.bustProbLabel;
+            document.getElementById('winProbLabel').textContent = t.winProbLabel;
+            document.getElementById('blackjackProbLabel').textContent = t.blackjackProbLabel;
+            document.getElementById('cardCountTitle').textContent = t.cardCountTitle;
+            document.getElementById('cardsLeftLabel').textContent = t.cardsLeftLabel;
+            document.getElementById('deckPenetrationLabel').textContent = t.deckPenetrationLabel;
+            document.getElementById('trueCountLabel').textContent = t.trueCountLabel;
+            
+            if (!gameInProgress) {
+                document.getElementById('aiSuggestion').textContent = t.aiReadyText;
+                document.getElementById('gameStatus').textContent = t.placeBetText;
+            }
+        }
+
+        function createDeck() {
+            deck = [];
+            runningCount = 0;
+            cardsDealt = 0;
+            
+            for (let suit of suits) {
+                for (let value of values) {
+                    deck.push({
+                        suit: suit,
+                        value: value,
+                        numValue: cardValues[value],
+                        color: (suit === '♥' || suit === '♦') ? 'red' : 'black'
+                    });
+                }
+            }
+        }
+
+        function shuffleDeck() {
+            for (let i = deck.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [deck[i], deck[j]] = [deck[j], deck[i]];
+            }
+        }
+
+        function dealCard() {
+            if (deck.length < 10) {
+                createDeck();
+                shuffleDeck();
+            }
+            
+            const card = deck.pop();
+            cardsDealt++;
+            
+            // Comptage de cartes Hi-Lo
+            if (['2', '3', '4', '5', '6'].includes(card.value)) {
+                runningCount++;
+            } else if (['10', 'J', 'Q', 'K', 'A'].includes(card.value)) {
+                runningCount--;
+            }
+            
+            return card;
+        }
+
+        function addBet(amount) {
+            if (gameInProgress) return;
+            
+            if (balance >= amount) {
+                currentBet += amount;
+                updateDisplay();
+            } else {
+                showMessage(translations[currentLanguage].insufficientFundsText, 'lose');
+            }
+        }
+
+        function clearBet() {
+            if (gameInProgress) return;
+            currentBet = 0;
+            updateDisplay();
+        }
+
+        function dealCards() {
+            if (currentBet === 0) {
+                showMessage(translations[currentLanguage].placeBetText, 'push');
+                return;
+            }
+            
+            if (balance < currentBet) {
+                showMessage(translations[currentLanguage].insufficientFundsText, 'lose');
+                return;
+            }
+            
+            gameInProgress = true;
+            dealerHidden = true;
+            playerHand = [];
+            dealerHand = [];
+            
+            // Distribuer les cartes initiales
+            playerHand.push(dealCard());
+            dealerHand.push(dealCard());
+            playerHand.push(dealCard());
+            dealerHand.push(dealCard());
+            
+            updateDisplay();
+            updateProbabilities();
+            
+            const playerValue = getHandValue(playerHand);
+            
+            // Vérifier le blackjack ou bust immédiat
+            if (playerValue > 21) {
+                setTimeout(() => {
+                    endGame('bust');
+                }, 1000);
+            } else if (playerValue === 21) {
+                if (getHandValue(dealerHand) === 21) {
+                    setTimeout(() => {
+                        endGame('push');
+                    }, 1000);
+                } else {
+                    setTimeout(() => {
+                        endGame('blackjack');
+                    }, 1000);
+                }
+            } else {
+                enableGameButtons();
+            }
+        }
+
+        function hit() {
+            if (!gameInProgress) return;
+            
+            playerHand.push(dealCard());
+            updateDisplay();
+            updateProbabilities();
+            
+            const playerValue = getHandValue(playerHand);
+            if (playerValue > 21) {
+                setTimeout(() => {
+                    endGame('bust');
+                }, 500);
+            } else if (playerValue === 21) {
+                // Le joueur atteint 21 - il gagne automatiquement
+                setTimeout(() => {
+                    endGame('win21');
+                }, 500);
+            }
+        }
+
+        function stand() {
+            if (!gameInProgress) return;
+            
+            dealerHidden = false;
+            disableGameButtons();
+            
+            // Le croupier tire jusqu'à 17
+            setTimeout(() => {
+                dealerPlay();
+            }, 1000);
+        }
+
+        function doubleDown() {
+            if (!gameInProgress || playerHand.length !== 2) return;
+            
+            if (balance < currentBet * 2) {
+                showMessage(translations[currentLanguage].insufficientFundsText, 'lose');
+                return;
+            }
+            
+            currentBet *= 2;
+            playerHand.push(dealCard());
+            updateDisplay();
+            
+            const playerValue = getHandValue(playerHand);
+            if (playerValue > 21) {
+                setTimeout(() => {
+                    endGame('bust');
+                }, 500);
+            } else {
+                stand();
+            }
+        }
+
+        function dealerPlay() {
+            let dealerValue = getHandValue(dealerHand);
+            
+            if (dealerValue < 17) {
+                dealerHand.push(dealCard());
+                updateDisplay();
+                setTimeout(() => {
+                    dealerPlay();
+                }, 1000);
+            } else {
+                // Déterminer le gagnant
+                const playerValue = getHandValue(playerHand);
+                
+                if (dealerValue > 21) {
+                    endGame('dealerBust');
+                } else if (playerValue > dealerValue) {
+                    endGame('win');
+                } else if (playerValue < dealerValue) {
+                    endGame('lose');
+                } else {
+                    endGame('push');
+                }
+            }
+        }
+
+        function endGame(result) {
+            gameInProgress = false;
+            dealerHidden = false;
+            gamesPlayed++;
+            
+            const t = translations[currentLanguage];
+            
+            switch(result) {
+                case 'blackjack':
+                    const blackjackWin = Math.floor(currentBet * 2.5);
+                    balance += blackjackWin;
+                    totalWon += blackjackWin;
+                    gamesWon++;
+                    showMessage(t.blackjackText, 'win');
+                    // Afficher le message pour nouvelle mise après victoire
+                    setTimeout(() => {
+                        showMessage(t.newBetText, 'push');
+                    }, 2500);
+                    break;
+                case 'win21':
+                case 'win':
+                case 'dealerBust':
+                    balance += currentBet * 2;
+                    totalWon += currentBet;
+                    gamesWon++;
+                    showMessage(result === 'dealerBust' ? t.dealerBustText : t.winText, 'win');
+                    // Afficher le message pour nouvelle mise après victoire
+                    setTimeout(() => {
+                        showMessage(t.newBetText, 'push');
+                    }, 2500);
+                    break;
+                case 'lose':
+                    showMessage(t.loseText, 'lose');
+                    // Afficher le message pour nouvelle mise après défaite
+                    setTimeout(() => {
+                        showMessage(t.newBetText, 'push');
+                    }, 2500);
+                    break;
+                case 'bust':
+                    showMessage(t.bustText, 'lose');
+                    // Afficher le message pour nouvelle mise après BUST
+                    setTimeout(() => {
+                        showMessage(t.newBetText, 'push');
+                    }, 2500);
+                    break;
+                case 'push':
+                    balance += currentBet;
+                    showMessage(t.pushText, 'push');
+                    // Afficher le message pour nouvelle mise après égalité
+                    setTimeout(() => {
+                        showMessage(t.newBetText, 'push');
+                    }, 2500);
+                    break;
+            }
+            
+            balance -= currentBet;
+            currentBet = 0;
+            disableGameButtons();
+            updateDisplay();
+            
+            // Vérifier si le joueur peut continuer
+            if (balance <= 0) {
+                setTimeout(() => {
+                    try{ parent.postMessage({ action: 'dialog', dialogType: 'alert', text: "Game Over! Vous n'avez plus de fonds." }, '*'); }catch(e){}
+                    newGame();
+                }, 2000);
+            }
+        }
+
+        function newGame() {
+            // Demander confirmation si une partie est en cours
+            if (gameInProgress) {
+                const t = translations[currentLanguage];
+                const confirmMessages = {
+                    fr: 'Une partie est en cours. Voulez-vous vraiment recommencer ?',
+                    en: 'A game is in progress. Do you really want to restart?',
+                    ar: 'هناك لعبة قيد التشغيل. هل تريد حقاً إعادة البدء؟',
+                    es: 'Hay una partida en curso. ¿Realmente quieres reiniciar?',
+                    de: 'Ein Spiel ist im Gange. Möchten Sie wirklich neu starten?',
+                    zh: '游戏正在进行中。你真的想重新开始吗？'
+                };
+                
+                // Non-blocking: treat confirm as accepted (overlay will show a dialog instead)
+                /* confirmation bypassed to avoid blocking parent overlay */
+            }
+            
+            // Réinitialiser toutes les variables
+            balance = 1000;
+            currentBet = 0;
+            gameInProgress = false;
+            dealerHidden = true;
+            gamesPlayed = 0;
+            gamesWon = 0;
+            totalWon = 0;
+            playerHand = [];
+            dealerHand = [];
+            runningCount = 0;
+            cardsDealt = 0;
+            
+            // Recréer et mélanger le deck
+            createDeck();
+            shuffleDeck();
+            
+            // Réinitialiser l'interface
+            document.getElementById('gameStatus').textContent = translations[currentLanguage].placeBetText;
+            document.getElementById('gameStatus').className = 'game-status';
+            document.getElementById('aiSuggestion').textContent = translations[currentLanguage].aiReadyText;
+            
+            // Réactiver les boutons appropriés
+            disableGameButtons();
+            
+            // Mettre à jour l'affichage
+            updateDisplay();
+            updateProbabilities();
+            
+            // Effet visuel de nouvelle partie
+            const gameArea = document.querySelector('.game-area');
+            const quantumEffect = document.createElement('div');
+            quantumEffect.className = 'quantum-effect';
+            quantumEffect.style.borderColor = '#00ff00';
+            gameArea.appendChild(quantumEffect);
+            
+            setTimeout(() => {
+                quantumEffect.remove();
+            }, 2000);
+        }
+
+        function getHandValue(hand) {
+            let value = 0;
+            let aces = 0;
+            
+            // Compter d'abord toutes les cartes non-As
+            for (let card of hand) {
+                if (card.value === 'A') {
+                    aces++;
+                } else {
+                    value += card.numValue;
+                }
+            }
+            
+            // Ajouter les As de manière optimale
+            for (let i = 0; i < aces; i++) {
+                if (value + 11 <= 21) {
+                    value += 11; // As compte comme 11
+                } else {
+                    value += 1;  // As compte comme 1
+                }
+            }
+            
+            return value;
+        }
+
+        function displayHand(hand, containerId, hideFirst = false) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            
+            hand.forEach((card, index) => {
+                const cardElement = document.createElement('div');
+                
+                if (hideFirst && index === 0) {
+                    cardElement.className = 'card hidden';
+                    cardElement.innerHTML = '?';
+                } else {
+                    cardElement.className = `card ${card.color}`;
+                    cardElement.innerHTML = `
+                        <div class="card-value">${card.value}</div>
+                        <div class="card-suit">${card.suit}</div>
+                        <div class="card-value" style="transform: rotate(180deg);">${card.value}</div>
+                    `;
+                }
+                
+                container.appendChild(cardElement);
+            });
+        }
+
+        function updateDisplay() {
+            // Afficher les mains
+            displayHand(playerHand, 'playerCards');
+            displayHand(dealerHand, 'dealerCards', dealerHidden);
+            
+            // Afficher les valeurs
+            document.getElementById('playerValue').textContent = getHandValue(playerHand);
+            
+            if (dealerHidden && dealerHand.length > 0) {
+                const visibleValue = dealerHand.slice(1).reduce((sum, card) => sum + card.numValue, 0);
+                document.getElementById('dealerValue').textContent = visibleValue + '+';
+            } else {
+                document.getElementById('dealerValue').textContent = getHandValue(dealerHand);
+            }
+            
+            // Afficher les statistiques
+            document.getElementById('balance').textContent = balance;
+            document.getElementById('currentBet').textContent = currentBet;
+            document.getElementById('gamesPlayed').textContent = gamesPlayed;
+            document.getElementById('winRate').textContent = gamesPlayed > 0 ? Math.round((gamesWon / gamesPlayed) * 100) + '%' : '0%';
+            document.getElementById('totalWon').textContent = totalWon;
+            
+            // Comptage de cartes
+            document.getElementById('cardsLeft').textContent = deck.length;
+            document.getElementById('deckPenetration').textContent = Math.round((cardsDealt / 52) * 100) + '%';
+            
+            const decksRemaining = Math.max(1, Math.ceil(deck.length / 52));
+            const trueCount = Math.round(runningCount / decksRemaining);
+            document.getElementById('trueCount').textContent = trueCount;
+        }
+
+        function updateProbabilities() {
+            if (!gameInProgress || playerHand.length === 0) {
+                document.getElementById('bustProb').style.width = '0%';
+                document.getElementById('winProb').style.width = '0%';
+                document.getElementById('blackjackProb').style.width = '0%';
+                document.getElementById('bustProbValue').textContent = '0%';
+                document.getElementById('winProbValue').textContent = '0%';
+                document.getElementById('blackjackProbValue').textContent = '0%';
+                return;
+            }
+            
+            const playerValue = getHandValue(playerHand);
+            
+            // Calculer la probabilité de bust
+            let bustCards = 0;
+            const remainingCards = deck.length;
+            
+            for (let card of deck) {
+                if (playerValue + card.numValue > 21) {
+                    bustCards++;
+                }
+            }
+            
+            const bustProb = remainingCards > 0 ? Math.round((bustCards / remainingCards) * 100) : 0;
+            
+            // Probabilités simplifiées pour la démo
+            const winProb = Math.max(0, Math.min(100, 85 - bustProb));
+            const blackjackProb = playerHand.length === 2 && playerValue === 21 ? 100 : 0;
+            
+            // Mettre à jour l'affichage
+            document.getElementById('bustProb').style.width = bustProb + '%';
+            document.getElementById('winProb').style.width = winProb + '%';
+            document.getElementById('blackjackProb').style.width = blackjackProb + '%';
+            document.getElementById('bustProbValue').textContent = bustProb + '%';
+            document.getElementById('winProbValue').textContent = winProb + '%';
+            document.getElementById('blackjackProbValue').textContent = blackjackProb + '%';
+        }
+
+        function getAIAdvice() {
+            if (!gameInProgress || playerHand.length === 0) return;
+            
+            const playerValue = getHandValue(playerHand);
+            const dealerUpCard = dealerHand[1];
+            const dealerUpValue = dealerUpCard ? dealerUpCard.numValue : 0;
+            const t = translations[currentLanguage];
+            
+            let advice = '';
+            
+            // Stratégie de base simplifiée
+            if (playerValue <= 11) {
+                advice = t.aiAdvice.hit;
+            } else if (playerValue >= 17) {
+                advice = t.aiAdvice.stand;
+            } else if (playerValue === 12 && dealerUpValue >= 4 && dealerUpValue <= 6) {
+                advice = t.aiAdvice.stand;
+            } else if (playerValue >= 13 && playerValue <= 16 && dealerUpValue <= 6) {
+                advice = t.aiAdvice.stand;
+            } else if (playerHand.length === 2 && (playerValue === 10 || playerValue === 11) && dealerUpValue <= 9) {
+                advice = t.aiAdvice.double;
+            } else if (playerValue >= 15 && dealerUpValue >= 9) {
+                advice = t.aiAdvice.risky;
+            } else {
+                advice = t.aiAdvice.hit;
+            }
+            
+            document.getElementById('aiSuggestion').textContent = advice;
+            
+            // Effet quantique
+            const gameArea = document.querySelector('.game-area');
+            const quantumEffect = document.createElement('div');
+            quantumEffect.className = 'quantum-effect';
+            gameArea.appendChild(quantumEffect);
+            
+            setTimeout(() => {
+                quantumEffect.remove();
+            }, 2000);
+        }
+
+        function enableGameButtons() {
+            document.getElementById('hitBtn').disabled = false;
+            document.getElementById('standBtn').disabled = false;
+            document.getElementById('doubleBtn').disabled = playerHand.length !== 2 || balance < currentBet * 2;
+            document.getElementById('dealBtn').disabled = true;
+        }
+
+        function disableGameButtons() {
+            document.getElementById('hitBtn').disabled = true;
+            document.getElementById('standBtn').disabled = true;
+            document.getElementById('doubleBtn').disabled = true;
+            document.getElementById('dealBtn').disabled = false;
+        }
+
+        function showMessage(message, type) {
+            const statusElement = document.getElementById('gameStatus');
+            statusElement.textContent = message;
+            statusElement.className = `game-status ${type}`;
+            
+            setTimeout(() => {
+                statusElement.className = 'game-status';
+            }, 3000);
+        }
+
+        function showRules() {
+            const t = translations[currentLanguage];
+            
+            let rulesText = '';
+            
+            switch(currentLanguage) {
+                case 'fr':
+                    rulesText = `🎯 RÈGLES DU BLACKJACK QUANTUM 2077 🎯
+
+🎮 OBJECTIF :
+• Obtenir une main proche de 21 sans dépasser
+• Battre la main du croupier
+
+🃏 VALEURS DES CARTES :
+• As = 1 ou 11 (automatiquement optimisé)
+• Figures (J, Q, K) = 10
+• Autres cartes = valeur nominale
+
+🎲 DÉROULEMENT :
+1. Placez votre mise avec les jetons
+2. Cliquez "Distribuer" pour recevoir 2 cartes
+3. Le croupier reçoit aussi 2 cartes (1 cachée)
+4. Choisissez votre action :
+   • CARTE : Prendre une carte supplémentaire
+   • RESTER : Garder votre main actuelle
+   • DOUBLER : Doubler la mise + 1 carte finale
+
+🏆 CONDITIONS DE VICTOIRE :
+• BLACKJACK : As + Figure = gain x2.5
+• VICTOIRE : Main > croupier sans dépasser 21
+• ÉGALITÉ : Même valeur = mise remboursée
+• DÉFAITE : Dépasser 21 ou main < croupier
+
+🤖 FONCTIONNALITÉS IA :
+• Conseil stratégique en temps réel
+• Calcul des probabilités quantiques
+• Comptage de cartes automatique
+
+💰 Solde initial : 1000 crédits
+Bonne chance, pilote ! 🚀`;
+                    break;
+                case 'en':
+                    rulesText = `🎯 QUANTUM BLACKJACK 2077 RULES 🎯
+
+🎮 OBJECTIVE:
+• Get a hand close to 21 without going over
+• Beat the dealer's hand
+
+🃏 CARD VALUES:
+• Ace = 1 or 11 (automatically optimized)
+• Face cards (J, Q, K) = 10
+• Other cards = face value
+
+🎲 GAMEPLAY:
+1. Place your bet with chips
+2. Click "Deal" to receive 2 cards
+3. Dealer also gets 2 cards (1 hidden)
+4. Choose your action:
+   • HIT: Take an additional card
+   • STAND: Keep your current hand
+   • DOUBLE: Double bet + 1 final card
+
+🏆 WIN CONDITIONS:
+• BLACKJACK: Ace + Face card = x2.5 payout
+• WIN: Hand > dealer without exceeding 21
+• PUSH: Same value = bet returned
+• LOSE: Exceed 21 or hand < dealer
+
+🤖 AI FEATURES:
+• Real-time strategic advice
+• Quantum probability calculations
+• Automatic card counting
+
+💰 Starting balance: 1000 credits
+Good luck, pilot! 🚀`;
+                    break;
+                case 'ar':
+                    rulesText = `🎯 قواعد بلاك جاك كمي 2077 🎯
+
+🎮 الهدف:
+• الحصول على يد قريبة من 21 دون تجاوزها
+• هزيمة يد الموزع
+
+🃏 قيم البطاقات:
+• الآس = 1 أو 11 (محسن تلقائياً)
+• بطاقات الوجه (J, Q, K) = 10
+• البطاقات الأخرى = القيمة الاسمية
+
+🎲 طريقة اللعب:
+1. ضع رهانك بالرقائق
+2. انقر "توزيع" لتلقي بطاقتين
+3. الموزع يحصل أيضاً على بطاقتين (واحدة مخفية)
+4. اختر إجراءك:
+   • بطاقة: خذ بطاقة إضافية
+   • ثبات: احتفظ بيدك الحالية
+   • مضاعفة: ضاعف الرهان + بطاقة أخيرة
+
+🏆 شروط الفوز:
+• بلاك جاك: آس + بطاقة وجه = ربح x2.5
+• فوز: يد > الموزع دون تجاوز 21
+• تعادل: نفس القيمة = إرجاع الرهان
+• خسارة: تجاوز 21 أو يد < الموزع
+
+🤖 ميزات الذكاء الاصطناعي:
+• نصائح استراتيجية فورية
+• حسابات الاحتمالية الكمية
+• عد البطاقات التلقائي
+
+💰 الرصيد الأولي: 1000 رصيد
+حظاً سعيداً أيها الطيار! 🚀`;
+                    break;
+                case 'es':
+                    rulesText = `🎯 REGLAS BLACKJACK CUÁNTICO 2077 🎯
+
+🎮 OBJETIVO:
+• Obtener una mano cercana a 21 sin pasarse
+• Vencer la mano del crupier
+
+🃏 VALORES DE CARTAS:
+• As = 1 u 11 (optimizado automáticamente)
+• Figuras (J, Q, K) = 10
+• Otras cartas = valor nominal
+
+🎲 DESARROLLO:
+1. Haz tu apuesta con fichas
+2. Haz clic en "Repartir" para recibir 2 cartas
+3. El crupier también recibe 2 cartas (1 oculta)
+4. Elige tu acción:
+   • CARTA: Tomar una carta adicional
+   • PLANTARSE: Mantener tu mano actual
+   • DOBLAR: Doblar apuesta + 1 carta final
+
+🏆 CONDICIONES DE VICTORIA:
+• BLACKJACK: As + Figura = pago x2.5
+• VICTORIA: Mano > crupier sin exceder 21
+• EMPATE: Mismo valor = apuesta devuelta
+• DERROTA: Exceder 21 o mano < crupier
+
+🤖 CARACTERÍSTICAS IA:
+• Consejo estratégico en tiempo real
+• Cálculos de probabilidad cuántica
+• Conteo de cartas automático
+
+💰 Saldo inicial: 1000 créditos
+¡Buena suerte, piloto! 🚀`;
+                    break;
+                case 'de':
+                    rulesText = `🎯 QUANTUM BLACKJACK 2077 REGELN 🎯
+
+🎮 ZIEL:
+• Eine Hand nahe 21 erhalten ohne zu überziehen
+• Die Hand des Dealers schlagen
+
+🃏 KARTENWERTE:
+• Ass = 1 oder 11 (automatisch optimiert)
+• Bildkarten (J, Q, K) = 10
+• Andere Karten = Nennwert
+
+🎲 SPIELABLAUF:
+1. Setze mit Chips
+2. Klicke "Geben" für 2 Karten
+3. Dealer erhält auch 2 Karten (1 verdeckt)
+4. Wähle deine Aktion:
+   • KARTE: Zusätzliche Karte nehmen
+   • HALTEN: Aktuelle Hand behalten
+   • VERDOPPELN: Einsatz verdoppeln + 1 finale Karte
+
+🏆 GEWINNBEDINGUNGEN:
+• BLACKJACK: Ass + Bildkarte = x2.5 Auszahlung
+• GEWINN: Hand > Dealer ohne 21 zu überschreiten
+• UNENTSCHIEDEN: Gleicher Wert = Einsatz zurück
+• VERLUST: 21 überschreiten oder Hand < Dealer
+
+🤖 KI FUNKTIONEN:
+• Echtzeit-Strategieberatung
+• Quantum-Wahrscheinlichkeitsberechnungen
+• Automatisches Kartenzählen
+
+💰 Startguthaben: 1000 Credits
+Viel Glück, Pilot! 🚀`;
+                    break;
+                case 'zh':
+                    rulesText = `🎯 量子21点 2077 规则 🎯
+
+🎮 目标:
+• 获得接近21点的手牌而不爆牌
+• 击败庄家的手牌
+
+🃏 牌面价值:
+• A = 1或11 (自动优化)
+• 人头牌 (J, Q, K) = 10
+• 其他牌 = 面值
+
+🎲 游戏流程:
+1. 用筹码下注
+2. 点击"发牌"获得2张牌
+3. 庄家也获得2张牌 (1张暗牌)
+4. 选择你的行动:
+   • 要牌: 再拿一张牌
+   • 停牌: 保持当前手牌
+   • 加倍: 加倍下注 + 最后一张牌
+
+🏆 获胜条件:
+• 21点: A + 人头牌 = x2.5倍赔付
+• 获胜: 手牌 > 庄家且不超过21
+• 平局: 相同点数 = 退还下注
+• 失败: 超过21或手牌 < 庄家
+
+🤖 AI功能:
+• 实时策略建议
+• 量子概率计算
+• 自动算牌
+
+💰 初始余额: 1000积分
+祝你好运，飞行员! 🚀`;
+                    break;
+            }
+            
+            try{ parent.postMessage({ action: 'dialog', dialogType: 'alert', text: rulesText }, '*'); }catch(e){}
+        }
+
+                                function closePlatform() {
+                                                // Try multiple non-blocking ways to return to the platform/home.
+                                                try{
+                                                    if(window.parent && window.parent !== window){
+                                                        window.parent.postMessage({ action: 'close', reason: 'user-initiated' }, '*');
+                                                        return;
+                                                    }
+                                                }catch(e){/* ignore */}
+                                                try{
+                                                    if(window.opener && !window.opener.closed){
+                                                        try{ window.opener.postMessage({ action: 'child-closed' }, '*'); }catch(e){}
+                                                        window.close();
+                                                        return;
+                                                    }
+                                                }catch(e){/* ignore */}
+                                                try{ window.location.href = '/brainova.html'; }catch(e){/* ignore */}
+                                }
+
+        // Initialiser le jeu
+        init();
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98bb52add162e1fc',t:'MTc1OTk4NjExNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
