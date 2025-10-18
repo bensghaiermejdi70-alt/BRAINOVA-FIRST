@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Collection de 37 jeux brise-glace pour animer vos événements et rencontres">
+    <title>Jeux Brise-Glace - 37 Jeux pour Briser la Glace</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>🎮 Jeux Brise-Glace</h1>
+            <p class="subtitle">Découvrez 37 jeux pour briser la glace et créer des liens</p>
+        </div>
+    </header>
+
+    <main class="container">
+        <section id="search-section">
+            <div class="search-box">
+                <input type="text" id="search-input" placeholder="Rechercher un jeu...">
+                <div class="filter-buttons">
+                    <button class="filter-btn active" data-category="all">Tous</button>
+                    <button class="filter-btn" data-category="rapide">Rapide</button>
+                    <button class="filter-btn" data-category="groupe">Grand Groupe</button>
+                    <button class="filter-btn" data-category="creatif">Créatif</button>
+                    <button class="filter-btn" data-category="mouvement">Mouvement</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="games-section">
+            <div id="games-container" class="games-grid">
+                <!-- Games will be loaded here by JavaScript -->
+            </div>
+        </section>
+    </main>
+
+    <div id="game-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="modal-title"></h2>
+            <div class="modal-info">
+                <span class="info-badge" id="modal-duration"></span>
+                <span class="info-badge" id="modal-players"></span>
+                <span class="info-badge" id="modal-category"></span>
+            </div>
+            <div id="modal-description"></div>
+            <div id="modal-rules"></div>
+            <div id="modal-materials"></div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 Jeux Brise-Glace. Plateforme de 37 jeux pour animer vos événements.</p>
+        </div>
+    </footer>
+
+    <script src="games-data.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
