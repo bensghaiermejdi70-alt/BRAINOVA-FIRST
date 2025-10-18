@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STELLAR NEXUS - Jeu Spatial Interactif</title>
+    <style>
+        body {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0c0c0c 0%, #1e1e3f 50%, #2a2a5a 100%);
+            color: #00d4ff;
+            overflow: auto;
+            min-height: 100vh;
+        }
+
+        .game-container {
+            position: relative;
+            width: 100%;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 25px;
+            background: rgba(0, 212, 255, 0.15);
+            backdrop-filter: blur(15px);
+            border-bottom: 3px solid #00d4ff;
+            box-shadow: 0 5px 25px rgba(0, 212, 255, 0.3);
+        }
+
+        .title {
+            font-size: 2.8rem;
+            font-weight: 900;
+            text-shadow: 0 0 25px #00d4ff;
+            animation: titleGlow 3s ease-in-out infinite alternate;
+            letter-spacing: 3px;
+        }
+
+        @keyframes titleGlow {
+            from { 
+                text-shadow: 0 0 25px #00d4ff, 0 0 35px #00d4ff; 
+                transform: scale(1);
+            }
+            to { 
+                text-shadow: 0 0 35px #00d4ff, 0 0 45px #00d4ff, 0 0 55px #00d4ff; 
+                transform: scale(1.02);
+            }
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+        }
+
+        .language-selector {
+            position: relative;
+        }
+
+        .lang-button {
+            background: linear-gradient(45deg, #00d4ff, #0099cc);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            color: #000;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            font-size: 1rem;
+            box-shadow: 0 5px 15px rgba(0, 212, 255, 0.4);
+        }
+
+        .lang-button:hover {
+            transform: scale(1.08);
+            box-shadow: 0 8px 25px rgba(0, 212, 255, 0.6);
+            background: linear-gradient(45deg, #00ffff, #00d4ff);
+        }
+
+        .lang-dropdown {
+            position: absolute;
+            top: 110%;
+            right: 0;
+            background: rgba(0, 0, 0, 0.95);
+            border: 2px solid #00d4ff;
+            border-radius: 12px;
+            padding: 6px;
+            display: none;
+            z-index: 1000;
+            min-width: 150px;
+            box-shadow: 0 15px 30px rgba(0, 212, 255, 0.5);
+            backdrop-filter: blur(10px);
+        }
+
+        .lang-option {
+            display: block;
+            padding: 8px 12px;
+            color: #00d4ff;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            white-space: nowrap;
+            margin: 1px 0;
+            font-weight: 600;
+            border: 1px solid transparent;
+            font-size: 0.9rem;
+        }
+
+        .lang-option:hover {
+            background: rgba(0, 212, 255, 0.25);
+            border-color: #00d4ff;
+            transform: translateX(10px);
+            box-shadow: 0 8px 20px rgba(0, 212, 255, 0.4);
+        }
+
+        .lang-option:active {
+            background: rgba(0, 212, 255, 0.5);
+            transform: scale(0.96);
+        }
+
+        .game-layout {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 40px;
+            padding: 30px;
+            flex: 1;
+        }
+
+        .level-display {
+            background: rgba(0, 0, 0, 0.85);
+            padding: 20px 25px;
+            border-radius: 30px;
+            border: 3px solid #00d4ff;
+            text-align: center;
+            min-width: 120px;
+            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.3);
+        }
+
+        .level-label {
+            font-size: 1rem;
+            margin-bottom: 8px;
+            color: #00d4ff;
+            font-weight: 600;
+        }
+
+        .level-number {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: #00ff88;
+            text-shadow: 0 0 15px #00ff88;
+        }
+
+        .game-board {
+            width: 650px;
+            height: 450px;
+            background: rgba(0, 0, 0, 0.85);
+            border: 4px solid #00d4ff;
+            border-radius: 25px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 0 60px rgba(0, 212, 255, 0.4);
+        }
+
+        .stats {
+            position: absolute;
+            top: 25px;
+            left: 25px;
+            background: rgba(0, 0, 0, 0.9);
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px solid #00d4ff;
+            z-index: 10;
+        }
+
+        .stat-item {
+            margin: 8px 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .stellar-pattern {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 250px;
+            height: 250px;
+            border: 3px solid #00d4ff;
+            border-radius: 50%;
+            animation: stellarSpin 5s linear infinite;
+        }
+
+        @keyframes stellarSpin {
+            from { transform: translate(-50%, -50%) rotate(0deg); }
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        .stellar-pattern::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 120px;
+            height: 120px;
+            border: 3px solid #ff0099;
+            border-radius: 50%;
+            animation: stellarSpin 3s linear infinite reverse;
+        }
+
+        .stellar-orb {
+            position: absolute;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            cursor: pointer;
+            animation: orbFloat 4s ease-in-out infinite;
+            box-shadow: 0 0 20px currentColor;
+            transition: all 0.3s ease;
+        }
+
+        .stellar-orb:hover {
+            transform: scale(1.2);
+            box-shadow: 0 0 30px currentColor;
+        }
+
+        @keyframes orbFloat {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-25px) rotate(180deg); }
+        }
+
+        .side-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .control-btn {
+            padding: 12px 25px;
+            border: 2px solid #00d4ff;
+            background: transparent;
+            color: #00d4ff;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+            min-width: 140px;
+        }
+
+        .control-btn:hover {
+            background: rgba(0, 212, 255, 0.15);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 25px rgba(0, 212, 255, 0.4);
+        }
+
+        .control-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .start-btn {
+            background: linear-gradient(45deg, #00ff88, #00d4ff);
+            color: #000;
+            border-color: #00ff88;
+        }
+
+        .pause-btn {
+            background: linear-gradient(45deg, #ffaa00, #ff6600);
+            color: #000;
+            border-color: #ffaa00;
+        }
+
+        .rules-btn {
+            background: linear-gradient(45deg, #ff0099, #9900ff);
+            color: #fff;
+            border-color: #ff0099;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.92);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #1a1a3e, #2a2a5a);
+            padding: 40px;
+            border-radius: 25px;
+            border: 3px solid #00d4ff;
+            max-width: 550px;
+            text-align: center;
+            box-shadow: 0 0 60px rgba(0, 212, 255, 0.6);
+        }
+
+        .modal h2 {
+            margin-bottom: 25px;
+            font-size: 2rem;
+            color: #00d4ff;
+        }
+
+        .modal p {
+            margin: 15px 0;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        .close-btn {
+            background: #ff0099;
+            border: none;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            margin-top: 25px;
+            font-weight: 800;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
+
+        .close-btn:hover {
+            background: #cc0077;
+            transform: scale(1.05);
+        }
+
+        .game-paused {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3.5rem;
+            font-weight: 900;
+            text-shadow: 0 0 40px #ffaa00;
+            display: none;
+            z-index: 100;
+            color: #ffaa00;
+        }
+
+        @media (max-width: 768px) {
+            .title { font-size: 2rem; }
+            .game-board { width: 90vw; height: 350px; }
+            .game-layout { flex-direction: column; gap: 20px; }
+            .control-btn { padding: 15px 25px; font-size: 1rem; min-width: 150px; }
+            .header-controls { gap: 15px; }
+        }
+        </style>
+    <style>
+    /* override: consistent global close button */
+    .global-close-btn { position: fixed !important; top: 14px !important; right: 14px !important; z-index: 99999 !important; background: linear-gradient(45deg,#ff3b3b,#ff0066) !important; color: #fff !important; border: none !important; width:52px !important; height:52px !important; border-radius:50% !important; font-size:22px !important; cursor:pointer !important; display:flex !important;align-items:center !important;justify-content:center !important; box-shadow:0 8px 22px rgba(255,59,59,0.28) !important; }
+    .global-close-btn:hover{ transform: scale(1.06); }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="header">
+            <div class="title" data-translate="title">STELLAR NEXUS</div>
+            <button class="global-close-btn" title="Fermer" aria-label="Fermer" onclick="closePlatform()">✕</button>
+            <script>
+            /* Canonical child-side overlay closer for platform pages */
+            function closePlatform(){
+                try{ console.debug('jeux33: closePlatform called'); }catch(e){}
+                if(window.parent && window.parent !== window){
+                    window.parent.postMessage({ action: 'close', reason: 'user-initiated', source: 'jeux33' }, '*');
+                    return;
+                }
+                if(window.opener && !window.opener.closed){
+                    try{ window.opener.postMessage({ action: 'child-closed', source: 'jeux33' }, '*'); }catch(e){}
+                    try{ window.close(); }catch(e){}
+                    return;
+                }
+                window.location.href = '/global_platform.html';
+            }
+            window.closePlatform = closePlatform;
+            </script>
+            <div class="header-controls">
+                <div class="language-selector">
+                    <button class="lang-button" data-translate="langButton">🌐 Français</button>
+                    <div class="lang-dropdown" id="langDropdown">
+                        <div class="lang-option" data-lang="fr">🇫🇷 Français</div>
+                        <div class="lang-option" data-lang="en">🇬🇧 English</div>
+                        <div class="lang-option" data-lang="ar">🇸🇦 العربية</div>
+                        <div class="lang-option" data-lang="es">🇪🇸 Español</div>
+                        <div class="lang-option" data-lang="de">🇩🇪 Deutsch</div>
+                        <div class="lang-option" data-lang="zh">🇨🇳 中文</div>
+                        <div class="lang-option" data-lang="ja">🇯🇵 日本語</div>
+                        <div class="lang-option" data-lang="ru">🇷🇺 Русский</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="game-layout">
+            <div class="level-display">
+                <div class="level-label" data-translate="levelLabel">Secteur</div>
+                <div class="level-number" id="levelNumber">1</div>
+            </div>
+
+            <div class="game-board" id="gameBoard">
+                <div class="stats">
+                    <div class="stat-item">
+                        <span data-translate="scoreText">Cristaux:</span> 
+                        <span id="score" style="color: #00ff88; font-weight: 800;">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span data-translate="timeText">Temps:</span> 
+                        <span id="time" style="color: #ffaa00; font-weight: 800;">0</span>s
+                    </div>
+                </div>
+                <div class="stellar-pattern"></div>
+                <div class="game-paused" data-translate="pausedText">SUSPENDU</div>
+            </div>
+
+            <div class="side-controls">
+                <button class="control-btn start-btn" data-translate="startBtn">🚀 LANCER</button>
+                <button class="control-btn pause-btn" data-translate="pauseBtn">⏸ PAUSE</button>
+                <button class="control-btn rules-btn" data-translate="rulesBtn">📖 GUIDE</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal des règles -->
+    <div class="modal" id="rulesModal">
+        <div class="modal-content">
+            <h2 data-translate="rulesTitle">🎮 GUIDE STELLAR</h2>
+            <div data-translate="rulesContent">
+                <p><strong>Objectif:</strong> Collectez les cristaux stellaires pour explorer de nouveaux secteurs!</p>
+                <p><strong>Contrôles:</strong> Cliquez sur les orbes lumineux qui apparaissent</p>
+                <p><strong>Secteurs:</strong> Chaque secteur augmente la difficulté et les récompenses</p>
+                <p><strong>Cristaux:</strong> +20 unités par orbe collecté</p>
+                <p><strong>Bonus:</strong> Collectez rapidement pour des multiplicateurs!</p>
+            </div>
+            <button class="close-btn" data-translate="closeBtn">FERMER</button>
+        </div>
+    </div>
+
+    <script>
+        // État du jeu
+        const gameState = {
+            isPlaying: false,
+            isPaused: false,
+            score: 0,
+            level: 1,
+            time: 0,
+            orbs: [],
+            gameInterval: null,
+            timeInterval: null,
+            currentLanguage: 'fr'
+        };
+
+        // Nouvelles traductions complètes
+        const translations = {
+            fr: {
+                title: 'STELLAR NEXUS',
+                langButton: '🌐 Français',
+                levelLabel: 'Secteur',
+                scoreText: 'Cristaux:',
+                timeText: 'Temps:',
+                startBtn: '🚀 LANCER',
+                pauseBtn: '⏸ PAUSE',
+                rulesBtn: '📖 GUIDE',
+                pausedText: 'SUSPENDU',
+                rulesTitle: '🎮 GUIDE STELLAR',
+                rulesContent: `
+                    <p><strong>Objectif:</strong> Collectez les cristaux stellaires pour explorer de nouveaux secteurs!</p>
+                    <p><strong>Contrôles:</strong> Cliquez sur les orbes lumineux qui apparaissent</p>
+                    <p><strong>Secteurs:</strong> Chaque secteur augmente la difficulté et les récompenses</p>
+                    <p><strong>Cristaux:</strong> +20 unités par orbe collecté</p>
+                    <p><strong>Bonus:</strong> Collectez rapidement pour des multiplicateurs!</p>
+                `,
+                closeBtn: 'FERMER'
+            },
+            en: {
+                title: 'STELLAR NEXUS',
+                langButton: '🌐 English',
+                levelLabel: 'Sector',
+                scoreText: 'Crystals:',
+                timeText: 'Time:',
+                startBtn: '🚀 LAUNCH',
+                pauseBtn: '⏸ PAUSE',
+                rulesBtn: '📖 GUIDE',
+                pausedText: 'PAUSED',
+                rulesTitle: '🎮 STELLAR GUIDE',
+                rulesContent: `
+                    <p><strong>Objective:</strong> Collect stellar crystals to explore new sectors!</p>
+                    <p><strong>Controls:</strong> Click on the luminous orbs that appear</p>
+                    <p><strong>Sectors:</strong> Each sector increases difficulty and rewards</p>
+                    <p><strong>Crystals:</strong> +20 units per collected orb</p>
+                    <p><strong>Bonus:</strong> Collect quickly for multipliers!</p>
+                `,
+                closeBtn: 'CLOSE'
+            },
+            ar: {
+                title: 'نيكسوس النجمي',
+                langButton: '🌐 العربية',
+                levelLabel: 'القطاع',
+                scoreText: 'البلورات:',
+                timeText: 'الوقت:',
+                startBtn: '🚀 إطلاق',
+                pauseBtn: '⏸ توقف',
+                rulesBtn: '📖 دليل',
+                pausedText: 'متوقف',
+                rulesTitle: '🎮 الدليل النجمي',
+                rulesContent: `
+                    <p><strong>الهدف:</strong> اجمع البلورات النجمية لاستكشاف قطاعات جديدة!</p>
+                    <p><strong>التحكم:</strong> انقر على الكرات المضيئة التي تظهر</p>
+                    <p><strong>القطاعات:</strong> كل قطاع يزيد الصعوبة والمكافآت</p>
+                    <p><strong>البلورات:</strong> +20 وحدة لكل كرة مجمعة</p>
+                    <p><strong>المكافأة:</strong> اجمع بسرعة للحصول على مضاعفات!</p>
+                `,
+                closeBtn: 'إغلاق'
+            },
+            es: {
+                title: 'NEXUS ESTELAR',
+                langButton: '🌐 Español',
+                levelLabel: 'Sector',
+                scoreText: 'Cristales:',
+                timeText: 'Tiempo:',
+                startBtn: '🚀 LANZAR',
+                pauseBtn: '⏸ PAUSA',
+                rulesBtn: '📖 GUÍA',
+                pausedText: 'PAUSADO',
+                rulesTitle: '🎮 GUÍA ESTELAR',
+                rulesContent: `
+                    <p><strong>Objetivo:</strong> ¡Recolecta cristales estelares para explorar nuevos sectores!</p>
+                    <p><strong>Controles:</strong> Haz clic en los orbes luminosos que aparecen</p>
+                    <p><strong>Sectores:</strong> Cada sector aumenta la dificultad y las recompensas</p>
+                    <p><strong>Cristales:</strong> +20 unidades por orbe recolectado</p>
+                    <p><strong>Bonus:</strong> ¡Recolecta rápidamente para multiplicadores!</p>
+                `,
+                closeBtn: 'CERRAR'
+            },
+            de: {
+                title: 'STELLAR NEXUS',
+                langButton: '🌐 Deutsch',
+                levelLabel: 'Sektor',
+                scoreText: 'Kristalle:',
+                timeText: 'Zeit:',
+                startBtn: '🚀 STARTEN',
+                pauseBtn: '⏸ PAUSE',
+                rulesBtn: '📖 ANLEITUNG',
+                pausedText: 'PAUSIERT',
+                rulesTitle: '🎮 STELLAR ANLEITUNG',
+                rulesContent: `
+                    <p><strong>Ziel:</strong> Sammle Sternenkristalle, um neue Sektoren zu erkunden!</p>
+                    <p><strong>Steuerung:</strong> Klicke auf die leuchtenden Orbs, die erscheinen</p>
+                    <p><strong>Sektoren:</strong> Jeder Sektor erhöht Schwierigkeit und Belohnungen</p>
+                    <p><strong>Kristalle:</strong> +20 Einheiten pro gesammeltem Orb</p>
+                    <p><strong>Bonus:</strong> Sammle schnell für Multiplikatoren!</p>
+                `,
+                closeBtn: 'SCHLIESSEN'
+            },
+            zh: {
+                title: '星际连接',
+                langButton: '🌐 中文',
+                levelLabel: '星区',
+                scoreText: '水晶:',
+                timeText: '时间:',
+                startBtn: '🚀 启动',
+                pauseBtn: '⏸ 暂停',
+                rulesBtn: '📖 指南',
+                pausedText: '已暂停',
+                rulesTitle: '🎮 星际指南',
+                rulesContent: `
+                    <p><strong>目标:</strong> 收集星际水晶探索新星区！</p>
+                    <p><strong>控制:</strong> 点击出现的发光球体</p>
+                    <p><strong>星区:</strong> 每个星区都会增加难度和奖励</p>
+                    <p><strong>水晶:</strong> 每收集一个球体+20单位</p>
+                    <p><strong>奖励:</strong> 快速收集获得倍数奖励！</p>
+                `,
+                closeBtn: '关闭'
+            },
+            ja: {
+                title: 'ステラーネクサス',
+                langButton: '🌐 日本語',
+                levelLabel: 'セクター',
+                scoreText: 'クリスタル:',
+                timeText: '時間:',
+                startBtn: '🚀 開始',
+                pauseBtn: '⏸ 一時停止',
+                rulesBtn: '📖 ガイド',
+                pausedText: '一時停止中',
+                rulesTitle: '🎮 ステラーガイド',
+                rulesContent: `
+                    <p><strong>目標:</strong> 星のクリスタルを集めて新しいセクターを探索しよう！</p>
+                    <p><strong>操作:</strong> 現れる光る球体をクリック</p>
+                    <p><strong>セクター:</strong> 各セクターで難易度と報酬が増加</p>
+                    <p><strong>クリスタル:</strong> 球体1個につき+20ユニット</p>
+                    <p><strong>ボーナス:</strong> 素早く集めて倍率ボーナス獲得！</p>
+                `,
+                closeBtn: '閉じる'
+            },
+            ru: {
+                title: 'ЗВЁЗДНЫЙ НЕКСУС',
+                langButton: '🌐 Русский',
+                levelLabel: 'Сектор',
+                scoreText: 'Кристаллы:',
+                timeText: 'Время:',
+                startBtn: '🚀 ЗАПУСК',
+                pauseBtn: '⏸ ПАУЗА',
+                rulesBtn: '📖 ГАЙД',
+                pausedText: 'ПАУЗА',
+                rulesTitle: '🎮 ЗВЁЗДНЫЙ ГАЙД',
+                rulesContent: `
+                    <p><strong>Цель:</strong> Собирайте звёздные кристаллы для исследования новых секторов!</p>
+                    <p><strong>Управление:</strong> Кликайте по светящимся сферам</p>
+                    <p><strong>Секторы:</strong> Каждый сектор увеличивает сложность и награды</p>
+                    <p><strong>Кристаллы:</strong> +20 единиц за собранную сферу</p>
+                    <p><strong>Бонус:</strong> Собирайте быстро для множителей!</p>
+                `,
+                closeBtn: 'ЗАКРЫТЬ'
+            }
+        };
+
+        // Système de traduction amélioré
+        function updateLanguage(langCode) {
+            console.log('Mise à jour langue:', langCode);
+            
+            if (!translations[langCode]) {
+                console.error('Langue non supportée:', langCode);
+                return;
+            }
+
+            gameState.currentLanguage = langCode;
+            const trans = translations[langCode];
+
+            // Mise à jour de tous les éléments avec data-translate
+            document.querySelectorAll('[data-translate]').forEach(element => {
+                const key = element.getAttribute('data-translate');
+                if (trans[key]) {
+                    if (key === 'rulesContent') {
+                        element.innerHTML = trans[key];
+                    } else {
+                        element.textContent = trans[key];
+                    }
+                }
+            });
+
+            // Mise à jour du titre de la page
+            document.title = `${trans.title} - Jeu Spatial Interactif`;
+            document.documentElement.lang = langCode;
+
+            // Direction RTL pour l'arabe
+            if (langCode === 'ar') {
+                document.body.style.direction = 'rtl';
+                document.body.style.textAlign = 'right';
+            } else {
+                document.body.style.direction = 'ltr';
+                document.body.style.textAlign = 'left';
+            }
+
+            // Sauvegarde de la préférence
+            localStorage.setItem('stellarLanguage', langCode);
+            
+            // Fermeture du dropdown
+            document.getElementById('langDropdown').style.display = 'none';
+            
+            // Notification de changement
+            showNotification(`✓ ${trans.langButton}`);
+        }
+
+        // Notification de changement de langue
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 30px;
+                right: 30px;
+                background: linear-gradient(45deg, #00d4ff, #00ff88);
+                color: #000;
+                padding: 18px 30px;
+                border-radius: 35px;
+                font-weight: 800;
+                z-index: 3000;
+                box-shadow: 0 15px 35px rgba(0, 212, 255, 0.6);
+                animation: notificationSlide 4s ease-in-out;
+                font-size: 1.1rem;
+            `;
+            notification.textContent = message;
+            
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes notificationSlide {
+                    0% { opacity: 0; transform: translateX(100px) scale(0.8); }
+                    15%, 85% { opacity: 1; transform: translateX(0) scale(1); }
+                    100% { opacity: 0; transform: translateX(100px) scale(0.8); }
+                }
+            `;
+            document.head.appendChild(style);
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                if (notification.parentNode) notification.parentNode.removeChild(notification);
+                if (style.parentNode) style.parentNode.removeChild(style);
+            }, 4000);
+        }
+
+        // Création d'orbes stellaires
+        function createStellarOrb() {
+            const gameBoard = document.getElementById('gameBoard');
+            const orb = document.createElement('div');
+            orb.className = 'stellar-orb';
+            
+            const colors = ['#00d4ff', '#00ff88', '#ffaa00', '#ff0099', '#9900ff', '#ff6600'];
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            orb.style.background = `radial-gradient(circle, ${color}, #ffffff, ${color})`;
+            orb.style.color = color;
+            
+            orb.style.left = Math.random() * (gameBoard.offsetWidth - 35) + 'px';
+            orb.style.top = Math.random() * (gameBoard.offsetHeight - 35) + 'px';
+            
+            orb.addEventListener('click', () => collectOrb(orb));
+            
+            gameBoard.appendChild(orb);
+            gameState.orbs.push(orb);
+            
+            // Auto-suppression après 5 secondes
+            setTimeout(() => {
+                if (orb.parentNode) {
+                    orb.parentNode.removeChild(orb);
+                    const index = gameState.orbs.indexOf(orb);
+                    if (index > -1) gameState.orbs.splice(index, 1);
+                }
+            }, 5000);
+        }
+
+        // Collecte d'orbes
+        function collectOrb(orb) {
+            if (!gameState.isPlaying || gameState.isPaused) return;
+            
+            gameState.score += 20 * gameState.level;
+            document.getElementById('score').textContent = gameState.score;
+            
+            // Effet visuel
+            orb.style.transform = 'scale(3)';
+            orb.style.opacity = '0';
+            orb.style.boxShadow = '0 0 60px currentColor';
+            
+            setTimeout(() => {
+                if (orb.parentNode) orb.parentNode.removeChild(orb);
+            }, 400);
+            
+            const index = gameState.orbs.indexOf(orb);
+            if (index > -1) gameState.orbs.splice(index, 1);
+            
+            // Montée de niveau
+            if (gameState.score > 0 && gameState.score % (200 * gameState.level) === 0) {
+                gameState.level++;
+                document.getElementById('levelNumber').textContent = gameState.level;
+            }
+        }
+
+        // Contrôles du jeu
+        function startGame() {
+            if (gameState.isPlaying && !gameState.isPaused) return;
+            
+            if (!gameState.isPlaying) {
+                gameState.score = 0;
+                gameState.level = 1;
+                gameState.time = 0;
+                document.getElementById('score').textContent = gameState.score;
+                document.getElementById('levelNumber').textContent = gameState.level;
+                document.getElementById('time').textContent = gameState.time;
+            }
+            
+            gameState.isPlaying = true;
+            gameState.isPaused = false;
+            document.querySelector('[data-translate="pausedText"]').style.display = 'none';
+            
+            if (gameState.gameInterval) clearInterval(gameState.gameInterval);
+            if (gameState.timeInterval) clearInterval(gameState.timeInterval);
+            
+            gameState.gameInterval = setInterval(() => {
+                if (!gameState.isPaused) createStellarOrb();
+            }, Math.max(1400 - (gameState.level * 80), 400));
+            
+            gameState.timeInterval = setInterval(() => {
+                if (!gameState.isPaused) {
+                    gameState.time++;
+                    document.getElementById('time').textContent = gameState.time;
+                }
+            }, 1000);
+        }
+
+        function pauseGame() {
+            if (!gameState.isPlaying) return;
+            
+            gameState.isPaused = !gameState.isPaused;
+            const pausedElement = document.querySelector('[data-translate="pausedText"]');
+            pausedElement.style.display = gameState.isPaused ? 'block' : 'none';
+        }
+
+        function showRules() {
+            document.getElementById('rulesModal').style.display = 'flex';
+        }
+
+        function closeRules() {
+            document.getElementById('rulesModal').style.display = 'none';
+        }
+
+        // Initialisation
+        function initGame() {
+            console.log('Initialisation de Stellar Nexus');
+            
+            // Système de langues
+            const langButton = document.querySelector('[data-translate="langButton"]');
+            const langDropdown = document.getElementById('langDropdown');
+            
+            langButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                langDropdown.style.display = langDropdown.style.display === 'block' ? 'none' : 'block';
+            });
+            
+            document.querySelectorAll('.lang-option').forEach(option => {
+                option.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const langCode = option.getAttribute('data-lang');
+                    updateLanguage(langCode);
+                });
+            });
+            
+            document.addEventListener('click', (e) => {
+                if (!langButton.contains(e.target) && !langDropdown.contains(e.target)) {
+                    langDropdown.style.display = 'none';
+                }
+            });
+            
+            // Contrôles du jeu
+            document.querySelector('[data-translate="startBtn"]').addEventListener('click', startGame);
+            document.querySelector('[data-translate="pauseBtn"]').addEventListener('click', pauseGame);
+            document.querySelector('[data-translate="rulesBtn"]').addEventListener('click', showRules);
+            document.querySelector('[data-translate="closeBtn"]').addEventListener('click', closeRules);
+            
+            // Orbes de fond
+            const gameBoard = document.getElementById('gameBoard');
+            for (let i = 0; i < 8; i++) {
+                setTimeout(() => {
+                    const bgOrb = document.createElement('div');
+                    bgOrb.className = 'stellar-orb';
+                    bgOrb.style.left = Math.random() * (gameBoard.offsetWidth - 35) + 'px';
+                    bgOrb.style.top = Math.random() * (gameBoard.offsetHeight - 35) + 'px';
+                    bgOrb.style.opacity = '0.3';
+                    bgOrb.style.pointerEvents = 'none';
+                    bgOrb.style.background = 'radial-gradient(circle, #00d4ff, #ff0099)';
+                    bgOrb.style.color = '#00d4ff';
+                    gameBoard.appendChild(bgOrb);
+                }, i * 700);
+            }
+            
+            // Chargement de la langue sauvegardée
+            const savedLang = localStorage.getItem('stellarLanguage');
+            if (savedLang && translations[savedLang]) {
+                updateLanguage(savedLang);
+            }
+            
+            console.log('Stellar Nexus initialisé avec succès');
+        }
+
+        // Démarrage
+        window.addEventListener('load', initGame);
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98839623a55fe22d',t:'MTc1OTQwMTY3Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
