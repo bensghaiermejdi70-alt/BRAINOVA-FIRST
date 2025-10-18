@@ -101,6 +101,11 @@ header h1 {
     transform: translateY(-2px);
 }
 
+.filter-btn:focus {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
 .filter-btn.active {
     background: var(--primary-color);
     color: white;
@@ -138,6 +143,11 @@ header h1 {
 .game-card:hover {
     transform: translateY(-5px);
     box-shadow: var(--shadow-hover);
+}
+
+.game-card:focus {
+    outline: 3px solid var(--primary-color);
+    outline-offset: 2px;
 }
 
 .game-card h3 {

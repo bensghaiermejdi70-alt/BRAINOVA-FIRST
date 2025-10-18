@@ -66,24 +66,59 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        gamesContainer.innerHTML = games.map(game => `
-            <div class="game-card" data-id="${game.id}">
-                <h3>${game.title}</h3>
-                <div class="game-info">
-                    <span class="info-badge">⏱️ ${game.duration}</span>
-                    <span class="info-badge">👥 ${game.players}</span>
-                </div>
-                <p class="game-description">${game.description}</p>
-                <span class="category-badge">${getCategoryLabel(game.category)}</span>
-            </div>
-        `).join('');
+        // Clear container
+        gamesContainer.innerHTML = '';
 
-        // Add click event to each card
-        document.querySelectorAll('.game-card').forEach(card => {
-            card.addEventListener('click', function() {
-                const gameId = parseInt(this.dataset.id);
-                openGameModal(gameId);
+        // Create game cards safely
+        games.forEach(game => {
+            const card = document.createElement('div');
+            card.className = 'game-card';
+            card.dataset.id = game.id;
+            card.setAttribute('tabindex', '0');
+            card.setAttribute('role', 'button');
+            card.setAttribute('aria-label', `Ouvrir les détails de ${game.title}`);
+
+            const title = document.createElement('h3');
+            title.textContent = game.title;
+
+            const gameInfo = document.createElement('div');
+            gameInfo.className = 'game-info';
+
+            const durationBadge = document.createElement('span');
+            durationBadge.className = 'info-badge';
+            durationBadge.textContent = `⏱️ ${game.duration}`;
+
+            const playersBadge = document.createElement('span');
+            playersBadge.className = 'info-badge';
+            playersBadge.textContent = `👥 ${game.players}`;
+
+            gameInfo.appendChild(durationBadge);
+            gameInfo.appendChild(playersBadge);
+
+            const description = document.createElement('p');
+            description.className = 'game-description';
+            description.textContent = game.description;
+
+            const categoryBadge = document.createElement('span');
+            categoryBadge.className = 'category-badge';
+            categoryBadge.textContent = getCategoryLabel(game.category);
+
+            card.appendChild(title);
+            card.appendChild(gameInfo);
+            card.appendChild(description);
+            card.appendChild(categoryBadge);
+
+            // Add click and keyboard event listeners
+            const openModal = () => openGameModal(game.id);
+            card.addEventListener('click', openModal);
+            card.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    openModal();
+                }
             });
+
+            gamesContainer.appendChild(card);
         });
     }
 
@@ -103,32 +138,50 @@ document.addEventListener('DOMContentLoaded', function() {
         const game = gamesData.find(g => g.id === gameId);
         if (!game) return;
 
+        // Set title safely
         document.getElementById('modal-title').textContent = game.title;
         document.getElementById('modal-duration').textContent = `⏱️ ${game.duration}`;
         document.getElementById('modal-players').textContent = `👥 ${game.players}`;
         document.getElementById('modal-category').textContent = getCategoryLabel(game.category);
         document.getElementById('modal-description').textContent = game.description;
 
-        // Display rules
-        const rulesHTML = `
-            <h3>📋 Règles du jeu</h3>
-            <ol>
-                ${game.rules.map(rule => `<li>${rule}</li>`).join('')}
-            </ol>
-        `;
-        document.getElementById('modal-rules').innerHTML = rulesHTML;
+        // Display rules safely
+        const rulesContainer = document.getElementById('modal-rules');
+        rulesContainer.innerHTML = ''; // Clear first
+        
+        const rulesTitle = document.createElement('h3');
+        rulesTitle.textContent = '📋 Règles du jeu';
+        rulesContainer.appendChild(rulesTitle);
+        
+        const rulesList = document.createElement('ol');
+        game.rules.forEach(rule => {
+            const li = document.createElement('li');
+            li.textContent = rule;
+            rulesList.appendChild(li);
+        });
+        rulesContainer.appendChild(rulesList);
 
-        // Display materials
-        const materialsHTML = `
-            <h3>🎯 Matériel nécessaire</h3>
-            <ul>
-                ${game.materials.map(material => `<li>${material}</li>`).join('')}
-            </ul>
-        `;
-        document.getElementById('modal-materials').innerHTML = materialsHTML;
+        // Display materials safely
+        const materialsContainer = document.getElementById('modal-materials');
+        materialsContainer.innerHTML = ''; // Clear first
+        
+        const materialsTitle = document.createElement('h3');
+        materialsTitle.textContent = '🎯 Matériel nécessaire';
+        materialsContainer.appendChild(materialsTitle);
+        
+        const materialsList = document.createElement('ul');
+        game.materials.forEach(material => {
+            const li = document.createElement('li');
+            li.textContent = material;
+            materialsList.appendChild(li);
+        });
+        materialsContainer.appendChild(materialsList);
 
         modal.style.display = 'block';
         document.body.style.overflow = 'hidden'; // Prevent scrolling when modal is open
+        
+        // Focus on close button for accessibility
+        closeBtn.focus();
     }
 
     // Close modal
@@ -141,6 +194,27 @@ document.addEventListener('DOMContentLoaded', function() {
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape' && modal.style.display === 'block') {
             closeModal();
+        }
+    });
+
+    // Focus trapping in modal
+    modal.addEventListener('keydown', function(e) {
+        if (e.key === 'Tab' && modal.style.display === 'block') {
+            const focusableElements = modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+            const firstElement = focusableElements[0];
+            const lastElement = focusableElements[focusableElements.length - 1];
+
+            if (e.shiftKey) {
+                if (document.activeElement === firstElement) {
+                    e.preventDefault();
+                    lastElement.focus();
+                }
+            } else {
+                if (document.activeElement === lastElement) {
+                    e.preventDefault();
+                    firstElement.focus();
+                }
+            }
         }
     });
 });
