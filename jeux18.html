@@ -1,0 +1,1783 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QUANTUM WARFARE 2.0 - Bataille Spatiale Futuriste</title>
+    <style>
+        body {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Orbitron', 'Segoe UI', monospace;
+            background: radial-gradient(ellipse at center, #0a0a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #00ffff;
+            overflow-y: auto;
+            overflow-x: hidden;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        .stars {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            z-index: 1;
+        }
+
+        .star {
+            position: absolute;
+            background: #ffffff;
+            border-radius: 50%;
+            animation: twinkle 2s infinite alternate;
+        }
+
+        @keyframes twinkle {
+            0% { opacity: 0.3; transform: scale(1); }
+            100% { opacity: 1; transform: scale(1.2); }
+        }
+
+        .game-container {
+            position: relative;
+            width: 100%;
+            min-height: 100vh;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-bottom: 20px;
+        }
+
+        .header {
+            width: 100%;
+            text-align: center;
+            padding: 15px 0;
+            background: rgba(0, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-bottom: 2px solid #00ffff;
+            box-shadow: 0 4px 20px rgba(0, 255, 255, 0.3);
+        }
+
+        /* global close button (fixed red circle) */
+        .global-close-btn { position: fixed; top: 14px; right: 14px; z-index: 99999; background: linear-gradient(45deg,#ff3b3b,#ff0066); color: #fff; border: none; width:52px; height:52px; border-radius:50%; font-size:22px; cursor:pointer; display:flex;align-items:center;justify-content:center; box-shadow:0 8px 22px rgba(255,59,59,0.28); }
+        .global-close-btn:hover{ transform: scale(1.06); }
+
+        .title {
+            font-size: 2rem;
+            font-weight: 900;
+            text-shadow: 0 0 20px #00ffff;
+            animation: titlePulse 3s ease-in-out infinite;
+            letter-spacing: 2px;
+            margin: 0;
+        }
+
+        @keyframes titlePulse {
+            0%, 100% { text-shadow: 0 0 20px #00ffff; }
+            50% { text-shadow: 0 0 30px #00ffff, 0 0 40px #ff0080; }
+        }
+
+        .game-layout {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin-top: 20px;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .left-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            min-width: 150px;
+        }
+
+        .right-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            min-width: 150px;
+        }
+
+        .game-center {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .game-hud {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .hud-panel {
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #00ffff;
+            border-radius: 10px;
+            padding: 10px 15px;
+            backdrop-filter: blur(5px);
+            min-width: 120px;
+        }
+
+        .stat-item {
+            margin: 3px 0;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .game-area {
+            width: 800px;
+            height: 500px;
+            border: 3px solid #00ffff;
+            border-radius: 15px;
+            background: rgba(0, 0, 0, 0.4);
+            overflow: hidden;
+            box-shadow: 0 0 40px rgba(0, 255, 255, 0.4);
+            position: relative;
+        }
+
+        .player-ship {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 50px;
+            background: linear-gradient(45deg, #00ffff, #0080ff);
+            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+            transition: all 0.1s ease;
+            box-shadow: 0 0 15px #00ffff;
+        }
+
+        .enemy-ship {
+            position: absolute;
+            width: 35px;
+            height: 40px;
+            background: linear-gradient(45deg, #ff0080, #ff4000);
+            clip-path: polygon(50% 100%, 0% 0%, 100% 0%);
+            transition: all 0.2s ease;
+            box-shadow: 0 0 12px #ff0080;
+        }
+
+        .boss-ship {
+            position: absolute;
+            width: 80px;
+            height: 60px;
+            background: linear-gradient(45deg, #ff0080, #8000ff, #ff4000);
+            clip-path: polygon(20% 0%, 80% 0%, 100% 50%, 80% 100%, 20% 100%, 0% 50%);
+            box-shadow: 0 0 25px #ff0080;
+            animation: bossFloat 2s ease-in-out infinite;
+        }
+
+        @keyframes bossFloat {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-15px) rotate(3deg); }
+        }
+
+        .boss-health {
+            position: absolute;
+            top: -15px;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 0, 0, 0.3);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .boss-health-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #ff0000, #ff8000);
+            transition: width 0.3s ease;
+        }
+
+        .projectile {
+            position: absolute;
+            width: 3px;
+            height: 12px;
+            background: linear-gradient(to top, #00ffff, #ffffff);
+            border-radius: 2px;
+            box-shadow: 0 0 8px #00ffff;
+        }
+
+        .enemy-projectile {
+            background: linear-gradient(to bottom, #ff0080, #ffffff);
+            box-shadow: 0 0 8px #ff0080;
+        }
+
+        .laser-projectile {
+            width: 2px;
+            height: 20px;
+            background: linear-gradient(to top, #ffff00, #ffffff);
+            box-shadow: 0 0 10px #ffff00;
+        }
+
+        .missile-projectile {
+            width: 4px;
+            height: 8px;
+            background: linear-gradient(45deg, #ff4000, #ffaa00);
+            border-radius: 50%;
+            box-shadow: 0 0 8px #ff4000;
+        }
+
+        .power-up {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            animation: powerUpFloat 1.5s ease-in-out infinite;
+            box-shadow: 0 0 12px currentColor;
+        }
+
+        @keyframes powerUpFloat {
+            0%, 100% { transform: translateY(0px) rotate(0deg) scale(1); }
+            50% { transform: translateY(-8px) rotate(180deg) scale(1.1); }
+        }
+
+        .explosion {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #ffff00, #ff4000, transparent);
+            animation: explode 0.4s ease-out forwards;
+            pointer-events: none;
+        }
+
+        @keyframes explode {
+            0% { transform: scale(0); opacity: 1; }
+            100% { transform: scale(1.5); opacity: 0; }
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: #ffff00;
+            border-radius: 50%;
+            animation: particle 0.8s ease-out forwards;
+            pointer-events: none;
+        }
+
+        @keyframes particle {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(0); opacity: 0; }
+        }
+
+        .control-btn {
+            padding: 8px 16px;
+            border: 2px solid #00ffff;
+            background: rgba(0, 255, 255, 0.1);
+            color: #00ffff;
+            border-radius: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.8rem;
+            text-align: center;
+        }
+
+        .control-btn:hover {
+            background: rgba(0, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 255, 255, 0.4);
+        }
+
+        .start-btn {
+            background: linear-gradient(45deg, #00ff80, #00ffff);
+            color: #000;
+            border-color: #00ff80;
+        }
+
+        .pause-btn {
+            background: linear-gradient(45deg, #ffaa00, #ff6600);
+            color: #000;
+            border-color: #ffaa00;
+        }
+
+        .rules-btn {
+            background: linear-gradient(45deg, #ff0080, #8000ff);
+            color: #fff;
+            border-color: #ff0080;
+        }
+
+        .level-selector {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .level-display {
+            text-align: center;
+            font-weight: 700;
+            color: #00ffff;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 8px;
+            border-radius: 8px;
+            border: 1px solid #00ffff;
+        }
+
+        .language-selector {
+            position: relative;
+        }
+
+        .lang-button {
+            background: linear-gradient(45deg, #00ffff, #0080ff);
+            border: 2px solid #00ffff;
+            padding: 8px 16px;
+            border-radius: 15px;
+            color: #000;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.8rem;
+            width: 100%;
+        }
+
+        .lang-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0, 255, 255, 0.5);
+        }
+
+        .lang-dropdown {
+            position: absolute;
+            top: 110%;
+            right: 0;
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #00ffff;
+            border-radius: 8px;
+            padding: 5px;
+            display: none;
+            z-index: 1000;
+            min-width: 120px;
+            box-shadow: 0 8px 20px rgba(0, 255, 255, 0.4);
+        }
+
+        .lang-option {
+            display: block;
+            padding: 6px 10px;
+            color: #00ffff;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            font-size: 0.75rem;
+            margin: 1px 0;
+        }
+
+        .lang-option:hover {
+            background: rgba(0, 255, 255, 0.2);
+            transform: translateX(3px);
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #1a1a3e, #2a2a5a);
+            padding: 25px;
+            border-radius: 15px;
+            border: 3px solid #00ffff;
+            max-width: 500px;
+            text-align: center;
+            box-shadow: 0 0 40px rgba(0, 255, 255, 0.6);
+        }
+
+        .modal h2 {
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+            color: #00ffff;
+        }
+
+        .modal p {
+            margin: 8px 0;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .close-btn {
+            background: #ff0080;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 15px;
+            cursor: pointer;
+            margin-top: 15px;
+            font-weight: 700;
+            transition: all 0.3s ease;
+        }
+
+        .close-btn:hover {
+            background: #cc0066;
+            transform: scale(1.05);
+        }
+
+        .level-indicator {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3rem;
+            font-weight: 900;
+            color: #00ffff;
+            text-shadow: 0 0 25px #00ffff;
+            display: none;
+            z-index: 200;
+            animation: levelShow 1.5s ease-out;
+        }
+
+        @keyframes levelShow {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
+        }
+
+        .technique-indicator {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #ff0080;
+            border-radius: 8px;
+            padding: 8px;
+            font-size: 0.8rem;
+            color: #ff0080;
+            animation: pulse 1s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @media (max-width: 768px) {
+            .title { font-size: 1.5rem; }
+            .game-layout { 
+                flex-direction: column; 
+                align-items: center; 
+                gap: 10px;
+            }
+            .game-area { 
+                width: 95vw; 
+                height: 400px; 
+            }
+            .left-controls, .right-controls { 
+                flex-direction: row; 
+                justify-content: center;
+                min-width: auto;
+                flex-wrap: wrap;
+            }
+            .level-selector {
+                flex-direction: row;
+                align-items: center;
+                gap: 5px;
+            }
+            .level-display {
+                font-size: 0.8rem;
+                padding: 4px;
+            }
+        }
+    </style>
+    <style>
+    /* override: consistent global close button */
+    .global-close-btn { position: fixed !important; top: 14px !important; right: 14px !important; z-index: 99999 !important; background: linear-gradient(45deg,#ff3b3b,#ff0066) !important; color: #fff !important; border: none !important; width:52px !important; height:52px !important; border-radius:50% !important; font-size:22px !important; cursor:pointer !important; display:flex !important;align-items:center !important;justify-content:center !important; box-shadow:0 8px 22px rgba(255,59,59,0.28) !important; }
+    .global-close-btn:hover{ transform: scale(1.06); }
+    </style>
+</head>
+<body>
+    <div class="stars" id="stars"></div>
+    
+    <div class="game-container">
+        <div class="header">
+            <h1 class="title" data-translate="title">QUANTUM WARFARE 2.0</h1>
+            <button class="global-close-btn" title="Fermer" aria-label="Fermer" onclick="(function(){ try{ if(window.parent && window.parent !== window){ window.parent.postMessage({action:'close', source:'jeux18'}, '*'); } else { window.location.href = 'global_platform.html'; } }catch(e){ window.location.href = 'global_platform.html'; } })()">✕</button>
+        </div>
+
+        <div class="game-layout">
+            <div class="left-controls">
+                <button class="control-btn start-btn" data-translate="startBtn">🚀 DÉMARRER</button>
+                <button class="control-btn pause-btn" data-translate="pauseBtn">⏸ PAUSE</button>
+                <button class="control-btn rules-btn" data-translate="rulesBtn">📖 RÈGLES</button>
+                <button class="control-btn start-btn" data-translate="newGameBtn" id="newGameBtn">🎮 NOUVEAU JEU</button>
+            </div>
+
+            <div class="game-center">
+                <div class="game-hud">
+                    <div class="hud-panel">
+                        <div class="stat-item">
+                            <span data-translate="scoreText">Score:</span><br>
+                            <span id="score" style="color: #00ff80;">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span data-translate="levelText">Niveau:</span><br>
+                            <span id="level" style="color: #ffaa00;">1</span>
+                        </div>
+                    </div>
+                    <div class="hud-panel">
+                        <div class="stat-item">
+                            <span data-translate="livesText">Vies:</span><br>
+                            <span id="lives" style="color: #ff0080;">3</span>
+                        </div>
+                        <div class="stat-item">
+                            <span data-translate="waveText">Vague:</span><br>
+                            <span id="wave" style="color: #8000ff;">1</span>
+                        </div>
+                    </div>
+                    <div class="hud-panel">
+                        <div class="stat-item">
+                            <span data-translate="enemiesText">Ennemis:</span><br>
+                            <span id="enemies" style="color: #ff4000;">0</span>
+                        </div>
+                        <div class="stat-item">
+                            <span data-translate="weaponText">Arme:</span><br>
+                            <span id="weapon" style="color: #00ffff;">Basique</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="game-area" id="gameArea">
+                    <div class="player-ship" id="playerShip"></div>
+                    <div class="technique-indicator" id="techniqueIndicator" style="display: none;">
+                        <div data-translate="techniqueText">Technique Prête!</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="right-controls">
+                <div class="language-selector">
+                    <button class="lang-button" data-translate="langButton">🌐 Français</button>
+                    <div class="lang-dropdown" id="langDropdown">
+                        <div class="lang-option" data-lang="fr">🇫🇷 Français</div>
+                        <div class="lang-option" data-lang="en">🇬🇧 English</div>
+                        <div class="lang-option" data-lang="ar">🇸🇦 العربية</div>
+                        <div class="lang-option" data-lang="es">🇪🇸 Español</div>
+                        <div class="lang-option" data-lang="de">🇩🇪 Deutsch</div>
+                        <div class="lang-option" data-lang="zh">🇨🇳 中文</div>
+                    </div>
+                </div>
+                <div class="level-selector">
+                    <button class="control-btn" id="prevLevel">⬅ Niveau Précédent</button>
+                    <button class="control-btn" id="nextLevel">Niveau Suivant ➡</button>
+                    <div class="level-display">Niveau: <span id="selectedLevel">1</span>/20</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="level-indicator" id="levelIndicator"></div>
+    </div>
+
+    <!-- Modal des règles -->
+    <div class="modal" id="rulesModal">
+        <div class="modal-content">
+            <h2 data-translate="rulesTitle">🎮 GUIDE DE COMBAT</h2>
+            <div data-translate="rulesContent">
+                <p><strong>Objectif:</strong> Survivez aux vagues d'ennemis et battez les boss!</p>
+                <p><strong>Contrôles:</strong> Souris pour bouger, Clic pour tirer, Espace pour technique spéciale</p>
+                <p><strong>Power-ups:</strong> Collectez les orbes colorés pour améliorer vos armes</p>
+                <p><strong>Armes:</strong> Basique, Rapide, Dispersion, Laser, Missiles</p>
+                <p><strong>IA Ennemie:</strong> 4 patterns différents qui s'adaptent à votre niveau</p>
+                <p><strong>Boss:</strong> Apparaissent tous les 5 niveaux avec barres de vie</p>
+            </div>
+            <button class="close-btn" data-translate="closeBtn">FERMER</button>
+        </div>
+    </div>
+
+    <!-- Modal de félicitations -->
+    <div class="modal" id="congratsModal">
+        <div class="modal-content" style="background: linear-gradient(135deg, #1a3e1a, #2a5a2a); border-color: #00ff80;">
+            <h2 style="color: #00ff80;">🎉 FÉLICITATIONS! 🎉</h2>
+            <div id="congratsMessage">
+                <p><strong>Niveau <span id="completedLevel">1</span> terminé!</strong></p>
+                <p>Score: <span id="levelScore">0</span> points</p>
+                <p>Bonus de niveau: <span id="levelBonus">0</span> points</p>
+                <p>Temps: <span id="levelTime">0</span> secondes</p>
+            </div>
+            <button class="close-btn" id="continueBtn" style="background: #00ff80; color: #000;">CONTINUER</button>
+        </div>
+    </div>
+    <!-- global close button style + behavior -->
+    <style>
+    .global-close-btn { position: fixed; top: 14px; right: 14px; z-index: 99999; background: linear-gradient(45deg,#ff3b3b,#ff0066); color: #fff; border: none; width:52px; height:52px; border-radius:50%; font-size:22px; cursor:pointer; display:flex;align-items:center;justify-content:center; box-shadow:0 8px 22px rgba(255,59,59,0.28); }
+    .global-close-btn:hover{ transform: scale(1.06); }
+    </style>
+    <script>
+    // Ensure a single global-close button exists and wire it to a robust closePlatform()
+    (function(){
+        try{
+            function closePlatform(){
+                try{ console.debug('jeux18: closePlatform called'); }catch(e){}
+                try{
+                    if(window.parent && window.parent !== window){
+                        window.parent.postMessage({ action: 'close', reason: 'user-initiated', source: 'jeux18' }, '*');
+                        return;
+                    }
+                }catch(e){}
+                try{
+                    if(window.opener && !window.opener.closed){
+                        try{ window.opener.postMessage({ action: 'child-closed', source: 'jeux18' }, '*'); }catch(e){}
+                        try{ window.close(); }catch(e){}
+                        return;
+                    }
+                }catch(e){}
+                try{ window.location.href = '/brainova.html'; }catch(e){}
+            }
+
+            var btn = document.querySelector('.global-close-btn');
+            if(!btn){
+                btn = document.createElement('button');
+                btn.className = 'global-close-btn';
+                btn.title = 'Retour';
+                btn.setAttribute('aria-label','Fermer');
+                btn.innerText = '✕';
+                document.body.appendChild(btn);
+            }
+
+            // Prefer onclick assignment to avoid duplicate listeners
+            try{ btn.onclick = closePlatform; }catch(e){ btn.addEventListener && btn.addEventListener('click', closePlatform); }
+
+            // Expose for debugging if needed
+            window.closePlatform = closePlatform;
+        }catch(e){ /* silent */ }
+    })();
+    </script>
+
+    <script>
+        // État du jeu
+        const gameState = {
+            isPlaying: false,
+            isPaused: false,
+            score: 0,
+            level: 1,
+            selectedLevel: 1,
+            wave: 1,
+            lives: 3,
+            enemies: 0,
+            totalEnemiesSpawned: 0,
+            currentWeapon: 'basic',
+            techniqueReady: false,
+            techniqueCharge: 0,
+            playerX: 400,
+            playerY: 450,
+            projectiles: [],
+            enemyProjectiles: [],
+            enemyShips: [],
+            powerUps: [],
+            particles: [],
+            gameInterval: null,
+            currentLanguage: 'fr',
+            aiDifficulty: 1,
+            bossActive: false,
+            bossHealth: 0,
+            maxBossHealth: 0,
+            levelStartTime: 0,
+            wavesPerLevel: 0,
+            currentWaveInLevel: 0,
+            maxLevel: 20,
+            unlockedLevels: 1,
+            canSelectLevel: false
+        };
+
+        // Traductions
+        const translations = {
+            fr: {
+                title: 'QUANTUM WARFARE 2.0',
+                langButton: '🌐 Français',
+                scoreText: 'Score:',
+                levelText: 'Niveau:',
+                livesText: 'Vies:',
+                enemiesText: 'Ennemis:',
+                waveText: 'Vague:',
+                weaponText: 'Arme:',
+                techniqueText: 'Technique Prête!',
+                startBtn: '🚀 DÉMARRER',
+                pauseBtn: '⏸ PAUSE',
+                rulesBtn: '📖 RÈGLES',
+                newGameBtn: '🎮 NOUVEAU JEU',
+                rulesTitle: '🎮 GUIDE DE COMBAT',
+                rulesContent: `
+                    <p><strong>Objectif:</strong> Survivez aux vagues d'ennemis et battez les boss!</p>
+                    <p><strong>Contrôles:</strong> ← → ou A/D pour bouger, Souris/Clic pour tirer, Espace pour tir automatique et technique spéciale</p>
+                    <p><strong>Mode Défenseur:</strong> Vous êtes invulnérable aux ennemis mais vulnérable aux projectiles!</p>
+                    <p><strong>Power-ups:</strong> Collectez les orbes colorés pour améliorer vos armes</p>
+                    <p><strong>Armes:</strong> Basique, Rapide, Dispersion, Laser, Missiles</p>
+                    <p><strong>IA Ennemie:</strong> 4 patterns différents qui s'adaptent à votre niveau</p>
+                    <p><strong>Boss:</strong> Apparaissent tous les 3 niveaux avec barres de vie</p>
+                `,
+                closeBtn: 'FERMER',
+                weapons: {
+                    basic: 'Basique',
+                    rapid: 'Rapide',
+                    spread: 'Dispersion',
+                    laser: 'Laser',
+                    missile: 'Missiles'
+                }
+            },
+            en: {
+                title: 'QUANTUM WARFARE 2.0',
+                langButton: '🌐 English',
+                scoreText: 'Score:',
+                levelText: 'Level:',
+                livesText: 'Lives:',
+                enemiesText: 'Enemies:',
+                waveText: 'Wave:',
+                weaponText: 'Weapon:',
+                techniqueText: 'Technique Ready!',
+                startBtn: '🚀 START',
+                pauseBtn: '⏸ PAUSE',
+                rulesBtn: '📖 RULES',
+                newGameBtn: '🎮 NEW GAME',
+                rulesTitle: '🎮 COMBAT GUIDE',
+                rulesContent: `
+                    <p><strong>Objective:</strong> Survive enemy waves and defeat bosses!</p>
+                    <p><strong>Controls:</strong> Mouse to move, Click to shoot, Space for special technique</p>
+                    <p><strong>Power-ups:</strong> Collect colored orbs to upgrade your weapons</p>
+                    <p><strong>Weapons:</strong> Basic, Rapid, Spread, Laser, Missiles</p>
+                    <p><strong>Enemy AI:</strong> 4 different patterns that adapt to your level</p>
+                    <p><strong>Bosses:</strong> Appear every 5 levels with health bars</p>
+                `,
+                closeBtn: 'CLOSE',
+                weapons: {
+                    basic: 'Basic',
+                    rapid: 'Rapid',
+                    spread: 'Spread',
+                    laser: 'Laser',
+                    missile: 'Missiles'
+                }
+            },
+            ar: {
+                title: 'حرب الكم 2.0',
+                langButton: '🌐 العربية',
+                scoreText: 'النقاط:',
+                levelText: 'المستوى:',
+                livesText: 'الأرواح:',
+                enemiesText: 'الأعداء:',
+                waveText: 'الموجة:',
+                weaponText: 'السلاح:',
+                techniqueText: 'التقنية جاهزة!',
+                startBtn: '🚀 ابدأ',
+                pauseBtn: '⏸ توقف',
+                rulesBtn: '📖 القواعد',
+                newGameBtn: '🎮 لعبة جديدة',
+                rulesTitle: '🎮 دليل القتال',
+                rulesContent: `
+                    <p><strong>الهدف:</strong> انج من موجات الأعداء واهزم الزعماء!</p>
+                    <p><strong>التحكم:</strong> الماوس للحركة، النقر للإطلاق، المسافة للتقنية الخاصة</p>
+                    <p><strong>التحسينات:</strong> اجمع الكرات الملونة لترقية أسلحتك</p>
+                    <p><strong>الأسلحة:</strong> أساسي، سريع، منتشر، ليزر، صواريخ</p>
+                    <p><strong>ذكاء العدو:</strong> 4 أنماط مختلفة تتكيف مع مستواك</p>
+                    <p><strong>الزعماء:</strong> يظهرون كل 5 مستويات مع أشرطة الصحة</p>
+                `,
+                closeBtn: 'إغلاق',
+                weapons: {
+                    basic: 'أساسي',
+                    rapid: 'سريع',
+                    spread: 'منتشر',
+                    laser: 'ليزر',
+                    missile: 'صواريخ'
+                }
+            },
+            es: {
+                title: 'GUERRA CUÁNTICA 2.0',
+                langButton: '🌐 Español',
+                scoreText: 'Puntos:',
+                levelText: 'Nivel:',
+                livesText: 'Vidas:',
+                enemiesText: 'Enemigos:',
+                waveText: 'Oleada:',
+                weaponText: 'Arma:',
+                techniqueText: '¡Técnica Lista!',
+                startBtn: '🚀 INICIAR',
+                pauseBtn: '⏸ PAUSA',
+                rulesBtn: '📖 REGLAS',
+                newGameBtn: '🎮 NUEVO JUEGO',
+                rulesTitle: '🎮 GUÍA DE COMBATE',
+                rulesContent: `
+                    <p><strong>Objetivo:</strong> ¡Sobrevive a las oleadas de enemigos y derrota a los jefes!</p>
+                    <p><strong>Controles:</strong> Ratón para mover, Clic para disparar, Espacio para técnica especial</p>
+                    <p><strong>Mejoras:</strong> Recoge orbes de colores para mejorar tus armas</p>
+                    <p><strong>Armas:</strong> Básico, Rápido, Dispersión, Láser, Misiles</p>
+                    <p><strong>IA Enemiga:</strong> 4 patrones diferentes que se adaptan a tu nivel</p>
+                    <p><strong>Jefes:</strong> Aparecen cada 5 niveles con barras de vida</p>
+                `,
+                closeBtn: 'CERRAR',
+                weapons: {
+                    basic: 'Básico',
+                    rapid: 'Rápido',
+                    spread: 'Dispersión',
+                    laser: 'Láser',
+                    missile: 'Misiles'
+                }
+            },
+            de: {
+                title: 'QUANTUM KRIEGSFÜHRUNG 2.0',
+                langButton: '🌐 Deutsch',
+                scoreText: 'Punkte:',
+                levelText: 'Level:',
+                livesText: 'Leben:',
+                enemiesText: 'Feinde:',
+                waveText: 'Welle:',
+                weaponText: 'Waffe:',
+                techniqueText: 'Technik bereit!',
+                startBtn: '🚀 START',
+                pauseBtn: '⏸ PAUSE',
+                rulesBtn: '📖 REGELN',
+                newGameBtn: '🎮 NEUES SPIEL',
+                rulesTitle: '🎮 KAMPF-ANLEITUNG',
+                rulesContent: `
+                    <p><strong>Ziel:</strong> Überlebe Feindeswellen und besiege Bosse!</p>
+                    <p><strong>Steuerung:</strong> Maus zum Bewegen, Klick zum Schießen, Leertaste für Spezial-Technik</p>
+                    <p><strong>Power-ups:</strong> Sammle farbige Orbs um deine Waffen zu verbessern</p>
+                    <p><strong>Waffen:</strong> Basis, Schnell, Streuung, Laser, Raketen</p>
+                    <p><strong>Feind-KI:</strong> 4 verschiedene Muster die sich an dein Level anpassen</p>
+                    <p><strong>Bosse:</strong> Erscheinen alle 5 Level mit Lebensbalken</p>
+                `,
+                closeBtn: 'SCHLIESSEN',
+                weapons: {
+                    basic: 'Basis',
+                    rapid: 'Schnell',
+                    spread: 'Streuung',
+                    laser: 'Laser',
+                    missile: 'Raketen'
+                }
+            },
+            zh: {
+                title: '量子战争 2.0',
+                langButton: '🌐 中文',
+                scoreText: '分数:',
+                levelText: '等级:',
+                livesText: '生命:',
+                enemiesText: '敌人:',
+                waveText: '波次:',
+                weaponText: '武器:',
+                techniqueText: '技能准备就绪!',
+                startBtn: '🚀 开始',
+                pauseBtn: '⏸ 暂停',
+                rulesBtn: '📖 规则',
+                newGameBtn: '🎮 新游戏',
+                rulesTitle: '🎮 战斗指南',
+                rulesContent: `
+                    <p><strong>目标:</strong> 在敌人波次中生存并击败Boss！</p>
+                    <p><strong>控制:</strong> 鼠标移动，点击射击，空格键使用特殊技能</p>
+                    <p><strong>强化道具:</strong> 收集彩色球体升级武器</p>
+                    <p><strong>武器:</strong> 基础，快速，散射，激光，导弹</p>
+                    <p><strong>敌人AI:</strong> 4种不同模式适应你的等级</p>
+                    <p><strong>Boss:</strong> 每5关出现，拥有生命条</p>
+                `,
+                closeBtn: '关闭',
+                weapons: {
+                    basic: '基础',
+                    rapid: '快速',
+                    spread: '散射',
+                    laser: '激光',
+                    missile: '导弹'
+                }
+            }
+        };
+
+        // Système de traduction
+        function updateLanguage(langCode) {
+            if (!translations[langCode]) return;
+            
+            gameState.currentLanguage = langCode;
+            const trans = translations[langCode];
+
+            document.querySelectorAll('[data-translate]').forEach(element => {
+                const key = element.getAttribute('data-translate');
+                if (trans[key]) {
+                    if (key === 'rulesContent') {
+                        element.innerHTML = trans[key];
+                    } else {
+                        element.textContent = trans[key];
+                    }
+                }
+            });
+
+            updateWeaponDisplay();
+            document.title = `${trans.title} - Bataille Spatiale Futuriste`;
+            document.documentElement.lang = langCode;
+
+            if (langCode === 'ar') {
+                document.body.style.direction = 'rtl';
+            } else {
+                document.body.style.direction = 'ltr';
+            }
+
+            localStorage.setItem('quantumLanguage', langCode);
+            document.getElementById('langDropdown').style.display = 'none';
+        }
+
+        function updateWeaponDisplay() {
+            const trans = translations[gameState.currentLanguage];
+            const weaponElement = document.getElementById('weapon');
+            if (trans.weapons && trans.weapons[gameState.currentWeapon]) {
+                weaponElement.textContent = trans.weapons[gameState.currentWeapon];
+            }
+        }
+
+        // Création des étoiles
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            for (let i = 0; i < 80; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.width = Math.random() * 2 + 1 + 'px';
+                star.style.height = star.style.width;
+                star.style.animationDelay = Math.random() * 2 + 's';
+                starsContainer.appendChild(star);
+            }
+        }
+
+        // Contrôles du joueur
+        function setupPlayerControls() {
+            const gameArea = document.getElementById('gameArea');
+            const playerShip = document.getElementById('playerShip');
+            const keys = {};
+
+            // Contrôles clavier
+            document.addEventListener('keydown', (e) => {
+                keys[e.code] = true;
+                
+                if (e.code === 'Space' && gameState.techniqueReady) {
+                    e.preventDefault();
+                    activateSpecialTechnique();
+                }
+                
+                // Contrôles de niveau avec les flèches (quand pas en jeu)
+                if (!gameState.isPlaying || gameState.canSelectLevel) {
+                    if (e.code === 'ArrowUp') {
+                        e.preventDefault();
+                        changeLevelSelection(1);
+                    }
+                    if (e.code === 'ArrowDown') {
+                        e.preventDefault();
+                        changeLevelSelection(-1);
+                    }
+                }
+            });
+
+            document.addEventListener('keyup', (e) => {
+                keys[e.code] = false;
+            });
+
+            // Mouvement continu avec les touches
+            function updatePlayerMovement() {
+                if (!gameState.isPlaying || gameState.isPaused) return;
+                
+                const speed = 5;
+                
+                if (keys['ArrowLeft'] || keys['KeyA']) {
+                    gameState.playerX = Math.max(20, gameState.playerX - speed);
+                }
+                if (keys['ArrowRight'] || keys['KeyD']) {
+                    gameState.playerX = Math.min(780, gameState.playerX + speed);
+                }
+                
+                playerShip.style.left = gameState.playerX - 20 + 'px';
+            }
+
+            // Contrôles souris (optionnels)
+            gameArea.addEventListener('mousemove', (e) => {
+                if (!gameState.isPlaying || gameState.isPaused) return;
+                
+                const rect = gameArea.getBoundingClientRect();
+                gameState.playerX = Math.max(20, Math.min(780, e.clientX - rect.left));
+                playerShip.style.left = gameState.playerX - 20 + 'px';
+            });
+
+            gameArea.addEventListener('click', (e) => {
+                if (!gameState.isPlaying || gameState.isPaused) return;
+                shootProjectile();
+            });
+
+            // Tir automatique avec espace
+            setInterval(() => {
+                if (keys['Space'] && gameState.isPlaying && !gameState.isPaused) {
+                    shootProjectile();
+                }
+            }, 150);
+
+            // Mise à jour du mouvement
+            setInterval(updatePlayerMovement, 16);
+        }
+
+        // Système de tir
+        function shootProjectile() {
+            switch (gameState.currentWeapon) {
+                case 'rapid':
+                    for (let i = 0; i < 3; i++) {
+                        setTimeout(() => createProjectile(gameState.playerX, gameState.playerY, 'basic'), i * 80);
+                    }
+                    break;
+                case 'spread':
+                    for (let i = -1; i <= 1; i++) {
+                        createProjectile(gameState.playerX + (i * 15), gameState.playerY, 'basic', i * 1.5);
+                    }
+                    break;
+                case 'laser':
+                    createProjectile(gameState.playerX, gameState.playerY, 'laser');
+                    break;
+                case 'missile':
+                    createProjectile(gameState.playerX, gameState.playerY, 'missile');
+                    break;
+                default:
+                    createProjectile(gameState.playerX, gameState.playerY, 'basic');
+            }
+        }
+
+        function createProjectile(x, y, type = 'basic', angle = 0) {
+            const gameArea = document.getElementById('gameArea');
+            const projectile = document.createElement('div');
+            
+            let className = 'projectile';
+            if (type === 'laser') className += ' laser-projectile';
+            if (type === 'missile') className += ' missile-projectile';
+            
+            projectile.className = className;
+            projectile.style.left = x - 2 + 'px';
+            projectile.style.bottom = (300 - y) + 'px';
+            gameArea.appendChild(projectile);
+            
+            gameState.projectiles.push({
+                element: projectile,
+                x: x,
+                y: y,
+                angle: angle,
+                type: type,
+                damage: type === 'laser' ? 3 : type === 'missile' ? 2 : 1
+            });
+        }
+
+        // Configuration des niveaux
+        function getLevelConfig(level) {
+            return {
+                enemyCount: Math.min(10, 4 + level),
+                wavesPerLevel: Math.min(6, 2 + Math.floor(level / 2)),
+                enemyHealth: Math.ceil(level / 2) + 1,
+                enemySpeed: 0.5 + (level * 0.15),
+                shootFrequency: Math.max(800, 2000 - (level * 60)),
+                bossHealth: level * 12,
+                hasBoss: level % 3 === 0,
+                maxEnemiesPerGame: 30
+            };
+        }
+
+        // Création d'ennemis
+        function createEnemyShip() {
+            const config = getLevelConfig(gameState.level);
+            
+            // Vérifier la limite d'ennemis par jeu
+            if (gameState.totalEnemiesSpawned >= config.maxEnemiesPerGame) {
+                return false; // Ne pas créer plus d'ennemis
+            }
+            
+            const gameArea = document.getElementById('gameArea');
+            const enemy = document.createElement('div');
+            
+            if (config.hasBoss && gameState.currentWaveInLevel === gameState.wavesPerLevel && !gameState.bossActive) {
+                enemy.className = 'boss-ship';
+                gameState.bossActive = true;
+                gameState.maxBossHealth = config.bossHealth;
+                gameState.bossHealth = gameState.maxBossHealth;
+                
+                // Barre de vie du boss
+                const healthBar = document.createElement('div');
+                healthBar.className = 'boss-health';
+                const healthFill = document.createElement('div');
+                healthFill.className = 'boss-health-bar';
+                healthFill.style.width = '100%';
+                healthBar.appendChild(healthFill);
+                enemy.appendChild(healthBar);
+            } else {
+                enemy.className = 'enemy-ship';
+            }
+            
+            const x = Math.random() * 720 + 40;
+            enemy.style.left = x + 'px';
+            enemy.style.top = '10px';
+            gameArea.appendChild(enemy);
+            
+            const enemyData = {
+                element: enemy,
+                x: x,
+                y: 10,
+                health: gameState.bossActive ? gameState.bossHealth : config.enemyHealth,
+                maxHealth: gameState.bossActive ? gameState.bossHealth : config.enemyHealth,
+                lastShot: 0,
+                aiPattern: Math.floor(Math.random() * 4),
+                direction: Math.random() > 0.5 ? 1 : -1,
+                isBoss: gameState.bossActive,
+                speed: config.enemySpeed,
+                shootFreq: config.shootFrequency
+            };
+            
+            gameState.enemyShips.push(enemyData);
+            gameState.enemies++;
+            gameState.totalEnemiesSpawned++;
+            document.getElementById('enemies').textContent = gameState.enemies;
+            return true;
+        }
+
+        // IA des ennemis améliorée
+        function updateEnemyAI(enemy) {
+            const currentTime = Date.now();
+            const speed = enemy.isBoss ? enemy.speed * 0.4 : enemy.speed;
+            
+            switch (enemy.aiPattern) {
+                case 0: // Poursuite directe
+                    const dx = gameState.playerX - enemy.x;
+                    enemy.x += Math.sign(dx) * Math.min(Math.abs(dx) * 0.02, speed);
+                    break;
+                    
+                case 1: // Zigzag
+                    enemy.x += enemy.direction * speed * 2;
+                    if (enemy.x <= 20 || enemy.x >= 780) {
+                        enemy.direction *= -1;
+                    }
+                    break;
+                    
+                case 2: // Cercle
+                    const centerX = 400;
+                    const radius = 120;
+                    const time = currentTime * 0.002;
+                    enemy.x = centerX + Math.cos(time + enemy.direction) * radius;
+                    break;
+                    
+                case 3: // Prédictif
+                    const predictedX = gameState.playerX + (Math.random() - 0.5) * 150;
+                    enemy.x += (predictedX - enemy.x) * 0.015;
+                    break;
+            }
+            
+            if (!enemy.isBoss) {
+                enemy.y += speed;
+            } else {
+                enemy.y += speed * 0.4;
+            }
+            
+            // Tir intelligent
+            if (currentTime - enemy.lastShot > enemy.shootFreq) {
+                const distance = Math.abs(enemy.x - gameState.playerX);
+                if (distance < (enemy.isBoss ? 300 : 180)) {
+                    createEnemyProjectile(enemy.x, enemy.y);
+                    enemy.lastShot = currentTime;
+                }
+            }
+            
+            enemy.element.style.left = Math.max(0, Math.min(800, enemy.x)) + 'px';
+            enemy.element.style.top = enemy.y + 'px';
+            
+            // Mise à jour barre de vie boss
+            if (enemy.isBoss) {
+                const healthBar = enemy.element.querySelector('.boss-health-bar');
+                if (healthBar) {
+                    const healthPercent = (enemy.health / enemy.maxHealth) * 100;
+                    healthBar.style.width = healthPercent + '%';
+                }
+            }
+        }
+
+        function createEnemyProjectile(x, y) {
+            const gameArea = document.getElementById('gameArea');
+            const projectile = document.createElement('div');
+            projectile.className = 'projectile enemy-projectile';
+            projectile.style.left = x - 2 + 'px';
+            projectile.style.top = y + 'px';
+            gameArea.appendChild(projectile);
+            
+            gameState.enemyProjectiles.push({
+                element: projectile,
+                x: x,
+                y: y
+            });
+        }
+
+        // Power-ups
+        function createPowerUp(x, y) {
+            const gameArea = document.getElementById('gameArea');
+            const powerUp = document.createElement('div');
+            powerUp.className = 'power-up';
+            
+            const types = ['rapid', 'spread', 'laser', 'missile', 'life'];
+            const type = types[Math.floor(Math.random() * types.length)];
+            
+            const colors = {
+                rapid: '#00ffff',
+                spread: '#ff0080',
+                laser: '#ffff00',
+                missile: '#ff4000',
+                life: '#00ff80'
+            };
+            
+            powerUp.style.background = colors[type];
+            powerUp.style.left = x + 'px';
+            powerUp.style.top = y + 'px';
+            powerUp.dataset.type = type;
+            
+            gameArea.appendChild(powerUp);
+            
+            gameState.powerUps.push({
+                element: powerUp,
+                x: x,
+                y: y,
+                type: type
+            });
+        }
+
+        // Technique spéciale
+        function activateSpecialTechnique() {
+            gameState.techniqueReady = false;
+            gameState.techniqueCharge = 0;
+            document.getElementById('techniqueIndicator').style.display = 'none';
+            
+            // Tir en cercle
+            for (let i = 0; i < 16; i++) {
+                const angle = (i * 22.5) * Math.PI / 180;
+                setTimeout(() => {
+                    const projX = gameState.playerX + Math.cos(angle) * 25;
+                    const projY = gameState.playerY + Math.sin(angle) * 25;
+                    createProjectile(projX, projY, 'laser', Math.cos(angle) * 3);
+                }, i * 30);
+            }
+        }
+
+        // Effets visuels
+        function createExplosion(x, y) {
+            const gameArea = document.getElementById('gameArea');
+            const explosion = document.createElement('div');
+            explosion.className = 'explosion';
+            explosion.style.left = x - 30 + 'px';
+            explosion.style.top = y - 30 + 'px';
+            gameArea.appendChild(explosion);
+            
+            // Particules
+            for (let i = 0; i < 8; i++) {
+                setTimeout(() => createParticle(x, y), i * 20);
+            }
+            
+            setTimeout(() => {
+                if (explosion.parentNode) {
+                    explosion.parentNode.removeChild(explosion);
+                }
+            }, 400);
+        }
+
+        function createParticle(x, y) {
+            const gameArea = document.getElementById('gameArea');
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            
+            const angle = Math.random() * Math.PI * 2;
+            const speed = Math.random() * 30 + 10;
+            const finalX = x + Math.cos(angle) * speed;
+            const finalY = y + Math.sin(angle) * speed;
+            
+            particle.style.left = x + 'px';
+            particle.style.top = y + 'px';
+            gameArea.appendChild(particle);
+            
+            setTimeout(() => {
+                particle.style.left = finalX + 'px';
+                particle.style.top = finalY + 'px';
+            }, 10);
+            
+            setTimeout(() => {
+                if (particle.parentNode) {
+                    particle.parentNode.removeChild(particle);
+                }
+            }, 800);
+        }
+
+        // Boucle de jeu principale
+        function gameLoop() {
+            if (!gameState.isPlaying || gameState.isPaused) return;
+            
+            // Projectiles du joueur
+            gameState.projectiles.forEach((proj, index) => {
+                proj.y -= 10;
+                proj.x += proj.angle;
+                proj.element.style.bottom = (300 - proj.y) + 'px';
+                proj.element.style.left = proj.x + 'px';
+                
+                if (proj.y < 0 || proj.x < 0 || proj.x > 500) {
+                    proj.element.remove();
+                    gameState.projectiles.splice(index, 1);
+                }
+            });
+            
+            // Projectiles ennemis
+            gameState.enemyProjectiles.forEach((proj, index) => {
+                proj.y += 5;
+                proj.element.style.top = proj.y + 'px';
+                
+                if (proj.y > 300) {
+                    proj.element.remove();
+                    gameState.enemyProjectiles.splice(index, 1);
+                }
+                
+                // Collision avec le joueur
+                if (Math.abs(proj.x - gameState.playerX) < 25 && 
+                    Math.abs(proj.y - gameState.playerY) < 25) {
+                    createExplosion(gameState.playerX, gameState.playerY);
+                    proj.element.remove();
+                    gameState.enemyProjectiles.splice(index, 1);
+                    gameState.lives--;
+                    document.getElementById('lives').textContent = gameState.lives;
+                    
+                    if (gameState.lives <= 0) {
+                        gameOver();
+                    }
+                }
+            });
+            
+            // Ennemis
+            gameState.enemyShips.forEach((enemy, enemyIndex) => {
+                updateEnemyAI(enemy);
+                
+                // Collisions avec projectiles
+                gameState.projectiles.forEach((proj, projIndex) => {
+                    const hitDistance = enemy.isBoss ? 50 : 30;
+                    if (Math.abs(proj.x - enemy.x) < hitDistance && 
+                        Math.abs(proj.y - enemy.y) < hitDistance) {
+                        createExplosion(enemy.x, enemy.y);
+                        proj.element.remove();
+                        gameState.projectiles.splice(projIndex, 1);
+                        
+                        enemy.health -= proj.damage;
+                        if (enemy.health <= 0) {
+                            enemy.element.remove();
+                            gameState.enemyShips.splice(enemyIndex, 1);
+                            gameState.enemies--;
+                            document.getElementById('enemies').textContent = gameState.enemies;
+                            
+                            if (enemy.isBoss) {
+                                gameState.bossActive = false;
+                                gameState.score += 1000;
+                            } else {
+                                gameState.score += 150;
+                            }
+                            
+                            document.getElementById('score').textContent = gameState.score;
+                            
+                            if (Math.random() < 0.4) {
+                                createPowerUp(enemy.x, enemy.y);
+                            }
+                        }
+                    }
+                });
+                
+                // Ennemi qui atteint le bas (pas de collision directe avec le joueur)
+                if (enemy.y > 500) {
+                    enemy.element.remove();
+                    gameState.enemyShips.splice(enemyIndex, 1);
+                    gameState.enemies--;
+                    document.getElementById('enemies').textContent = gameState.enemies;
+                    // Pas de perte de vie pour collision directe - le joueur est un défenseur invulnérable
+                }
+            });
+            
+            // Power-ups
+            gameState.powerUps.forEach((powerUp, index) => {
+                powerUp.y += 1.5;
+                powerUp.element.style.top = powerUp.y + 'px';
+                
+                if (Math.abs(powerUp.x - gameState.playerX) < 30 && 
+                    Math.abs(powerUp.y - gameState.playerY) < 30) {
+                    
+                    if (powerUp.type === 'life') {
+                        gameState.lives++;
+                        document.getElementById('lives').textContent = gameState.lives;
+                    } else {
+                        gameState.currentWeapon = powerUp.type;
+                        updateWeaponDisplay();
+                    }
+                    
+                    powerUp.element.remove();
+                    gameState.powerUps.splice(index, 1);
+                }
+                
+                if (powerUp.y > 500) {
+                    powerUp.element.remove();
+                    gameState.powerUps.splice(index, 1);
+                }
+            });
+            
+            // Charge technique spéciale
+            gameState.techniqueCharge++;
+            if (gameState.techniqueCharge >= 400 && !gameState.techniqueReady) {
+                gameState.techniqueReady = true;
+                document.getElementById('techniqueIndicator').style.display = 'block';
+            }
+            
+            // Fin de vague
+            if (gameState.enemies === 0) {
+                nextWave();
+            }
+        }
+
+        function nextWave() {
+            gameState.currentWaveInLevel++;
+            gameState.wave++;
+            document.getElementById('wave').textContent = gameState.wave;
+            
+            const config = getLevelConfig(gameState.level);
+            
+            // Vérifier si on a atteint la limite d'ennemis ou terminé les vagues
+            if (gameState.currentWaveInLevel > config.wavesPerLevel || gameState.totalEnemiesSpawned >= config.maxEnemiesPerGame) {
+                // Niveau terminé
+                completeLevel();
+                return;
+            }
+            
+            const enemyCount = Math.min(config.enemyCount, Math.floor(config.enemyCount * (gameState.currentWaveInLevel / config.wavesPerLevel)) + 3);
+            const remainingEnemies = config.maxEnemiesPerGame - gameState.totalEnemiesSpawned;
+            const actualEnemyCount = Math.min(enemyCount, remainingEnemies);
+            
+            for (let i = 0; i < actualEnemyCount; i++) {
+                setTimeout(() => {
+                    if (!createEnemyShip()) {
+                        // Si on ne peut plus créer d'ennemis, terminer le niveau
+                        if (gameState.enemies === 0) {
+                            completeLevel();
+                        }
+                    }
+                }, i * 600);
+            }
+        }
+
+        function completeLevel() {
+            gameState.isPlaying = false;
+            clearInterval(gameState.gameInterval);
+            
+            const levelTime = Math.floor((Date.now() - gameState.levelStartTime) / 1000);
+            const timeBonus = Math.max(0, 300 - levelTime) * 10;
+            const levelBonus = gameState.level * 500 + timeBonus;
+            gameState.score += levelBonus;
+            
+            // Débloquer le niveau suivant
+            if (gameState.level < gameState.maxLevel) {
+                gameState.unlockedLevels = Math.max(gameState.unlockedLevels, gameState.level + 1);
+            }
+            
+            // Afficher les félicitations
+            document.getElementById('completedLevel').textContent = gameState.level;
+            document.getElementById('levelScore').textContent = gameState.score;
+            document.getElementById('levelBonus').textContent = levelBonus;
+            document.getElementById('levelTime').textContent = levelTime;
+            document.getElementById('congratsModal').style.display = 'flex';
+            
+            // Sauvegarder les progrès
+            localStorage.setItem('quantumProgress', JSON.stringify({
+                unlockedLevels: gameState.unlockedLevels,
+                highScores: getHighScores()
+            }));
+        }
+
+        function getHighScores() {
+            const saved = localStorage.getItem('quantumHighScores');
+            return saved ? JSON.parse(saved) : {};
+        }
+
+        function continueToNextLevel() {
+            document.getElementById('congratsModal').style.display = 'none';
+            
+            if (gameState.level < gameState.maxLevel) {
+                gameState.level++;
+                gameState.selectedLevel = gameState.level;
+                document.getElementById('level').textContent = gameState.level;
+                document.getElementById('selectedLevel').textContent = gameState.level;
+                startLevel();
+            } else {
+                // Jeu terminé
+                try{ parent.postMessage({ action: 'dialog', dialogType: 'alert', text: '🎉 Félicitations! Vous avez terminé tous les niveaux! 🎉' }, '*'); }catch(e){}
+            }
+        }
+
+        function showLevelIndicator() {
+            const indicator = document.getElementById('levelIndicator');
+            const trans = translations[gameState.currentLanguage];
+            indicator.textContent = `${trans.levelText} ${gameState.level}`;
+            indicator.style.display = 'block';
+            
+            setTimeout(() => {
+                indicator.style.display = 'none';
+            }, 1500);
+        }
+
+        function changeLevelSelection(direction) {
+            console.log('Changement niveau:', direction, 'Actuel:', gameState.selectedLevel);
+            
+            const newLevel = gameState.selectedLevel + direction;
+            console.log('Nouveau niveau proposé:', newLevel, 'Max débloqué:', gameState.unlockedLevels);
+            
+            if (newLevel >= 1 && newLevel <= gameState.unlockedLevels && newLevel <= gameState.maxLevel) {
+                gameState.selectedLevel = newLevel;
+                document.getElementById('selectedLevel').textContent = gameState.selectedLevel;
+                updateLevelButtons();
+                console.log('Niveau changé vers:', gameState.selectedLevel);
+            } else {
+                console.log('Changement refusé - hors limites');
+            }
+        }
+
+        function updateLevelButtons() {
+            const prevBtn = document.getElementById('prevLevel');
+            const nextBtn = document.getElementById('nextLevel');
+            
+            if (!prevBtn || !nextBtn) {
+                console.error('Boutons de niveau introuvables!');
+                return;
+            }
+            
+            // Les boutons sont toujours actifs maintenant
+            const canGoPrev = gameState.selectedLevel > 1;
+            const canGoNext = gameState.selectedLevel < gameState.unlockedLevels && gameState.selectedLevel < gameState.maxLevel;
+            
+            // Mise à jour visuelle
+            prevBtn.style.opacity = canGoPrev ? '1' : '0.5';
+            nextBtn.style.opacity = canGoNext ? '1' : '0.5';
+            prevBtn.style.cursor = canGoPrev ? 'pointer' : 'not-allowed';
+            nextBtn.style.cursor = canGoNext ? 'pointer' : 'not-allowed';
+            
+            // Supprimer l'attribut disabled pour permettre les clics
+            prevBtn.removeAttribute('disabled');
+            nextBtn.removeAttribute('disabled');
+            
+            console.log('Boutons mis à jour - Prev:', canGoPrev, 'Next:', canGoNext);
+        }
+
+        function startLevel() {
+            gameState.level = gameState.selectedLevel;
+            gameState.levelStartTime = Date.now();
+            gameState.currentWaveInLevel = 0;
+            
+            const config = getLevelConfig(gameState.level);
+            gameState.wavesPerLevel = config.wavesPerLevel;
+            
+            startGame();
+        }
+
+        function newGame() {
+            // Arrêter le jeu en cours
+            if (gameState.isPlaying) {
+                gameState.isPlaying = false;
+                clearInterval(gameState.gameInterval);
+            }
+            
+            // Réinitialiser complètement l'état du jeu
+            gameState.score = 0;
+            gameState.level = 1;
+            gameState.selectedLevel = 1;
+            gameState.wave = 1;
+            gameState.lives = 3;
+            gameState.enemies = 0;
+            gameState.totalEnemiesSpawned = 0;
+            gameState.currentWeapon = 'basic';
+            gameState.techniqueReady = false;
+            gameState.techniqueCharge = 0;
+            gameState.bossActive = false;
+            gameState.currentWaveInLevel = 0;
+            gameState.isPaused = false;
+            gameState.canSelectLevel = true; // Permettre la sélection de niveau
+            
+            // Nettoyage complet de l'écran
+            document.querySelectorAll('.enemy-ship, .boss-ship, .projectile, .power-up, .explosion, .particle').forEach(el => el.remove());
+            gameState.projectiles = [];
+            gameState.enemyProjectiles = [];
+            gameState.enemyShips = [];
+            gameState.powerUps = [];
+            gameState.particles = [];
+            
+            // Mise à jour de l'affichage
+            document.getElementById('score').textContent = gameState.score;
+            document.getElementById('level').textContent = gameState.level;
+            document.getElementById('selectedLevel').textContent = gameState.selectedLevel;
+            document.getElementById('wave').textContent = gameState.wave;
+            document.getElementById('lives').textContent = gameState.lives;
+            document.getElementById('enemies').textContent = gameState.enemies;
+            updateWeaponDisplay();
+            updateLevelButtons();
+            
+            // Cacher l'indicateur de technique
+            document.getElementById('techniqueIndicator').style.display = 'none';
+            
+            // Le joueur peut maintenant sélectionner un niveau et commencer
+            const trans = translations[gameState.currentLanguage];
+            try{ parent.postMessage({ action: 'dialog', dialogType: 'alert', text: `${trans.newGameBtn} - Sélectionnez un niveau et cliquez sur Démarrer!` }, '*'); }catch(e){}
+        }
+
+        function startGame() {
+            if (gameState.isPlaying && !gameState.isPaused) return;
+            
+            if (!gameState.isPlaying) {
+                // Reset du jeu pour le niveau sélectionné (mais garder le score si c'est une continuation)
+                if (gameState.level === gameState.selectedLevel && gameState.score === 0) {
+                    // Nouveau jeu complet
+                    gameState.score = 0;
+                    gameState.wave = 1;
+                    gameState.lives = 3 + Math.floor(gameState.level / 5);
+                    gameState.totalEnemiesSpawned = 0;
+                }
+                
+                gameState.enemies = 0;
+                gameState.currentWeapon = 'basic';
+                gameState.techniqueReady = false;
+                gameState.techniqueCharge = 0;
+                gameState.bossActive = false;
+                gameState.currentWaveInLevel = 0;
+                
+                // Nettoyage
+                document.querySelectorAll('.enemy-ship, .boss-ship, .projectile, .power-up, .explosion, .particle').forEach(el => el.remove());
+                gameState.projectiles = [];
+                gameState.enemyProjectiles = [];
+                gameState.enemyShips = [];
+                gameState.powerUps = [];
+                gameState.particles = [];
+                
+                // Mise à jour affichage
+                document.getElementById('score').textContent = gameState.score;
+                document.getElementById('level').textContent = gameState.level;
+                document.getElementById('wave').textContent = gameState.wave;
+                document.getElementById('lives').textContent = gameState.lives;
+                document.getElementById('enemies').textContent = gameState.enemies;
+                updateWeaponDisplay();
+            }
+            
+            gameState.isPlaying = true;
+            gameState.isPaused = false;
+            gameState.canSelectLevel = false; // Désactiver la sélection pendant le jeu
+            
+            if (gameState.gameInterval) clearInterval(gameState.gameInterval);
+            gameState.gameInterval = setInterval(gameLoop, 40);
+            
+            nextWave();
+        }
+
+        function pauseGame() {
+            if (!gameState.isPlaying) return;
+            gameState.isPaused = !gameState.isPaused;
+        }
+
+        function gameOver() {
+            gameState.isPlaying = false;
+            gameState.canSelectLevel = true; // Réactiver la sélection après game over
+            clearInterval(gameState.gameInterval);
+            updateLevelButtons();
+            
+            setTimeout(() => {
+                const trans = translations[gameState.currentLanguage];
+                try{ parent.postMessage({ action: 'dialog', dialogType: 'alert', text: `Game Over! ${trans.scoreText} ${gameState.score}` }, '*'); }catch(e){}
+            }, 100);
+        }
+
+        function showRules() {
+            document.getElementById('rulesModal').style.display = 'flex';
+        }
+
+        function closeRules() {
+            document.getElementById('rulesModal').style.display = 'none';
+        }
+
+        // Initialisation
+        function initGame() {
+            createStars();
+            setupPlayerControls();
+            
+            // Charger les progrès sauvegardés
+            const savedProgress = localStorage.getItem('quantumProgress');
+            if (savedProgress) {
+                const progress = JSON.parse(savedProgress);
+                gameState.unlockedLevels = progress.unlockedLevels || 5; // Débloquer 5 niveaux par défaut
+            } else {
+                gameState.unlockedLevels = 5; // Débloquer 5 niveaux pour les nouveaux joueurs
+            }
+            
+            console.log('Niveaux débloqués:', gameState.unlockedLevels);
+            
+            // Système de langues
+            const langButton = document.querySelector('[data-translate="langButton"]');
+            const langDropdown = document.getElementById('langDropdown');
+            
+            langButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                langDropdown.style.display = langDropdown.style.display === 'block' ? 'none' : 'block';
+            });
+            
+            document.querySelectorAll('.lang-option').forEach(option => {
+                option.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const langCode = option.getAttribute('data-lang');
+                    updateLanguage(langCode);
+                });
+            });
+            
+            document.addEventListener('click', (e) => {
+                if (!langButton.contains(e.target) && !langDropdown.contains(e.target)) {
+                    langDropdown.style.display = 'none';
+                }
+            });
+            
+            // Contrôles
+            document.querySelector('[data-translate="startBtn"]').addEventListener('click', startLevel);
+            document.querySelector('[data-translate="pauseBtn"]').addEventListener('click', pauseGame);
+            document.querySelector('[data-translate="rulesBtn"]').addEventListener('click', showRules);
+            document.querySelector('[data-translate="closeBtn"]').addEventListener('click', closeRules);
+            document.getElementById('continueBtn').addEventListener('click', continueToNextLevel);
+            document.getElementById('newGameBtn').addEventListener('click', newGame);
+            
+            // Contrôles de niveau avec gestion d'erreur
+            const prevLevelBtn = document.getElementById('prevLevel');
+            const nextLevelBtn = document.getElementById('nextLevel');
+            
+            if (prevLevelBtn && nextLevelBtn) {
+                prevLevelBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Clic bouton précédent');
+                    changeLevelSelection(-1);
+                });
+                
+                nextLevelBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Clic bouton suivant');
+                    changeLevelSelection(1);
+                });
+                
+                console.log('Événements de niveau attachés avec succès');
+            } else {
+                console.error('Impossible de trouver les boutons de niveau!');
+            }
+            
+            // Langue sauvegardée
+            const savedLang = localStorage.getItem('quantumLanguage');
+            if (savedLang && translations[savedLang]) {
+                updateLanguage(savedLang);
+            }
+            
+            // Mise à jour initiale des boutons
+            updateLevelButtons();
+        }
+
+        window.addEventListener('load', initGame);
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9884240a4190adb5',t:'MTc1OTQwNzQ4OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
