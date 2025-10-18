@@ -1,0 +1,2420 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeuroSynth Explorer - Brainova Premium</title>
+    <script>
+        (function(){
+            if(window.__platform_nonblocking_dialogs) return; window.__platform_nonblocking_dialogs=true;
+            try{
+                const _alert = window.alert.bind(window);
+                const _confirm = window.confirm.bind(window);
+                const _prompt = window.prompt.bind(window);
+                function send(type,text){ try{ if(window.parent && window.parent!==window) parent.postMessage({action:'dialog', dialogType:type, text:String(text||'')}, '*'); }catch(e){} }
+                window.alert = function(msg){ if(window.parent && window.parent!==window){ send('alert', msg); } else { _alert(msg); } };
+                window.confirm = function(msg){ if(window.parent && window.parent!==window){ send('confirm', msg); return true; } else { return _confirm(msg); } };
+                window.prompt = function(msg, def){ if(window.parent && window.parent!==window){ send('prompt', msg+'\n(default: '+(def||'')+')'); return def||null; } else { return _prompt(msg, def); } };
+            }catch(e){ }
+        })();
+    </script>
+    <style>
+        body {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Orbitron', 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            color: #ffffff;
+            overflow: hidden;
+            height: 100vh;
+        }
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            z-index: -2;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(0, 255, 255, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 0, 255, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(0, 255, 0, 0.2) 0%, transparent 50%);
+            animation: quantumShift 10s ease-in-out infinite;
+        }
+
+        @keyframes quantumShift {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.1) rotate(2deg); }
+        }
+
+        .neural-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: #00ffff;
+            border-radius: 50%;
+            animation: float 8s ease-in-out infinite;
+            box-shadow: 0 0 10px #00ffff;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) translateX(0px) rotate(0deg); opacity: 0.3; }
+            25% { transform: translateY(-30px) translateX(20px) rotate(90deg); opacity: 1; }
+            50% { transform: translateY(-60px) translateX(-10px) rotate(180deg); opacity: 0.7; }
+            75% { transform: translateY(-30px) translateX(-20px) rotate(270deg); opacity: 1; }
+        }
+
+        .main-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            background: linear-gradient(135deg, rgba(10, 10, 20, 0.95) 0%, rgba(20, 30, 40, 0.95) 100%);
+            backdrop-filter: blur(20px);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 25px;
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.1) 0%, rgba(255, 0, 255, 0.1) 100%);
+            border-bottom: 2px solid rgba(0, 255, 255, 0.3);
+            backdrop-filter: blur(15px);
+            z-index: 100;
+        }
+
+        .game-title {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .game-title h1 {
+            font-size: 24px;
+            font-weight: 900;
+            background: linear-gradient(135deg, #00ffff, #ff00ff, #00ff00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: 0;
+            text-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
+            letter-spacing: 2px;
+            animation: titlePulse 3s ease-in-out infinite;
+        }
+
+        @keyframes titlePulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .game-logo {
+            font-size: 28px;
+            filter: drop-shadow(0 0 20px #00ffff);
+            animation: logoRotate 6s linear infinite;
+        }
+
+        @keyframes logoRotate {
+            0% { transform: rotate(0deg) scale(1); }
+            50% { transform: rotate(180deg) scale(1.1); }
+            100% { transform: rotate(360deg) scale(1); }
+        }
+
+        .hud-stats {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .language-selector {
+            margin-right: 20px;
+        }
+
+        .lang-select {
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.2) 0%, rgba(255, 0, 255, 0.2) 100%);
+            border: 1px solid rgba(0, 255, 255, 0.5);
+            border-radius: 10px;
+            color: #ffffff;
+            padding: 8px 12px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .lang-select:hover {
+            border-color: rgba(0, 255, 255, 0.8);
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.3) 0%, rgba(255, 0, 255, 0.3) 100%);
+        }
+
+        .lang-select option {
+            background: #1a1a2e;
+            color: #ffffff;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px 12px;
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            min-width: 60px;
+        }
+
+        .stat-label {
+            font-size: 10px;
+            color: #00ffff;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-value {
+            font-size: 16px;
+            font-weight: bold;
+            color: #ffffff;
+            margin-top: 2px;
+        }
+
+        .game-world {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+        }
+
+        .world-3d {
+            flex: 1;
+            position: relative;
+            background: 
+                linear-gradient(180deg, 
+                    rgba(135, 206, 235, 0.9) 0%,
+                    rgba(144, 238, 144, 0.8) 20%,
+                    rgba(34, 139, 34, 0.7) 40%,
+                    rgba(0, 100, 0, 0.8) 70%,
+                    rgba(25, 25, 112, 0.9) 100%),
+                radial-gradient(ellipse at 30% 20%, rgba(255, 255, 255, 0.3) 0%, transparent 50%),
+                radial-gradient(ellipse at 70% 80%, rgba(46, 125, 50, 0.4) 0%, transparent 60%);
+            perspective: 1000px;
+            overflow: hidden;
+        }
+
+        .forest-layer {
+            position: absolute;
+            width: 120%;
+            height: 120%;
+            background-image: 
+                radial-gradient(ellipse at 15% 25%, rgba(34, 139, 34, 0.6) 0%, transparent 30%),
+                radial-gradient(ellipse at 45% 60%, rgba(0, 128, 0, 0.4) 0%, transparent 40%),
+                radial-gradient(ellipse at 75% 35%, rgba(46, 125, 50, 0.5) 0%, transparent 35%),
+                radial-gradient(ellipse at 85% 75%, rgba(25, 111, 61, 0.3) 0%, transparent 45%),
+                linear-gradient(90deg, 
+                    rgba(139, 69, 19, 0.2) 0%, 
+                    transparent 20%, 
+                    transparent 80%, 
+                    rgba(160, 82, 45, 0.2) 100%);
+            animation: forestSway 15s ease-in-out infinite;
+        }
+
+        .ground-layer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 30%;
+            background: 
+                linear-gradient(180deg, 
+                    rgba(34, 139, 34, 0.8) 0%,
+                    rgba(107, 142, 35, 0.9) 30%,
+                    rgba(85, 107, 47, 0.95) 70%,
+                    rgba(139, 69, 19, 1) 100%);
+            z-index: 0;
+        }
+
+        .sky-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 40%;
+            background: 
+                linear-gradient(180deg, 
+                    rgba(135, 206, 235, 0.9) 0%,
+                    rgba(176, 224, 230, 0.7) 50%,
+                    rgba(144, 238, 144, 0.5) 100%);
+            z-index: -1;
+        }
+
+        .mountain-layer {
+            position: absolute;
+            bottom: 30%;
+            left: 0;
+            width: 100%;
+            height: 40%;
+            background: 
+                linear-gradient(180deg, 
+                    rgba(105, 105, 105, 0.8) 0%,
+                    rgba(119, 136, 153, 0.6) 50%,
+                    rgba(34, 139, 34, 0.4) 100%);
+            clip-path: polygon(0% 100%, 15% 60%, 25% 80%, 40% 40%, 55% 70%, 70% 30%, 85% 60%, 100% 50%, 100% 100%);
+            z-index: -1;
+        }
+
+        @keyframes forestSway {
+            0%, 100% { transform: translateX(-10px) translateY(-5px) rotateX(2deg); }
+            50% { transform: translateX(10px) translateY(5px) rotateX(-2deg); }
+        }
+        .tree {
+            
+            height: 120px;
+            background: linear-gradient(180deg, 
+                rgba(34, 139, 34, 0.9) 0%,
+                rgba(0, 128, 0, 0.8) 20%,
+                rgba(46, 125, 50, 0.7) 40%,
+                rgba(139, 69, 19, 0.9) 65%,
+                rgba(101, 67, 33, 1) 100%);
+            border-radius: 30px 30px 8px 8px;
+            transform-style: preserve-3d;
+            animation: treeGlow 4s ease-in-out infinite;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 
+                0 0 15px rgba(34, 139, 34, 0.4),
+                inset 0 0 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .tree::before {
+            content: '';
+            position: absolute;
+            top: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 40px;
+            background: radial-gradient(circle, rgba(46, 125, 50, 0.8) 0%, rgba(34, 139, 34, 0.6) 70%, transparent 100%);
+            border-radius: 50%;
+            z-index: 1;
+        }
+
+        .tree::after {
+            content: '';
+            position: absolute;
+            top: 15px;
+            left: 20%;
+            width: 25px;
+            height: 25px;
+            background: radial-gradient(circle, rgba(0, 128, 0, 0.7) 0%, rgba(34, 139, 34, 0.5) 70%, transparent 100%);
+            border-radius: 50%;
+            z-index: 1;
+        }
+
+        .tree:hover {
+            transform: scale(1.1) rotateY(10deg);
+            box-shadow: 
+                0 0 30px rgba(34, 139, 34, 0.8),
+                0 0 50px rgba(0, 255, 255, 0.3);
+        }
+
+        @keyframes treeGlow {
+            0%, 100% { 
+                box-shadow: 
+                    0 0 15px rgba(34, 139, 34, 0.4),
+                    inset 0 0 20px rgba(0, 0, 0, 0.2);
+            }
+            50% { 
+                box-shadow: 
+                    0 0 25px rgba(34, 139, 34, 0.6),
+                    0 0 40px rgba(0, 255, 255, 0.2),
+                    inset 0 0 20px rgba(0, 0, 0, 0.2);
+            }
+        }
+
+        .neural-node {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: radial-gradient(circle, rgba(255, 0, 255, 0.8) 0%, rgba(0, 255, 255, 0.4) 100%);
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.6);
+            cursor: pointer;
+            animation: nodePulse 2s ease-in-out infinite;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: all 0.3s ease;
+        }
+
+        .neural-node:hover {
+            transform: scale(1.2);
+            animation-duration: 0.5s;
+        }
+
+        @keyframes nodePulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 20px rgba(255, 0, 255, 0.5); }
+            50% { transform: scale(1.1); box-shadow: 0 0 40px rgba(255, 0, 255, 0.8); }
+        }
+
+        .memory-crystal {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: linear-gradient(45deg, 
+                rgba(255, 215, 0, 0.9) 0%,
+                rgba(255, 255, 0, 0.7) 50%,
+                rgba(255, 215, 0, 0.9) 100%);
+            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+            animation: crystalSpin 3s linear infinite;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .memory-crystal:hover {
+            transform: scale(1.3);
+            filter: brightness(1.5);
+        }
+
+        @keyframes crystalSpin {
+            0% { transform: rotateY(0deg); }
+            100% { transform: rotateY(360deg); }
+        }
+
+        .ai-entity {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle, 
+                rgba(0, 255, 255, 0.8) 0%,
+                rgba(0, 200, 255, 0.6) 30%,
+                rgba(0, 150, 255, 0.4) 60%,
+                rgba(0, 100, 255, 0.2) 100%);
+            border-radius: 50%;
+            border: 3px solid rgba(255, 255, 255, 0.8);
+            animation: aiFloat 5s ease-in-out infinite;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            transition: all 0.3s ease;
+        }
+
+        .ai-entity:hover {
+            transform: scale(1.2);
+            box-shadow: 0 0 50px rgba(0, 255, 255, 0.8);
+        }
+
+        @keyframes aiFloat {
+            0%, 100% { transform: translateY(0px) rotateZ(0deg); }
+            25% { transform: translateY(-20px) rotateZ(5deg); }
+            50% { transform: translateY(-40px) rotateZ(0deg); }
+            75% { transform: translateY(-20px) rotateZ(-5deg); }
+        }
+
+        .side-panel {
+            width: 300px;
+            background: linear-gradient(135deg, rgba(10, 10, 30, 0.95) 0%, rgba(20, 20, 40, 0.95) 100%);
+            border-left: 2px solid rgba(0, 255, 255, 0.3);
+            backdrop-filter: blur(15px);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .panel-section {
+            padding: 20px;
+            border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+        }
+
+        .panel-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #00ffff;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .neural-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+            margin: 5px 0;
+            width: 100%;
+        }
+
+        .neural-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        }
+
+        .neural-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .neural-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .neural-btn:hover::before {
+            left: 100%;
+        }
+
+        .action-btn {
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+            color: #1a1a2e;
+        }
+
+        .action-btn:hover:not(:disabled) {
+            background: linear-gradient(135deg, #ffed4e 0%, #ffd700 100%);
+            box-shadow: 0 6px 20px rgba(255, 215, 0, 0.6);
+        }
+
+        .danger-btn {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+        }
+
+        .danger-btn:hover:not(:disabled) {
+            background: linear-gradient(135deg, #ee5a24 0%, #ff6b6b 100%);
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.6);
+        }
+
+        .success-btn {
+            background: linear-gradient(135deg, #00d2d3 0%, #54a0ff 100%);
+        }
+
+        .success-btn:hover:not(:disabled) {
+            background: linear-gradient(135deg, #54a0ff 0%, #00d2d3 100%);
+            box-shadow: 0 6px 20px rgba(0, 210, 211, 0.6);
+        }
+
+        .inventory-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .inventory-slot {
+            width: 60px;
+            height: 60px;
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .inventory-slot:hover {
+            border-color: rgba(0, 255, 255, 0.8);
+            background: rgba(0, 255, 255, 0.1);
+            transform: scale(1.05);
+        }
+
+        .inventory-slot.filled {
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.2) 0%, rgba(255, 0, 255, 0.2) 100%);
+            border-color: rgba(0, 255, 255, 0.8);
+        }
+
+        .quest-item {
+            padding: 15px;
+            margin: 10px 0;
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .quest-item:hover {
+            background: rgba(0, 255, 255, 0.2);
+            border-color: rgba(0, 255, 255, 0.6);
+            transform: translateX(5px);
+        }
+
+        .quest-item.completed {
+            background: rgba(0, 255, 0, 0.1);
+            border-color: rgba(0, 255, 0, 0.3);
+            opacity: 0.7;
+        }
+
+        .quest-title {
+            font-weight: bold;
+            color: #00ffff;
+            margin-bottom: 5px;
+        }
+
+        .quest-description {
+            font-size: 12px;
+            color: #cccccc;
+            line-height: 1.4;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ffff, #ff00ff);
+            transition: width 0.3s ease;
+            border-radius: 4px;
+        }
+
+        .neural-network {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .neural-connection {
+            position: absolute;
+            height: 2px;
+            background: linear-gradient(90deg, rgba(0, 255, 255, 0.6), rgba(255, 0, 255, 0.6));
+            transform-origin: left center;
+            animation: connectionPulse 3s ease-in-out infinite;
+        }
+
+        @keyframes connectionPulse {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, rgba(10, 10, 30, 0.95) 0%, rgba(20, 20, 40, 0.95) 100%);
+            border: 2px solid rgba(0, 255, 255, 0.5);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 0 50px rgba(0, 255, 255, 0.3);
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #00ffff;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .modal-text {
+            font-size: 16px;
+            color: #ffffff;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .puzzle-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin: 20px 0;
+            max-width: 300px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .puzzle-cell {
+            width: 60px;
+            height: 60px;
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .puzzle-cell:hover {
+            border-color: rgba(0, 255, 255, 0.8);
+            background: rgba(0, 255, 255, 0.1);
+            transform: scale(1.05);
+        }
+
+        .puzzle-cell.active {
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.3) 0%, rgba(255, 0, 255, 0.3) 100%);
+            border-color: rgba(0, 255, 255, 0.8);
+        }
+
+        .message-display {
+            position: fixed;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.9) 0%, rgba(255, 0, 255, 0.9) 100%);
+            color: #000000;
+            padding: 15px 25px;
+            border-radius: 25px;
+            font-weight: bold;
+            font-size: 16px;
+            z-index: 999;
+            opacity: 0;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
+        }
+
+        .message-display.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(10px);
+        }
+
+        @media (max-width: 1200px) {
+            .game-world {
+                flex-direction: column;
+            }
+            
+            .side-panel {
+                width: 100%;
+                height: 200px;
+                border-left: none;
+                border-top: 2px solid rgba(0, 255, 255, 0.3);
+            }
+            
+            .panel-section {
+                padding: 10px;
+            }
+        }
+
+        @media (max-width: 800px) {
+            .game-title h1 {
+                font-size: 18px;
+            }
+            
+            .hud-stats {
+                gap: 10px;
+            }
+            
+            .stat-item {
+                padding: 6px 8px;
+                min-width: 50px;
+            }
+        }
+
+        .minimap {
+            width: 150px;
+            height: 150px;
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            position: relative;
+            margin: 10px 0;
+        }
+
+        .minimap-dot {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #00ffff;
+            animation: minimapPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes minimapPulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        .ai-chat {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .chat-message {
+            margin: 8px 0;
+            padding: 8px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        .chat-message.ai {
+            background: rgba(0, 255, 255, 0.1);
+            border-left: 3px solid #00ffff;
+        }
+
+        .chat-message.player {
+            background: rgba(255, 0, 255, 0.1);
+            border-right: 3px solid #ff00ff;
+            text-align: right;
+        }
+
+        /* Styles pour l'arabe (RTL) */
+        .rtl {
+            direction: rtl;
+            text-align: right;
+        }
+
+        .rtl .game-header {
+            flex-direction: row-reverse;
+        }
+
+        .rtl .hud-stats {
+            flex-direction: row-reverse;
+        }
+
+        .rtl .game-title {
+            flex-direction: row-reverse;
+        }
+
+        .rtl .panel-title {
+            flex-direction: row-reverse;
+        }
+
+        .rtl .quest-item:hover {
+            transform: translateX(-5px);
+        }
+
+        .rtl .chat-message.ai {
+            border-left: none;
+            border-right: 3px solid #00ffff;
+            text-align: right;
+        }
+
+        .rtl .chat-message.player {
+            border-right: none;
+            border-left: 3px solid #ff00ff;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <div class="quantum-bg"></div>
+    <div class="neural-particles" id="neuralParticles"></div>
+    
+    <div class="main-container">
+        <!-- En-tête du jeu -->
+        <div class="game-header">
+            <div class="game-title">
+                <div class="game-logo">🧠</div>
+                <h1>NEUROSYNTH EXPLORER</h1>
+                <div style="font-size: 12px; color: #00ffff; margin-left: 10px;">BRAINOVA PREMIUM</div>
+            </div>
+            
+            <div class="hud-stats">
+                <div class="language-selector">
+                    <select id="languageSelect" onchange="changeLanguage(this.value)" class="lang-select">
+                        <option value="fr">🇫🇷 Français</option>
+                        <option value="en">🇺🇸 English</option>
+                        <option value="ar">🇸🇦 العربية</option>
+                        <option value="es">🇪🇸 Español</option>
+                        <option value="de">🇩🇪 Deutsch</option>
+                        <option value="zh">🇨🇳 中文</option>
+                    </select>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label" data-lang="level">Niveau</div>
+                    <div class="stat-value" id="playerLevel">1</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label" data-lang="xp">XP</div>
+                    <div class="stat-value" id="playerXP">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label" data-lang="energy">Énergie</div>
+                    <div class="stat-value" id="playerEnergy">100</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label" data-lang="crystals">Cristaux</div>
+                    <div class="stat-value" id="crystalCount">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label" data-lang="time">Temps</div>
+                    <div class="stat-value" id="gameTime">00:00</div>
+                </div>
+                <!-- Global platform close button -->
+                <button class="global-close-btn" title="Fermer" aria-label="Fermer" onclick="closePlatform()" style="margin-left:12px; background:transparent; border:2px solid rgba(255,255,255,0.12); color:#ff6b6b; font-size:20px; width:36px; height:36px; border-radius:18px; display:flex; align-items:center; justify-content:center;">✕</button>
+            </div>
+        </div>
+
+        <div class="game-world">
+            <!-- Monde 3D principal -->
+            <div class="world-3d" id="gameWorld">
+                <div class="sky-layer"></div>
+                <div class="mountain-layer"></div>
+                <div class="forest-layer"></div>
+                <div class="ground-layer"></div>
+                <div class="neural-network" id="neuralNetwork"></div>
+                
+                <!-- Les éléments du jeu seront générés dynamiquement -->
+            </div>
+
+            <!-- Panneau latéral -->
+            <div class="side-panel">
+                <!-- Section Contrôles du Jeu -->
+                <div class="panel-section">
+                    <div class="panel-title">🎮 Contrôles</div>
+                    <button class="neural-btn action-btn" id="startGameBtn" onclick="startGame()" data-lang="start_game">🎮 Commencer le Jeu</button>
+                    <button class="neural-btn" id="pauseResumeBtn" onclick="togglePause()" data-lang="pause_game" style="display: none;">⏸️ Pause</button>
+                </div>
+
+                <!-- Section Guide -->
+                <div class="panel-section">
+                    <div class="panel-title" data-lang="game_guide">📖 Guide de Jeu</div>
+                    <div style="font-size: 11px; color: #cccccc; line-height: 1.4; margin-bottom: 10px;" id="gameGuideContent">
+                        <strong style="color: #00ffff;" data-lang="how_to_play">🎮 COMMENT JOUER :</strong><br>
+                        <span data-lang="guide_crystals">• Cliquez sur les 💎 cristaux pour les collecter</span><br>
+                        <span data-lang="guide_nodes">• Activez les 🧠 nœuds neuraux (2 cristaux requis)</span><br>
+                        <span data-lang="guide_ai">• Parlez aux 🤖 entités IA pour progresser</span><br>
+                        <span data-lang="guide_puzzles">• Résolvez les énigmes pour gagner de l'XP</span><br>
+                        <span data-lang="guide_scan">• Utilisez ESPACE pour scanner la zone</span><br>
+                        <span data-lang="guide_meditate">• Appuyez sur M pour méditer</span><br><br>
+                        <strong style="color: #ffd700;" data-lang="objectives">🏆 OBJECTIFS :</strong><br>
+                        <span data-lang="obj_crystals">• Collectez 5 cristaux de mémoire</span><br>
+                        <span data-lang="obj_ai">• Connectez-vous à 3 entités IA</span><br>
+                        <span data-lang="obj_puzzles">• Résolvez 10 énigmes neurales</span>
+                    </div>
+                </div>
+
+                <!-- Section Actions -->
+                <div class="panel-section">
+                    <div class="panel-title" data-lang="actions">⚡ Actions</div>
+                    <button class="neural-btn action-btn" onclick="scanArea()" data-lang="scan_area">🔍 Scanner Zone</button>
+                    <button class="neural-btn" onclick="meditate()" data-lang="neural_meditation">🧘 Méditation Neural</button>
+                    <button class="neural-btn success-btn" onclick="saveProgress()" data-lang="save">💾 Sauvegarder</button>
+                    <button class="neural-btn danger-btn" onclick="resetGame()" data-lang="new_journey">🔄 Nouveau Voyage</button>
+                </div>
+
+                <!-- Section Quêtes -->
+                <div class="panel-section">
+                    <div class="panel-title" data-lang="active_missions">🎯 Missions Actives</div>
+                    <div id="questList">
+                        <div class="quest-item" onclick="selectQuest(0)">
+                            <div class="quest-title" data-lang="neural_awakening">Éveil Neural</div>
+                            <div class="quest-description" data-lang="neural_awakening_desc">Collectez 5 cristaux de mémoire pour activer votre premier nœud neural.</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 0%" id="quest0Progress"></div>
+                            </div>
+                        </div>
+                        <div class="quest-item" onclick="selectQuest(1)">
+                            <div class="quest-title" data-lang="ai_connection">Connexion IA</div>
+                            <div class="quest-description" data-lang="ai_connection_desc">Établissez le contact avec 3 entités IA dans la forêt mystique.</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 0%" id="quest1Progress"></div>
+                            </div>
+                        </div>
+                        <div class="quest-item" onclick="selectQuest(2)">
+                            <div class="quest-title" data-lang="puzzle_master">Maître des Énigmes</div>
+                            <div class="quest-description" data-lang="puzzle_master_desc">Résolvez 10 énigmes neurales pour débloquer de nouveaux pouvoirs.</div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: 0%" id="quest2Progress"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section Inventaire -->
+                <div class="panel-section">
+                    <div class="panel-title" data-lang="neural_inventory">🎒 Inventaire Neural</div>
+                    <div class="inventory-grid" id="inventoryGrid">
+                        <!-- Les slots d'inventaire seront générés dynamiquement -->
+                    </div>
+                </div>
+
+                <!-- Section Minimap -->
+                <div class="panel-section">
+                    <div class="panel-title" data-lang="neural_map">🗺️ Carte Neural</div>
+                    <div class="minimap" id="minimap">
+                        <!-- Les points de la minimap seront générés dynamiquement -->
+                    </div>
+                </div>
+
+                <!-- Section IA Assistant -->
+                <div class="panel-section">
+                    <div class="panel-title" data-lang="assistant_aria">🤖 Assistant ARIA</div>
+                    <div class="ai-chat" id="aiChat">
+                        <div class="chat-message ai" data-lang="welcome_message">
+                            Bienvenue, Explorateur Neural ! Je suis ARIA, votre assistant IA. Prêt à explorer les mystères de la forêt quantique ?
+                        </div>
+                    </div>
+                    <button class="neural-btn success-btn" onclick="askAI()" data-lang="talk_to_aria">💬 Parler à ARIA</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal pour les énigmes -->
+    <div class="modal" id="puzzleModal">
+        <div class="modal-content">
+            <div class="modal-title" id="puzzleTitle" data-lang="neural_puzzle">Énigme Neural</div>
+            <div class="modal-text" id="puzzleDescription" data-lang="puzzle_description">Résolvez cette énigme pour progresser...</div>
+            <div style="text-align: center; margin: 10px 0; color: #00ffff; font-weight: bold;">
+                <span data-lang="moves_left">Mouvements restants</span>: <span id="movesCounter">5</span>
+            </div>
+            <div class="puzzle-grid" id="puzzleGrid">
+                <!-- La grille de puzzle sera générée dynamiquement -->
+            </div>
+            <div style="display: flex; gap: 10px; justify-content: center; margin-top: 20px;">
+                <button class="neural-btn success-btn" onclick="solvePuzzle()" data-lang="validate">✓ Valider</button>
+                <button class="neural-btn danger-btn" onclick="closePuzzle()" data-lang="close">✗ Fermer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Affichage des messages -->
+    <div class="message-display" id="messageDisplay"></div>
+
+    <script>
+        // Système de traduction multilingue
+        const translations = {
+            fr: {
+                level: "Niveau",
+                xp: "XP",
+                energy: "Énergie",
+                crystals: "Cristaux",
+                time: "Temps",
+                active_missions: "🎯 Missions Actives",
+                neural_awakening: "Éveil Neural",
+                neural_awakening_desc: "Collectez 5 cristaux de mémoire pour activer votre premier nœud neural.",
+                ai_connection: "Connexion IA",
+                ai_connection_desc: "Établissez le contact avec 3 entités IA dans la forêt mystique.",
+                puzzle_master: "Maître des Énigmes",
+                puzzle_master_desc: "Résolvez 10 énigmes neurales pour débloquer de nouveaux pouvoirs.",
+                neural_inventory: "🎒 Inventaire Neural",
+                neural_map: "🗺️ Carte Neural",
+                assistant_aria: "🤖 Assistant ARIA",
+                welcome_message: "Bienvenue, Explorateur Neural ! Je suis ARIA, votre assistant IA. Prêt à explorer les mystères de la forêt quantique ?",
+                talk_to_aria: "💬 Parler à ARIA",
+                game_guide: "📖 Guide de Jeu",
+                how_to_play: "🎮 COMMENT JOUER :",
+                guide_crystals: "• Cliquez sur les 💎 cristaux pour les collecter",
+                guide_nodes: "• Activez les 🧠 nœuds neuraux (2 cristaux requis)",
+                guide_ai: "• Parlez aux 🤖 entités IA pour progresser",
+                guide_puzzles: "• Résolvez les énigmes pour gagner de l'XP",
+                guide_scan: "• Utilisez ESPACE pour scanner la zone",
+                guide_meditate: "• Appuyez sur M pour méditer",
+                objectives: "🏆 OBJECTIFS :",
+                obj_crystals: "• Collectez 5 cristaux de mémoire",
+                obj_ai: "• Connectez-vous à 3 entités IA",
+                obj_puzzles: "• Résolvez 10 énigmes neurales",
+                actions: "⚡ Actions",
+                scan_area: "🔍 Scanner Zone",
+                neural_meditation: "🧘 Méditation Neural",
+                save: "💾 Sauvegarder",
+                new_journey: "🔄 Nouveau Voyage",
+                neural_puzzle: "Énigme Neural",
+                puzzle_description: "Résolvez cette énigme pour progresser...",
+                validate: "✓ Valider",
+                close: "✗ Fermer",
+                start_game: "🎮 Commencer le Jeu",
+                pause_game: "⏸️ Pause",
+                resume_game: "▶️ Reprendre",
+                moves_left: "Mouvements restants",
+                puzzle_failed: "❌ Échec ! Plus de mouvements disponibles.",
+                try_again: "Essayez à nouveau",
+                puzzle_success: "🎉 Parfait ! Énigme résolue !",
+                next_level: "Niveau suivant"
+            },
+            en: {
+                level: "Level",
+                xp: "XP",
+                energy: "Energy",
+                crystals: "Crystals",
+                time: "Time",
+                active_missions: "🎯 Active Missions",
+                neural_awakening: "Neural Awakening",
+                neural_awakening_desc: "Collect 5 memory crystals to activate your first neural node.",
+                ai_connection: "AI Connection",
+                ai_connection_desc: "Establish contact with 3 AI entities in the mystical forest.",
+                puzzle_master: "Puzzle Master",
+                puzzle_master_desc: "Solve 10 neural puzzles to unlock new powers.",
+                neural_inventory: "🎒 Neural Inventory",
+                neural_map: "🗺️ Neural Map",
+                assistant_aria: "🤖 Assistant ARIA",
+                welcome_message: "Welcome, Neural Explorer! I am ARIA, your AI assistant. Ready to explore the mysteries of the quantum forest?",
+                talk_to_aria: "💬 Talk to ARIA",
+                game_guide: "📖 Game Guide",
+                how_to_play: "🎮 HOW TO PLAY:",
+                guide_crystals: "• Click on 💎 crystals to collect them",
+                guide_nodes: "• Activate 🧠 neural nodes (2 crystals required)",
+                guide_ai: "• Talk to 🤖 AI entities to progress",
+                guide_puzzles: "• Solve puzzles to gain XP",
+                guide_scan: "• Use SPACE to scan the area",
+                guide_meditate: "• Press M to meditate",
+                objectives: "🏆 OBJECTIVES:",
+                obj_crystals: "• Collect 5 memory crystals",
+                obj_ai: "• Connect to 3 AI entities",
+                obj_puzzles: "• Solve 10 neural puzzles",
+                actions: "⚡ Actions",
+                scan_area: "🔍 Scan Area",
+                neural_meditation: "🧘 Neural Meditation",
+                save: "💾 Save",
+                new_journey: "🔄 New Journey",
+                neural_puzzle: "Neural Puzzle",
+                puzzle_description: "Solve this puzzle to progress...",
+                validate: "✓ Validate",
+                close: "✗ Close",
+                start_game: "🎮 Start Game",
+                pause_game: "⏸️ Pause",
+                resume_game: "▶️ Resume",
+                moves_left: "Moves left",
+                puzzle_failed: "❌ Failed! No more moves available.",
+                try_again: "Try again",
+                puzzle_success: "🎉 Perfect! Puzzle solved!",
+                next_level: "Next level"
+            },
+            ar: {
+                level: "المستوى",
+                xp: "نقاط الخبرة",
+                energy: "الطاقة",
+                crystals: "البلورات",
+                time: "الوقت",
+                active_missions: "🎯 المهام النشطة",
+                neural_awakening: "الصحوة العصبية",
+                neural_awakening_desc: "اجمع 5 بلورات ذاكرة لتفعيل أول عقدة عصبية لك.",
+                ai_connection: "اتصال الذكاء الاصطناعي",
+                ai_connection_desc: "أقم اتصالاً مع 3 كيانات ذكاء اصطناعي في الغابة الصوفية.",
+                puzzle_master: "سيد الألغاز",
+                puzzle_master_desc: "حل 10 ألغاز عصبية لفتح قوى جديدة.",
+                neural_inventory: "🎒 المخزون العصبي",
+                neural_map: "🗺️ الخريطة العصبية",
+                assistant_aria: "🤖 المساعد آريا",
+                welcome_message: "مرحباً، المستكشف العصبي! أنا آريا، مساعدك الذكي. هل أنت مستعد لاستكشاف أسرار الغابة الكمية؟",
+                talk_to_aria: "💬 تحدث مع آريا",
+                game_guide: "📖 دليل اللعبة",
+                how_to_play: "🎮 كيفية اللعب:",
+                guide_crystals: "• انقر على البلورات 💎 لجمعها",
+                guide_nodes: "• فعّل العقد العصبية 🧠 (مطلوب بلورتان)",
+                guide_ai: "• تحدث مع كيانات الذكاء الاصطناعي 🤖 للتقدم",
+                guide_puzzles: "• حل الألغاز لكسب نقاط الخبرة",
+                guide_scan: "• استخدم مفتاح المسافة لمسح المنطقة",
+                guide_meditate: "• اضغط M للتأمل",
+                objectives: "🏆 الأهداف:",
+                obj_crystals: "• اجمع 5 بلورات ذاكرة",
+                obj_ai: "• اتصل بـ 3 كيانات ذكاء اصطناعي",
+                obj_puzzles: "• حل 10 ألغاز عصبية",
+                actions: "⚡ الإجراءات",
+                scan_area: "🔍 مسح المنطقة",
+                neural_meditation: "🧘 التأمل العصبي",
+                save: "💾 حفظ",
+                new_journey: "🔄 رحلة جديدة",
+                neural_puzzle: "اللغز العصبي",
+                puzzle_description: "حل هذا اللغز للتقدم...",
+                validate: "✓ تأكيد",
+                close: "✗ إغلاق",
+                start_game: "🎮 بدء اللعبة",
+                pause_game: "⏸️ إيقاف مؤقت",
+                resume_game: "▶️ استئناف",
+                moves_left: "الحركات المتبقية",
+                puzzle_failed: "❌ فشل! لا توجد حركات متاحة.",
+                try_again: "حاول مرة أخرى",
+                puzzle_success: "🎉 مثالي! تم حل اللغز!",
+                next_level: "المستوى التالي"
+            },
+            es: {
+                level: "Nivel",
+                xp: "XP",
+                energy: "Energía",
+                crystals: "Cristales",
+                time: "Tiempo",
+                active_missions: "🎯 Misiones Activas",
+                neural_awakening: "Despertar Neural",
+                neural_awakening_desc: "Recolecta 5 cristales de memoria para activar tu primer nodo neural.",
+                ai_connection: "Conexión IA",
+                ai_connection_desc: "Establece contacto con 3 entidades IA en el bosque místico.",
+                puzzle_master: "Maestro de Enigmas",
+                puzzle_master_desc: "Resuelve 10 enigmas neurales para desbloquear nuevos poderes.",
+                neural_inventory: "🎒 Inventario Neural",
+                neural_map: "🗺️ Mapa Neural",
+                assistant_aria: "🤖 Asistente ARIA",
+                welcome_message: "¡Bienvenido, Explorador Neural! Soy ARIA, tu asistente IA. ¿Listo para explorar los misterios del bosque cuántico?",
+                talk_to_aria: "💬 Hablar con ARIA",
+                game_guide: "📖 Guía del Juego",
+                how_to_play: "🎮 CÓMO JUGAR:",
+                guide_crystals: "• Haz clic en los cristales 💎 para recolectarlos",
+                guide_nodes: "• Activa los nodos neurales 🧠 (2 cristales requeridos)",
+                guide_ai: "• Habla con las entidades IA 🤖 para progresar",
+                guide_puzzles: "• Resuelve enigmas para ganar XP",
+                guide_scan: "• Usa ESPACIO para escanear el área",
+                guide_meditate: "• Presiona M para meditar",
+                objectives: "🏆 OBJETIVOS:",
+                obj_crystals: "• Recolecta 5 cristales de memoria",
+                obj_ai: "• Conéctate con 3 entidades IA",
+                obj_puzzles: "• Resuelve 10 enigmas neurales",
+                actions: "⚡ Acciones",
+                scan_area: "🔍 Escanear Área",
+                neural_meditation: "🧘 Meditación Neural",
+                save: "💾 Guardar",
+                new_journey: "🔄 Nuevo Viaje",
+                neural_puzzle: "Enigma Neural",
+                puzzle_description: "Resuelve este enigma para progresar...",
+                validate: "✓ Validar",
+                close: "✗ Cerrar",
+                start_game: "🎮 Iniciar Juego",
+                pause_game: "⏸️ Pausa",
+                resume_game: "▶️ Reanudar",
+                moves_left: "Movimientos restantes",
+                puzzle_failed: "❌ ¡Fallido! No hay más movimientos disponibles.",
+                try_again: "Inténtalo de nuevo",
+                puzzle_success: "🎉 ¡Perfecto! ¡Enigma resuelto!",
+                next_level: "Siguiente nivel"
+            },
+            de: {
+                level: "Level",
+                xp: "EP",
+                energy: "Energie",
+                crystals: "Kristalle",
+                time: "Zeit",
+                active_missions: "🎯 Aktive Missionen",
+                neural_awakening: "Neurales Erwachen",
+                neural_awakening_desc: "Sammle 5 Gedächtniskristalle, um deinen ersten neuralen Knoten zu aktivieren.",
+                ai_connection: "KI-Verbindung",
+                ai_connection_desc: "Stelle Kontakt zu 3 KI-Entitäten im mystischen Wald her.",
+                puzzle_master: "Rätselmeister",
+                puzzle_master_desc: "Löse 10 neurale Rätsel, um neue Kräfte freizuschalten.",
+                neural_inventory: "🎒 Neurales Inventar",
+                neural_map: "🗺️ Neurale Karte",
+                assistant_aria: "🤖 Assistent ARIA",
+                welcome_message: "Willkommen, Neuraler Entdecker! Ich bin ARIA, dein KI-Assistent. Bereit, die Geheimnisse des Quantenwaldes zu erkunden?",
+                talk_to_aria: "💬 Mit ARIA sprechen",
+                game_guide: "📖 Spielanleitung",
+                how_to_play: "🎮 WIE MAN SPIELT:",
+                guide_crystals: "• Klicke auf die Kristalle 💎, um sie zu sammeln",
+                guide_nodes: "• Aktiviere neurale Knoten 🧠 (2 Kristalle erforderlich)",
+                guide_ai: "• Sprich mit KI-Entitäten 🤖, um voranzukommen",
+                guide_puzzles: "• Löse Rätsel, um EP zu gewinnen",
+                guide_scan: "• Verwende LEERTASTE, um das Gebiet zu scannen",
+                guide_meditate: "• Drücke M zum Meditieren",
+                objectives: "🏆 ZIELE:",
+                obj_crystals: "• Sammle 5 Gedächtniskristalle",
+                obj_ai: "• Verbinde dich mit 3 KI-Entitäten",
+                obj_puzzles: "• Löse 10 neurale Rätsel",
+                actions: "⚡ Aktionen",
+                scan_area: "🔍 Gebiet scannen",
+                neural_meditation: "🧘 Neurale Meditation",
+                save: "💾 Speichern",
+                new_journey: "🔄 Neue Reise",
+                neural_puzzle: "Neurales Rätsel",
+                puzzle_description: "Löse dieses Rätsel, um voranzukommen...",
+                validate: "✓ Bestätigen",
+                close: "✗ Schließen",
+                start_game: "🎮 Spiel Starten",
+                pause_game: "⏸️ Pause",
+                resume_game: "▶️ Fortsetzen",
+                moves_left: "Züge übrig",
+                puzzle_failed: "❌ Gescheitert! Keine Züge mehr verfügbar.",
+                try_again: "Versuche es erneut",
+                puzzle_success: "🎉 Perfekt! Rätsel gelöst!",
+                next_level: "Nächstes Level"
+            },
+            zh: {
+                level: "等级",
+                xp: "经验值",
+                energy: "能量",
+                crystals: "水晶",
+                time: "时间",
+                active_missions: "🎯 活跃任务",
+                neural_awakening: "神经觉醒",
+                neural_awakening_desc: "收集5个记忆水晶来激活你的第一个神经节点。",
+                ai_connection: "AI连接",
+                ai_connection_desc: "在神秘森林中与3个AI实体建立联系。",
+                puzzle_master: "谜题大师",
+                puzzle_master_desc: "解决10个神经谜题来解锁新能力。",
+                neural_inventory: "🎒 神经背包",
+                neural_map: "🗺️ 神经地图",
+                assistant_aria: "🤖 助手ARIA",
+                welcome_message: "欢迎，神经探索者！我是ARIA，你的AI助手。准备好探索量子森林的奥秘了吗？",
+                talk_to_aria: "💬 与ARIA对话",
+                game_guide: "📖 游戏指南",
+                how_to_play: "🎮 如何游戏：",
+                guide_crystals: "• 点击💎水晶来收集它们",
+                guide_nodes: "• 激活🧠神经节点（需要2个水晶）",
+                guide_ai: "• 与🤖AI实体对话来进步",
+                guide_puzzles: "• 解决谜题来获得经验值",
+                guide_scan: "• 使用空格键扫描区域",
+                guide_meditate: "• 按M键冥想",
+                objectives: "🏆 目标：",
+                obj_crystals: "• 收集5个记忆水晶",
+                obj_ai: "• 连接3个AI实体",
+                obj_puzzles: "• 解决10个神经谜题",
+                actions: "⚡ 行动",
+                scan_area: "🔍 扫描区域",
+                neural_meditation: "🧘 神经冥想",
+                save: "💾 保存",
+                new_journey: "🔄 新旅程",
+                neural_puzzle: "神经谜题",
+                puzzle_description: "解决这个谜题来进步...",
+                validate: "✓ 验证",
+                close: "✗ 关闭",
+                start_game: "🎮 开始游戏",
+                pause_game: "⏸️ 暂停",
+                resume_game: "▶️ 继续",
+                moves_left: "剩余移动",
+                puzzle_failed: "❌ 失败！没有更多移动可用。",
+                try_again: "再试一次",
+                puzzle_success: "🎉 完美！谜题解决！",
+                next_level: "下一关"
+            }
+        };
+
+        let currentLanguage = 'fr';
+
+        // Fonction pour changer la langue
+        function changeLanguage(lang) {
+            currentLanguage = lang;
+            
+            // Appliquer la direction RTL pour l'arabe
+            if (lang === 'ar') {
+                document.body.classList.add('rtl');
+                document.documentElement.setAttribute('dir', 'rtl');
+            } else {
+                document.body.classList.remove('rtl');
+                document.documentElement.setAttribute('dir', 'ltr');
+            }
+            
+            // Mettre à jour tous les éléments avec data-lang
+            const elements = document.querySelectorAll('[data-lang]');
+            elements.forEach(element => {
+                const key = element.getAttribute('data-lang');
+                if (translations[lang] && translations[lang][key]) {
+                    element.textContent = translations[lang][key];
+                }
+            });
+            
+            // Mettre à jour les boutons de contrôle du jeu
+            updateGameControlButtons();
+            
+            // Sauvegarder la langue choisie
+            localStorage.setItem('neurosynthLanguage', lang);
+            
+            // Mettre à jour les messages dynamiques
+            updateDynamicMessages();
+        }
+
+        // Fonction pour obtenir une traduction
+        function t(key) {
+            return translations[currentLanguage] && translations[currentLanguage][key] 
+                ? translations[currentLanguage][key] 
+                : translations['fr'][key] || key;
+        }
+
+        // Messages dynamiques traduits
+        const dynamicMessages = {
+            fr: {
+                welcome: "🌟 Bienvenue dans NeuroSynth Explorer ! Explorez la forêt quantique et éveillez votre conscience neural.",
+                tree_messages: [
+                    "🌳 Cet arbre ancien pulse d'énergie quantique...",
+                    "🍃 Les feuilles murmurent des secrets neuraux...",
+                    "🌿 Vous ressentez une connexion profonde avec la nature digitale...",
+                    "🌲 L'arbre semble réagir à votre présence neural..."
+                ],
+                crystal_collected: "💎 Cristal de mémoire collecté ! Énergie neural +10 XP",
+                node_locked: "🔒 Vous avez besoin de 2 cristaux de mémoire pour activer ce nœud neural.",
+                ai_messages: [
+                    "🤖 Salutations, être neural. Je détecte un potentiel quantique élevé en vous.",
+                    "🔮 Vos ondes cérébrales résonnent avec la fréquence de la forêt mystique.",
+                    "⚡ Connexion établie. Transfert de données neurales en cours...",
+                    "🌟 Votre évolution neural progresse admirablement, explorateur.",
+                    "🧬 Les patterns de votre conscience s'alignent avec la matrice universelle."
+                ]
+            },
+            en: {
+                welcome: "🌟 Welcome to NeuroSynth Explorer! Explore the quantum forest and awaken your neural consciousness.",
+                tree_messages: [
+                    "🌳 This ancient tree pulses with quantum energy...",
+                    "🍃 The leaves whisper neural secrets...",
+                    "🌿 You feel a deep connection with digital nature...",
+                    "🌲 The tree seems to react to your neural presence..."
+                ],
+                crystal_collected: "💎 Memory crystal collected! Neural energy +10 XP",
+                node_locked: "🔒 You need 2 memory crystals to activate this neural node.",
+                ai_messages: [
+                    "🤖 Greetings, neural being. I detect high quantum potential in you.",
+                    "🔮 Your brain waves resonate with the mystical forest frequency.",
+                    "⚡ Connection established. Neural data transfer in progress...",
+                    "🌟 Your neural evolution progresses admirably, explorer.",
+                    "🧬 Your consciousness patterns align with the universal matrix."
+                ]
+            },
+            ar: {
+                welcome: "🌟 مرحباً بك في مستكشف NeuroSynth! استكشف الغابة الكمية وأيقظ وعيك العصبي.",
+                tree_messages: [
+                    "🌳 هذه الشجرة القديمة تنبض بالطاقة الكمية...",
+                    "🍃 الأوراق تهمس بأسرار عصبية...",
+                    "🌿 تشعر بارتباط عميق مع الطبيعة الرقمية...",
+                    "🌲 الشجرة تبدو وكأنها تتفاعل مع حضورك العصبي..."
+                ],
+                crystal_collected: "💎 تم جمع بلورة الذاكرة! طاقة عصبية +10 نقطة خبرة",
+                node_locked: "🔒 تحتاج إلى بلورتي ذاكرة لتفعيل هذه العقدة العصبية.",
+                ai_messages: [
+                    "🤖 تحياتي، الكائن العصبي. أكتشف إمكانات كمية عالية فيك.",
+                    "🔮 موجات دماغك تتردد مع تردد الغابة الصوفية.",
+                    "⚡ تم إنشاء الاتصال. نقل البيانات العصبية قيد التقدم...",
+                    "🌟 تطورك العصبي يتقدم بشكل رائع، أيها المستكشف.",
+                    "🧬 أنماط وعيك تتماشى مع المصفوفة الكونية."
+                ]
+            },
+            es: {
+                welcome: "🌟 ¡Bienvenido a NeuroSynth Explorer! Explora el bosque cuántico y despierta tu conciencia neural.",
+                tree_messages: [
+                    "🌳 Este árbol ancestral pulsa con energía cuántica...",
+                    "🍃 Las hojas susurran secretos neurales...",
+                    "🌿 Sientes una conexión profunda con la naturaleza digital...",
+                    "🌲 El árbol parece reaccionar a tu presencia neural..."
+                ],
+                crystal_collected: "💎 ¡Cristal de memoria recolectado! Energía neural +10 XP",
+                node_locked: "🔒 Necesitas 2 cristales de memoria para activar este nodo neural.",
+                ai_messages: [
+                    "🤖 Saludos, ser neural. Detecto alto potencial cuántico en ti.",
+                    "🔮 Tus ondas cerebrales resuenan con la frecuencia del bosque místico.",
+                    "⚡ Conexión establecida. Transferencia de datos neurales en progreso...",
+                    "🌟 Tu evolución neural progresa admirablemente, explorador.",
+                    "🧬 Los patrones de tu conciencia se alinean con la matriz universal."
+                ]
+            },
+            de: {
+                welcome: "🌟 Willkommen bei NeuroSynth Explorer! Erkunde den Quantenwald und erwecke dein neurales Bewusstsein.",
+                tree_messages: [
+                    "🌳 Dieser uralte Baum pulsiert mit Quantenenergie...",
+                    "🍃 Die Blätter flüstern neurale Geheimnisse...",
+                    "🌿 Du spürst eine tiefe Verbindung zur digitalen Natur...",
+                    "🌲 Der Baum scheint auf deine neurale Präsenz zu reagieren..."
+                ],
+                crystal_collected: "💎 Gedächtniskristall gesammelt! Neurale Energie +10 EP",
+                node_locked: "🔒 Du benötigst 2 Gedächtniskristalle, um diesen neuralen Knoten zu aktivieren.",
+                ai_messages: [
+                    "🤖 Grüße, neurales Wesen. Ich erkenne hohes Quantenpotential in dir.",
+                    "🔮 Deine Gehirnwellen resonieren mit der Frequenz des mystischen Waldes.",
+                    "⚡ Verbindung hergestellt. Neuraler Datentransfer läuft...",
+                    "🌟 Deine neurale Evolution schreitet bewundernswert voran, Entdecker.",
+                    "🧬 Die Muster deines Bewusstseins richten sich an der universellen Matrix aus."
+                ]
+            },
+            zh: {
+                welcome: "🌟 欢迎来到NeuroSynth Explorer！探索量子森林，唤醒你的神经意识。",
+                tree_messages: [
+                    "🌳 这棵古老的树脉动着量子能量...",
+                    "🍃 叶子低语着神经秘密...",
+                    "🌿 你感受到与数字自然的深层连接...",
+                    "🌲 这棵树似乎对你的神经存在有反应..."
+                ],
+                crystal_collected: "💎 记忆水晶已收集！神经能量 +10 经验值",
+                node_locked: "🔒 你需要2个记忆水晶来激活这个神经节点。",
+                ai_messages: [
+                    "🤖 问候，神经存在。我在你身上检测到高量子潜力。",
+                    "🔮 你的脑波与神秘森林的频率共鸣。",
+                    "⚡ 连接已建立。神经数据传输进行中...",
+                    "🌟 你的神经进化进展令人钦佩，探索者。",
+                    "🧬 你的意识模式与宇宙矩阵对齐。"
+                ]
+            }
+        };
+
+        function updateDynamicMessages() {
+            // Cette fonction sera appelée quand on change de langue
+            // pour mettre à jour les messages qui ne sont pas dans le DOM
+        }
+
+        function updateGameControlButtons() {
+            const startBtn = document.getElementById('startGameBtn');
+            const pauseBtn = document.getElementById('pauseResumeBtn');
+            
+            if (startBtn) {
+                startBtn.textContent = t('start_game');
+            }
+            
+            if (pauseBtn) {
+                if (gameState.gamePaused) {
+                    pauseBtn.textContent = t('resume_game');
+                    pauseBtn.setAttribute('data-lang', 'resume_game');
+                } else {
+                    pauseBtn.textContent = t('pause_game');
+                    pauseBtn.setAttribute('data-lang', 'pause_game');
+                }
+            }
+        }
+
+        function startGame() {
+            if (!gameState.gameStarted) {
+                gameState.gameStarted = true;
+                gameState.startTime = Date.now();
+                
+                document.getElementById('startGameBtn').style.display = 'none';
+                document.getElementById('pauseResumeBtn').style.display = 'block';
+                
+                const msg = currentLanguage === 'fr' ? "🎮 Jeu commencé ! Bonne exploration !" :
+                           currentLanguage === 'en' ? "🎮 Game started! Happy exploring!" :
+                           currentLanguage === 'ar' ? "🎮 بدأت اللعبة! استكشاف سعيد!" :
+                           currentLanguage === 'es' ? "🎮 ¡Juego iniciado! ¡Feliz exploración!" :
+                           currentLanguage === 'de' ? "🎮 Spiel gestartet! Viel Spaß beim Erkunden!" :
+                           "🎮 游戏开始！愉快探索！";
+                
+                showMessage(msg);
+                updateGameControlButtons();
+            }
+        }
+
+        function togglePause() {
+            if (!gameState.gameStarted) return;
+            
+            gameState.gamePaused = !gameState.gamePaused;
+            
+            if (gameState.gamePaused) {
+                const msg = currentLanguage === 'fr' ? "⏸️ Jeu en pause" :
+                           currentLanguage === 'en' ? "⏸️ Game paused" :
+                           currentLanguage === 'ar' ? "⏸️ اللعبة متوقفة مؤقتاً" :
+                           currentLanguage === 'es' ? "⏸️ Juego pausado" :
+                           currentLanguage === 'de' ? "⏸️ Spiel pausiert" :
+                           "⏸️ 游戏暂停";
+                showMessage(msg);
+            } else {
+                const msg = currentLanguage === 'fr' ? "▶️ Jeu repris" :
+                           currentLanguage === 'en' ? "▶️ Game resumed" :
+                           currentLanguage === 'ar' ? "▶️ تم استئناف اللعبة" :
+                           currentLanguage === 'es' ? "▶️ Juego reanudado" :
+                           currentLanguage === 'de' ? "▶️ Spiel fortgesetzt" :
+                           "▶️ 游戏继续";
+                showMessage(msg);
+            }
+            
+            updateGameControlButtons();
+        }
+
+        function getDynamicMessage(category, index = null) {
+            const messages = dynamicMessages[currentLanguage] || dynamicMessages['fr'];
+            if (index !== null && Array.isArray(messages[category])) {
+                return messages[category][index] || messages[category][0];
+            }
+            return messages[category] || category;
+        }
+
+        // État du jeu
+        let gameState = {
+            player: {
+                level: 1,
+                xp: 0,
+                energy: 100,
+                maxEnergy: 100,
+                position: { x: 50, y: 50 },
+                crystals: 0,
+                inventory: [],
+                unlockedNodes: []
+            },
+            world: {
+                trees: [],
+                neuralNodes: [],
+                memoryCrystals: [],
+                aiEntities: [],
+                connections: []
+            },
+            quests: [
+                { id: 0, title: "neural_awakening", progress: 0, target: 5, completed: false },
+                { id: 1, title: "ai_connection", progress: 0, target: 3, completed: false },
+                { id: 2, title: "puzzle_master", progress: 0, target: 10, completed: false }
+            ],
+            currentPuzzle: null,
+            gameTime: 0,
+            startTime: Date.now(),
+            aiMessages: [],
+            discoveredAreas: [],
+            gameStarted: false,
+            gamePaused: false,
+            puzzleMovesLeft: 5
+        };
+
+        // Initialisation du jeu
+        function initGame() {
+            console.log("🧠 Initialisation de NeuroSynth Explorer...");
+            
+            // Charger la langue sauvegardée
+            const savedLanguage = localStorage.getItem('neurosynthLanguage');
+            if (savedLanguage) {
+                currentLanguage = savedLanguage;
+                document.getElementById('languageSelect').value = savedLanguage;
+                changeLanguage(savedLanguage);
+            }
+            
+            generateParticles();
+            generateWorld();
+            createInventorySlots();
+            updateMinimap();
+            startGameTimer();
+            
+            showMessage(getDynamicMessage('welcome'));
+            
+            // Première interaction avec l'IA
+            setTimeout(() => {
+                addAIMessage(getDynamicMessage('ai_messages', 0));
+            }, 3000);
+        }
+
+        // Génération des particules neurales
+        function generateParticles() {
+            const container = document.getElementById('neuralParticles');
+            container.innerHTML = '';
+            
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 8 + 's';
+                particle.style.animationDuration = (8 + Math.random() * 4) + 's';
+                container.appendChild(particle);
+            }
+        }
+
+        // Génération du monde 3D
+        function generateWorld() {
+            const world = document.getElementById('gameWorld');
+            
+            // Nettoyer le monde existant (garder les couches de base)
+            const existingElements = world.querySelectorAll('.tree, .neural-node, .memory-crystal, .ai-entity');
+            existingElements.forEach(el => el.remove());
+            
+            // Générer les arbres
+            for (let i = 0; i < 15; i++) {
+                createTree();
+            }
+            
+            // Générer les nœuds neuraux
+            for (let i = 0; i < 8; i++) {
+                createNeuralNode();
+            }
+            
+            // Générer les cristaux de mémoire
+            for (let i = 0; i < 12; i++) {
+                createMemoryCrystal();
+            }
+            
+            // Générer les entités IA
+            for (let i = 0; i < 5; i++) {
+                createAIEntity();
+            }
+            
+            // Créer les connexions neurales
+            setTimeout(() => {
+                createNeuralConnections();
+            }, 1000);
+        }
+
+        function createTree() {
+            const tree = document.createElement('div');
+            tree.className = 'tree';
+            tree.style.left = Math.random() * 80 + 10 + '%';
+            tree.style.top = Math.random() * 70 + 15 + '%';
+            tree.style.transform = `rotateY(${Math.random() * 360}deg) rotateX(${Math.random() * 20 - 10}deg)`;
+            tree.onclick = () => interactWithTree(tree);
+            
+            document.getElementById('gameWorld').appendChild(tree);
+            gameState.world.trees.push(tree);
+        }
+
+        function createNeuralNode() {
+            const node = document.createElement('div');
+            node.className = 'neural-node';
+            node.style.left = Math.random() * 85 + 5 + '%';
+            node.style.top = Math.random() * 75 + 10 + '%';
+            node.innerHTML = '🧠';
+            node.onclick = () => interactWithNeuralNode(node);
+            
+            document.getElementById('gameWorld').appendChild(node);
+            gameState.world.neuralNodes.push(node);
+        }
+
+        function createMemoryCrystal() {
+            const crystal = document.createElement('div');
+            crystal.className = 'memory-crystal';
+            crystal.style.left = Math.random() * 90 + 5 + '%';
+            crystal.style.top = Math.random() * 80 + 10 + '%';
+            crystal.onclick = () => collectCrystal(crystal);
+            
+            document.getElementById('gameWorld').appendChild(crystal);
+            gameState.world.memoryCrystals.push(crystal);
+        }
+
+        function createAIEntity() {
+            const entity = document.createElement('div');
+            entity.className = 'ai-entity';
+            entity.style.left = Math.random() * 75 + 10 + '%';
+            entity.style.top = Math.random() * 65 + 15 + '%';
+            entity.innerHTML = '🤖';
+            entity.onclick = () => interactWithAI(entity);
+            
+            document.getElementById('gameWorld').appendChild(entity);
+            gameState.world.aiEntities.push(entity);
+        }
+
+        function createNeuralConnections() {
+            const network = document.getElementById('neuralNetwork');
+            network.innerHTML = '';
+            
+            const nodes = gameState.world.neuralNodes;
+            
+            for (let i = 0; i < nodes.length - 1; i++) {
+                for (let j = i + 1; j < nodes.length; j++) {
+                    if (Math.random() < 0.3) { // 30% de chance de connexion
+                        createConnection(nodes[i], nodes[j]);
+                    }
+                }
+            }
+        }
+
+        function createConnection(node1, node2) {
+            const connection = document.createElement('div');
+            connection.className = 'neural-connection';
+            
+            const rect1 = node1.getBoundingClientRect();
+            const rect2 = node2.getBoundingClientRect();
+            const worldRect = document.getElementById('gameWorld').getBoundingClientRect();
+            
+            const x1 = rect1.left - worldRect.left + rect1.width / 2;
+            const y1 = rect1.top - worldRect.top + rect1.height / 2;
+            const x2 = rect2.left - worldRect.left + rect2.width / 2;
+            const y2 = rect2.top - worldRect.top + rect2.height / 2;
+            
+            const length = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);
+            const angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+            
+            connection.style.left = x1 + 'px';
+            connection.style.top = y1 + 'px';
+            connection.style.width = length + 'px';
+            connection.style.transform = `rotate(${angle}deg)`;
+            connection.style.animationDelay = Math.random() * 3 + 's';
+            
+            document.getElementById('neuralNetwork').appendChild(connection);
+            gameState.world.connections.push(connection);
+        }
+
+        // Interactions avec les éléments du monde
+        function interactWithTree(tree) {
+            const messages = dynamicMessages[currentLanguage].tree_messages;
+            const message = messages[Math.floor(Math.random() * messages.length)];
+            showMessage(message);
+            
+            // Chance de trouver quelque chose
+            if (Math.random() < 0.3) {
+                gainXP(5);
+                showMessage("✨ " + (currentLanguage === 'fr' ? "Vous gagnez de l'expérience en communiant avec l'arbre !" :
+                                   currentLanguage === 'en' ? "You gain experience by communing with the tree!" :
+                                   currentLanguage === 'ar' ? "تكسب خبرة من خلال التواصل مع الشجرة!" :
+                                   currentLanguage === 'es' ? "¡Ganas experiencia al comunicarte con el árbol!" :
+                                   currentLanguage === 'de' ? "Du gewinnst Erfahrung durch die Kommunikation mit dem Baum!" :
+                                   "你通过与树木交流获得经验！"));
+            }
+        }
+
+        function interactWithNeuralNode(node) {
+            if (gameState.player.crystals >= 2) {
+                // Ouvrir une énigme
+                openPuzzle("neural");
+                node.style.background = 'radial-gradient(circle, rgba(0, 255, 0, 0.8) 0%, rgba(0, 200, 0, 0.4) 100%)';
+            } else {
+                showMessage(getDynamicMessage('node_locked'));
+            }
+        }
+
+        function collectCrystal(crystal) {
+            gameState.player.crystals++;
+            gameState.quests[0].progress++;
+            
+            // Animation de collecte
+            crystal.style.animation = 'crystalSpin 0.5s ease-in-out';
+            crystal.style.transform = 'scale(2)';
+            crystal.style.opacity = '0';
+            
+            setTimeout(() => {
+                crystal.remove();
+                const index = gameState.world.memoryCrystals.indexOf(crystal);
+                if (index > -1) {
+                    gameState.world.memoryCrystals.splice(index, 1);
+                }
+            }, 500);
+            
+            gainXP(10);
+            showMessage(getDynamicMessage('crystal_collected'));
+            
+            updateStats();
+            updateQuestProgress();
+            
+            // Vérifier si la quête est terminée
+            if (gameState.quests[0].progress >= gameState.quests[0].target && !gameState.quests[0].completed) {
+                completeQuest(0);
+            }
+        }
+
+        function interactWithAI(entity) {
+            gameState.quests[1].progress++;
+            
+            const messages = dynamicMessages[currentLanguage].ai_messages;
+            const message = messages[Math.floor(Math.random() * messages.length)];
+            addAIMessage(message);
+            
+            const connectionMsg = currentLanguage === 'fr' ? "🤖 Connexion IA établie ! Nouveau message reçu." :
+                                 currentLanguage === 'en' ? "🤖 AI Connection established! New message received." :
+                                 currentLanguage === 'ar' ? "🤖 تم إنشاء اتصال الذكاء الاصطناعي! تم استلام رسالة جديدة." :
+                                 currentLanguage === 'es' ? "🤖 ¡Conexión IA establecida! Nuevo mensaje recibido." :
+                                 currentLanguage === 'de' ? "🤖 KI-Verbindung hergestellt! Neue Nachricht erhalten." :
+                                 "🤖 AI连接已建立！收到新消息。";
+            
+            showMessage(connectionMsg);
+            
+            // Animation de connexion
+            entity.style.boxShadow = '0 0 50px rgba(0, 255, 255, 1)';
+            setTimeout(() => {
+                entity.style.boxShadow = '0 0 20px rgba(0, 255, 255, 0.5)';
+            }, 2000);
+            
+            gainXP(15);
+            updateStats();
+            updateQuestProgress();
+            
+            // Vérifier si la quête est terminée
+            if (gameState.quests[1].progress >= gameState.quests[1].target && !gameState.quests[1].completed) {
+                completeQuest(1);
+            }
+        }
+
+        // Système d'énigmes
+        function openPuzzle(type) {
+            if (gameState.gamePaused) {
+                showMessage(currentLanguage === 'fr' ? "⏸️ Jeu en pause ! Reprenez pour jouer." :
+                           currentLanguage === 'en' ? "⏸️ Game paused! Resume to play." :
+                           currentLanguage === 'ar' ? "⏸️ اللعبة متوقفة! استأنف للعب." :
+                           currentLanguage === 'es' ? "⏸️ ¡Juego pausado! Reanuda para jugar." :
+                           currentLanguage === 'de' ? "⏸️ Spiel pausiert! Fortsetzen zum Spielen." :
+                           "⏸️ 游戏暂停！继续游戏。");
+                return;
+            }
+            
+            const modal = document.getElementById('puzzleModal');
+            const puzzles = {
+                neural: {
+                    title: t("neural_puzzle"),
+                    description: t("puzzle_description"),
+                    type: "sequence"
+                }
+            };
+            
+            const puzzle = puzzles[type] || puzzles.neural;
+            gameState.currentPuzzle = puzzle;
+            gameState.puzzleMovesLeft = 5;
+            
+            document.getElementById('puzzleTitle').textContent = puzzle.title;
+            document.getElementById('puzzleDescription').textContent = puzzle.description;
+            document.getElementById('movesCounter').textContent = gameState.puzzleMovesLeft;
+            
+            generatePuzzleGrid(puzzle.type);
+            modal.style.display = 'flex';
+        }
+
+        function generatePuzzleGrid(type) {
+            const grid = document.getElementById('puzzleGrid');
+            grid.innerHTML = '';
+            
+            if (type === "sequence") {
+                // Créer une grille 4x4 pour la séquence
+                for (let i = 0; i < 16; i++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'puzzle-cell';
+                    cell.dataset.index = i;
+                    cell.onclick = () => togglePuzzleCell(cell);
+                    grid.appendChild(cell);
+                }
+                
+                // Générer une séquence aléatoire
+                gameState.currentPuzzle.sequence = [];
+                for (let i = 0; i < 6; i++) {
+                    gameState.currentPuzzle.sequence.push(Math.floor(Math.random() * 16));
+                }
+                
+                // Montrer la séquence
+                showSequence();
+            }
+        }
+
+        function showSequence() {
+            const sequence = gameState.currentPuzzle.sequence;
+            let index = 0;
+            
+            const showNext = () => {
+                if (index < sequence.length) {
+                    const cell = document.querySelector(`[data-index="${sequence[index]}"]`);
+                    cell.style.background = 'linear-gradient(135deg, #00ffff 0%, #ff00ff 100%)';
+                    
+                    setTimeout(() => {
+                        cell.style.background = '';
+                        index++;
+                        setTimeout(showNext, 300);
+                    }, 800);
+                } else {
+                    // Séquence terminée, permettre à l'utilisateur de jouer
+                    gameState.currentPuzzle.playerSequence = [];
+                    const msg = currentLanguage === 'fr' ? "🧠 Reproduisez la séquence que vous venez de voir !" :
+                               currentLanguage === 'en' ? "🧠 Reproduce the sequence you just saw!" :
+                               currentLanguage === 'ar' ? "🧠 أعد إنتاج التسلسل الذي رأيته للتو!" :
+                               currentLanguage === 'es' ? "🧠 ¡Reproduce la secuencia que acabas de ver!" :
+                               currentLanguage === 'de' ? "🧠 Reproduziere die Sequenz, die du gerade gesehen hast!" :
+                               "🧠 重现你刚才看到的序列！";
+                    showMessage(msg);
+                }
+            };
+            
+            setTimeout(showNext, 1000);
+        }
+
+        function togglePuzzleCell(cell) {
+            if (!gameState.currentPuzzle.playerSequence || gameState.puzzleMovesLeft <= 0) return;
+            
+            const index = parseInt(cell.dataset.index);
+            gameState.currentPuzzle.playerSequence.push(index);
+            gameState.puzzleMovesLeft--;
+            
+            document.getElementById('movesCounter').textContent = gameState.puzzleMovesLeft;
+            
+            cell.classList.add('active');
+            
+            // Vérifier si la séquence est correcte jusqu'à présent
+            const playerSeq = gameState.currentPuzzle.playerSequence;
+            const targetSeq = gameState.currentPuzzle.sequence;
+            
+            if (playerSeq.length <= targetSeq.length) {
+                const isCorrect = playerSeq.every((val, i) => val === targetSeq[i]);
+                
+                if (!isCorrect) {
+                    // Séquence incorrecte
+                    gameState.puzzleMovesLeft--;
+                    document.getElementById('movesCounter').textContent = gameState.puzzleMovesLeft;
+                    
+                    if (gameState.puzzleMovesLeft <= 0) {
+                        showMessage(t('puzzle_failed'));
+                        setTimeout(() => {
+                            closePuzzle();
+                        }, 2000);
+                    } else {
+                        const msg = currentLanguage === 'fr' ? "❌ Séquence incorrecte ! Essayez à nouveau." :
+                                   currentLanguage === 'en' ? "❌ Incorrect sequence! Try again." :
+                                   currentLanguage === 'ar' ? "❌ تسلسل خاطئ! حاول مرة أخرى." :
+                                   currentLanguage === 'es' ? "❌ ¡Secuencia incorrecta! Inténtalo de nuevo." :
+                                   currentLanguage === 'de' ? "❌ Falsche Sequenz! Versuche es erneut." :
+                                   "❌ 序列错误！再试一次。";
+                        showMessage(msg);
+                        resetPuzzle();
+                    }
+                } else if (playerSeq.length === targetSeq.length) {
+                    // Séquence complète et correcte
+                    showMessage(t('puzzle_success'));
+                    setTimeout(() => {
+                        solvePuzzle();
+                    }, 1500);
+                }
+            }
+        }
+
+        function resetPuzzle() {
+            gameState.currentPuzzle.playerSequence = [];
+            gameState.puzzleMovesLeft = 5;
+            document.getElementById('movesCounter').textContent = gameState.puzzleMovesLeft;
+            
+            document.querySelectorAll('.puzzle-cell').forEach(cell => {
+                cell.classList.remove('active');
+            });
+            
+            setTimeout(() => {
+                showSequence();
+            }, 1000);
+        }
+
+        function solvePuzzle() {
+            gameState.quests[2].progress++;
+            gameState.player.crystals += 2;
+            
+            const msg = currentLanguage === 'fr' ? "🎉 Énigme résolue ! +25 XP et 2 cristaux de mémoire !" :
+                       currentLanguage === 'en' ? "🎉 Puzzle solved! +25 XP and 2 memory crystals!" :
+                       currentLanguage === 'ar' ? "🎉 تم حل اللغز! +25 نقطة خبرة و 2 بلورة ذاكرة!" :
+                       currentLanguage === 'es' ? "🎉 ¡Enigma resuelto! ¡+25 XP y 2 cristales de memoria!" :
+                       currentLanguage === 'de' ? "🎉 Rätsel gelöst! +25 EP und 2 Gedächtniskristalle!" :
+                       "🎉 谜题解决！+25经验值和2个记忆水晶！";
+            
+            showMessage(msg);
+            gainXP(25);
+            
+            closePuzzle();
+            updateStats();
+            updateQuestProgress();
+            
+            // Vérifier si la quête est terminée
+            if (gameState.quests[2].progress >= gameState.quests[2].target && !gameState.quests[2].completed) {
+                completeQuest(2);
+            }
+        }
+
+        function closePuzzle() {
+            document.getElementById('puzzleModal').style.display = 'none';
+            gameState.currentPuzzle = null;
+        }
+
+        // Système de progression
+        function gainXP(amount) {
+            gameState.player.xp += amount;
+            
+            // Vérifier le niveau
+            const newLevel = Math.floor(gameState.player.xp / 100) + 1;
+            if (newLevel > gameState.player.level) {
+                levelUp(newLevel);
+            }
+        }
+
+        function levelUp(newLevel) {
+            gameState.player.level = newLevel;
+            gameState.player.maxEnergy += 20;
+            gameState.player.energy = gameState.player.maxEnergy;
+            
+            const msg = currentLanguage === 'fr' ? `🌟 NIVEAU SUPÉRIEUR ! Niveau ${newLevel} atteint ! Énergie maximale augmentée !` :
+                       currentLanguage === 'en' ? `🌟 LEVEL UP! Level ${newLevel} reached! Maximum energy increased!` :
+                       currentLanguage === 'ar' ? `🌟 ارتقاء في المستوى! تم الوصول للمستوى ${newLevel}! زيادة الطاقة القصوى!` :
+                       currentLanguage === 'es' ? `🌟 ¡SUBIDA DE NIVEL! ¡Nivel ${newLevel} alcanzado! ¡Energía máxima aumentada!` :
+                       currentLanguage === 'de' ? `🌟 LEVEL AUFSTIEG! Level ${newLevel} erreicht! Maximale Energie erhöht!` :
+                       `🌟 升级！达到等级${newLevel}！最大能量增加！`;
+            
+            showMessage(msg);
+            
+            // Effets visuels de niveau supérieur
+            document.body.style.animation = 'quantumShift 2s ease-in-out';
+            setTimeout(() => {
+                document.body.style.animation = '';
+            }, 2000);
+        }
+
+        function completeQuest(questId) {
+            gameState.quests[questId].completed = true;
+            const quest = gameState.quests[questId];
+            
+            const msg = currentLanguage === 'fr' ? `🏆 QUÊTE TERMINÉE : ${t(quest.title)} ! Récompense spéciale débloquée !` :
+                       currentLanguage === 'en' ? `🏆 QUEST COMPLETED: ${t(quest.title)}! Special reward unlocked!` :
+                       currentLanguage === 'ar' ? `🏆 تمت المهمة: ${t(quest.title)}! تم فتح مكافأة خاصة!` :
+                       currentLanguage === 'es' ? `🏆 MISIÓN COMPLETADA: ${t(quest.title)}! ¡Recompensa especial desbloqueada!` :
+                       currentLanguage === 'de' ? `🏆 MISSION ABGESCHLOSSEN: ${t(quest.title)}! Spezielle Belohnung freigeschaltet!` :
+                       `🏆 任务完成：${t(quest.title)}！特殊奖励解锁！`;
+            
+            showMessage(msg);
+            
+            // Récompenses spéciales
+            gainXP(50);
+            gameState.player.crystals += 5;
+            
+            // Marquer visuellement la quête comme terminée
+            const questElement = document.querySelector(`#questList .quest-item:nth-child(${questId + 1})`);
+            if (questElement) {
+                questElement.classList.add('completed');
+            }
+            
+            updateStats();
+        }
+
+        // Actions du joueur
+        function scanArea() {
+            if (!gameState.gameStarted || gameState.gamePaused) {
+                showMessage(currentLanguage === 'fr' ? "🎮 Commencez ou reprenez le jeu pour utiliser cette action." :
+                           currentLanguage === 'en' ? "🎮 Start or resume the game to use this action." :
+                           currentLanguage === 'ar' ? "🎮 ابدأ أو استأنف اللعبة لاستخدام هذا الإجراء." :
+                           currentLanguage === 'es' ? "🎮 Inicia o reanuda el juego para usar esta acción." :
+                           currentLanguage === 'de' ? "🎮 Starte oder setze das Spiel fort, um diese Aktion zu verwenden." :
+                           "🎮 开始或继续游戏以使用此操作。");
+                return;
+            }
+            
+            if (gameState.player.energy < 10) {
+                const msg = currentLanguage === 'fr' ? "⚡ Énergie insuffisante pour scanner la zone." :
+                           currentLanguage === 'en' ? "⚡ Insufficient energy to scan the area." :
+                           currentLanguage === 'ar' ? "⚡ طاقة غير كافية لمسح المنطقة." :
+                           currentLanguage === 'es' ? "⚡ Energía insuficiente para escanear el área." :
+                           currentLanguage === 'de' ? "⚡ Unzureichende Energie zum Scannen des Gebiets." :
+                           "⚡ 能量不足，无法扫描区域。";
+                showMessage(msg);
+                return;
+            }
+            
+            gameState.player.energy -= 10;
+            
+            // Révéler des éléments cachés
+            const hiddenElements = Math.floor(Math.random() * 3) + 1;
+            
+            for (let i = 0; i < hiddenElements; i++) {
+                if (Math.random() < 0.5) {
+                    createMemoryCrystal();
+                } else {
+                    createNeuralNode();
+                }
+            }
+            
+            const msg = currentLanguage === 'fr' ? `🔍 Scan terminé ! ${hiddenElements} nouveaux éléments détectés dans la zone.` :
+                       currentLanguage === 'en' ? `🔍 Scan complete! ${hiddenElements} new elements detected in the area.` :
+                       currentLanguage === 'ar' ? `🔍 اكتمل المسح! تم اكتشاف ${hiddenElements} عناصر جديدة في المنطقة.` :
+                       currentLanguage === 'es' ? `🔍 ¡Escaneo completo! ${hiddenElements} nuevos elementos detectados en el área.` :
+                       currentLanguage === 'de' ? `🔍 Scan abgeschlossen! ${hiddenElements} neue Elemente im Gebiet entdeckt.` :
+                       `🔍 扫描完成！在区域中检测到${hiddenElements}个新元素。`;
+            
+            showMessage(msg);
+            updateStats();
+        }
+
+        function meditate() {
+            if (!gameState.gameStarted || gameState.gamePaused) {
+                showMessage(currentLanguage === 'fr' ? "🎮 Commencez ou reprenez le jeu pour méditer." :
+                           currentLanguage === 'en' ? "🎮 Start or resume the game to meditate." :
+                           currentLanguage === 'ar' ? "🎮 ابدأ أو استأنف اللعبة للتأمل." :
+                           currentLanguage === 'es' ? "🎮 Inicia o reanuda el juego para meditar." :
+                           currentLanguage === 'de' ? "🎮 Starte oder setze das Spiel fort zum Meditieren." :
+                           "🎮 开始或继续游戏进行冥想。");
+                return;
+            }
+            
+            if (gameState.player.energy >= gameState.player.maxEnergy) {
+                const msg = currentLanguage === 'fr' ? "🧘 Votre énergie est déjà au maximum." :
+                           currentLanguage === 'en' ? "🧘 Your energy is already at maximum." :
+                           currentLanguage === 'ar' ? "🧘 طاقتك في الحد الأقصى بالفعل." :
+                           currentLanguage === 'es' ? "🧘 Tu energía ya está al máximo." :
+                           currentLanguage === 'de' ? "🧘 Deine Energie ist bereits am Maximum." :
+                           "🧘 你的能量已经达到最大值。";
+                showMessage(msg);
+                return;
+            }
+            
+            gameState.player.energy = Math.min(gameState.player.maxEnergy, gameState.player.energy + 30);
+            
+            const msg = currentLanguage === 'fr' ? "🧘 Méditation neural terminée. Énergie restaurée !" :
+                       currentLanguage === 'en' ? "🧘 Neural meditation complete. Energy restored!" :
+                       currentLanguage === 'ar' ? "🧘 اكتمل التأمل العصبي. تم استعادة الطاقة!" :
+                       currentLanguage === 'es' ? "🧘 Meditación neural completa. ¡Energía restaurada!" :
+                       currentLanguage === 'de' ? "🧘 Neurale Meditation abgeschlossen. Energie wiederhergestellt!" :
+                       "🧘 神经冥想完成。能量恢复！";
+            
+            showMessage(msg);
+            
+            // Effet visuel de méditation
+            document.getElementById('gameWorld').style.filter = 'hue-rotate(60deg)';
+            setTimeout(() => {
+                document.getElementById('gameWorld').style.filter = '';
+            }, 2000);
+            
+            updateStats();
+        }
+
+        function askAI() {
+            const responses = [
+                getDynamicMessage('ai_messages', 0),
+                getDynamicMessage('ai_messages', 1),
+                getDynamicMessage('ai_messages', 2),
+                getDynamicMessage('ai_messages', 3),
+                getDynamicMessage('ai_messages', 4)
+            ];
+            
+            const response = responses[Math.floor(Math.random() * responses.length)];
+            addAIMessage(response);
+        }
+
+        function addAIMessage(message) {
+            const chat = document.getElementById('aiChat');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'chat-message ai';
+            messageDiv.textContent = message;
+            chat.appendChild(messageDiv);
+            
+            // Faire défiler vers le bas
+            chat.scrollTop = chat.scrollHeight;
+            
+            // Limiter le nombre de messages
+            const messages = chat.querySelectorAll('.chat-message');
+            if (messages.length > 10) {
+                messages[0].remove();
+            }
+        }
+
+        function saveProgress() {
+            localStorage.setItem('neurosynthExplorer', JSON.stringify(gameState));
+            
+            const msg = currentLanguage === 'fr' ? "💾 Progression sauvegardée avec succès !" :
+                       currentLanguage === 'en' ? "💾 Progress saved successfully!" :
+                       currentLanguage === 'ar' ? "💾 تم حفظ التقدم بنجاح!" :
+                       currentLanguage === 'es' ? "💾 ¡Progreso guardado con éxito!" :
+                       currentLanguage === 'de' ? "💾 Fortschritt erfolgreich gespeichert!" :
+                       "💾 进度保存成功！";
+            
+            showMessage(msg);
+        }
+
+        function loadProgress() {
+            const saved = localStorage.getItem('neurosynthExplorer');
+            if (saved) {
+                gameState = JSON.parse(saved);
+                updateStats();
+                updateQuestProgress();
+                
+                const msg = currentLanguage === 'fr' ? "📁 Progression chargée !" :
+                           currentLanguage === 'en' ? "📁 Progress loaded!" :
+                           currentLanguage === 'ar' ? "📁 تم تحميل التقدم!" :
+                           currentLanguage === 'es' ? "📁 ¡Progreso cargado!" :
+                           currentLanguage === 'de' ? "📁 Fortschritt geladen!" :
+                           "📁 进度已加载！";
+                
+                showMessage(msg);
+                return true;
+            }
+            return false;
+        }
+
+        function resetGame() {
+            const confirmMsg = currentLanguage === 'fr' ? "🔄 Êtes-vous sûr de vouloir recommencer votre voyage neural ?" :
+                              currentLanguage === 'en' ? "🔄 Are you sure you want to restart your neural journey?" :
+                              currentLanguage === 'ar' ? "🔄 هل أنت متأكد من أنك تريد إعادة تشغيل رحلتك العصبية؟" :
+                              currentLanguage === 'es' ? "🔄 ¿Estás seguro de que quieres reiniciar tu viaje neural?" :
+                              currentLanguage === 'de' ? "🔄 Bist du sicher, dass du deine neurale Reise neu starten möchtest?" :
+                              "🔄 你确定要重新开始你的神经之旅吗？";
+            
+            if (confirm(confirmMsg)) {
+                localStorage.removeItem('neurosynthExplorer');
+                location.reload();
+            }
+        }
+
+        // Fonctions utilitaires
+        function updateStats() {
+            document.getElementById('playerLevel').textContent = gameState.player.level;
+            document.getElementById('playerXP').textContent = gameState.player.xp;
+            document.getElementById('playerEnergy').textContent = gameState.player.energy;
+            document.getElementById('crystalCount').textContent = gameState.player.crystals;
+        }
+
+        function updateQuestProgress() {
+            gameState.quests.forEach((quest, index) => {
+                const progressBar = document.getElementById(`quest${index}Progress`);
+                if (progressBar) {
+                    const percentage = Math.min(100, (quest.progress / quest.target) * 100);
+                    progressBar.style.width = percentage + '%';
+                }
+            });
+        }
+
+        function createInventorySlots() {
+            const grid = document.getElementById('inventoryGrid');
+            grid.innerHTML = '';
+            
+            for (let i = 0; i < 9; i++) {
+                const slot = document.createElement('div');
+                slot.className = 'inventory-slot';
+                slot.dataset.slot = i;
+                
+                if (gameState.player.inventory[i]) {
+                    slot.textContent = gameState.player.inventory[i].icon;
+                    slot.classList.add('filled');
+                }
+                
+                grid.appendChild(slot);
+            }
+        }
+
+        function updateMinimap() {
+            const minimap = document.getElementById('minimap');
+            minimap.innerHTML = '';
+            
+            // Ajouter des points pour les éléments importants
+            const elements = [
+                ...gameState.world.neuralNodes,
+                ...gameState.world.aiEntities,
+                ...gameState.world.memoryCrystals
+            ];
+            
+            elements.forEach((element, index) => {
+                if (index < 20) { // Limiter le nombre de points
+                    const dot = document.createElement('div');
+                    dot.className = 'minimap-dot';
+                    dot.style.left = Math.random() * 90 + 5 + '%';
+                    dot.style.top = Math.random() * 90 + 5 + '%';
+                    
+                    if (element.classList.contains('neural-node')) {
+                        dot.style.background = '#00ffff';
+                    } else if (element.classList.contains('ai-entity')) {
+                        dot.style.background = '#ff00ff';
+                    } else {
+                        dot.style.background = '#ffff00';
+                    }
+                    
+                    minimap.appendChild(dot);
+                }
+            });
+        }
+
+        function startGameTimer() {
+            setInterval(() => {
+                gameState.gameTime = Math.floor((Date.now() - gameState.startTime) / 1000);
+                const minutes = Math.floor(gameState.gameTime / 60);
+                const seconds = gameState.gameTime % 60;
+                document.getElementById('gameTime').textContent = 
+                    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }, 1000);
+        }
+
+        function showMessage(text) {
+            const display = document.getElementById('messageDisplay');
+            display.textContent = text;
+            display.classList.add('show');
+            
+            setTimeout(() => {
+                display.classList.remove('show');
+            }, 4000);
+        }
+
+        function selectQuest(questId) {
+            const quest = gameState.quests[questId];
+            const msg = currentLanguage === 'fr' ? `🎯 Quête sélectionnée : ${t(quest.title)} (${quest.progress}/${quest.target})` :
+                       currentLanguage === 'en' ? `🎯 Quest selected: ${t(quest.title)} (${quest.progress}/${quest.target})` :
+                       currentLanguage === 'ar' ? `🎯 تم اختيار المهمة: ${t(quest.title)} (${quest.progress}/${quest.target})` :
+                       currentLanguage === 'es' ? `🎯 Misión seleccionada: ${t(quest.title)} (${quest.progress}/${quest.target})` :
+                       currentLanguage === 'de' ? `🎯 Mission ausgewählt: ${t(quest.title)} (${quest.progress}/${quest.target})` :
+                       `🎯 任务已选择：${t(quest.title)} (${quest.progress}/${quest.target})`;
+            
+            showMessage(msg);
+        }
+
+        // Initialisation au chargement de la page
+        window.addEventListener('load', () => {
+            console.log("🚀 Lancement de NeuroSynth Explorer...");
+            
+            // Essayer de charger une progression sauvegardée
+            if (!loadProgress()) {
+                initGame();
+            } else {
+                // Régénérer le monde si progression chargée
+                generateWorld();
+                createInventorySlots();
+                updateMinimap();
+                startGameTimer();
+            }
+        });
+
+        // Gestion des événements clavier
+        document.addEventListener('keydown', (event) => {
+            switch(event.key) {
+                case 'Escape':
+                    closePuzzle();
+                    break;
+                case ' ':
+                    event.preventDefault();
+                    scanArea();
+                    break;
+                case 'm':
+                case 'M':
+                    meditate();
+                    break;
+            }
+        });
+
+        // Régénération périodique d'éléments
+        setInterval(() => {
+            if (gameState.world.memoryCrystals.length < 5) {
+                createMemoryCrystal();
+            }
+        }, 30000); // Toutes les 30 secondes
+
+        // Régénération d'énergie passive
+        setInterval(() => {
+            if (gameState.player.energy < gameState.player.maxEnergy) {
+                gameState.player.energy = Math.min(gameState.player.maxEnergy, gameState.player.energy + 1);
+                updateStats();
+            }
+        }, 5000); // Toutes les 5 secondes
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'986a8f5b5033e280',t:'MTc1OTEzOTI1NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
+
+<!-- canonical closePlatform handler inserted by automation -->
+<script>
+    (function(){
+        function closePlatform(){
+            try{ console.debug && console.debug('jeux15: closePlatform called'); }catch(e){}
+            try{
+                if(window.parent && window.parent !== window){
+                    window.parent.postMessage({ action: 'close', reason: 'user-initiated', source: 'jeux15' }, '*');
+                    return;
+                }
+            }catch(e){}
+            try{
+                if(window.opener && !window.opener.closed){
+                    try{ window.opener.postMessage({ action: 'child-closed', source: 'jeux15' }, '*'); }catch(e){}
+                    try{ window.close(); }catch(e){}
+                    return;
+                }
+            }catch(e){}
+            // final fallback: navigate to platform home
+            try{ window.location.href = '/brainova.html'; }catch(e){ /* ignore */ }
+        }
+        window.closePlatform = closePlatform;
+    })();
+</script>
