@@ -1,0 +1,1852 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enigma Hunter</title>
+    <style>
+        body {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 25%, #16213e 50%, #0f3460 75%, #533483 100%);
+            min-height: 100vh;
+            color: #00ff88;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Animated quantum grid background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(0, 255, 136, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 136, 0.1) 1px, transparent 1px);
+            background-size: 40px 40px;
+            animation: quantumGrid 20s linear infinite;
+            z-index: -1;
+        }
+
+        @keyframes quantumGrid {
+            0% { transform: translate(0, 0) rotate(0deg); opacity: 0.3; }
+            50% { opacity: 0.6; }
+            100% { transform: translate(40px, 40px) rotate(360deg); opacity: 0.3; }
+        }
+
+        .quantum-particles {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #00ccff;
+            border-radius: 50%;
+            animation: quantumFloat 12s linear infinite;
+            box-shadow: 0 0 15px rgba(0, 204, 255, 0.8);
+        }
+
+        @keyframes quantumFloat {
+            0% {
+                transform: translateY(100vh) translateX(0) scale(0) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-10vh) translateX(300px) scale(0) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        .game-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .title {
+            font-size: 3rem;
+            margin: 0;
+            text-shadow: 0 0 40px rgba(0, 255, 136, 0.8);
+            background: linear-gradient(45deg, #00ff88, #00ccff, #ff0088, #ffaa00, #8800ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: titlePulse 5s ease-in-out infinite;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+        }
+
+        @keyframes titlePulse {
+            0%, 100% { 
+                filter: drop-shadow(0 0 30px rgba(0, 255, 136, 0.5));
+                transform: scale(1);
+            }
+            50% { 
+                filter: drop-shadow(0 0 60px rgba(0, 255, 136, 1));
+                transform: scale(1.08);
+            }
+        }
+
+        .subtitle {
+            font-size: 1.4rem;
+            color: #00ccff;
+            margin: 15px 0;
+            opacity: 0.9;
+            letter-spacing: 3px;
+            animation: subtitleGlow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes subtitleGlow {
+            0% { text-shadow: 0 0 10px rgba(0, 204, 255, 0.5); }
+            100% { text-shadow: 0 0 25px rgba(0, 204, 255, 1); }
+        }
+
+        .language-selector {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .language-dropdown {
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #00ff88;
+            border-radius: 10px;
+            padding: 12px 18px;
+            color: #00ff88;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            cursor: pointer;
+            outline: none;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .language-dropdown:hover {
+            background: rgba(0, 255, 136, 0.1);
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.6);
+            transform: scale(1.05);
+        }
+
+        .control-panel {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .quantum-btn {
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.2) 0%, rgba(0, 204, 255, 0.2) 100%);
+            border: 2px solid #00ff88;
+            padding: 12px 20px;
+            border-radius: 8px;
+            color: #00ff88;
+            font-size: 1rem;
+            font-family: 'Courier New', monospace;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            min-width: 140px;
+            font-weight: bold;
+        }
+
+        .quantum-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 136, 0.4), transparent);
+            transition: left 0.5s;
+        }
+
+        .quantum-btn:hover::before {
+            left: 100%;
+        }
+
+        .quantum-btn:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0, 255, 136, 0.4);
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.4) 0%, rgba(0, 204, 255, 0.4) 100%);
+            border-color: #00ccff;
+            color: #ffffff;
+        }
+
+        .quantum-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .quantum-btn:disabled:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        .rules-btn {
+            background: linear-gradient(135deg, rgba(255, 170, 0, 0.2) 0%, rgba(255, 136, 0, 0.2) 100%);
+            border-color: #ffaa00;
+            color: #ffaa00;
+        }
+
+        .rules-btn:hover {
+            background: linear-gradient(135deg, rgba(255, 170, 0, 0.4) 0%, rgba(255, 136, 0, 0.4) 100%);
+            border-color: #ff8800;
+        }
+
+        .pause-btn {
+            background: linear-gradient(135deg, rgba(255, 0, 136, 0.2) 0%, rgba(136, 0, 255, 0.2) 100%);
+            border-color: #ff0088;
+            color: #ff0088;
+        }
+
+        .pause-btn:hover {
+            background: linear-gradient(135deg, rgba(255, 0, 136, 0.4) 0%, rgba(136, 0, 255, 0.4) 100%);
+            border-color: #cc0066;
+        }
+
+        .game-area {
+            display: grid;
+            grid-template-columns: 250px 1fr 250px;
+            gap: 20px;
+            margin: 20px 0;
+            min-height: 500px;
+        }
+
+        .main-game {
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #00ff88;
+            border-radius: 15px;
+            padding: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .main-game::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #00ff88, #00ccff, #ff0088, #ffaa00, #8800ff);
+            border-radius: 17px;
+            z-index: -1;
+            animation: borderGlow 8s linear infinite;
+        }
+
+        @keyframes borderGlow {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+
+        .side-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .ai-assistant {
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #00ccff;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ai-assistant::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #00ccff, #0088ff, #0044ff);
+            border-radius: 14px;
+            z-index: -1;
+            animation: aiGlow 4s ease-in-out infinite;
+        }
+
+        @keyframes aiGlow {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.8; }
+        }
+
+        .ai-avatar {
+            width: 50px;
+            height: 50px;
+            margin: 0 auto 10px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #00ccff 0%, #0088ff 50%, #0044ff 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            animation: aiPulse 3s ease-in-out infinite;
+            box-shadow: 0 0 25px rgba(0, 204, 255, 0.8);
+        }
+
+        @keyframes aiPulse {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.15) rotate(180deg); }
+        }
+
+        .ai-name {
+            font-size: 1rem;
+            color: #00ccff;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: bold;
+        }
+
+        .ai-message {
+            font-size: 0.85rem;
+            line-height: 1.4;
+            color: #88ffcc;
+            background: rgba(0, 204, 255, 0.1);
+            padding: 12px;
+            border-radius: 6px;
+            border-left: 3px solid #00ccff;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .stats-panel {
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #ffaa00;
+            border-radius: 12px;
+            padding: 15px;
+        }
+
+        .stats-title {
+            font-size: 1rem;
+            color: #ffaa00;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+            padding: 6px;
+            background: rgba(255, 170, 0, 0.1);
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+
+        .stat-label {
+            color: #ffcc66;
+        }
+
+        .stat-value {
+            color: #ffaa00;
+            font-weight: bold;
+        }
+
+        .enigma-display {
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid #00ff88;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .enigma-text {
+            font-size: 1.3rem;
+            color: #00ff88;
+            margin-bottom: 15px;
+            line-height: 1.5;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+        }
+
+        .enigma-input {
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #00ccff;
+            border-radius: 8px;
+            padding: 15px;
+            color: #00ccff;
+            font-family: 'Courier New', monospace;
+            font-size: 1.2rem;
+            width: 100%;
+            text-align: center;
+            margin: 10px 0;
+            box-shadow: 0 0 15px rgba(0, 204, 255, 0.3);
+        }
+
+        .enigma-input:focus {
+            outline: none;
+            box-shadow: 0 0 25px rgba(0, 204, 255, 0.6);
+            border-color: #00ff88;
+        }
+
+        .progress-bar {
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #ff0088;
+            border-radius: 10px;
+            padding: 10px;
+            margin: 15px 0;
+        }
+
+        .progress-title {
+            color: #ff0088;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #ff0088, #ff44aa);
+            height: 20px;
+            border-radius: 10px;
+            transition: width 0.5s ease;
+            box-shadow: 0 0 15px rgba(255, 0, 136, 0.6);
+        }
+
+        .timer-display {
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #ffaa00;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            margin: 15px 0;
+        }
+
+        .timer-text {
+            font-size: 2rem;
+            color: #ffaa00;
+            font-weight: bold;
+            text-shadow: 0 0 20px rgba(255, 170, 0, 0.8);
+        }
+
+        .game-message {
+            text-align: center;
+            font-size: 1.2rem;
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid #00ccff;
+            color: #00ccff;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .rules-panel, .pause-panel {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.95);
+            border: 2px solid #00ff88;
+            border-radius: 20px;
+            padding: 40px;
+            z-index: 3000;
+            display: none;
+            min-width: 600px;
+            max-width: 85vw;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+
+        .rules-content {
+            color: #00ff88;
+            line-height: 1.8;
+        }
+
+        .rules-content h3 {
+            color: #00ccff;
+            margin-top: 30px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #00ff88;
+            padding-bottom: 10px;
+            font-size: 1.4rem;
+        }
+
+        .rules-content ul {
+            margin: 20px 0;
+            padding-left: 30px;
+        }
+
+        .rules-content li {
+            margin: 10px 0;
+        }
+
+        .pause-panel {
+            text-align: center;
+            border-color: #ff0088;
+        }
+
+        .pause-panel h3 {
+            color: #ff0088;
+            font-size: 2.5rem;
+            margin-bottom: 30px;
+        }
+
+        .level-indicator {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid #ffaa00;
+            border-radius: 12px;
+            padding: 12px 25px;
+            color: #ffaa00;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .hint-system {
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #8800ff;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+
+        .hint-title {
+            color: #8800ff;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .hint-text {
+            color: #cc88ff;
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+
+        @media (max-width: 768px) {
+            .game-area {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .title {
+                font-size: 2.5rem;
+            }
+            
+            .control-panel {
+                gap: 15px;
+            }
+            
+            .quantum-btn {
+                min-width: 130px;
+                padding: 15px 25px;
+                font-size: 1.1rem;
+            }
+            
+            .language-selector {
+                top: 10px;
+                right: 10px;
+            }
+            
+            .rules-panel {
+                min-width: 95vw;
+                padding: 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="quantum-particles" id="particles"></div>
+    
+    <div class="language-selector">
+        <select class="language-dropdown" id="languageSelect">
+            <option value="fr">🇫🇷 Français</option>
+            <option value="en">🇬🇧 English</option>
+            <option value="ar">🇸🇦 العربية</option>
+            <option value="es">🇪🇸 Español</option>
+            <option value="de">🇩🇪 Deutsch</option>
+            <option value="zh">🇨🇳 中文</option>
+        </select>
+    </div>
+
+    <div class="level-indicator" id="levelIndicator">
+        Niveau 1
+    </div>
+
+    <div class="game-container">
+        <div class="header">
+            <h1 class="title" id="gameTitle">Enigma Hunter</h1>
+            <p class="subtitle" id="gameSubtitle">Chasseur d'Énigmes Quantiques avec IA</p>
+        </div>
+
+        <div class="control-panel">
+            <button class="quantum-btn rules-btn" id="rulesBtn" onclick="showRules()">📖 Règles</button>
+            <button class="quantum-btn" id="startBtn" onclick="startGame()">🚀 Commencer</button>
+            <button class="quantum-btn pause-btn" id="pauseBtn" onclick="togglePause()" disabled>⏸️ Pause</button>
+            <button class="quantum-btn" id="newGameBtn" onclick="newGame()">🔄 Nouveau Jeu</button>
+        </div>
+
+        <div class="game-area">
+            <div class="side-panel">
+                <div class="ai-assistant">
+                    <div class="ai-avatar">🧠</div>
+                    <div class="ai-name" id="aiName">CIPHER-AI</div>
+                    <div class="ai-message" id="aiMessage">
+                        Salut ! Je suis CIPHER-AI, votre assistant quantique. Prêt à résoudre des énigmes mystérieuses ?
+                    </div>
+                </div>
+
+                <div class="stats-panel" style="padding: 12px;">
+                    <div class="stats-title" id="statsTitle" style="font-size: 0.9rem; margin-bottom: 10px;">Statistiques</div>
+                    <div class="stat-item" style="margin: 6px 0; padding: 4px; font-size: 0.75rem;">
+                        <span class="stat-label" id="solvedLabel">Résolues:</span>
+                        <span class="stat-value" id="solvedValue">0</span>
+                    </div>
+                    <div class="stat-item" style="margin: 6px 0; padding: 4px; font-size: 0.75rem;">
+                        <span class="stat-label" id="failedLabel">Échouées:</span>
+                        <span class="stat-value" id="failedValue">0</span>
+                    </div>
+                    <div class="stat-item" style="margin: 6px 0; padding: 4px; font-size: 0.75rem;">
+                        <span class="stat-label" id="streakLabel">Série:</span>
+                        <span class="stat-value" id="streakValue">0</span>
+                    </div>
+                    <div class="stat-item" style="margin: 6px 0; padding: 4px; font-size: 0.75rem;">
+                        <span class="stat-label" id="levelLabel">Niveau:</span>
+                        <span class="stat-value" id="levelValue">1</span>
+                    </div>
+                    <div class="stat-item" style="margin: 6px 0; padding: 4px; font-size: 0.75rem;">
+                        <span class="stat-label" id="scoreLabel">Score:</span>
+                        <span class="stat-value" id="scoreValue">0</span>
+                    </div>
+                </div>
+
+
+            </div>
+
+            <div class="main-game">
+                <div class="timer-display" id="timerDisplay">
+                    <div class="timer-text" id="timerText">--:--</div>
+                </div>
+
+                <div class="progress-bar">
+                    <div class="progress-title" id="progressTitle">Progression du Niveau</div>
+                    <div style="background: rgba(255, 0, 136, 0.2); border-radius: 10px;">
+                        <div class="progress-fill" id="progressFill" style="width: 0%;"></div>
+                    </div>
+                </div>
+
+                <div class="enigma-display" id="enigmaDisplay">
+                    <div class="enigma-text" id="enigmaText">
+                        Cliquez sur "Commencer" pour débuter votre aventure de chasseur d'énigmes !
+                    </div>
+                    <input type="text" class="enigma-input" id="enigmaInput" placeholder="Tapez votre réponse ici..." style="display: none;">
+                    <button class="quantum-btn" id="submitBtn" onclick="submitAnswer()" style="display: none; margin-top: 15px;">Valider</button>
+                </div>
+
+                <div class="game-message" id="gameMessage">
+                    Bienvenue dans Enigma Hunter ! Résolvez des énigmes mystérieuses avec l'aide de votre IA.
+                </div>
+            </div>
+
+            <div class="side-panel">
+                <div class="ai-assistant">
+                    <div class="ai-avatar">📖</div>
+                    <div class="ai-name" id="rulesName">OBJECTIF</div>
+                    <div class="ai-message" id="rulesMessage">
+                        Résolvez l'énigme avant la fin du temps imparti !
+                    </div>
+                </div>
+
+                <div class="hint-system" id="hintSystemRight" style="display: block;">
+                    <div class="hint-title" id="hintTitleRight">💡 Indice & Solution</div>
+                    <div class="hint-text" id="hintTextRight">Utilisez un indice pour vous aider...</div>
+                    <div style="display: flex; gap: 8px; margin-top: 10px;">
+                        <button class="quantum-btn" id="hintBtnRight" onclick="useHint()" style="min-width: 80px; padding: 8px 12px; font-size: 0.8rem;">Indice</button>
+                        <button class="quantum-btn" id="solutionBtnRight" onclick="showSolution()" style="min-width: 80px; padding: 8px 12px; font-size: 0.8rem; background: linear-gradient(135deg, rgba(255, 0, 136, 0.2) 0%, rgba(136, 0, 255, 0.2) 100%); border-color: #ff0088; color: #ff0088;">Solution</button>
+                    </div>
+                </div>
+
+                <div class="stats-panel" style="padding: 12px;">
+                    <div class="stats-title" id="difficultyTitle" style="font-size: 0.9rem; margin-bottom: 10px;">Difficulté</div>
+                    <div class="stat-item" style="margin: 6px 0; padding: 4px; font-size: 0.75rem;">
+                        <span class="stat-label" id="currentDiffLabel">Actuelle:</span>
+                        <span class="stat-value" id="currentDiffValue">Facile</span>
+                    </div>
+                    <div class="stat-item" style="margin: 6px 0; padding: 4px; font-size: 0.75rem;">
+                        <span class="stat-label" id="timeLeftLabel">Temps:</span>
+                        <span class="stat-value" id="timeLeftValue">--</span>
+                    </div>
+                    <div class="stat-item" style="margin: 6px 0; padding: 4px; font-size: 0.75rem;">
+                        <span class="stat-label" id="hintsLeftLabel">Indices:</span>
+                        <span class="stat-value" id="hintsLeftValue">3</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rules Panel -->
+    <div class="rules-panel" id="rulesPanel">
+        <h3 style="color: #00ff88; text-align: center; margin-bottom: 30px;" id="rulesTitle">📖 Règles d'Enigma Hunter</h3>
+        <div class="rules-content" id="rulesContent">
+            <div id="rulesObjective">
+                <h3 id="objectiveTitle">🎯 Objectif</h3>
+                <p id="objectiveText">Résolvez des énigmes de plus en plus complexes en utilisant votre logique et l'aide de votre IA assistant CIPHER-AI.</p>
+            </div>
+            
+            <div id="rulesGameplay">
+                <h3 id="gameplayTitle">🎮 Gameplay</h3>
+                <ul>
+                    <li><strong id="variedEnigmas">Énigmes variées:</strong> <span id="variedEnigmasDesc">Mathématiques, logique, mots, codes secrets</span></li>
+                    <li><strong id="timedChallenges">Temps limité:</strong> <span id="timedChallengesDesc">Chaque énigme a une limite de temps</span></li>
+                    <li><strong id="progressiveLevels">Niveaux progressifs:</strong> <span id="progressiveLevelsDesc">La difficulté augmente avec votre progression</span></li>
+                    <li><strong id="hintSystem">Système d'indices:</strong> <span id="hintSystemDesc">Utilisez des indices pour vous aider</span></li>
+                    <li><strong id="solutionSystem">Bouton Solution:</strong> <span id="solutionSystemDesc">Révélez la réponse si vous êtes bloqué</span></li>
+                </ul>
+            </div>
+            
+            <div id="rulesScoring">
+                <h3 id="scoringTitle">🏆 Système de Score</h3>
+                <ul>
+                    <li><strong id="fastSolving">Résolution rapide:</strong> <span id="fastSolvingDesc">Plus vous êtes rapide, plus vous gagnez de points</span></li>
+                    <li><strong id="noHints">Sans indices:</strong> <span id="noHintsDesc">Bonus pour résoudre sans aide</span></li>
+                    <li><strong id="streaks">Séries:</strong> <span id="streaksDesc">Bonus pour les résolutions consécutives</span></li>
+                    <li><strong id="levelUnlock">Niveaux:</strong> <span id="levelUnlockDesc">Débloquez de nouveaux défis</span></li>
+                </ul>
+            </div>
+        </div>
+        <button class="quantum-btn" onclick="hideRules()" style="margin-top: 30px;" id="closeRulesBtn">Fermer</button>
+    </div>
+
+    <!-- Pause Panel -->
+    <div class="pause-panel" id="pausePanel">
+        <h3 id="pauseTitle">⏸️ Jeu en Pause</h3>
+        <p style="color: #ff88cc; margin: 30px 0; font-size: 1.2rem;" id="pauseMessage">Le jeu est actuellement en pause. Prenez votre temps !</p>
+        <button class="quantum-btn" onclick="togglePause()" id="resumeBtn">▶️ Reprendre</button>
+    </div>
+
+    <style>
+        .global-close-btn { position: fixed; top: 14px; right: 14px; z-index: 99999; background: #ff3b3b; color: #fff; border: none; width:52px; height:52px; border-radius:50%; font-size:22px; cursor:pointer; box-shadow:0 6px 18px rgba(255,59,59,0.3);} 
+        .global-close-btn:hover{ transform: scale(1.05); }
+    </style>
+    <button class="global-close-btn" title="Fermer" aria-label="Fermer" onclick="closePlatform()">✕</button>
+    <script>
+        function closePlatform(){
+            try{ console.debug('jeux16: closePlatform called'); }catch(e){}
+            try{
+                if(window.parent && window.parent !== window){
+                    window.parent.postMessage({ action: 'close', reason: 'user-initiated', source: 'jeux16' }, '*');
+                    return;
+                }
+            }catch(e){}
+            try{
+                if(window.opener && !window.opener.closed){
+                    try{ window.opener.postMessage({ action: 'child-closed', source: 'jeux16' }, '*'); }catch(e){}
+                    try{ window.close(); }catch(e){}
+                    return;
+                }
+            }catch(e){}
+            try{ window.location.href = '/brainova.html'; }catch(e){}
+        }
+    </script>
+    <script>
+        const translations = {
+            fr: {
+                title: "Enigma Hunter",
+                subtitle: "Chasseur d'Énigmes Quantiques avec IA",
+                start: "🚀 Commencer",
+                pause: "⏸️ Pause",
+                resume: "▶️ Reprendre",
+                rules: "Règles",
+                newGame: "🔄 Nouveau Jeu",
+                aiName: "CIPHER-AI",
+                aiWelcome: "Salut ! Je suis CIPHER-AI, votre assistant quantique. Prêt à résoudre des énigmes mystérieuses ?",
+                statsTitle: "Statistiques",
+                solved: "Résolues:",
+                failed: "Échouées:",
+                streak: "Série:",
+                level: "Niveau:",
+                score: "Score:",
+                difficultyTitle: "Difficulté",
+                currentDiff: "Actuelle:",
+                timeLeft: "Temps:",
+                hintsLeft: "Indices:",
+                objectiveName: "OBJECTIF",
+                rulesMessage: "Résolvez l'énigme avant la fin du temps imparti !",
+                startMessage: "Cliquez sur \"Commencer\" pour débuter votre aventure de chasseur d'énigmes !",
+                welcomeMessage: "Bienvenue dans Enigma Hunter ! Résolvez des énigmes mystérieuses avec l'aide de votre IA.",
+                rulesTitle: "📖 Règles d'Enigma Hunter",
+                pauseTitle: "⏸️ Jeu en Pause",
+                pauseMessage: "Le jeu est actuellement en pause. Prenez votre temps !",
+                levelIndicator: "Niveau",
+                closeBtn: "Fermer",
+                submitBtn: "Valider",
+                hintBtn: "Indice",
+                hintTitle: "💡 Indice & Solution",
+                solutionBtn: "Solution",
+                progressTitle: "Progression du Niveau",
+                inputPlaceholder: "Tapez votre réponse ici...",
+                difficulties: {
+                    easy: "Facile",
+                    medium: "Moyen",
+                    hard: "Difficile",
+                    expert: "Expert"
+                },
+                messages: {
+                    correct: "🎉 Excellent ! Bonne réponse !",
+                    wrong: "❌ Incorrect. Essayez encore !",
+                    timeout: "⏰ Temps écoulé ! Passons à la suivante.",
+                    levelUp: "🎊 Niveau supérieur ! Félicitations !",
+                    gameOver: "🏁 Partie terminée ! Score final :",
+                    hint: "💡 Voici un indice pour vous aider...",
+                    noHints: "❌ Plus d'indices disponibles !",
+                    newRecord: "🏆 Nouveau record personnel !",
+                    solutionRevealed: "Solution révélée ! Passage au niveau suivant...",
+                    encourageAfterSolution: "Ne vous découragez pas ! Chaque énigme est une leçon."
+                },
+                aiMessages: {
+                    encouragement: [
+                        "Vous y êtes presque ! Continuez !",
+                        "Excellente logique ! Poursuivez !",
+                        "Votre raisonnement est bon !",
+                        "Fantastique ! Vous progressez bien !"
+                    ],
+                    hints: [
+                        "Pensez différemment...",
+                        "La réponse est plus simple qu'elle n'y paraît.",
+                        "Regardez les détails attentivement.",
+                        "Utilisez la logique étape par étape."
+                    ]
+                },
+                rules: {
+                    objectiveTitle: "🎯 Objectif",
+                    objectiveText: "Résolvez des énigmes de plus en plus complexes en utilisant votre logique et l'aide de votre IA assistant CIPHER-AI.",
+                    gameplayTitle: "🎮 Gameplay",
+                    variedEnigmas: "Énigmes variées:",
+                    variedEnigmasDesc: "Mathématiques, logique, mots, codes secrets",
+                    timedChallenges: "Temps limité:",
+                    timedChallengesDesc: "Chaque énigme a une limite de temps",
+                    progressiveLevels: "Niveaux progressifs:",
+                    progressiveLevelsDesc: "La difficulté augmente avec votre progression",
+                    hintSystem: "Système d'indices:",
+                    hintSystemDesc: "Utilisez des indices pour vous aider",
+                    solutionSystem: "Bouton Solution:",
+                    solutionSystemDesc: "Révélez la réponse si vous êtes bloqué",
+                    scoringTitle: "🏆 Système de Score",
+                    fastSolving: "Résolution rapide:",
+                    fastSolvingDesc: "Plus vous êtes rapide, plus vous gagnez de points",
+                    noHints: "Sans indices:",
+                    noHintsDesc: "Bonus pour résoudre sans aide",
+                    streaks: "Séries:",
+                    streaksDesc: "Bonus pour les résolutions consécutives",
+                    levelUnlock: "Niveaux:",
+                    levelUnlockDesc: "Débloquez de nouveaux défis"
+                }
+            },
+            en: {
+                title: "Enigma Hunter",
+                subtitle: "Quantum Enigma Hunter with AI",
+                start: "🚀 Start",
+                pause: "⏸️ Pause",
+                resume: "▶️ Resume",
+                rules: "Rules",
+                newGame: "🔄 New Game",
+                aiName: "CIPHER-AI",
+                aiWelcome: "Hi! I'm CIPHER-AI, your quantum assistant. Ready to solve mysterious enigmas?",
+                statsTitle: "Statistics",
+                solved: "Solved:",
+                failed: "Failed:",
+                streak: "Streak:",
+                level: "Level:",
+                score: "Score:",
+                difficultyTitle: "Difficulty",
+                currentDiff: "Current:",
+                timeLeft: "Time:",
+                hintsLeft: "Hints:",
+                objectiveName: "OBJECTIVE",
+                rulesMessage: "Solve the enigma before time runs out!",
+                startMessage: "Click \"Start\" to begin your enigma hunter adventure!",
+                welcomeMessage: "Welcome to Enigma Hunter! Solve mysterious enigmas with your AI's help.",
+                rulesTitle: "📖 Enigma Hunter Rules",
+                pauseTitle: "⏸️ Game Paused",
+                pauseMessage: "The game is currently paused. Take your time!",
+                levelIndicator: "Level",
+                closeBtn: "Close",
+                submitBtn: "Submit",
+                hintBtn: "Hint",
+                hintTitle: "💡 Hint & Solution",
+                solutionBtn: "Solution",
+                progressTitle: "Level Progress",
+                inputPlaceholder: "Type your answer here...",
+                difficulties: {
+                    easy: "Easy",
+                    medium: "Medium",
+                    hard: "Hard",
+                    expert: "Expert"
+                },
+                messages: {
+                    correct: "🎉 Excellent! Correct answer!",
+                    wrong: "❌ Incorrect. Try again!",
+                    timeout: "⏰ Time's up! Moving to the next one.",
+                    levelUp: "🎊 Level up! Congratulations!",
+                    gameOver: "🏁 Game over! Final score:",
+                    hint: "💡 Here's a hint to help you...",
+                    noHints: "❌ No more hints available!",
+                    newRecord: "🏆 New personal record!",
+                    solutionRevealed: "Solution revealed! Moving to next level...",
+                    encourageAfterSolution: "Don't get discouraged! Every enigma is a lesson."
+                },
+                aiMessages: {
+                    encouragement: [
+                        "You're almost there! Keep going!",
+                        "Excellent logic! Continue!",
+                        "Your reasoning is good!",
+                        "Fantastic! You're progressing well!"
+                    ],
+                    hints: [
+                        "Think differently...",
+                        "The answer is simpler than it appears.",
+                        "Look at the details carefully.",
+                        "Use logic step by step."
+                    ]
+                },
+                rules: {
+                    objectiveTitle: "🎯 Objective",
+                    objectiveText: "Solve increasingly complex enigmas using your logic and the help of your AI assistant CIPHER-AI.",
+                    gameplayTitle: "🎮 Gameplay",
+                    variedEnigmas: "Varied Enigmas:",
+                    variedEnigmasDesc: "Mathematics, logic, words, secret codes",
+                    timedChallenges: "Time Limited:",
+                    timedChallengesDesc: "Each enigma has a time limit",
+                    progressiveLevels: "Progressive Levels:",
+                    progressiveLevelsDesc: "Difficulty increases with your progression",
+                    hintSystem: "Hint System:",
+                    hintSystemDesc: "Use hints to help you",
+                    solutionSystem: "Solution Button:",
+                    solutionSystemDesc: "Reveal the answer if you're stuck",
+                    scoringTitle: "🏆 Scoring System",
+                    fastSolving: "Fast Solving:",
+                    fastSolvingDesc: "The faster you are, the more points you earn",
+                    noHints: "No Hints:",
+                    noHintsDesc: "Bonus for solving without help",
+                    streaks: "Streaks:",
+                    streaksDesc: "Bonus for consecutive solutions",
+                    levelUnlock: "Levels:",
+                    levelUnlockDesc: "Unlock new challenges"
+                }
+            },
+            ar: {
+                title: "صائد الألغاز",
+                subtitle: "صائد الألغاز الكمي مع الذكاء الاصطناعي",
+                start: "🚀 ابدأ",
+                pause: "⏸️ توقف",
+                resume: "▶️ استئناف",
+                rules: "القواعد",
+                newGame: "🔄 لعبة جديدة",
+                aiName: "سايفر-إيه آي",
+                aiWelcome: "مرحباً! أنا سايفر-إيه آي، مساعدك الكمي. مستعد لحل الألغاز الغامضة؟",
+                statsTitle: "الإحصائيات",
+                solved: "محلولة:",
+                failed: "فاشلة:",
+                streak: "السلسلة:",
+                level: "المستوى:",
+                score: "النقاط:",
+                difficultyTitle: "الصعوبة",
+                currentDiff: "الحالية:",
+                timeLeft: "الوقت:",
+                hintsLeft: "التلميحات:",
+                objectiveName: "الهدف",
+                rulesMessage: "حل اللغز قبل انتهاء الوقت!",
+                startMessage: "انقر على \"ابدأ\" لبدء مغامرة صائد الألغاز!",
+                welcomeMessage: "مرحباً بك في صائد الألغاز! حل الألغاز الغامضة بمساعدة الذكاء الاصطناعي.",
+                rulesTitle: "📖 قواعد صائد الألغاز",
+                pauseTitle: "⏸️ اللعبة متوقفة",
+                pauseMessage: "اللعبة متوقفة حالياً. خذ وقتك!",
+                levelIndicator: "المستوى",
+                closeBtn: "إغلاق",
+                submitBtn: "إرسال",
+                hintBtn: "تلميح",
+                hintTitle: "💡 تلميح و الحل",
+                solutionBtn: "الحل",
+                progressTitle: "تقدم المستوى",
+                inputPlaceholder: "اكتب إجابتك هنا...",
+                difficulties: {
+                    easy: "سهل",
+                    medium: "متوسط",
+                    hard: "صعب",
+                    expert: "خبير"
+                },
+                messages: {
+                    correct: "🎉 ممتاز! إجابة صحيحة!",
+                    wrong: "❌ خطأ. حاول مرة أخرى!",
+                    timeout: "⏰ انتهى الوقت! ننتقل للتالي.",
+                    levelUp: "🎊 مستوى أعلى! تهانينا!",
+                    gameOver: "🏁 انتهت اللعبة! النقاط النهائية:",
+                    hint: "💡 إليك تلميح لمساعدتك...",
+                    noHints: "❌ لا توجد تلميحات متاحة!",
+                    newRecord: "🏆 رقم قياسي شخصي جديد!",
+                    solutionRevealed: "تم الكشف عن الحل! الانتقال للمستوى التالي...",
+                    encourageAfterSolution: "لا تيأس! كل لغز درس."
+                },
+                aiMessages: {
+                    encouragement: [
+                        "أنت قريب جداً! استمر!",
+                        "منطق ممتاز! تابع!",
+                        "تفكيرك جيد!",
+                        "رائع! تتقدم بشكل جيد!"
+                    ],
+                    hints: [
+                        "فكر بطريقة مختلفة...",
+                        "الإجابة أبسط مما تبدو.",
+                        "انظر للتفاصيل بعناية.",
+                        "استخدم المنطق خطوة بخطوة."
+                    ]
+                },
+                rules: {
+                    objectiveTitle: "🎯 الهدف",
+                    objectiveText: "حل الألغاز المعقدة بشكل متزايد باستخدام منطقك ومساعدة مساعد الذكاء الاصطناعي سايفر-إيه آي.",
+                    gameplayTitle: "🎮 طريقة اللعب",
+                    variedEnigmas: "ألغاز متنوعة:",
+                    variedEnigmasDesc: "رياضيات، منطق، كلمات، رموز سرية",
+                    timedChallenges: "وقت محدود:",
+                    timedChallengesDesc: "كل لغز له حد زمني",
+                    progressiveLevels: "مستويات تدريجية:",
+                    progressiveLevelsDesc: "تزداد الصعوبة مع تقدمك",
+                    hintSystem: "نظام التلميحات:",
+                    hintSystemDesc: "استخدم التلميحات لمساعدتك",
+                    solutionSystem: "زر الحل:",
+                    solutionSystemDesc: "اكشف الإجابة إذا كنت عالقاً",
+                    scoringTitle: "🏆 نظام النقاط",
+                    fastSolving: "الحل السريع:",
+                    fastSolvingDesc: "كلما كنت أسرع، كلما حصلت على نقاط أكثر",
+                    noHints: "بدون تلميحات:",
+                    noHintsDesc: "مكافأة للحل بدون مساعدة",
+                    streaks: "السلاسل:",
+                    streaksDesc: "مكافأة للحلول المتتالية",
+                    levelUnlock: "المستويات:",
+                    levelUnlockDesc: "افتح تحديات جديدة"
+                }
+            },
+            es: {
+                title: "Enigma Hunter",
+                subtitle: "Cazador de Enigmas Cuántico con IA",
+                start: "🚀 Comenzar",
+                pause: "⏸️ Pausa",
+                resume: "▶️ Reanudar",
+                rules: "Reglas",
+                newGame: "🔄 Nuevo Juego",
+                aiName: "CIPHER-AI",
+                aiWelcome: "¡Hola! Soy CIPHER-AI, tu asistente cuántico. ¿Listo para resolver enigmas misteriosos?",
+                statsTitle: "Estadísticas",
+                solved: "Resueltos:",
+                failed: "Fallados:",
+                streak: "Racha:",
+                level: "Nivel:",
+                score: "Puntuación:",
+                difficultyTitle: "Dificultad",
+                currentDiff: "Actual:",
+                timeLeft: "Tiempo:",
+                hintsLeft: "Pistas:",
+                objectiveName: "OBJETIVO",
+                rulesMessage: "¡Resuelve el enigma antes de que se acabe el tiempo!",
+                startMessage: "¡Haz clic en \"Comenzar\" para iniciar tu aventura de cazador de enigmas!",
+                welcomeMessage: "¡Bienvenido a Enigma Hunter! Resuelve enigmas misteriosos con la ayuda de tu IA.",
+                rulesTitle: "📖 Reglas de Enigma Hunter",
+                pauseTitle: "⏸️ Juego Pausado",
+                pauseMessage: "El juego está actualmente pausado. ¡Tómate tu tiempo!",
+                levelIndicator: "Nivel",
+                closeBtn: "Cerrar",
+                submitBtn: "Enviar",
+                hintBtn: "Pista",
+                hintTitle: "💡 Pista y Solución",
+                solutionBtn: "Solución",
+                progressTitle: "Progreso del Nivel",
+                inputPlaceholder: "Escribe tu respuesta aquí...",
+                difficulties: {
+                    easy: "Fácil",
+                    medium: "Medio",
+                    hard: "Difícil",
+                    expert: "Experto"
+                },
+                messages: {
+                    correct: "🎉 ¡Excelente! ¡Respuesta correcta!",
+                    wrong: "❌ Incorrecto. ¡Inténtalo de nuevo!",
+                    timeout: "⏰ ¡Se acabó el tiempo! Pasando al siguiente.",
+                    levelUp: "🎊 ¡Subiste de nivel! ¡Felicitaciones!",
+                    gameOver: "🏁 ¡Juego terminado! Puntuación final:",
+                    hint: "💡 Aquí tienes una pista para ayudarte...",
+                    noHints: "❌ ¡No hay más pistas disponibles!",
+                    newRecord: "🏆 ¡Nuevo récord personal!",
+                    solutionRevealed: "¡Solución revelada! Pasando al siguiente nivel...",
+                    encourageAfterSolution: "¡No te desanimes! Cada enigma es una lección."
+                },
+                aiMessages: {
+                    encouragement: [
+                        "¡Casi lo tienes! ¡Sigue así!",
+                        "¡Excelente lógica! ¡Continúa!",
+                        "¡Tu razonamiento es bueno!",
+                        "¡Fantástico! Estás progresando bien!"
+                    ],
+                    hints: [
+                        "Piensa diferente...",
+                        "La respuesta es más simple de lo que parece.",
+                        "Mira los detalles cuidadosamente.",
+                        "Usa la lógica paso a paso."
+                    ]
+                },
+                rules: {
+                    objectiveTitle: "🎯 Objetivo",
+                    objectiveText: "Resuelve enigmas cada vez más complejos usando tu lógica y la ayuda de tu asistente IA CIPHER-AI.",
+                    gameplayTitle: "🎮 Jugabilidad",
+                    variedEnigmas: "Enigmas Variados:",
+                    variedEnigmasDesc: "Matemáticas, lógica, palabras, códigos secretos",
+                    timedChallenges: "Tiempo Limitado:",
+                    timedChallengesDesc: "Cada enigma tiene un límite de tiempo",
+                    progressiveLevels: "Niveles Progresivos:",
+                    progressiveLevelsDesc: "La dificultad aumenta con tu progreso",
+                    hintSystem: "Sistema de Pistas:",
+                    hintSystemDesc: "Usa pistas para ayudarte",
+                    solutionSystem: "Botón Solución:",
+                    solutionSystemDesc: "Revela la respuesta si estás atascado",
+                    scoringTitle: "🏆 Sistema de Puntuación",
+                    fastSolving: "Resolución Rápida:",
+                    fastSolvingDesc: "Cuanto más rápido seas, más puntos ganas",
+                    noHints: "Sin Pistas:",
+                    noHintsDesc: "Bonificación por resolver sin ayuda",
+                    streaks: "Rachas:",
+                    streaksDesc: "Bonificación por soluciones consecutivas",
+                    levelUnlock: "Niveles:",
+                    levelUnlockDesc: "Desbloquea nuevos desafíos"
+                }
+            },
+            de: {
+                title: "Enigma Hunter",
+                subtitle: "Quantum Rätsel-Jäger mit KI",
+                start: "🚀 Starten",
+                pause: "⏸️ Pause",
+                resume: "▶️ Fortsetzen",
+                rules: "Regeln",
+                newGame: "🔄 Neues Spiel",
+                aiName: "CIPHER-AI",
+                aiWelcome: "Hallo! Ich bin CIPHER-AI, dein Quantum-Assistent. Bereit, geheimnisvolle Rätsel zu lösen?",
+                statsTitle: "Statistiken",
+                solved: "Gelöst:",
+                failed: "Gescheitert:",
+                streak: "Serie:",
+                level: "Level:",
+                score: "Punkte:",
+                difficultyTitle: "Schwierigkeit",
+                currentDiff: "Aktuell:",
+                timeLeft: "Zeit:",
+                hintsLeft: "Hinweise:",
+                objectiveName: "ZIEL",
+                rulesMessage: "Löse das Rätsel bevor die Zeit abläuft!",
+                startMessage: "Klicke \"Starten\" um dein Rätsel-Jäger Abenteuer zu beginnen!",
+                welcomeMessage: "Willkommen bei Enigma Hunter! Löse geheimnisvolle Rätsel mit Hilfe deiner KI.",
+                rulesTitle: "📖 Enigma Hunter Regeln",
+                pauseTitle: "⏸️ Spiel Pausiert",
+                pauseMessage: "Das Spiel ist derzeit pausiert. Lass dir Zeit!",
+                levelIndicator: "Level",
+                closeBtn: "Schließen",
+                submitBtn: "Senden",
+                hintBtn: "Hinweis",
+                hintTitle: "💡 Hinweis & Lösung",
+                solutionBtn: "Lösung",
+                progressTitle: "Level-Fortschritt",
+                inputPlaceholder: "Gib deine Antwort hier ein...",
+                difficulties: {
+                    easy: "Einfach",
+                    medium: "Mittel",
+                    hard: "Schwer",
+                    expert: "Experte"
+                },
+                messages: {
+                    correct: "🎉 Ausgezeichnet! Richtige Antwort!",
+                    wrong: "❌ Falsch. Versuche es nochmal!",
+                    timeout: "⏰ Zeit ist um! Weiter zum nächsten.",
+                    levelUp: "🎊 Level aufgestiegen! Glückwunsch!",
+                    gameOver: "🏁 Spiel vorbei! Endpunktzahl:",
+                    hint: "💡 Hier ist ein Hinweis um dir zu helfen...",
+                    noHints: "❌ Keine Hinweise mehr verfügbar!",
+                    newRecord: "🏆 Neuer persönlicher Rekord!"
+                },
+                aiMessages: {
+                    encouragement: [
+                        "Du bist fast da! Mach weiter!",
+                        "Ausgezeichnete Logik! Weiter so!",
+                        "Deine Überlegung ist gut!",
+                        "Fantastisch! Du machst gute Fortschritte!"
+                    ],
+                    hints: [
+                        "Denk anders...",
+                        "Die Antwort ist einfacher als sie scheint.",
+                        "Schau dir die Details genau an.",
+                        "Verwende Logik Schritt für Schritt."
+                    ]
+                },
+                rules: {
+                    objectiveTitle: "🎯 Ziel",
+                    objectiveText: "Löse zunehmend komplexe Rätsel mit deiner Logik und der Hilfe deines KI-Assistenten CIPHER-AI.",
+                    gameplayTitle: "🎮 Spielweise",
+                    variedEnigmas: "Vielfältige Rätsel:",
+                    variedEnigmasDesc: "Mathematik, Logik, Wörter, Geheimcodes",
+                    timedChallenges: "Zeitbegrenzt:",
+                    timedChallengesDesc: "Jedes Rätsel hat ein Zeitlimit",
+                    progressiveLevels: "Progressive Level:",
+                    progressiveLevelsDesc: "Die Schwierigkeit steigt mit deinem Fortschritt",
+                    hintSystem: "Hinweis-System:",
+                    hintSystemDesc: "Verwende Hinweise um dir zu helfen",
+                    solutionSystem: "Lösungs-Button:",
+                    solutionSystemDesc: "Zeige die Antwort wenn du feststeckst",
+                    scoringTitle: "🏆 Punktesystem",
+                    fastSolving: "Schnelles Lösen:",
+                    fastSolvingDesc: "Je schneller du bist, desto mehr Punkte erhältst du",
+                    noHints: "Ohne Hinweise:",
+                    noHintsDesc: "Bonus für das Lösen ohne Hilfe",
+                    streaks: "Serien:",
+                    streaksDesc: "Bonus für aufeinanderfolgende Lösungen",
+                    levelUnlock: "Level:",
+                    levelUnlockDesc: "Schalte neue Herausforderungen frei"
+                }
+            },
+            zh: {
+                title: "谜题猎人",
+                subtitle: "量子谜题猎人与AI",
+                start: "🚀 开始",
+                pause: "⏸️ 暂停",
+                resume: "▶️ 继续",
+                rules: "规则",
+                newGame: "🔄 新游戏",
+                aiName: "密码-AI",
+                aiWelcome: "你好！我是密码-AI，你的量子助手。准备好解决神秘谜题了吗？",
+                statsTitle: "统计",
+                solved: "已解决:",
+                failed: "失败:",
+                streak: "连胜:",
+                level: "等级:",
+                score: "分数:",
+                difficultyTitle: "难度",
+                currentDiff: "当前:",
+                timeLeft: "时间:",
+                hintsLeft: "提示:",
+                objectiveName: "目标",
+                rulesMessage: "在时间用完之前解决谜题！",
+                startMessage: "点击\"开始\"开始你的谜题猎人冒险！",
+                welcomeMessage: "欢迎来到谜题猎人！在AI的帮助下解决神秘谜题。",
+                rulesTitle: "📖 谜题猎人规则",
+                pauseTitle: "⏸️ 游戏暂停",
+                pauseMessage: "游戏当前已暂停。慢慢来！",
+                levelIndicator: "等级",
+                closeBtn: "关闭",
+                submitBtn: "提交",
+                hintBtn: "提示",
+                hintTitle: "💡 提示与答案",
+                solutionBtn: "答案",
+                progressTitle: "等级进度",
+                inputPlaceholder: "在这里输入你的答案...",
+                difficulties: {
+                    easy: "简单",
+                    medium: "中等",
+                    hard: "困难",
+                    expert: "专家"
+                },
+                messages: {
+                    correct: "🎉 太棒了！答案正确！",
+                    wrong: "❌ 错误。再试一次！",
+                    timeout: "⏰ 时间到！进入下一题。",
+                    levelUp: "🎊 升级了！恭喜！",
+                    gameOver: "🏁 游戏结束！最终得分：",
+                    hint: "💡 这里有个提示帮助你...",
+                    noHints: "❌ 没有更多提示了！",
+                    newRecord: "🏆 新的个人记录！"
+                },
+                aiMessages: {
+                    encouragement: [
+                        "你快成功了！继续！",
+                        "逻辑很棒！继续！",
+                        "你的推理很好！",
+                        "太棒了！你进步很好！"
+                    ],
+                    hints: [
+                        "换个角度思考...",
+                        "答案比看起来简单。",
+                        "仔细看细节。",
+                        "一步步使用逻辑。"
+                    ]
+                },
+                rules: {
+                    objectiveTitle: "🎯 目标",
+                    objectiveText: "使用你的逻辑和AI助手密码-AI的帮助解决越来越复杂的谜题。",
+                    gameplayTitle: "🎮 游戏玩法",
+                    variedEnigmas: "多样谜题:",
+                    variedEnigmasDesc: "数学、逻辑、文字、密码",
+                    timedChallenges: "限时挑战:",
+                    timedChallengesDesc: "每个谜题都有时间限制",
+                    progressiveLevels: "渐进等级:",
+                    progressiveLevelsDesc: "难度随着你的进步而增加",
+                    hintSystem: "提示系统:",
+                    hintSystemDesc: "使用提示来帮助你",
+                    solutionSystem: "答案按钮:",
+                    solutionSystemDesc: "如果卡住了就显示答案",
+                    scoringTitle: "🏆 计分系统",
+                    fastSolving: "快速解决:",
+                    fastSolvingDesc: "你越快，得到的分数越多",
+                    noHints: "无提示:",
+                    noHintsDesc: "无帮助解决的奖励",
+                    streaks: "连胜:",
+                    streaksDesc: "连续解决的奖励",
+                    levelUnlock: "等级:",
+                    levelUnlockDesc: "解锁新挑战"
+                }
+            }
+        };
+
+        let currentLanguage = 'fr';
+        let gameState = {
+            isPlaying: false,
+            isPaused: false,
+            currentEnigma: null,
+            level: 1,
+            score: 0,
+            solved: 0,
+            failed: 0,
+            streak: 0,
+            hintsLeft: 3,
+            timeLeft: 0,
+            timer: null,
+            difficulty: 'easy',
+            enigmasInLevel: 0,
+            enigmasNeededForLevel: 3,
+            usedEnigmas: {
+                easy: [],
+                medium: [],
+                hard: []
+            }
+        };
+
+        const enigmas = {
+            fr: {
+                easy: [
+                    { question: "Quel est le résultat de 15 + 27 ?", answer: "42", hint: "Additionnez simplement les deux nombres.", time: 30 },
+                    { question: "Complétez la séquence : 2, 4, 6, 8, ?", answer: "10", hint: "C'est une suite de nombres pairs.", time: 25 },
+                    { question: "Quel mot peut être lu de la même façon à l'endroit et à l'envers ?", answer: "radar", hint: "C'est un palindrome de 5 lettres utilisé pour détecter.", time: 40 },
+                    { question: "Combien font 8 × 7 ?", answer: "56", hint: "Multipliez 8 par 7.", time: 20 },
+                    { question: "Quel est le double de 25 ?", answer: "50", hint: "Multipliez 25 par 2.", time: 20 }
+                ],
+                medium: [
+                    { question: "Résolvez : 3x + 7 = 22. Que vaut x ?", answer: "5", hint: "Soustrayez 7 des deux côtés, puis divisez par 3.", time: 60 },
+                    { question: "Quel est l'anagramme de 'LISTEN' ?", answer: "silent", hint: "Réarrangez les lettres pour former un mot opposé.", time: 50 },
+                    { question: "Dans une suite de Fibonacci, après 1, 1, 2, 3, 5, quel est le nombre suivant ?", answer: "8", hint: "Chaque nombre est la somme des deux précédents.", time: 40 }
+                ],
+                hard: [
+                    { question: "Décodez ce message César (décalage de 3) : 'FDHVDU'", answer: "caesar", hint: "Reculez chaque lettre de 3 positions dans l'alphabet.", time: 90 },
+                    { question: "Quel est le plus petit nombre premier supérieur à 50 ?", answer: "53", hint: "Testez la divisibilité par les nombres premiers jusqu'à sa racine carrée.", time: 75 }
+                ]
+            },
+            en: {
+                easy: [
+                    { question: "What is 15 + 27?", answer: "42", hint: "Simply add the two numbers together.", time: 30 },
+                    { question: "Complete the sequence: 2, 4, 6, 8, ?", answer: "10", hint: "It's a sequence of even numbers.", time: 25 },
+                    { question: "What word can be read the same forwards and backwards?", answer: "radar", hint: "It's a 5-letter palindrome used for detection.", time: 40 },
+                    { question: "What is 8 × 7?", answer: "56", hint: "Multiply 8 by 7.", time: 20 },
+                    { question: "What is double 25?", answer: "50", hint: "Multiply 25 by 2.", time: 20 }
+                ],
+                medium: [
+                    { question: "Solve: 3x + 7 = 22. What is x?", answer: "5", hint: "Subtract 7 from both sides, then divide by 3.", time: 60 },
+                    { question: "What is the anagram of 'LISTEN'?", answer: "silent", hint: "Rearrange the letters to form an opposite word.", time: 50 },
+                    { question: "In Fibonacci sequence, after 1, 1, 2, 3, 5, what's next?", answer: "8", hint: "Each number is the sum of the two preceding ones.", time: 40 }
+                ],
+                hard: [
+                    { question: "Decode this Caesar cipher (shift 3): 'FDHVDU'", answer: "caesar", hint: "Move each letter back 3 positions in the alphabet.", time: 90 },
+                    { question: "What is the smallest prime number greater than 50?", answer: "53", hint: "Test divisibility by prime numbers up to its square root.", time: 75 }
+                ]
+            },
+            ar: {
+                easy: [
+                    { question: "ما هو ناتج 15 + 27؟", answer: "42", hint: "اجمع الرقمين ببساطة.", time: 30 },
+                    { question: "أكمل التسلسل: 2، 4، 6، 8، ؟", answer: "10", hint: "إنه تسلسل من الأرقام الزوجية.", time: 25 },
+                    { question: "ما الكلمة التي تُقرأ بنفس الطريقة من الأمام والخلف؟", answer: "رادار", hint: "إنها كلمة متناظرة من 5 أحرف تُستخدم للكشف.", time: 40 },
+                    { question: "كم يساوي 8 × 7؟", answer: "56", hint: "اضرب 8 في 7.", time: 20 },
+                    { question: "ما هو ضعف 25؟", answer: "50", hint: "اضرب 25 في 2.", time: 20 }
+                ],
+                medium: [
+                    { question: "حل: 3س + 7 = 22. ما قيمة س؟", answer: "5", hint: "اطرح 7 من الطرفين، ثم اقسم على 3.", time: 60 },
+                    { question: "ما هو تبديل أحرف 'LISTEN'؟", answer: "silent", hint: "أعد ترتيب الأحرف لتكوين كلمة معاكسة.", time: 50 },
+                    { question: "في متتالية فيبوناتشي، بعد 1، 1، 2، 3، 5، ما التالي؟", answer: "8", hint: "كل رقم هو مجموع الرقمين السابقين.", time: 40 }
+                ],
+                hard: [
+                    { question: "فك تشفير قيصر (إزاحة 3): 'FDHVDU'", answer: "caesar", hint: "حرك كل حرف 3 مواضع للخلف في الأبجدية.", time: 90 },
+                    { question: "ما أصغر عدد أولي أكبر من 50؟", answer: "53", hint: "اختبر القسمة على الأعداد الأولية حتى جذره التربيعي.", time: 75 }
+                ]
+            },
+            es: {
+                easy: [
+                    { question: "¿Cuánto es 15 + 27?", answer: "42", hint: "Simplemente suma los dos números.", time: 30 },
+                    { question: "Completa la secuencia: 2, 4, 6, 8, ?", answer: "10", hint: "Es una secuencia de números pares.", time: 25 },
+                    { question: "¿Qué palabra se lee igual hacia adelante y hacia atrás?", answer: "radar", hint: "Es un palíndromo de 5 letras usado para detectar.", time: 40 },
+                    { question: "¿Cuánto es 8 × 7?", answer: "56", hint: "Multiplica 8 por 7.", time: 20 },
+                    { question: "¿Cuál es el doble de 25?", answer: "50", hint: "Multiplica 25 por 2.", time: 20 }
+                ],
+                medium: [
+                    { question: "Resuelve: 3x + 7 = 22. ¿Cuál es x?", answer: "5", hint: "Resta 7 de ambos lados, luego divide por 3.", time: 60 },
+                    { question: "¿Cuál es el anagrama de 'LISTEN'?", answer: "silent", hint: "Reorganiza las letras para formar una palabra opuesta.", time: 50 },
+                    { question: "En la secuencia de Fibonacci, después de 1, 1, 2, 3, 5, ¿qué sigue?", answer: "8", hint: "Cada número es la suma de los dos anteriores.", time: 40 }
+                ],
+                hard: [
+                    { question: "Decodifica este cifrado César (desplazamiento 3): 'FDHVDU'", answer: "caesar", hint: "Mueve cada letra 3 posiciones hacia atrás en el alfabeto.", time: 90 },
+                    { question: "¿Cuál es el número primo más pequeño mayor que 50?", answer: "53", hint: "Prueba la divisibilidad por números primos hasta su raíz cuadrada.", time: 75 }
+                ]
+            },
+            de: {
+                easy: [
+                    { question: "Was ist 15 + 27?", answer: "42", hint: "Addiere einfach die beiden Zahlen.", time: 30 },
+                    { question: "Vervollständige die Sequenz: 2, 4, 6, 8, ?", answer: "10", hint: "Es ist eine Folge gerader Zahlen.", time: 25 },
+                    { question: "Welches Wort kann vorwärts und rückwärts gleich gelesen werden?", answer: "radar", hint: "Es ist ein 5-Buchstaben-Palindrom zur Erkennung.", time: 40 },
+                    { question: "Was ist 8 × 7?", answer: "56", hint: "Multipliziere 8 mit 7.", time: 20 },
+                    { question: "Was ist das Doppelte von 25?", answer: "50", hint: "Multipliziere 25 mit 2.", time: 20 }
+                ],
+                medium: [
+                    { question: "Löse: 3x + 7 = 22. Was ist x?", answer: "5", hint: "Subtrahiere 7 von beiden Seiten, dann teile durch 3.", time: 60 },
+                    { question: "Was ist das Anagramm von 'LISTEN'?", answer: "silent", hint: "Ordne die Buchstaben neu, um ein gegenteiliges Wort zu bilden.", time: 50 },
+                    { question: "In der Fibonacci-Folge, nach 1, 1, 2, 3, 5, was kommt als nächstes?", answer: "8", hint: "Jede Zahl ist die Summe der beiden vorhergehenden.", time: 40 }
+                ],
+                hard: [
+                    { question: "Entschlüssele diese Caesar-Chiffre (Verschiebung 3): 'FDHVDU'", answer: "caesar", hint: "Bewege jeden Buchstaben 3 Positionen im Alphabet zurück.", time: 90 },
+                    { question: "Was ist die kleinste Primzahl größer als 50?", answer: "53", hint: "Teste die Teilbarkeit durch Primzahlen bis zu ihrer Quadratwurzel.", time: 75 }
+                ]
+            },
+            zh: {
+                easy: [
+                    { question: "15 + 27 等于多少？", answer: "42", hint: "简单地将两个数字相加。", time: 30 },
+                    { question: "完成序列：2, 4, 6, 8, ?", answer: "10", hint: "这是一个偶数序列。", time: 25 },
+                    { question: "什么词正读反读都一样？", answer: "radar", hint: "这是一个用于探测的5字母回文词。", time: 40 },
+                    { question: "8 × 7 等于多少？", answer: "56", hint: "将8乘以7。", time: 20 },
+                    { question: "25的两倍是多少？", answer: "50", hint: "将25乘以2。", time: 20 }
+                ],
+                medium: [
+                    { question: "解：3x + 7 = 22。x等于多少？", answer: "5", hint: "两边都减去7，然后除以3。", time: 60 },
+                    { question: "'LISTEN'的字母重组词是什么？", answer: "silent", hint: "重新排列字母形成一个相反的词。", time: 50 },
+                    { question: "在斐波那契数列中，1, 1, 2, 3, 5之后是什么？", answer: "8", hint: "每个数字都是前两个数字的和。", time: 40 }
+                ],
+                hard: [
+                    { question: "解码这个凯撒密码（移位3）：'FDHVDU'", answer: "caesar", hint: "将每个字母在字母表中向后移动3个位置。", time: 90 },
+                    { question: "大于50的最小质数是什么？", answer: "53", hint: "测试被质数整除直到其平方根。", time: 75 }
+                ]
+            }
+        };
+
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            for (let i = 0; i < 20; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 12 + 's';
+                particle.style.animationDuration = (Math.random() * 6 + 6) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        function updateLanguage() {
+            const lang = document.getElementById('languageSelect').value;
+            currentLanguage = lang;
+            const t = translations[lang];
+            
+            // Update UI elements
+            document.getElementById('gameTitle').textContent = t.title;
+            document.getElementById('gameSubtitle').textContent = t.subtitle;
+            document.getElementById('startBtn').innerHTML = t.start;
+            document.getElementById('pauseBtn').innerHTML = gameState.isPaused ? t.resume : t.pause;
+            document.getElementById('rulesBtn').innerHTML = `📖 ${t.rules.replace('📖 ', '')}`;
+            document.getElementById('newGameBtn').innerHTML = t.newGame;
+            document.getElementById('aiName').textContent = t.aiName;
+            document.getElementById('aiMessage').textContent = t.aiWelcome;
+            document.getElementById('statsTitle').textContent = t.statsTitle;
+            document.getElementById('solvedLabel').textContent = t.solved;
+            document.getElementById('failedLabel').textContent = t.failed;
+            document.getElementById('streakLabel').textContent = t.streak;
+            document.getElementById('levelLabel').textContent = t.level;
+            document.getElementById('scoreLabel').textContent = t.score;
+            document.getElementById('difficultyTitle').textContent = t.difficultyTitle;
+            document.getElementById('currentDiffLabel').textContent = t.currentDiff;
+            document.getElementById('timeLeftLabel').textContent = t.timeLeft;
+            document.getElementById('hintsLeftLabel').textContent = t.hintsLeft;
+            document.getElementById('rulesName').textContent = t.objectiveName;
+            document.getElementById('rulesTitle').textContent = t.rulesTitle;
+            document.getElementById('rulesMessage').textContent = t.rulesMessage;
+            document.getElementById('levelIndicator').textContent = t.levelIndicator + ' ' + gameState.level;
+            document.getElementById('submitBtn').textContent = t.submitBtn;
+            document.getElementById('hintBtnRight').textContent = t.hintBtn;
+            document.getElementById('solutionBtnRight').textContent = t.solutionBtn;
+            document.getElementById('hintTitleRight').textContent = t.hintTitle;
+
+            document.getElementById('progressTitle').textContent = t.progressTitle;
+            document.getElementById('enigmaInput').placeholder = t.inputPlaceholder;
+            document.getElementById('closeRulesBtn').textContent = t.closeBtn;
+            
+            // Update rules content
+            if (t.rules) {
+                document.getElementById('objectiveTitle').textContent = t.rules.objectiveTitle;
+                document.getElementById('objectiveText').textContent = t.rules.objectiveText;
+                document.getElementById('gameplayTitle').textContent = t.rules.gameplayTitle;
+                document.getElementById('variedEnigmas').textContent = t.rules.variedEnigmas;
+                document.getElementById('variedEnigmasDesc').textContent = t.rules.variedEnigmasDesc;
+                document.getElementById('timedChallenges').textContent = t.rules.timedChallenges;
+                document.getElementById('timedChallengesDesc').textContent = t.rules.timedChallengesDesc;
+                document.getElementById('progressiveLevels').textContent = t.rules.progressiveLevels;
+                document.getElementById('progressiveLevelsDesc').textContent = t.rules.progressiveLevelsDesc;
+                document.getElementById('hintSystem').textContent = t.rules.hintSystem;
+                document.getElementById('hintSystemDesc').textContent = t.rules.hintSystemDesc;
+                document.getElementById('solutionSystem').textContent = t.rules.solutionSystem;
+                document.getElementById('solutionSystemDesc').textContent = t.rules.solutionSystemDesc;
+                document.getElementById('scoringTitle').textContent = t.rules.scoringTitle;
+                document.getElementById('fastSolving').textContent = t.rules.fastSolving;
+                document.getElementById('fastSolvingDesc').textContent = t.rules.fastSolvingDesc;
+                document.getElementById('noHints').textContent = t.rules.noHints;
+                document.getElementById('noHintsDesc').textContent = t.rules.noHintsDesc;
+                document.getElementById('streaks').textContent = t.rules.streaks;
+                document.getElementById('streaksDesc').textContent = t.rules.streaksDesc;
+                document.getElementById('levelUnlock').textContent = t.rules.levelUnlock;
+                document.getElementById('levelUnlockDesc').textContent = t.rules.levelUnlockDesc;
+            }
+            
+            // Update difficulty display
+            document.getElementById('currentDiffValue').textContent = t.difficulties[gameState.difficulty];
+            
+            if (!gameState.isPlaying) {
+                document.getElementById('enigmaText').textContent = t.startMessage;
+                document.getElementById('gameMessage').textContent = t.welcomeMessage;
+            }
+            
+            // Set text direction for Arabic
+            if (lang === 'ar') {
+                document.body.style.direction = 'rtl';
+                document.body.style.textAlign = 'right';
+            } else {
+                document.body.style.direction = 'ltr';
+                document.body.style.textAlign = 'left';
+            }
+        }
+
+        function startGame() {
+            gameState.isPlaying = true;
+            gameState.isPaused = false;
+            gameState.level = 1;
+            gameState.score = 0;
+            gameState.solved = 0;
+            gameState.failed = 0;
+            gameState.streak = 0;
+            gameState.hintsLeft = 3;
+            gameState.difficulty = 'easy';
+            gameState.enigmasInLevel = 0;
+            gameState.usedEnigmas = {
+                easy: [],
+                medium: [],
+                hard: []
+            };
+            
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('pauseBtn').disabled = false;
+            document.getElementById('enigmaInput').style.display = 'block';
+            document.getElementById('submitBtn').style.display = 'block';
+
+            document.getElementById('hintSystemRight').style.display = 'block';
+            
+            updateStats();
+            nextEnigma();
+            updateAIMessage(translations[currentLanguage].aiMessages.encouragement[0]);
+        }
+
+        function nextEnigma() {
+            const enigmaList = enigmas[currentLanguage][gameState.difficulty];
+            if (!enigmaList || enigmaList.length === 0) return;
+            
+            // Get unused enigmas for current difficulty
+            const usedList = gameState.usedEnigmas[gameState.difficulty];
+            const availableEnigmas = enigmaList.filter((_, index) => !usedList.includes(index));
+            
+            // If all enigmas used, reset the used list
+            if (availableEnigmas.length === 0) {
+                gameState.usedEnigmas[gameState.difficulty] = [];
+                availableEnigmas.push(...enigmaList);
+            }
+            
+            // Select random enigma from available ones
+            const randomIndex = Math.floor(Math.random() * availableEnigmas.length);
+            gameState.currentEnigma = availableEnigmas[randomIndex];
+            
+            // Mark this enigma as used
+            const originalIndex = enigmaList.indexOf(gameState.currentEnigma);
+            gameState.usedEnigmas[gameState.difficulty].push(originalIndex);
+            
+            gameState.timeLeft = gameState.currentEnigma.time;
+            
+            document.getElementById('enigmaText').textContent = gameState.currentEnigma.question;
+            document.getElementById('enigmaInput').value = '';
+            document.getElementById('enigmaInput').focus();
+            
+            startTimer();
+            updateGameMessage(translations[currentLanguage].targetMessage);
+        }
+
+        function startTimer() {
+            if (gameState.timer) clearInterval(gameState.timer);
+            
+            gameState.timer = setInterval(() => {
+                if (!gameState.isPaused && gameState.timeLeft > 0) {
+                    gameState.timeLeft--;
+                    updateTimerDisplay();
+                    
+                    if (gameState.timeLeft === 0) {
+                        timeOut();
+                    }
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(gameState.timeLeft / 60);
+            const seconds = gameState.timeLeft % 60;
+            document.getElementById('timerText').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            document.getElementById('timeLeftValue').textContent = `${gameState.timeLeft}s`;
+        }
+
+        function submitAnswer() {
+            const userAnswer = document.getElementById('enigmaInput').value.trim().toLowerCase();
+            const correctAnswer = gameState.currentEnigma.answer.toLowerCase();
+            
+            if (userAnswer === correctAnswer) {
+                correctAnswerHandler();
+            } else {
+                wrongAnswer();
+            }
+        }
+
+        function correctAnswerHandler() {
+            gameState.solved++;
+            gameState.streak++;
+            gameState.enigmasInLevel++;
+            
+            const timeBonus = Math.floor(gameState.timeLeft * 10);
+            const streakBonus = gameState.streak * 50;
+            const scoreGain = 100 + timeBonus + streakBonus;
+            gameState.score += scoreGain;
+            
+            clearInterval(gameState.timer);
+            updateStats();
+            updateGameMessage(translations[currentLanguage].messages.correct);
+            updateAIMessage(translations[currentLanguage].aiMessages.encouragement[Math.floor(Math.random() * translations[currentLanguage].aiMessages.encouragement.length)]);
+            
+            if (gameState.enigmasInLevel >= gameState.enigmasNeededForLevel) {
+                levelUp();
+            } else {
+                setTimeout(nextEnigma, 2000);
+            }
+        }
+
+        function wrongAnswer() {
+            gameState.failed++;
+            gameState.streak = 0;
+            updateStats();
+            updateGameMessage(translations[currentLanguage].messages.wrong);
+            updateAIMessage(translations[currentLanguage].aiMessages.hints[Math.floor(Math.random() * translations[currentLanguage].aiMessages.hints.length)]);
+        }
+
+        function timeOut() {
+            gameState.failed++;
+            gameState.streak = 0;
+            clearInterval(gameState.timer);
+            updateStats();
+            updateGameMessage(translations[currentLanguage].messages.timeout);
+            setTimeout(nextEnigma, 2000);
+        }
+
+        function levelUp() {
+            gameState.level++;
+            gameState.enigmasInLevel = 0;
+            gameState.hintsLeft = 3;
+            
+            if (gameState.level <= 3) gameState.difficulty = 'easy';
+            else if (gameState.level <= 6) gameState.difficulty = 'medium';
+            else gameState.difficulty = 'hard';
+            
+            updateStats();
+            updateGameMessage(translations[currentLanguage].messages.levelUp);
+            updateAIMessage(`🎊 ${translations[currentLanguage].levelIndicator} ${gameState.level} !`);
+            
+            setTimeout(nextEnigma, 3000);
+        }
+
+        function useHint() {
+            if (gameState.hintsLeft > 0) {
+                gameState.hintsLeft--;
+                document.getElementById('hintText').textContent = gameState.currentEnigma.hint;
+                document.getElementById('hintTextRight').textContent = gameState.currentEnigma.hint;
+                updateStats();
+                updateGameMessage(translations[currentLanguage].messages.hint);
+            } else {
+                updateGameMessage(translations[currentLanguage].messages.noHints);
+            }
+        }
+
+        function showSolution() {
+            if (gameState.currentEnigma) {
+                // Show the solution
+                document.getElementById('enigmaInput').value = gameState.currentEnigma.answer;
+                document.getElementById('hintText').textContent = `💡 Solution: ${gameState.currentEnigma.answer}`;
+                document.getElementById('hintTextRight').textContent = `💡 Solution: ${gameState.currentEnigma.answer}`;
+                
+                // Mark as failed but allow progression
+                gameState.failed++;
+                gameState.streak = 0;
+                gameState.enigmasInLevel++;
+                
+                clearInterval(gameState.timer);
+                updateStats();
+                updateGameMessage("🔓 " + translations[currentLanguage].messages.solutionRevealed || "Solution révélée ! Passage au niveau suivant...");
+                updateAIMessage(translations[currentLanguage].messages.encourageAfterSolution || "Ne vous découragez pas ! Chaque énigme est une leçon.");
+                
+                if (gameState.enigmasInLevel >= gameState.enigmasNeededForLevel) {
+                    setTimeout(levelUp, 2000);
+                } else {
+                    setTimeout(nextEnigma, 2000);
+                }
+            }
+        }
+
+        function togglePause() {
+            gameState.isPaused = !gameState.isPaused;
+            
+            if (gameState.isPaused) {
+                document.getElementById('pausePanel').style.display = 'block';
+                document.getElementById('pauseBtn').innerHTML = translations[currentLanguage].resume;
+            } else {
+                document.getElementById('pausePanel').style.display = 'none';
+                document.getElementById('pauseBtn').innerHTML = translations[currentLanguage].pause;
+            }
+        }
+
+        function newGame() {
+            if (gameState.timer) clearInterval(gameState.timer);
+            
+            gameState.isPlaying = false;
+            gameState.isPaused = false;
+            gameState.currentEnigma = null;
+            gameState.level = 1;
+            gameState.score = 0;
+            gameState.solved = 0;
+            gameState.failed = 0;
+            gameState.streak = 0;
+            gameState.hintsLeft = 3;
+            gameState.difficulty = 'easy';
+            gameState.enigmasInLevel = 0;
+            gameState.usedEnigmas = {
+                easy: [],
+                medium: [],
+                hard: []
+            };
+            
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('pauseBtn').disabled = true;
+            document.getElementById('enigmaInput').style.display = 'none';
+            document.getElementById('submitBtn').style.display = 'none';
+
+            document.getElementById('hintSystemRight').style.display = 'none';
+            document.getElementById('pausePanel').style.display = 'none';
+            
+            document.getElementById('enigmaText').textContent = translations[currentLanguage].startMessage;
+            document.getElementById('gameMessage').textContent = translations[currentLanguage].welcomeMessage;
+            document.getElementById('aiMessage').textContent = translations[currentLanguage].aiWelcome;
+            document.getElementById('timerText').textContent = '--:--';
+            document.getElementById('progressFill').style.width = '0%';
+            
+            updateStats();
+        }
+
+        function updateStats() {
+            document.getElementById('solvedValue').textContent = gameState.solved;
+            document.getElementById('failedValue').textContent = gameState.failed;
+            document.getElementById('streakValue').textContent = gameState.streak;
+            document.getElementById('levelValue').textContent = gameState.level;
+            document.getElementById('scoreValue').textContent = gameState.score;
+            document.getElementById('hintsLeftValue').textContent = gameState.hintsLeft;
+            document.getElementById('currentDiffValue').textContent = translations[currentLanguage].difficulties[gameState.difficulty];
+            document.getElementById('levelIndicator').textContent = translations[currentLanguage].levelIndicator + ' ' + gameState.level;
+            
+            const progress = (gameState.enigmasInLevel / gameState.enigmasNeededForLevel) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+        }
+
+        function updateGameMessage(message) {
+            document.getElementById('gameMessage').textContent = message;
+        }
+
+        function updateAIMessage(message) {
+            document.getElementById('aiMessage').textContent = message;
+        }
+
+        function showRules() {
+            document.getElementById('rulesPanel').style.display = 'block';
+        }
+
+        function hideRules() {
+            document.getElementById('rulesPanel').style.display = 'none';
+        }
+
+        // Event listeners
+        document.getElementById('languageSelect').addEventListener('change', updateLanguage);
+        document.getElementById('enigmaInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                submitAnswer();
+            }
+        });
+
+        // Initialize
+        createParticles();
+        updateLanguage();
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98720769317ae23b',t:'MTc1OTIxNzU3My4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
