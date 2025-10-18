@@ -1,0 +1,2156 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Quantique 2077 - Neural Interface</title>
+    <style>
+        body {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Orbitron', monospace;
+            background: linear-gradient(135deg, #0a0a0a, #1a1a2e, #16213e, #0f3460);
+            color: #00ffff;
+            height: 100%;
+            overflow-x: hidden;
+            overflow-y: auto;
+            animation: backgroundPulse 8s ease-in-out infinite;
+        }
+
+        @keyframes backgroundPulse {
+            0%, 100% { background: linear-gradient(135deg, #0a0a0a, #1a1a2e, #16213e, #0f3460); }
+            50% { background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460, #533483); }
+        }
+
+        .game-header {
+            text-align: center;
+            padding: 10px;
+            position: relative;
+        }
+
+        .game-title {
+            font-size: 32px;
+            margin: 0;
+            text-shadow: 0 0 20px #00ffff;
+            background: linear-gradient(45deg, #00ffff, #ff00ff, #ffff00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: titleGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes titleGlow {
+            0%, 100% { text-shadow: 0 0 30px #00ffff; }
+            50% { text-shadow: 0 0 50px #ff00ff, 0 0 70px #00ffff; }
+        }
+
+        .subtitle {
+            font-size: 16px;
+            color: #888;
+            margin-top: 10px;
+            letter-spacing: 2px;
+        }
+
+        .controls-header {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .language-selector select {
+            padding: 8px 12px;
+            background: rgba(0, 0, 0, 0.8);
+            color: #00ffff;
+            border: 2px solid #00ffff;
+            border-radius: 8px;
+            font-size: 14px;
+            min-width: 120px;
+        }
+
+        .close-btn {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(45deg, #ff0000, #ff4444);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.6);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 4px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ffff, #ff00ff);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+            animation: progressGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes progressGlow {
+            0%, 100% { box-shadow: 0 0 10px rgba(0, 255, 255, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(255, 0, 255, 0.8); }
+        }
+
+        .game-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 15px;
+            padding: 10px;
+            min-height: calc(100vh - 120px);
+        }
+
+        .game-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .game-timer {
+            background: rgba(0, 255, 255, 0.1);
+            border: 2px solid #00ffff;
+            border-radius: 12px;
+            padding: 15px 30px;
+            text-align: center;
+            min-width: 200px;
+        }
+
+        .timer-display {
+            font-size: 32px;
+            font-weight: bold;
+            color: #00ffff;
+            text-shadow: 0 0 15px #00ffff;
+            margin: 5px 0;
+        }
+
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid #00ffff;
+            border-radius: 15px;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
+            animation: boardPulse 4s ease-in-out infinite;
+        }
+
+        @keyframes boardPulse {
+            0%, 100% { box-shadow: 0 0 50px rgba(0, 255, 255, 0.3); }
+            50% { box-shadow: 0 0 80px rgba(0, 255, 255, 0.6), 0 0 120px rgba(255, 0, 255, 0.3); }
+        }
+
+        .memory-card {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border: 2px solid #00ffff;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+            font-size: 24px;
+            transform-style: preserve-3d;
+        }
+
+        .memory-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent, rgba(0, 255, 255, 0.1), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.6s;
+        }
+
+        .memory-card:hover::before {
+            transform: translateX(100%);
+        }
+
+        .memory-card:hover {
+            transform: translateY(-10px) rotateY(10deg);
+            box-shadow: 0 20px 40px rgba(0, 255, 255, 0.4);
+            border-color: #ff00ff;
+        }
+
+        .memory-card.flipped {
+            transform: rotateY(180deg) scale(1.05);
+            box-shadow: 0 0 30px rgba(255, 0, 255, 0.8);
+        }
+
+        .memory-card.flipped { 
+            border-color: #00ffff;
+        }
+
+        .memory-card.matched {
+            background: linear-gradient(135deg, #00ff00, #00ffff);
+            animation: matchedPulse 1s ease-in-out;
+            pointer-events: none;
+        }
+
+        @keyframes matchedPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); box-shadow: 0 0 50px rgba(0, 255, 0, 1); }
+            100% { transform: scale(1); }
+        }
+
+        .memory-card.wrong {
+            background: linear-gradient(135deg, #ff0000, #ff4444);
+            animation: wrongShake 0.5s ease-in-out;
+        }
+
+        @keyframes wrongShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #00ffff;
+            backface-visibility: hidden;
+        }
+
+        .card-front {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform: rotateY(180deg);
+            backface-visibility: hidden;
+        }
+
+        .side-panel {
+            width: 220px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .stats-panel {
+            background: rgba(0, 255, 255, 0.1);
+            border: 2px solid #00ffff;
+            border-radius: 8px;
+            padding: 8px;
+            text-align: center;
+        }
+
+        .stat-item {
+            margin: 4px 0;
+            font-size: 12px;
+        }
+
+        .stat-value {
+            font-size: 16px;
+            font-weight: bold;
+            color: #ff00ff;
+            text-shadow: 0 0 8px #ff00ff;
+        }
+
+        .controls-panel {
+            background: rgba(255, 0, 255, 0.1);
+            border: 2px solid #ff00ff;
+            border-radius: 8px;
+            padding: 8px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 6px;
+            margin: 3px 0;
+            background: linear-gradient(45deg, #00ffff, #0080ff);
+            border: none;
+            border-radius: 6px;
+            color: #000;
+            font-weight: bold;
+            font-size: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 255, 255, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .difficulty-btn {
+            background: linear-gradient(45deg, #ff6400, #ff8c00);
+            margin: 5px 0;
+        }
+
+        .difficulty-btn.active {
+            background: linear-gradient(45deg, #00ff00, #00cc00);
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.6);
+        }
+
+        .ai-panel {
+            background: rgba(255, 255, 0, 0.1);
+            border: 2px solid #ffff00;
+            border-radius: 8px;
+            padding: 8px;
+        }
+
+        .ai-suggestion {
+            font-size: 10px;
+            margin-top: 6px;
+            color: #ffff00;
+            min-height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        /* (file truncated in patch for brevity) */
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Quantique 2077 - Neural Interface</title>
+    <style>
+        body {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Orbitron', monospace;
+            background: linear-gradient(135deg, #0a0a0a, #1a1a2e, #16213e, #0f3460);
+            color: #00ffff;
+            height: 100%;
+            overflow-x: hidden;
+            overflow-y: auto;
+            animation: backgroundPulse 8s ease-in-out infinite;
+        }
+
+        @keyframes backgroundPulse {
+            0%, 100% { background: linear-gradient(135deg, #0a0a0a, #1a1a2e, #16213e, #0f3460); }
+            50% { background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460, #533483); }
+        }
+
+        .game-header {
+            text-align: center;
+            padding: 10px;
+            position: relative;
+        }
+
+        .game-title {
+            font-size: 32px;
+            margin: 0;
+            text-shadow: 0 0 20px #00ffff;
+            background: linear-gradient(45deg, #00ffff, #ff00ff, #ffff00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: titleGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes titleGlow {
+            0%, 100% { text-shadow: 0 0 30px #00ffff; }
+            50% { text-shadow: 0 0 50px #ff00ff, 0 0 70px #00ffff; }
+        }
+
+        .subtitle {
+            font-size: 16px;
+            color: #888;
+            margin-top: 10px;
+            letter-spacing: 2px;
+        }
+
+        .controls-header {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .language-selector select {
+            padding: 8px 12px;
+            background: rgba(0, 0, 0, 0.8);
+            color: #00ffff;
+            border: 2px solid #00ffff;
+            border-radius: 8px;
+            font-size: 14px;
+            min-width: 120px;
+        }
+
+        .close-btn {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(45deg, #ff0000, #ff4444);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.6);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 4px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ffff, #ff00ff);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+            animation: progressGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes progressGlow {
+            0%, 100% { box-shadow: 0 0 10px rgba(0, 255, 255, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(255, 0, 255, 0.8); }
+        }
+
+        .game-container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 15px;
+            padding: 10px;
+            min-height: calc(100vh - 120px);
+        }
+
+        .game-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .game-timer {
+            background: rgba(0, 255, 255, 0.1);
+            border: 2px solid #00ffff;
+            border-radius: 12px;
+            padding: 15px 30px;
+            text-align: center;
+            min-width: 200px;
+        }
+
+        .timer-display {
+            font-size: 32px;
+            font-weight: bold;
+            color: #00ffff;
+            text-shadow: 0 0 15px #00ffff;
+            margin: 5px 0;
+        }
+
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid #00ffff;
+            border-radius: 15px;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
+            animation: boardPulse 4s ease-in-out infinite;
+        }
+
+        @keyframes boardPulse {
+            0%, 100% { box-shadow: 0 0 50px rgba(0, 255, 255, 0.3); }
+            50% { box-shadow: 0 0 80px rgba(0, 255, 255, 0.6), 0 0 120px rgba(255, 0, 255, 0.3); }
+        }
+
+        .memory-card {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border: 2px solid #00ffff;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+            font-size: 24px;
+            transform-style: preserve-3d;
+        }
+
+        .memory-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent, rgba(0, 255, 255, 0.1), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.6s;
+        }
+
+        .memory-card:hover::before {
+            transform: translateX(100%);
+        }
+
+        .memory-card:hover {
+            transform: translateY(-10px) rotateY(10deg);
+            box-shadow: 0 20px 40px rgba(0, 255, 255, 0.4);
+            border-color: #ff00ff;
+        }
+
+        .memory-card.flipped {
+            transform: rotateY(180deg) scale(1.05);
+            box-shadow: 0 0 30px rgba(255, 0, 255, 0.8);
+        }
+
+        .memory-card.flipped { 
+            border-color: #00ffff;
+        }
+
+        .memory-card.matched {
+            background: linear-gradient(135deg, #00ff00, #00ffff);
+            animation: matchedPulse 1s ease-in-out;
+            pointer-events: none;
+        }
+
+        @keyframes matchedPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); box-shadow: 0 0 50px rgba(0, 255, 0, 1); }
+            100% { transform: scale(1); }
+        }
+
+        .memory-card.wrong {
+            background: linear-gradient(135deg, #ff0000, #ff4444);
+            animation: wrongShake 0.5s ease-in-out;
+        }
+
+        @keyframes wrongShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #00ffff;
+            backface-visibility: hidden;
+        }
+
+        .card-front {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform: rotateY(180deg);
+            backface-visibility: hidden;
+        }
+
+        .side-panel {
+            width: 220px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .stats-panel {
+            background: rgba(0, 255, 255, 0.1);
+            border: 2px solid #00ffff;
+            border-radius: 8px;
+            padding: 8px;
+            text-align: center;
+        }
+
+        .stat-item {
+            margin: 4px 0;
+            font-size: 12px;
+        }
+
+        .stat-value {
+            font-size: 16px;
+            font-weight: bold;
+            color: #ff00ff;
+            text-shadow: 0 0 8px #ff00ff;
+        }
+
+        .controls-panel {
+            background: rgba(255, 0, 255, 0.1);
+            border: 2px solid #ff00ff;
+            border-radius: 8px;
+            padding: 8px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 6px;
+            margin: 3px 0;
+            background: linear-gradient(45deg, #00ffff, #0080ff);
+            border: none;
+            border-radius: 6px;
+            color: #000;
+            font-weight: bold;
+            font-size: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 255, 255, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .difficulty-btn {
+            background: linear-gradient(45deg, #ff6400, #ff8c00);
+            margin: 5px 0;
+        }
+
+        .difficulty-btn.active {
+            background: linear-gradient(45deg, #00ff00, #00cc00);
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.6);
+        }
+
+        .ai-panel {
+            background: rgba(255, 255, 0, 0.1);
+            border: 2px solid #ffff00;
+            border-radius: 8px;
+            padding: 8px;
+            text-align: center;
+        }
+
+        .ai-suggestion {
+            font-size: 10px;
+            margin-top: 6px;
+            color: #ffff00;
+            min-height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .victory-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: victoryFade 0.5s ease-in-out;
+        }
+
+        @keyframes victoryFade {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .victory-title {
+            font-size: 64px;
+            color: #00ff00;
+            text-shadow: 0 0 50px #00ff00;
+            margin-bottom: 30px;
+            animation: victoryPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes victoryPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .victory-stats {
+            font-size: 24px;
+            margin: 10px 0;
+            color: #00ffff;
+        }
+
+        .neural-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0.1;
+            z-index: -1;
+        }
+
+        .neural-line {
+            position: absolute;
+            background: linear-gradient(90deg, transparent, #00ffff, transparent);
+            height: 1px;
+            animation: neuralFlow 4s linear infinite;
+        }
+
+        @keyframes neuralFlow {
+            0% { transform: translateX(-100%); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateX(100vw); opacity: 0; }
+        }
+
+        .achievement-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(45deg, #ff00ff, #00ffff);
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            z-index: 2000;
+            animation: achievementPop 3s ease-in-out;
+        }
+
+        @keyframes achievementPop {
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+            20% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+            80% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="neural-grid" id="neuralGrid"></div>
+
+    <div class="game-header">
+        <h1 class="game-title">MEMORY QUANTIQUE 2077</h1>
+        <p class="subtitle">NEURAL INTERFACE ACTIVATED</p>
+        
+        <div class="controls-header">
+            <div class="language-selector">
+                <select id="languageSelect">
+                    <option value="fr">Français</option>
+                    <option value="en">English</option>
+                    <option value="ar">العربية</option>
+                    <option value="es">Español</option>
+                    <option value="de">Deutsch</option>
+                    <option value="zh">中文</option>
+                </select>
+            </div>
+            <!-- Red close button removed; overlay-aware closeToBrainova() remains available -->
+            <a id="brainovaLink2" href="./brainova.html" title="Aller à Brainova" aria-label="Aller à Brainova" style="margin-left:10px;padding:6px 8px;border-radius:8px;background:linear-gradient(45deg,#ff9b3b,#ff6a6a);color:#fff;text-decoration:none;display:none;font-weight:700;">Accueil Brainova</a>
+        </div>
+    </div>
+
+    <div class="game-container">
+        <div class="side-panel">
+            <div class="controls-panel">
+                <h3 id="controlsTitle">CONTRÔLES QUANTIQUES</h3>
+                <button class="btn" id="startBtn" style="background: linear-gradient(45deg, #00ff00, #00cc00);">Démarrer</button>
+                <button class="btn" id="newGameBtn">Nouvelle Partie</button>
+                <button class="btn" id="resetBtn">Réinitialiser</button>
+                <button class="btn" id="pauseBtn">Pause</button>
+                <button class="btn" id="rulesBtn" style="background: linear-gradient(45deg, #ffff00, #ffa500);">Règles du Jeu</button>
+            </div>
+
+            <div class="stats-panel">
+                <h3 id="statsTitle">STATISTIQUES NEURALES</h3>
+                <div class="stat-item">
+                    <div id="scoreLabel">Score Total</div>
+                    <div class="stat-value" id="scoreValue">0</div>
+                </div>
+                <div class="stat-item">
+                    <div id="movesLabel">Mouvements</div>
+                    <div class="stat-value" id="movesValue">0</div>
+                </div>
+                <div class="stat-item">
+                    <div id="pairsLabel">Paires</div>
+                    <div class="stat-value" id="pairsValue">0/8</div>
+                </div>
+                <div class="stat-item">
+                    <div id="gameNumberLabel">Progression</div>
+                    <div class="stat-value" id="gameNumberValue">1/20</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill" style="width: 5%"></div>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <div id="streakLabel">Série</div>
+                    <div class="stat-value" id="streakValue">0</div>
+                </div>
+                <div class="stat-item" id="livesDisplay" style="display: none;">
+                    <div id="livesLabel">Vies</div>
+                    <div class="stat-value" id="livesValue">❤️❤️❤️</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="game-area">
+            <div class="game-timer">
+                <div id="timeLabel">Temps</div>
+                <div class="timer-display" id="timeValue">00:00</div>
+            </div>
+            
+            <div class="game-board" id="gameBoard">
+                <!-- Les cartes seront générées dynamiquement -->
+            </div>
+        </div>
+
+        <div class="side-panel">
+            <div class="controls-panel">
+                <h3 id="difficultyTitle">NIVEAU NEURAL</h3>
+                <button class="difficulty-btn btn active" onclick="setDifficulty('easy')" id="easyBtn">Facile (4x4)</button>
+                <button class="difficulty-btn btn" onclick="setDifficulty('medium')" id="mediumBtn">Moyen (6x4)</button>
+                <button class="difficulty-btn btn" onclick="setDifficulty('hard')" id="hardBtn">Difficile (6x6)</button>
+            </div>
+
+            <div class="controls-panel">
+                <h3 id="gameModeTitle">MODE DE JEU</h3>
+                <button class="difficulty-btn btn active" onclick="setGameMode('classic')" id="classicBtn">Classique</button>
+                <button class="difficulty-btn btn" onclick="setGameMode('timed')" id="timedBtn">Contre-la-montre</button>
+                <button class="difficulty-btn btn" onclick="setGameMode('survival')" id="survivalBtn">Survie</button>
+                <button class="difficulty-btn btn" onclick="setGameMode('zen')" id="zenBtn">Mode Zen</button>
+            </div>
+
+            <div class="ai-panel">
+                <h3 id="aiTitle">ASSISTANT NEURAL</h3>
+                <button class="btn" id="aiHintBtn" style="background: linear-gradient(45deg, #ffff00, #ffa500);">Conseil IA</button>
+                <div class="ai-suggestion" id="aiSuggestion">Activez l'interface neurale pour commencer</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Show the Brainova link only when standalone
+        (function(){
+            function getFallbackHref(){
+                try{
+                    if(location && location.protocol && (location.protocol.indexOf('http') === 0)){
+                        return (location.origin || (location.protocol + '//' + location.host)) + '/brainova.html';
+                    }
+                    try{ return new URL('brainova.html', location.href).href; }catch(e){}
+                    return './brainova.html';
+                }catch(e){ return '/brainova.html'; }
+            }
+
+            function updateLink(){
+                var link = document.getElementById('brainovaLink2');
+                if(!link) return;
+                try{ link.href = getFallbackHref(); }catch(e){}
+                try{
+                    if(window.parent && window.parent !== window){ link.style.display = 'none'; }
+                    else { link.style.display = 'inline-block'; }
+                }catch(e){ link.style.display = 'inline-block'; }
+            }
+            if(document.readyState === 'loading'){ document.addEventListener('DOMContentLoaded', updateLink); } else { updateLink(); }
+            window.addEventListener('message', updateLink);
+        })();
+
+        function closeToBrainova(){
+            try{
+                if(window.parent && window.parent !== window){
+                    try{ window.parent.postMessage({ action: 'close', reason: 'user-initiated', source: 'jeux2' }, '*'); }catch(e){}
+                    try{ if(window.parent.OverlayManager && typeof window.parent.OverlayManager.close === 'function'){ window.parent.OverlayManager.close(); return; } }catch(e){}
+                    // If parent didn't close the overlay, force a top-level navigation to the origin-based Brainova URL
+                    setTimeout(function(){
+                        try{ window.top.location.href = new URL('/brainova.html', window.location.origin).href; }catch(e){ window.location.href = '/brainova.html'; }
+                    }, 350);
+                    return;
+                }
+            }catch(e){}
+            try{ window.location.href = new URL('/brainova.html', window.location.origin).href; }catch(e){ window.location.href = '/brainova.html'; }
+        }
+    </script>
+
+    <div class="victory-screen" id="victoryScreen">
+        <div class="victory-title" id="victoryTitle">MISSION ACCOMPLIE!</div>
+        <div class="victory-stats" id="victoryScore">Score Final: 0</div>
+        <div class="victory-stats" id="victoryTime">Temps: 00:00</div>
+        <div class="victory-stats" id="victoryMoves">Mouvements: 0</div>
+        <div id="victoryButtons">
+            <button class="btn" onclick="nextGame()" style="margin-top: 30px;">Jeu Suivant</button>
+            <button class="btn" onclick="newGame(); document.getElementById('victoryScreen').style.display='none'" style="margin-top: 10px; background: linear-gradient(45deg, #ff6400, #ff8c00);">Recommencer</button>
+        </div>
+    </div>
+
+    <div class="victory-screen" id="rulesModal" style="display: none;">
+        <div style="background: rgba(0, 0, 0, 0.9); border: 3px solid #00ffff; border-radius: 20px; padding: 40px; max-width: 600px; text-align: center;">
+            <h2 style="color: #00ffff; font-size: 36px; margin-bottom: 30px;" id="rulesModalTitle">RÈGLES DU JEU</h2>
+            <p style="color: #ffffff; font-size: 18px; line-height: 1.6; margin-bottom: 30px;" id="rulesModalText">
+                Cliquez sur les cartes pour les retourner et trouvez les paires de symboles identiques. Mémorisez les positions et terminez avec le moins de mouvements possible !
+            </p>
+            <div style="display: flex; gap: 20px; justify-content: center; margin-top: 30px;">
+                <button class="btn" onclick="closeRules()" style="background: linear-gradient(45deg, #ff0000, #ff4444);" id="closeRulesBtn">Fermer</button>
+                <button class="btn" onclick="closeRules(); startGame();" style="background: linear-gradient(45deg, #00ff00, #00cc00);" id="startFromRulesBtn">Commencer à Jouer</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Traductions
+        const translations = {
+            fr: {
+                statsTitle: "STATISTIQUES NEURALES",
+                score: "Score Total",
+                moves: "Mouvements", 
+                time: "Temps",
+                pairs: "Paires",
+                gameNumber: "Progression",
+                streak: "Série",
+                lives: "Vies",
+                controlsTitle: "CONTRÔLES QUANTIQUES",
+                newGame: "Nouvelle Partie",
+                reset: "Réinitialiser",
+                pause: "Pause",
+                resume: "Reprendre",
+                start: "Démarrer",
+                rules: "Règles du Jeu",
+                difficultyTitle: "NIVEAU NEURAL",
+                easy: "Facile (4x4)",
+                medium: "Moyen (6x4)", 
+                hard: "Difficile (6x6)",
+                gameModeTitle: "MODE DE JEU",
+                classic: "Classique",
+                timed: "Contre-la-montre",
+                survival: "Survie",
+                zen: "Mode Zen",
+                aiTitle: "ASSISTANT NEURAL",
+                aiHint: "Conseil IA",
+                victoryTitle: "MISSION ACCOMPLIE!",
+                finalScore: "Score Final",
+                gameOver: "GAME OVER!",
+                timeUp: "TEMPS ÉCOULÉ!",
+                levelComplete: "NIVEAU TERMINÉ!",
+                gameComplete: "JEU COMPLET!",
+                nextGame: "Jeu Suivant",
+                nextLevel: "Niveau Suivant",
+                restartLevel: "Recommencer Niveau",
+                aiSuggestions: [
+                    "Mémorisez les positions des symboles",
+                    "Commencez par les coins et les bords",
+                    "Créez des associations visuelles",
+                    "Concentrez-vous sur les patterns",
+                    "Utilisez la logique d'élimination",
+                    "Observez les couleurs et thèmes",
+                    "Prenez votre temps pour mémoriser",
+                    "Groupez les symboles similaires"
+                ],
+                rulesText: "Cliquez sur les cartes pour les retourner et trouvez les paires de symboles identiques. Mémorisez les positions et terminez avec le moins de mouvements possible !",
+                close: "Fermer",
+                startFromRules: "Commencer à Jouer"
+            },
+            en: {
+                statsTitle: "NEURAL STATISTICS",
+                score: "Total Score",
+                moves: "Moves",
+                time: "Time", 
+                pairs: "Pairs",
+                gameNumber: "Progress",
+                streak: "Streak",
+                lives: "Lives",
+                controlsTitle: "QUANTUM CONTROLS",
+                newGame: "New Game",
+                reset: "Reset",
+                pause: "Pause",
+                resume: "Resume",
+                start: "Start",
+                rules: "Game Rules",
+                difficultyTitle: "NEURAL LEVEL",
+                easy: "Easy (4x4)",
+                medium: "Medium (6x4)", 
+                hard: "Hard (6x6)",
+                gameModeTitle: "GAME MODE",
+                classic: "Classic",
+                timed: "Timed",
+                survival: "Survival",
+                zen: "Zen Mode",
+                aiTitle: "NEURAL ASSISTANT",
+                aiHint: "AI Hint",
+                victoryTitle: "MISSION ACCOMPLISHED!",
+                finalScore: "Final Score",
+                gameOver: "GAME OVER!",
+                timeUp: "TIME UP!",
+                levelComplete: "LEVEL COMPLETE!",
+                gameComplete: "GAME COMPLETE!",
+                nextGame: "Next Game",
+                nextLevel: "Next Level",
+                restartLevel: "Restart Level",
+                aiSuggestions: [
+                    "Memorize symbol positions",
+                    "Start with corners and edges", 
+                    "Create visual associations",
+                    "Focus on patterns",
+                    "Use elimination logic",
+                    "Observe colors and themes",
+                    "Take time to memorize",
+                    "Group similar symbols"
+                ],
+                rulesText: "Click cards to flip them and find matching symbol pairs. Remember positions and complete with the fewest moves possible!",
+                close: "Close",
+                startFromRules: "Start Playing"
+            },
+            ar: {
+                statsTitle: "الإحصائيات العصبية",
+                score: "النقاط الإجمالية",
+                moves: "الحركات", 
+                time: "الوقت",
+                pairs: "الأزواج",
+                gameNumber: "التقدم",
+                streak: "السلسلة",
+                lives: "الأرواح",
+                controlsTitle: "التحكم الكمي",
+                newGame: "لعبة جديدة",
+                reset: "إعادة تعيين",
+                pause: "إيقاف مؤقت",
+                resume: "استئناف",
+                start: "ابدأ",
+                rules: "قواعد اللعبة",
+                difficultyTitle: "المستوى العصبي",
+                easy: "سهل (4×4)",
+                medium: "متوسط (6×4)", 
+                hard: "صعب (6×6)",
+                gameModeTitle: "نمط اللعبة",
+                classic: "كلاسيكي",
+                timed: "ضد الوقت",
+                survival: "البقاء",
+                zen: "نمط الزن",
+                aiTitle: "المساعد العصبي",
+                aiHint: "نصيحة الذكاء الاصطناعي",
+                victoryTitle: "تمت المهمة!",
+                finalScore: "النقاط النهائية",
+                gameOver: "انتهت اللعبة!",
+                timeUp: "انتهى الوقت!",
+                levelComplete: "اكتمل المستوى!",
+                gameComplete: "اكتملت اللعبة!",
+                nextGame: "اللعبة التالية",
+                nextLevel: "المستوى التالي",
+                restartLevel: "إعادة تشغيل المستوى",
+                aiSuggestions: [
+                    "احفظ مواضع الرموز",
+                    "ابدأ بالزوايا والحواف",
+                    "أنشئ روابط بصرية",
+                    "ركز على الأنماط",
+                    "استخدم منطق الاستبعاد",
+                    "لاحظ الألوان والموضوعات",
+                    "خذ وقتك للحفظ",
+                    "اجمع الرموز المتشابهة"
+                ],
+                rulesText: "انقر على البطاقات لقلبها واعثر على أزواج الرموز المتطابقة. تذكر المواضع وأكمل بأقل عدد من الحركات!",
+                close: "إغلاق",
+                startFromRules: "ابدأ اللعب"
+            },
+            es: {
+                statsTitle: "ESTADÍSTICAS NEURALES",
+                score: "Puntuación Total",
+                moves: "Movimientos", 
+                time: "Tiempo",
+                pairs: "Parejas",
+                gameNumber: "Progreso",
+                streak: "Racha",
+                lives: "Vidas",
+                controlsTitle: "CONTROLES CUÁNTICOS",
+                newGame: "Nueva Partida",
+                reset: "Reiniciar",
+                pause: "Pausa",
+                resume: "Reanudar",
+                start: "Comenzar",
+                rules: "Reglas del Juego",
+                difficultyTitle: "NIVEL NEURAL",
+                easy: "Fácil (4×4)",
+                medium: "Medio (6×4)", 
+                hard: "Difícil (6×6)",
+                gameModeTitle: "MODO DE JUEGO",
+                classic: "Clásico",
+                timed: "Contrarreloj",
+                survival: "Supervivencia",
+                zen: "Modo Zen",
+                aiTitle: "ASISTENTE NEURAL",
+                aiHint: "Consejo IA",
+                victoryTitle: "¡MISIÓN CUMPLIEDA!",
+                finalScore: "Puntuación Final",
+                gameOver: "¡JUEGO TERMINADO!",
+                timeUp: "¡TIEMPO AGOTADO!",
+                levelComplete: "¡NIVEL COMPLETADO!",
+                gameComplete: "¡JUEGO COMPLETADO!",
+                nextGame: "Siguiente Juego",
+                nextLevel: "Siguiente Nivel",
+                restartLevel: "Reiniciar Nivel",
+                aiSuggestions: [
+                    "Memoriza las posiciones de los símbolos",
+                    "Comienza por las esquinas y bordes",
+                    "Crea asociaciones visuales",
+                    "Concéntrate en los patrones",
+                    "Usa lógica de eliminación",
+                    "Observa colores y temas",
+                    "Tómate tiempo para memorizar",
+                    "Agrupa símbolos similares"
+                ],
+                rulesText: "¡Haz clic en las cartas para voltearlas y encuentra parejas de símbolos idénticos. Recuerda las posiciones y completa con el menor número de movimientos!",
+                close: "Cerrar",
+                startFromRules: "Empezar a Jugar"
+            },
+            de: {
+                statsTitle: "NEURALE STATISTIKEN",
+                score: "Gesamtpunktzahl",
+                moves: "Züge", 
+                time: "Zeit",
+                pairs: "Paare",
+                gameNumber: "Fortschritt",
+                streak: "Serie",
+                lives: "Leben",
+                controlsTitle: "QUANTENSTEUERUNG",
+                newGame: "Neues Spiel",
+                reset: "Zurücksetzen",
+                pause: "Pause",
+                resume: "Fortsetzen",
+                start: "Starten",
+                rules: "Spielregeln",
+                difficultyTitle: "NEURALES NIVEAU",
+                easy: "Einfach (4×4)",
+                medium: "Mittel (6×4)", 
+                hard: "Schwer (6×6)",
+                gameModeTitle: "SPIELMODUS",
+                classic: "Klassisch",
+                timed: "Zeitlimit",
+                survival: "Überleben",
+                zen: "Zen-Modus",
+                aiTitle: "NEURALER ASSISTENT",
+                aiHint: "KI-Tipp",
+                victoryTitle: "MISSION ERFÜLLT!",
+                finalScore: "Endpunktzahl",
+                gameOver: "SPIEL VORBEI!",
+                timeUp: "ZEIT ABGELAUFEN!",
+                levelComplete: "LEVEL ABGESCHLOSSEN!",
+                gameComplete: "SPIEL ABGESCHLOSSEN!",
+                nextGame: "Nächstes Spiel",
+                nextLevel: "Nächstes Level",
+                restartLevel: "Level Neustarten",
+                aiSuggestions: [
+                    "Merke dir die Symbolpositionen",
+                    "Beginne mit Ecken und Rändern",
+                    "Erstelle visuelle Verbindungen",
+                    "Konzentriere dich auf Muster",
+                    "Verwende Ausschlusslogik",
+                    "Beobachte Farben und Themen",
+                    "Nimm dir Zeit zum Merken",
+                    "Gruppiere ähnliche Symbole"
+                ],
+                rulesText: "Klicke auf die Karten, um sie umzudrehen und finde identische Symbolpaare. Merke dir die Positionen und beende mit möglichst wenigen Zügen!",
+                close: "Schließen",
+                startFromRules: "Spielen Beginnen"
+            },
+            zh: {
+                statsTitle: "神经统计",
+                score: "总分",
+                moves: "移动次数", 
+                time: "时间",
+                pairs: "配对",
+                gameNumber: "进度",
+                streak: "连胜",
+                lives: "生命",
+                controlsTitle: "量子控制",
+                newGame: "新游戏",
+                reset: "重置",
+                pause: "暂停",
+                resume: "继续",
+                start: "开始",
+                rules: "游戏规则",
+                difficultyTitle: "神经级别",
+                easy: "简单 (4×4)",
+                medium: "中等 (6×4)", 
+                hard: "困难 (6×6)",
+                gameModeTitle: "游戏模式",
+                classic: "经典",
+                timed: "限时",
+                survival: "生存",
+                zen: "禅模式",
+                aiTitle: "神经助手",
+                aiHint: "AI提示",
+                victoryTitle: "任务完成！",
+                finalScore: "最终得分",
+                gameOver: "游戏结束！",
+                timeUp: "时间到！",
+                levelComplete: "关卡完成！",
+                gameComplete: "游戏完成！",
+                nextGame: "下一局",
+                nextLevel: "下一关",
+                restartLevel: "重新开始关卡",
+                aiSuggestions: [
+                    "记住符号位置",
+                    "从角落和边缘开始",
+                    "创建视觉联想",
+                    "专注于模式",
+                    "使用排除逻辑",
+                    "观察颜色和主题",
+                    "花时间记忆",
+                    "将相似符号分组"
+                ],
+                rulesText: "点击卡片翻转并找到相同的符号配对。记住位置并用最少的移动次数完成！",
+                close: "关闭",
+                startFromRules: "开始游戏"
+            }
+        };
+
+        // Variables du jeu
+        let currentLanguage = 'fr';
+        let gameBoard = [];
+        let flippedCards = [];
+        let matchedPairs = 0;
+        let totalPairs = 8;
+        let moves = 0;
+        let totalScore = 0; // Score cumulé sur tous les jeux
+        let gameScore = 0; // Score du jeu actuel
+        let startTime = null;
+        let gameTimer = null;
+        let isPaused = false;
+        let isGameStarted = false;
+        let difficulty = 'easy';
+        let gridSize = { rows: 4, cols: 4 };
+        let gameMode = 'classic';
+        let streak = 0;
+        let maxStreak = 0;
+        let lives = 3;
+        let timeLimit = 0;
+        let wrongMoves = 0;
+        let maxWrongMoves = 3;
+
+        // Système de progression
+        let currentGameNumber = 1;
+        let maxGamesPerLevel = 20;
+        let levelProgress = {
+            easy: { completed: 0, unlocked: true },
+            medium: { completed: 0, unlocked: true },
+            hard: { completed: 0, unlocked: true }
+        };
+
+        // Collections de symboles par thème avec plus de variété - 30 thèmes différents pour plus de diversité
+        const symbolThemes = {
+            // Jeu 1 - Animaux sauvages
+            animals_wild: ['🦁', '🐯', '🐻', '🐼', '🦊', '🐺', '🦒', '🐘', '🦏', '🦛', '🐆', '🐅'],
+            // Jeu 2 - Avions colorés
+            aircraft: ['✈️', '🛩️', '🚁', '🛸', '🚀', '🪂', '🎈', '🪁', '🛫', '🛬', '🚂', '🚄'],
+            // Jeu 3 - Fruits tropicaux
+            fruits_tropical: ['🍍', '🥭', '🥝', '🍌', '🥥', '🍑', '🍒', '🍓', '🍊', '🍋', '🍇', '🫐'],
+            // Jeu 4 - Véhicules de course
+            racing_vehicles: ['🏎️', '🏍️', '🚲', '🛵', '🚗', '🚙', '🚕', '🚐', '🚛', '🚚', '🏁', '⛽'],
+            // Jeu 5 - Fleurs et nature
+            flowers: ['🌸', '🌺', '🌻', '🌷', '🌹', '🌼', '🌿', '🍀', '🌱', '🌳', '🌲', '🌴'],
+            // Jeu 6 - Animaux marins
+            sea_animals: ['🐙', '🦈', '🐠', '🐟', '🐡', '🦀', '🦞', '🐚', '🐬', '🐳', '🦭', '🐧'],
+            // Jeu 7 - Instruments de musique
+            instruments: ['🎸', '🎹', '🥁', '🎺', '🎷', '🎻', '🪕', '🎤', '🎵', '🎶', '🎼', '🔊'],
+            // Jeu 8 - Gemmes et trésors
+            gems: ['💎', '💍', '👑', '🔮', '💰', '🏆', '⚜️', '💠', '🪙', '💳', '🎖️', '🏅'],
+            // Jeu 9 - Sports et jeux
+            sports: ['⚽', '🏀', '🏈', '⚾', '🎾', '🏐', '🏓', '🏸', '🥎', '🏑', '🏒', '🥍'],
+            // Jeu 10 - Espace et cosmos
+            space: ['🚀', '🛸', '🌍', '🌙', '⭐', '🌟', '☄️', '🛰️', '🌌', '🪐', '🌕', '🌑'],
+            // Jeu 11 - Nourriture sucrée
+            sweets: ['🍰', '🧁', '🍪', '🍩', '🍭', '🍬', '🍫', '🍯', '🎂', '🥧', '🍮', '🍨'],
+            // Jeu 12 - Outils et bricolage
+            tools: ['🔨', '🪓', '🔧', '🔩', '⚙️', '🪚', '🔪', '⛏️', '🪛', '🔨', '⚒️', '🛠️'],
+            // Jeu 13 - Vêtements et mode
+            fashion: ['👕', '👔', '👗', '👠', '👒', '🎩', '🧢', '👑', '👖', '👚', '🧥', '👘'],
+            // Jeu 14 - Bâtiments et architecture
+            buildings: ['🏠', '🏢', '🏰', '🏛️', '⛪', '🕌', '🏗️', '🏭', '🏪', '🏬', '🏦', '🏨'],
+            // Jeu 15 - Météo et climat
+            weather: ['☀️', '🌈', '⚡', '❄️', '🌤️', '⛅', '🌧️', '🌪️', '🌊', '🌀', '🌩️', '⛈️'],
+            // Jeu 16 - Objets technologiques
+            tech: ['📱', '💻', '⌚', '📷', '🎮', '🕹️', '📺', '📻', '🖥️', '⌨️', '🖱️', '💾'],
+            // Jeu 17 - Animaux domestiques
+            pets: ['🐱', '🐶', '🐰', '🐹', '🐭', '🐦', '🐠', '🐢', '🐈', '🐕', '🐇', '🐿️'],
+            // Jeu 18 - Légumes et jardinage
+            vegetables: ['🥕', '🌽', '🥒', '🍅', '🥑', '🌶️', '🥬', '🧄', '🥔', '🧅', '🥦', '🍆'],
+            // Jeu 19 - Transports publics
+            public_transport: ['🚌', '🚎', '🚂', '🚆', '🚇', '🚊', '🚝', '🚄', '🚃', '🚋', '🚞', '🚟'],
+            // Jeu 20 - Symboles magiques
+            magic: ['🔮', '⭐', '✨', '🌟', '💫', '🎭', '🎪', '🎨', '🪄', '🧙', '🔯', '🕯️'],
+            // Jeu 21 - Objets de bureau
+            office: ['📝', '📊', '📈', '📉', '📋', '📌', '📎', '🖇️', '📏', '📐', '✂️', '🖊️'],
+            // Jeu 22 - Boissons
+            drinks: ['☕', '🍵', '🥤', '🧃', '🍷', '🍸', '🍹', '🍺', '🥛', '🧋', '🍶', '🥃'],
+            // Jeu 23 - Émojis visages
+            faces: ['😀', '😃', '😄', '😁', '😆', '😅', '😂', '🤣', '😊', '😇', '🙂', '😉'],
+            // Jeu 24 - Objets de cuisine
+            kitchen: ['🍳', '🥄', '🍴', '🔪', '🥢', '🍽️', '🥣', '🥗', '🍲', '🥘', '🍱', '🧂'],
+            // Jeu 25 - Fêtes et célébrations
+            party: ['🎉', '🎊', '🎈', '🎁', '🎀', '🎂', '🕯️', '🎆', '🎇', '🪅', '🎃', '🎄'],
+            // Jeu 26 - Coeurs et amour
+            hearts: ['❤️', '💙', '💚', '💛', '🧡', '💜', '🖤', '🤍', '🤎', '💕', '💖', '💗'],
+            // Jeu 27 - Formes géométriques
+            shapes: ['🔴', '🟠', '🟡', '🟢', '🔵', '🟣', '⚫', '⚪', '🟤', '🔶', '🔷', '🔸'],
+            // Jeu 28 - Drapeaux et pays
+            flags: ['🏁', '🏳️', '🏴', '🚩', '🎌', '🏳️‍🌈', '🏳️‍⚧️', '🏴‍☠️', '🇫🇷', '🇺🇸', '🇬🇧', '🇩🇪'],
+            // Jeu 29 - Signes du zodiaque
+            zodiac: ['♈', '♉', '♊', '♋', '♌', '♍', '♎', '♏', '♐', '♑', '♒', '♓'],
+            // Jeu 30 - Symboles mathématiques
+            math: ['➕', '➖', '✖️', '➗', '🟰', '💯', '🔢', '🔣', '📐', '📏', '🧮', '∞']
+        };
+
+        // Variables pour la gestion des thèmes et symboles
+        let currentTheme = 'quantum';
+        let usedThemes = [];
+        let gameCounter = 0; // Compteur global pour tous les jeux
+
+        // Initialisation
+        function init() {
+            createNeuralGrid();
+            updateLanguage();
+            setupEventListeners();
+            loadProgress();
+            newGame();
+        }
+
+        function createNeuralGrid() {
+            const neuralGrid = document.getElementById('neuralGrid');
+            for (let i = 0; i < 20; i++) {
+                const line = document.createElement('div');
+                line.className = 'neural-line';
+                line.style.top = Math.random() * 100 + '%';
+                line.style.width = '200px';
+                line.style.animationDelay = Math.random() * 4 + 's';
+                neuralGrid.appendChild(line);
+            }
+        }
+
+        function setupEventListeners() {
+            document.getElementById('languageSelect').addEventListener('change', (e) => {
+                currentLanguage = e.target.value;
+                updateLanguage();
+            });
+
+            document.getElementById('startBtn').addEventListener('click', startGame);
+            document.getElementById('newGameBtn').addEventListener('click', newGame);
+            document.getElementById('resetBtn').addEventListener('click', resetGame);
+            document.getElementById('pauseBtn').addEventListener('click', togglePause);
+            document.getElementById('rulesBtn').addEventListener('click', showRules);
+            document.getElementById('aiHintBtn').addEventListener('click', showAIHint);
+        }
+
+        function selectRandomTheme() {
+            const themes = Object.keys(symbolThemes);
+            let availableThemes = themes.filter(theme => !usedThemes.includes(theme));
+            
+            // Si tous les thèmes ont été utilisés, réinitialiser
+            if (availableThemes.length === 0) {
+                usedThemes = [];
+                availableThemes = themes;
+            }
+            
+            const newTheme = availableThemes[Math.floor(Math.random() * availableThemes.length)];
+            usedThemes.push(newTheme);
+            currentTheme = newTheme;
+        }
+
+        function updateLanguage() {
+            const t = translations[currentLanguage];
+            document.getElementById('statsTitle').textContent = t.statsTitle;
+            document.getElementById('scoreLabel').textContent = t.score;
+            document.getElementById('movesLabel').textContent = t.moves;
+            document.getElementById('timeLabel').textContent = t.time;
+            document.getElementById('pairsLabel').textContent = t.pairs;
+            document.getElementById('gameNumberLabel').textContent = t.gameNumber;
+            document.getElementById('streakLabel').textContent = t.streak;
+            document.getElementById('livesLabel').textContent = t.lives;
+            document.getElementById('controlsTitle').textContent = t.controlsTitle;
+            document.getElementById('startBtn').textContent = t.start;
+            document.getElementById('newGameBtn').textContent = t.newGame;
+            document.getElementById('resetBtn').textContent = t.reset;
+            document.getElementById('pauseBtn').textContent = isPaused ? t.resume : t.pause;
+            document.getElementById('rulesBtn').textContent = t.rules;
+            document.getElementById('difficultyTitle').textContent = t.difficultyTitle;
+            document.getElementById('easyBtn').textContent = t.easy;
+            document.getElementById('mediumBtn').textContent = t.medium;
+            document.getElementById('hardBtn').textContent = t.hard;
+            document.getElementById('gameModeTitle').textContent = t.gameModeTitle;
+            document.getElementById('classicBtn').textContent = t.classic;
+            document.getElementById('timedBtn').textContent = t.timed;
+            document.getElementById('survivalBtn').textContent = t.survival;
+            document.getElementById('zenBtn').textContent = t.zen;
+            document.getElementById('aiTitle').textContent = t.aiTitle;
+            document.getElementById('aiHintBtn').textContent = t.aiHint;
+            document.getElementById('victoryTitle').textContent = t.victoryTitle;
+            document.getElementById('rulesModalTitle').textContent = t.rules;
+            document.getElementById('rulesModalText').textContent = t.rulesText;
+            document.getElementById('closeRulesBtn').textContent = t.close;
+            document.getElementById('startFromRulesBtn').textContent = t.startFromRules;
+            
+            updateStats();
+        }
+
+        function setDifficulty(level) {
+            difficulty = level;
+            currentGameNumber = 1;
+            
+            // Mettre à jour les boutons de difficulté
+            document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                if (btn.onclick && btn.onclick.toString().includes('setDifficulty')) {
+                    btn.classList.remove('active');
+                }
+            });
+            document.getElementById(level + 'Btn').classList.add('active');
+            
+            // Définir la taille de la grille
+            switch(level) {
+                case 'easy':
+                    gridSize = { rows: 4, cols: 4 };
+                    totalPairs = 8;
+                    break;
+                case 'medium':
+                    gridSize = { rows: 4, cols: 6 };
+                    totalPairs = 12;
+                    break;
+                case 'hard':
+                    gridSize = { rows: 6, cols: 6 };
+                    totalPairs = 18;
+                    break;
+            }
+            
+            // Réinitialiser les thèmes utilisés
+            usedThemes = [];
+            selectRandomTheme();
+            
+            newGame();
+        }
+
+        function setGameMode(mode) {
+            gameMode = mode;
+            
+            // Mettre à jour les boutons de mode
+            document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                if (btn.onclick && btn.onclick.toString().includes('setGameMode')) {
+                    btn.classList.remove('active');
+                }
+            });
+            document.getElementById(mode + 'Btn').classList.add('active');
+            
+            // Configurer les paramètres selon le mode
+            switch(mode) {
+                case 'classic':
+                    timeLimit = 0;
+                    lives = 0;
+                    maxWrongMoves = 999;
+                    break;
+                case 'timed':
+                    timeLimit = 120; // 2 minutes
+                    lives = 0;
+                    maxWrongMoves = 999;
+                    break;
+                case 'survival':
+                    timeLimit = 0;
+                    lives = 3;
+                    maxWrongMoves = 3;
+                    break;
+                case 'zen':
+                    timeLimit = 0;
+                    lives = 0;
+                    maxWrongMoves = 999;
+                    break;
+            }
+            
+            newGame();
+        }
+
+        function newGame() {
+            // Incrémenter le compteur global pour chaque nouveau jeu
+            gameCounter++;
+            
+            // Réinitialiser les variables du jeu actuel
+            gameBoard = [];
+            flippedCards = [];
+            matchedPairs = 0;
+            moves = 0;
+            gameScore = 0; // Score du jeu actuel seulement
+            startTime = null;
+            isPaused = false;
+            isGameStarted = false;
+            wrongMoves = 0;
+            
+            // Réinitialiser les vies selon le mode
+            if (gameMode === 'survival') {
+                lives = 3;
+            }
+            
+            // Arrêter le timer précédent
+            if (gameTimer) clearInterval(gameTimer);
+            
+            // Masquer l'écran de victoire et les règles
+            document.getElementById('victoryScreen').style.display = 'none';
+            document.getElementById('rulesModal').style.display = 'none';
+            
+            // Créer le plateau de jeu mais les cartes ne sont pas encore jouables
+            createGameBoard();
+            
+            // Désactiver toutes les cartes jusqu'au démarrage
+            gameBoard.forEach(card => {
+                card.style.pointerEvents = 'none';
+                card.style.cursor = 'not-allowed';
+            });
+            
+            // Mettre à jour l'affichage
+            updateStats();
+            updateLanguage();
+            
+            // Afficher un message d'encouragement avec progression
+            const t = translations[currentLanguage];
+            document.getElementById('aiSuggestion').textContent = `Jeu ${currentGameNumber}/${maxGamesPerLevel} - Cliquez "Démarrer" pour commencer !`;
+        }
+
+        function startGame() {
+            if (isGameStarted) return;
+            
+            isGameStarted = true;
+            startTime = Date.now();
+            
+            // Activer toutes les cartes
+            gameBoard.forEach(card => {
+                card.style.pointerEvents = 'auto';
+                card.style.cursor = 'pointer';
+            });
+            
+            // Démarrer le timer
+            startTimer();
+            
+            // Mettre à jour l'affichage
+            updateStats();
+            
+            // Changer le message d'encouragement
+            const t = translations[currentLanguage];
+            document.getElementById('aiSuggestion').textContent = `Jeu ${currentGameNumber}/${maxGamesPerLevel} - Trouvez les paires !`;
+        }
+
+        function createGameBoard() {
+            const board = document.getElementById('gameBoard');
+            board.innerHTML = '';
+            board.style.gridTemplateColumns = `repeat(${gridSize.cols}, 1fr)`;
+            
+            // Calculer le nombre total de cartes dans la grille
+            const totalCards = gridSize.rows * gridSize.cols;
+            const numberOfPairs = totalCards / 2; // Chaque paire = 2 cartes
+            
+            // Sélectionner le thème de symboles pour ce jeu
+            selectRandomTheme();
+            const themeSymbols = symbolThemes[currentTheme];
+            
+            // Palette de couleurs ultra-vives et distinctes - chaque couleur sera unique par paire
+            const vibrantColors = [
+                '#FF0000', '#00FF00', '#0000FF', '#FFFF00', '#FF00FF', '#00FFFF',
+                '#FF6600', '#FF0066', '#66FF00', '#6600FF', '#0066FF', '#FF3333',
+                '#FF3300', '#33FF00', '#3300FF', '#FF0033', '#00FF33', '#0033FF',
+                '#FF9900', '#99FF00', '#9900FF', '#FF0099', '#00FF99', '#0099FF',
+                '#FF4400', '#44FF00', '#4400FF', '#FF0044', '#00FF44', '#0044FF',
+                '#FF7700', '#77FF00', '#7700FF', '#FF0077', '#00FF77', '#0077FF',
+                '#FF8800', '#88FF00', '#8800FF', '#FF0088', '#00FF88', '#0088FF',
+                '#FF5500', '#55FF00', '#5500FF', '#FF0055', '#00FF55', '#0055FF',
+                '#FF2200', '#22FF00', '#2200FF', '#FF0022', '#00FF22', '#0022FF',
+                '#FF1100', '#11FF00', '#1100FF', '#FF0011', '#00FF11', '#0011FF'
+            ];
+            
+            // Créer EXACTEMENT numberOfPairs paires - chaque paire = même couleur + même symbole
+            const cardPairs = [];
+            
+            for (let i = 0; i < numberOfPairs; i++) {
+                // Chaque paire a UNE couleur unique et UN symbole unique
+                const pairColor = vibrantColors[i % vibrantColors.length];
+                const pairSymbol = themeSymbols[i % themeSymbols.length];
+                const pairId = `pair_${i}`;
+                
+                // Créer EXACTEMENT 2 cartes identiques pour cette paire
+                const pairData = {
+                    color: pairColor,
+                    symbol: pairSymbol,
+                    pairId: pairId,
+                    combination: `${pairColor}_${pairSymbol}`
+                };
+                
+                // Ajouter les 2 cartes IDENTIQUES de la paire
+                cardPairs.push({...pairData, cardIndex: 0});
+                cardPairs.push({...pairData, cardIndex: 1});
+            }
+            
+            // Vérification : on doit avoir exactement totalCards cartes
+            console.log(`Grille ${gridSize.rows}x${gridSize.cols}: ${totalCards} cartes, ${numberOfPairs} paires créées, ${cardPairs.length} cartes générées`);
+            
+            // Mélanger toutes les cartes de façon aléatoire
+            for (let i = cardPairs.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [cardPairs[i], cardPairs[j]] = [cardPairs[j], cardPairs[i]];
+            }
+            
+            // Créer les éléments HTML des cartes
+            cardPairs.forEach((pairData, index) => {
+                const card = document.createElement('div');
+                card.className = 'memory-card';
+                card.dataset.color = pairData.color;
+                card.dataset.symbol = pairData.symbol;
+                card.dataset.pairId = pairData.pairId;
+                card.dataset.combination = pairData.combination;
+                card.dataset.cardIndex = pairData.cardIndex;
+                card.dataset.position = index;
+                card.style.pointerEvents = 'none';
+                card.style.cursor = 'not-allowed';
+                
+                card.innerHTML = `
+                    <div class="card-back" style="display: flex; font-size: 18px; align-items: center; justify-content: center;">🔒</div>
+                    <div class="card-front" style="display: none; align-items: center; justify-content: center;">`;
+                card.innerHTML += `</div>`;
+
+                card.addEventListener('click', () => flipCard(card));
+                board.appendChild(card);
+                gameBoard.push(card);
+            });
+            
+            // Message informatif avec vérification
+            console.log(`✅ Jeu ${currentGameNumber}: Thème "${currentTheme}" - ${numberOfPairs} paires uniques créées`);
+            console.log(`🎯 Chaque symbole/couleur apparaît exactement 2 fois`);
+            document.getElementById('aiSuggestion').textContent = `Thème: ${currentTheme.replace('_', ' ').toUpperCase()} - ${numberOfPairs} paires uniques`;
+        }
+
+        function flipCard(card) {
+            if (isPaused || card.classList.contains('flipped') || card.classList.contains('matched') || flippedCards.length >= 2) {
+                return;
+            }
+            
+            card.classList.add('flipped');
+            
+            // Afficher le symbole avec sa couleur IMMÉDIATEMENT
+            const cardFront = card.querySelector('.card-front');
+            const cardBack = card.querySelector('.card-back');
+            const pairColor = card.dataset.color;
+            const pairSymbol = card.dataset.symbol;
+            
+            // Masquer le dos et afficher le devant INSTANTANÉMENT
+            cardBack.style.display = 'none';
+            cardFront.style.display = 'flex';
+            
+            // Nettoyer complètement tous les styles précédents
+            cardFront.style.cssText = '';
+            card.style.background = '';
+            card.style.border = '';
+            
+            // Appliquer IMMÉDIATEMENT la vraie couleur UNIQUE de cette paire
+            cardFront.style.setProperty('background', `linear-gradient(135deg, ${pairColor}, ${pairColor}dd)`, 'important');
+            cardFront.style.setProperty('color', 'white', 'important');
+            cardFront.style.setProperty('border', `3px solid ${pairColor}`, 'important');
+            cardFront.style.setProperty('box-shadow', `0 0 25px ${pairColor}80`, 'important');
+            cardFront.style.setProperty('text-shadow', '2px 2px 4px rgba(0,0,0,0.9)', 'important');
+            cardFront.style.setProperty('font-size', '32px', 'important');
+            cardFront.style.setProperty('font-weight', 'bold', 'important');
+            cardFront.style.setProperty('border-radius', '8px', 'important');
+            cardFront.style.setProperty('display', 'flex', 'important');
+            cardFront.style.setProperty('align-items', 'center', 'important');
+            cardFront.style.setProperty('justify-content', 'center', 'important');
+            cardFront.style.setProperty('width', '100%', 'important');
+            cardFront.style.setProperty('height', '100%', 'important');
+            cardFront.textContent = pairSymbol;
+            
+            // Appliquer aussi la couleur à la carte elle-même
+            card.style.setProperty('background', `linear-gradient(135deg, ${pairColor}, ${pairColor}dd)`, 'important');
+            card.style.setProperty('border-color', pairColor, 'important');
+            card.style.setProperty('box-shadow', `0 0 20px ${pairColor}60`, 'important');
+            
+            // Forcer le rendu immédiat
+            cardFront.offsetHeight;
+            card.offsetHeight;
+            
+            flippedCards.push(card);
+            
+            if (flippedCards.length === 2) {
+                moves++;
+                updateStats();
+                
+                setTimeout(() => {
+                    checkMatch();
+                }, 800);
+            }
+        }
+
+        function checkMatch() {
+            const [card1, card2] = flippedCards;
+            
+            // Vérifier si c'est EXACTEMENT la même combinaison (couleur + symbole identiques)
+            // ET que ce ne sont pas la même carte physique
+            if (card1.dataset.combination === card2.dataset.combination && 
+                card1.dataset.position !== card2.dataset.position) {
+                
+                // Match trouvé ! Les cartes restent ouvertes définitivement
+                card1.classList.add('matched');
+                card2.classList.add('matched');
+                card1.style.pointerEvents = 'none';
+                card2.style.pointerEvents = 'none';
+                matchedPairs++;
+                
+                // Calcul du score avec bonus selon le mode
+                let baseScore = 100;
+                let difficultyMultiplier = difficulty === 'easy' ? 1 : difficulty === 'medium' ? 1.5 : 2;
+                let modeMultiplier = gameMode === 'timed' ? 2 : gameMode === 'survival' ? 1.5 : 1;
+                gameScore += Math.floor(baseScore * difficultyMultiplier * modeMultiplier);
+                
+                // Réinitialiser immédiatement pour permettre de continuer
+                flippedCards = [];
+                updateStats();
+                
+                // Calculer le nombre total de paires dans la grille actuelle
+                const totalCards = gridSize.rows * gridSize.cols;
+                const totalPairsInGrid = totalCards / 2;
+                
+                // Vérifier si toutes les paires sont trouvées
+                if (matchedPairs === totalPairsInGrid) {
+                    setTimeout(() => {
+                        showVictory();
+                    }, 500);
+                }
+                
+                console.log(`✅ Paire trouvée: ${card1.dataset.symbol} (${card1.dataset.color}) - ${matchedPairs}/${totalPairsInGrid}`);
+            } else {
+                // Pas de match - combinaisons différentes
+                wrongMoves++;
+                
+                // En mode survie, perdre une vie
+                if (gameMode === 'survival') {
+                    lives--;
+                    if (lives <= 0) {
+                        setTimeout(() => {
+                            showGameOver('lives');
+                        }, 1000);
+                        return;
+                    }
+                }
+                
+                card1.classList.add('wrong');
+                card2.classList.add('wrong');
+                
+                console.log(`❌ Pas de match: ${card1.dataset.symbol} (${card1.dataset.color}) ≠ ${card2.dataset.symbol} (${card2.dataset.color})`);
+                
+                setTimeout(() => {
+                    // Retourner les cartes face cachée
+                    card1.classList.remove('flipped', 'wrong');
+                    card2.classList.remove('flipped', 'wrong');
+                    
+                    // Remettre l'affichage normal (dos de carte)
+                    const cardFront1 = card1.querySelector('.card-front');
+                    const cardBack1 = card1.querySelector('.card-back');
+                    const cardFront2 = card2.querySelector('.card-front');
+                    const cardBack2 = card2.querySelector('.card-back');
+                    
+                    // NETTOYER COMPLÈTEMENT tous les styles des cartes
+                    cardFront1.style.cssText = 'display: none; align-items: center; justify-content: center;';
+                    cardFront1.textContent = '';
+                    cardBack1.style.display = 'flex';
+                    
+                    cardFront2.style.cssText = 'display: none; align-items: center; justify-content: center;';
+                    cardFront2.textContent = '';
+                    cardBack2.style.display = 'flex';
+                    
+                    // NETTOYER COMPLÈTEMENT les styles des cartes elles-mêmes
+                    card1.style.cssText = '';
+                    card1.className = 'memory-card';
+                    card2.style.cssText = '';
+                    card2.className = 'memory-card';
+                    
+                    // Remettre les styles de base des cartes
+                    card1.style.pointerEvents = 'auto';
+                    card1.style.cursor = 'pointer';
+                    card2.style.pointerEvents = 'auto';
+                    card2.style.cursor = 'pointer';
+                    
+                    flippedCards = [];
+                }, 600);
+            }
+            
+            updateStats();
+        }
+
+        function updateStats() {
+            const t = translations[currentLanguage];
+            document.getElementById('scoreValue').textContent = totalScore + gameScore;
+            document.getElementById('movesValue').textContent = moves;
+            
+            // Calculer le nombre total de paires dans la grille actuelle
+            const totalCards = gridSize.rows * gridSize.cols;
+            const totalPairsInGrid = totalCards / 2;
+            
+            document.getElementById('pairsValue').textContent = `${matchedPairs}/${totalPairsInGrid}`;
+            document.getElementById('gameNumberValue').textContent = `${currentGameNumber}/${maxGamesPerLevel}`;
+            document.getElementById('streakValue').textContent = streak;
+            
+            // Mettre à jour la barre de progression
+            const progress = (currentGameNumber / maxGamesPerLevel) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+            
+            // Mettre à jour l'affichage des vies
+            if (gameMode === 'survival') {
+                let livesDisplay = '';
+                for (let i = 0; i < lives; i++) {
+                    livesDisplay += '❤️';
+                }
+                for (let i = lives; i < 3; i++) {
+                    livesDisplay += '💔';
+                }
+                document.getElementById('livesValue').textContent = livesDisplay;
+                document.getElementById('livesDisplay').style.display = 'block';
+            } else {
+                document.getElementById('livesDisplay').style.display = 'none';
+            }
+        }
+
+        function startTimer() {
+            if (gameTimer) clearInterval(gameTimer);
+            
+            gameTimer = setInterval(() => {
+                if (!isPaused && startTime) {
+                    const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                    
+                    if (gameMode === 'timed' && timeLimit > 0) {
+                        // Mode contre-la-montre : décompte
+                        const remaining = timeLimit - elapsed;
+                        if (remaining <= 0) {
+                            // Temps écoulé !
+                            showGameOver('timeUp');
+                            return;
+                        }
+                        const minutes = Math.floor(remaining / 60).toString().padStart(2, '0');
+                        const seconds = (remaining % 60).toString().padStart(2, '0');
+                        document.getElementById('timeValue').textContent = `${minutes}:${seconds}`;
+                        
+                        // Changer la couleur quand il reste moins de 30 secondes
+                        if (remaining <= 30) {
+                            document.getElementById('timeValue').style.color = '#ff0000';
+                            document.getElementById('timeValue').style.animation = 'pulse 1s infinite';
+                        }
+                    } else {
+                        // Mode normal : compte
+                        const minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
+                        const seconds = (elapsed % 60).toString().padStart(2, '0');
+                        document.getElementById('timeValue').textContent = `${minutes}:${seconds}`;
+                    }
+                }
+            }, 1000);
+        }
+
+        function togglePause() {
+            isPaused = !isPaused;
+            
+            if (isPaused) {
+                gameBoard.forEach(card => card.style.pointerEvents = 'none');
+            } else {
+                gameBoard.forEach(card => {
+                    if (!card.classList.contains('matched')) {
+                        card.style.pointerEvents = 'auto';
+                    }
+                });
+            }
+            
+            updateLanguage();
+        }
+
+        function resetGame() {
+            if (gameTimer) clearInterval(gameTimer);
+            currentGameNumber = 1;
+            totalScore = 0;
+            streak = 0;
+            newGame();
+        }
+
+        function showVictory() {
+            if (gameTimer) clearInterval(gameTimer);
+            
+            // Augmenter la série de victoires
+            streak++;
+            if (streak > maxStreak) maxStreak = streak;
+            
+            const t = translations[currentLanguage];
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            const minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
+            const seconds = (elapsed % 60).toString().padStart(2, '0');
+            
+            // Calculer les bonus
+            let performanceBonus = 0;
+            if (moves <= totalPairs * 1.2) { // Très efficace
+                performanceBonus = 500;
+            } else if (moves <= totalPairs * 1.5) { // Efficace
+                performanceBonus = 200;
+            } else if (moves <= totalPairs * 2) { // Correct
+                performanceBonus = 100;
+            }
+            
+            // Bonus de temps (mode chronométré)
+            let timeBonus = 0;
+            if (gameMode === 'timed' && timeLimit > 0) {
+                const remaining = timeLimit - elapsed;
+                timeBonus = Math.max(0, remaining * 10);
+            }
+            
+            // Bonus de série
+            let streakBonus = streak >= 5 ? streak * 100 : 0;
+            
+            // Ajouter tous les bonus au score
+            gameScore += performanceBonus + timeBonus + streakBonus;
+            totalScore += gameScore;
+            
+            // Nettoyer l'écran de victoire précédent
+            const victoryScreen = document.getElementById('victoryScreen');
+            const existingButtons = document.getElementById('victoryButtons');
+            existingButtons.innerHTML = '';
+            
+            // Supprimer les anciens éléments bonus
+            const oldBonus = victoryScreen.querySelectorAll('.bonus-display');
+            oldBonus.forEach(el => el.remove());
+            
+            document.getElementById('victoryTitle').textContent = t.victoryTitle;
+            document.getElementById('victoryScore').textContent = `${t.finalScore}: ${totalScore}`;
+            document.getElementById('victoryTime').textContent = `${t.time}: ${minutes}:${seconds}`;
+            document.getElementById('victoryMoves').textContent = `${t.moves}: ${moves}`;
+            
+            // Afficher les bonus
+            if (performanceBonus > 0 || timeBonus > 0 || streakBonus > 0) {
+                const bonusElement = document.createElement('div');
+                bonusElement.className = 'victory-stats bonus-display';
+                bonusElement.style.color = '#00ff00';
+                bonusElement.style.fontSize = '18px';
+                let bonusText = '';
+                if (performanceBonus > 0) bonusText += `🎯 Bonus Efficacité: +${performanceBonus}\n`;
+                if (timeBonus > 0) bonusText += `⏱️ Bonus Temps: +${timeBonus}\n`;
+                if (streakBonus > 0) bonusText += `🔥 Bonus Série: +${streakBonus}`;
+                bonusElement.textContent = bonusText;
+                document.getElementById('victoryMoves').parentNode.appendChild(bonusElement);
+            }
+            
+            // Mettre à jour la progression du niveau
+            levelProgress[difficulty].completed = currentGameNumber;
+            
+            // Boutons selon la progression
+            if (currentGameNumber < maxGamesPerLevel) {
+                // Jeu suivant disponible
+                existingButtons.innerHTML = `
+                    <button class="btn" onclick="nextGame()" style="margin-top: 30px; background: linear-gradient(45deg, #00ff00, #00cc00);">${t.nextGame} (${currentGameNumber + 1}/${maxGamesPerLevel})</button>
+                    <button class="btn" onclick="newGame(); document.getElementById('victoryScreen').style.display='none'" style="margin-top: 10px; background: linear-gradient(45deg, #ff6400, #ff8c00);">Recommencer ce Jeu</button>
+                `;
+            } else {
+                // Niveau terminé !
+                showLevelComplete();
+                return;
+            }
+            
+            document.getElementById('victoryScreen').style.display = 'flex';
+            saveProgress();
+        }
+
+        function showLevelComplete() {
+            const t = translations[currentLanguage];
+            document.getElementById('victoryTitle').textContent = '🏆 ' + t.levelComplete + ' 🏆';
+            
+            const levels = ['easy', 'medium', 'hard'];
+            const currentIndex = levels.indexOf(difficulty);
+            
+            const existingButtons = document.getElementById('victoryButtons');
+            existingButtons.innerHTML = `
+                <div style="color: #ffff00; font-size: 24px; margin: 20px 0;">Félicitations ! Vous avez terminé les 20 jeux du niveau ${difficulty.toUpperCase()} !</div>
+                <div style="color: #00ffff; font-size: 18px; margin: 10px 0;">Score Total: ${totalScore}</div>
+                <div style="color: #ff00ff; font-size: 18px; margin: 10px 0;">Série Maximale: ${maxStreak}</div>
+            `;
+            
+            if (currentIndex < levels.length - 1) {
+                existingButtons.innerHTML += `<button class="btn" onclick="unlockNextLevel()" style="margin: 10px; background: linear-gradient(45deg, #00ff00, #00cc00);">${t.nextLevel}</button>`;
+            } else {
+                // Tous les niveaux terminés !
+                existingButtons.innerHTML += `<div style="color: #ffff00; font-size: 28px; margin: 20px 0;">🎉 ${t.gameComplete} ! 🎉</div>`;
+                showAchievement('🎉 Maître du Memory Quantique !', 'Vous avez terminé TOUS les niveaux !');
+            }
+            
+            existingButtons.innerHTML += `<button class="btn" onclick="restartLevel()" style="margin: 10px;">Recommencer ce Niveau</button>`;
+            
+            document.getElementById('victoryScreen').style.display = 'flex';
+            saveProgress();
+        }
+
+        function nextGame() {
+            currentGameNumber++;
+            document.getElementById('victoryScreen').style.display = 'none';
+            newGame();
+            setTimeout(() => {
+                startGame();
+            }, 500);
+        }
+
+        function unlockNextLevel() {
+            const levels = ['easy', 'medium', 'hard'];
+            const currentIndex = levels.indexOf(difficulty);
+            if (currentIndex < levels.length - 1) {
+                setDifficulty(levels[currentIndex + 1]);
+            }
+            document.getElementById('victoryScreen').style.display = 'none';
+        }
+
+        function restartLevel() {
+            currentGameNumber = 1;
+            levelProgress[difficulty].completed = 0;
+            document.getElementById('victoryScreen').style.display = 'none';
+            newGame();
+        }
+
+        function showGameOver(reason = 'lives') {
+            if (gameTimer) clearInterval(gameTimer);
+            
+            // Réinitialiser la série
+            streak = 0;
+            
+            const t = translations[currentLanguage];
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            const minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
+            const seconds = (elapsed % 60).toString().padStart(2, '0');
+            
+            // Nettoyer l'écran précédent
+            const existingButtons = document.getElementById('victoryButtons');
+            existingButtons.innerHTML = '';
+            
+            if (reason === 'timeUp') {
+                document.getElementById('victoryTitle').textContent = t.timeUp;
+            } else {
+                document.getElementById('victoryTitle').textContent = t.gameOver;
+            }
+            
+            document.getElementById('victoryScore').textContent = `${t.finalScore}: ${totalScore}`;
+            document.getElementById('victoryTime').textContent = `${t.time}: ${minutes}:${seconds}`;
+            document.getElementById('victoryMoves').textContent = `${t.moves}: ${moves}`;
+            
+            existingButtons.innerHTML = `
+                <button class="btn" onclick="newGame(); document.getElementById('victoryScreen').style.display='none'" style="margin-top: 30px;">Recommencer</button>
+                <button class="btn" onclick="resetGame(); document.getElementById('victoryScreen').style.display='none'" style="margin-top: 10px; background: linear-gradient(45deg, #ff6400, #ff8c00);">Nouveau Niveau</button>
+            `;
+            
+            document.getElementById('victoryScreen').style.display = 'flex';
+        }
+
+        function showAIHint() {
+            const t = translations[currentLanguage];
+            const suggestions = t.aiSuggestions;
+            const randomSuggestion = suggestions[Math.floor(Math.random() * suggestions.length)];
+            document.getElementById('aiSuggestion').textContent = randomSuggestion;
+        }
+
+        function showRules() {
+            document.getElementById('rulesModal').style.display = 'flex';
+        }
+
+        function closeRules() {
+            document.getElementById('rulesModal').style.display = 'none';
+        }
+
+        function showAchievement(title, message) {
+            const achievement = document.createElement('div');
+            achievement.className = 'achievement-popup';
+            achievement.innerHTML = `
+                <h3 style="color: #000; font-size: 24px; margin: 0 0 10px 0;">${title}</h3>
+                <p style="color: #000; font-size: 16px; margin: 0;">${message}</p>
+            `;
+            document.body.appendChild(achievement);
+            
+            setTimeout(() => {
+                achievement.remove();
+            }, 3000);
+        }
+
+        function saveProgress() {
+            const progress = {
+                levelProgress: levelProgress,
+                totalScore: totalScore,
+                maxStreak: maxStreak,
+                currentGameNumber: currentGameNumber,
+                difficulty: difficulty
+            };
+            localStorage.setItem('memoryQuantique2077', JSON.stringify(progress));
+        }
+
+        function loadProgress() {
+            const saved = localStorage.getItem('memoryQuantique2077');
+            if (saved) {
+                const progress = JSON.parse(saved);
+                levelProgress = progress.levelProgress || levelProgress;
+                totalScore = progress.totalScore || 0;
+                maxStreak = progress.maxStreak || 0;
+                currentGameNumber = progress.currentGameNumber || 1;
+                if (progress.difficulty) {
+                    setDifficulty(progress.difficulty);
+                }
+            }
+        }
+
+        function closePlatform() {
+            console.debug('jeux2: closePlatform called');
+            try{
+                if (window.parent && window.parent !== window) {
+                    window.parent.postMessage({ action: 'close', reason: 'user-initiated', source: 'jeux2' }, '*');
+                    return;
+                }
+            }catch(e){}
+            try{
+                if (window.opener && !window.opener.closed) {
+                    try{ window.opener.postMessage({ action: 'child-closed', source: 'jeux2' }, '*'); }catch(e){}
+                    try{ window.close(); }catch(e){}
+                    return;
+                }
+            }catch(e){}
+            try{ window.location.href = new URL('./brainova.html', window.location.href).href; }catch(e){ try{ window.location.href = './brainova.html'; }catch(e){} }
+        }
+
+        // Démarrer le jeu
+        init();
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98b7dd3580d189c7',t:'MTc1OTk0OTg0OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
