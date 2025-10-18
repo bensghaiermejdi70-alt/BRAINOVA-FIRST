@@ -1,0 +1,2541 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧩 Neural Puzzle Master - IA Futuriste</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        /* Particules d'arrière-plan futuristes */
+        .neural-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .neural-particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: #00ffff;
+            border-radius: 50%;
+            animation: neuralFloat 8s infinite linear;
+            box-shadow: 0 0 6px #00ffff;
+        }
+
+        @keyframes neuralFloat {
+            0% {
+                transform: translateY(100vh) translateX(0) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-10vh) translateX(100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Grille de fond cyberpunk */
+        .cyber-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(0, 255, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 255, 0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+            z-index: 1;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        /* Container principal */
+        .neural-puzzle-container {
+            position: relative;
+            z-index: 10;
+            display: grid;
+            grid-template-columns: 250px 1fr 250px;
+            gap: 20px;
+            min-height: 100vh;
+            padding: 15px;
+            padding-top: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .left-panel, .right-panel {
+            background: linear-gradient(145deg, 
+                rgba(26, 26, 46, 0.95) 0%,
+                rgba(22, 33, 62, 0.95) 50%,
+                rgba(15, 15, 35, 0.95) 100%);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 20px;
+            height: fit-content;
+            box-shadow: 
+                0 20px 40px rgba(0, 0, 0, 0.5),
+                0 0 80px rgba(0, 255, 255, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            animation: panelGlow 3s ease-in-out infinite alternate;
+        }
+
+        .game-panel {
+            background: linear-gradient(145deg, 
+                rgba(26, 26, 46, 0.95) 0%,
+                rgba(22, 33, 62, 0.95) 50%,
+                rgba(15, 15, 35, 0.95) 100%);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 25px;
+            width: 100%;
+            height: fit-content;
+            box-shadow: 
+                0 20px 40px rgba(0, 0, 0, 0.5),
+                0 0 80px rgba(0, 255, 255, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            animation: panelGlow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes panelGlow {
+            from { 
+                box-shadow: 
+                    0 25px 50px rgba(0, 0, 0, 0.5),
+                    0 0 100px rgba(0, 255, 255, 0.1),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            }
+            to { 
+                box-shadow: 
+                    0 25px 50px rgba(0, 0, 0, 0.5),
+                    0 0 120px rgba(0, 255, 255, 0.2),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            }
+        }
+
+        /* En-tête du jeu */
+        .neural-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(0, 255, 255, 0.3);
+        }
+
+        .neural-title {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .neural-title h1 {
+            color: #00ffff;
+            margin: 0;
+            font-size: 24px;
+            font-weight: 700;
+            text-shadow: 0 0 20px rgba(0, 255, 255, 0.6);
+            animation: titlePulse 2s infinite alternate;
+        }
+
+        @keyframes titlePulse {
+            from { text-shadow: 0 0 20px rgba(0, 255, 255, 0.6); }
+            to { text-shadow: 0 0 30px rgba(0, 255, 255, 0.9); }
+        }
+
+        .neural-icon {
+            font-size: 32px;
+            animation: iconSpin 4s linear infinite;
+            filter: drop-shadow(0 0 10px #00ffff);
+        }
+
+        @keyframes iconSpin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .ai-badge {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7aa);
+            background-size: 200% 200%;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            animation: badgeShine 3s ease-in-out infinite;
+            box-shadow: 0 0 15px rgba(78, 205, 196, 0.5);
+        }
+
+        @keyframes badgeShine {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .close-btn {
+            background: rgba(255, 0, 0, 0.2);
+            border: 2px solid rgba(255, 0, 0, 0.5);
+            color: #ff6b6b;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-btn:hover {
+            background: rgba(255, 0, 0, 0.4);
+            transform: scale(1.1) rotate(90deg);
+            box-shadow: 0 0 20px rgba(255, 107, 107, 0.6);
+        }
+
+        /* Futuristic mini language selector (neon glass) */
+        .mini-lang-button {
+            --glass: rgba(0,255,255,0.06);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 14px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+            border: 1px solid rgba(0,255,255,0.12);
+            color: #aafcff;
+            backdrop-filter: blur(6px) saturate(120%);
+            box-shadow: 0 6px 18px rgba(0,255,255,0.06), 0 0 18px rgba(0,255,255,0.08) inset;
+            cursor: pointer;
+            font-weight: 700;
+            text-shadow: 0 0 6px rgba(0,255,255,0.12);
+            transition: transform 160ms ease, box-shadow 160ms ease;
+        }
+
+        .mini-lang-button:hover { transform: translateY(-2px) scale(1.02); }
+
+        .mini-lang-flag { font-size: 18px; filter: drop-shadow(0 0 6px rgba(0,255,255,0.2)); }
+        .mini-lang-label { font-size: 13px; color: #e6ffff; }
+        .mini-lang-chevron { margin-left: 6px; font-size: 12px; opacity: 0.9; }
+
+        .mini-lang-menu {
+            position: absolute;
+            right: 18px;
+            top: 64px;
+            min-width: 180px;
+            background: linear-gradient(180deg, rgba(10,10,20,0.95), rgba(8,8,18,0.98));
+            border: 1px solid rgba(0,255,255,0.08);
+            border-radius: 12px;
+            padding: 8px;
+            display: none;
+            flex-direction: column;
+            gap: 6px;
+            z-index: 9999;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.6), 0 0 30px rgba(0,255,255,0.04);
+        }
+
+        .mini-lang-menu.active { display: flex; animation: menuPop .16s ease both; }
+
+        .mini-lang-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 10px;
+            border-radius: 8px;
+            color: #cfffff;
+            cursor: pointer;
+            transition: background 120ms ease, transform 120ms ease;
+        }
+
+        .mini-lang-item:hover { background: rgba(0,255,255,0.02); transform: translateX(6px); }
+
+        @keyframes menuPop {
+            from { transform: translateY(-6px) scale(0.98); opacity: 0; }
+            to { transform: translateY(0) scale(1); opacity: 1; }
+        }
+
+        /* En-tête des contrôles de jeu */
+        .game-header-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            border: 2px solid rgba(0, 255, 255, 0.2);
+        }
+
+        /* Sélecteur de langue */
+        .language-selector {
+            position: relative;
+        }
+
+        .language-btn {
+            background: linear-gradient(145deg, #6c5ce7, #5f3dc4);
+            position: relative;
+            z-index: 10;
+        }
+
+        .language-btn:hover {
+            background: linear-gradient(145deg, #7c6ce7, #6f4dc4);
+        }
+
+        .language-menu {
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(145deg, 
+                rgba(26, 26, 46, 0.98) 0%,
+                rgba(22, 33, 62, 0.98) 50%,
+                rgba(15, 15, 35, 0.98) 100%);
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            border-radius: 15px;
+            padding: 10px;
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            min-width: 180px;
+            z-index: 20;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            animation: slideDown 0.3s ease-out;
+        }
+
+        .language-menu.active {
+            display: flex;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+
+        .language-option {
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            color: #00ffff;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 12px;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .language-option:hover {
+            background: rgba(0, 255, 255, 0.2);
+            transform: translateX(5px);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+        }
+
+        .language-option.selected {
+            background: rgba(0, 255, 255, 0.3);
+            border-color: rgba(0, 255, 255, 0.6);
+        }
+
+        /* Bouton Pause */
+        .pause-control {
+            position: relative;
+        }
+
+        .pause-btn {
+            background: linear-gradient(145deg, #e74c3c, #c0392b);
+            position: relative;
+            z-index: 10;
+            min-width: 120px;
+        }
+
+        .pause-btn:hover {
+            background: linear-gradient(145deg, #f74c3c, #d0392b);
+        }
+
+        .pause-btn.paused {
+            background: linear-gradient(145deg, #27ae60, #229954);
+        }
+
+        .pause-btn.paused:hover {
+            background: linear-gradient(145deg, #37be70, #339964);
+        }
+
+        /* Statistiques horizontales */
+        .neural-stats-horizontal {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .neural-stats-horizontal .stat-item {
+            background: rgba(0, 255, 255, 0.1);
+            padding: 8px 15px;
+            border-radius: 12px;
+            text-align: center;
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+            min-width: 80px;
+        }
+
+        .neural-stats-horizontal .stat-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.2), transparent);
+            animation: statScan 3s linear infinite;
+        }
+
+        @keyframes statScan {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .neural-stats-horizontal .stat-label {
+            display: block;
+            color: #888;
+            font-size: 10px;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .neural-stats-horizontal .stat-value {
+            display: block;
+            color: #00ffff;
+            font-size: 16px;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.6);
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Statut IA */
+        .neural-ai-status {
+            margin-bottom: 15px;
+            text-align: center;
+            min-height: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .ai-thinking {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            color: #4ecdc4;
+            font-size: 16px;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            background: rgba(78, 205, 196, 0.1);
+            padding: 10px 20px;
+            border-radius: 25px;
+            border: 1px solid rgba(78, 205, 196, 0.3);
+        }
+
+        .ai-thinking.active {
+            opacity: 1;
+        }
+
+        .ai-pulse {
+            width: 12px;
+            height: 12px;
+            background: #4ecdc4;
+            border-radius: 50%;
+            animation: aiPulse 1.5s infinite;
+            box-shadow: 0 0 10px #4ecdc4;
+        }
+
+        @keyframes aiPulse {
+            0%, 100% { 
+                transform: scale(1); 
+                opacity: 1; 
+            }
+            50% { 
+                transform: scale(1.5); 
+                opacity: 0.5; 
+            }
+        }
+
+        /* Plateaux de jeu côte à côte */
+        .game-boards-container {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+
+        .board-section {
+            text-align: center;
+            flex: 1;
+        }
+
+        .reference-board {
+            width: 300px;
+            height: 300px;
+            border-radius: 15px;
+            border: 3px solid rgba(0, 255, 255, 0.5);
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+            animation: referenceGlow 3s ease-in-out infinite alternate;
+        }
+
+        .puzzle-board {
+            width: 300px;
+            height: 300px;
+            display: grid;
+            gap: 2px;
+            border-radius: 15px;
+            border: 3px solid rgba(255, 107, 107, 0.5);
+            box-shadow: 0 0 20px rgba(255, 107, 107, 0.3);
+            background: rgba(0, 0, 0, 0.3);
+            padding: 5px;
+            margin: 0 auto;
+            transition: opacity 0.3s ease;
+        }
+
+        .puzzle-board.grid-4x4 {
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(4, 1fr);
+        }
+
+        .puzzle-board.grid-5x5 {
+            grid-template-columns: repeat(5, 1fr);
+            grid-template-rows: repeat(5, 1fr);
+        }
+
+        .puzzle-board.grid-6x6 {
+            grid-template-columns: repeat(6, 1fr);
+            grid-template-rows: repeat(6, 1fr);
+        }
+
+        .puzzle-piece {
+            background-size: 300px 300px;
+            background-repeat: no-repeat;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .puzzle-piece:hover {
+            transform: scale(1.05);
+            border-color: rgba(0, 255, 255, 0.8);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+            z-index: 10;
+        }
+
+        .puzzle-piece.selected {
+            border-color: rgba(255, 215, 0, 1);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+            transform: scale(1.1);
+            z-index: 20;
+        }
+
+        .puzzle-piece.correct {
+            border-color: rgba(0, 255, 0, 0.8);
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.5);
+        }
+
+        @keyframes referenceGlow {
+            from { box-shadow: 0 0 20px rgba(0, 255, 255, 0.3); }
+            to { box-shadow: 0 0 30px rgba(0, 255, 255, 0.6); }
+        }
+
+        .board-label {
+            color: #00ffff;
+            font-size: 14px;
+            margin-top: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.6);
+            font-weight: bold;
+        }
+
+        .puzzle-label {
+            color: #ff6b6b;
+            text-shadow: 0 0 10px rgba(255, 107, 107, 0.6);
+        }
+
+        /* Contrôles du jeu */
+        .neural-controls {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+
+        .panel-section {
+            margin-bottom: 20px;
+        }
+
+        .panel-title {
+            color: #00ffff;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.6);
+            border-bottom: 2px solid rgba(0, 255, 255, 0.3);
+            padding-bottom: 8px;
+        }
+
+        .neural-btn {
+            padding: 12px 18px;
+            background: linear-gradient(145deg, #4ecdc4, #45b7aa);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .neural-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .neural-btn:hover::before {
+            left: 100%;
+        }
+
+        .neural-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(78, 205, 196, 0.4);
+            background: linear-gradient(145deg, #5fd4d4, #4ecdc4);
+        }
+
+        .neural-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .neural-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Fonctionnalités avancées */
+        .advanced-features {
+            margin-bottom: 20px;
+        }
+
+        .feature-row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .stats-horizontal {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: space-between;
+        }
+
+        .stats-horizontal .neural-btn {
+            flex: 1;
+            min-width: 120px;
+            font-size: 10px;
+            padding: 8px 10px;
+        }
+
+        .feature-btn {
+            font-size: 11px;
+            padding: 10px 12px;
+            background: linear-gradient(145deg, #6c5ce7, #5f3dc4);
+        }
+
+        .feature-btn:hover {
+            background: linear-gradient(145deg, #7c6ce7, #6f4dc4);
+        }
+
+        .feature-btn.active {
+            background: linear-gradient(145deg, #00b894, #00a085);
+        }
+
+        /* Panneau d'analyse */
+        .analysis-panel {
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .analysis-panel.active {
+            display: block;
+            animation: slideDownPanel 0.3s ease-out;
+        }
+
+        @keyframes slideDownPanel {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .analysis-text {
+            color: #00ffff;
+            font-size: 14px;
+            line-height: 1.4;
+            margin-bottom: 10px;
+        }
+
+        .difficulty-indicator {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 8px;
+            font-size: 10px;
+            font-weight: bold;
+            margin-left: 5px;
+        }
+
+        .difficulty-easy { background: #00b894; }
+        .difficulty-normal { background: #fdcb6e; color: #2d3436; }
+        .difficulty-hard { background: #e17055; }
+        .difficulty-expert { background: #d63031; }
+
+        /* Barre de progression */
+        .neural-progress {
+            text-align: center;
+        }
+
+        .progress-container {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 15px;
+            padding: 5px;
+            margin-bottom: 15px;
+            border: 2px solid rgba(0, 255, 255, 0.3);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4ecdc4, #00ffff, #4ecdc4);
+            background-size: 200% 100%;
+            width: 0%;
+            transition: width 0.8s ease;
+            border-radius: 10px;
+            animation: progressShine 2s linear infinite;
+            position: relative;
+        }
+
+        @keyframes progressShine {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: progressGlow 1.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes progressGlow {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .progress-text {
+            color: #00ffff;
+            font-size: 16px;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.6);
+        }
+
+        /* Effets de victoire */
+        .victory-effect {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .victory-particle {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: #00ffff;
+            border-radius: 50%;
+            animation: victoryBurst 2s ease-out forwards;
+        }
+
+        @keyframes victoryBurst {
+            0% {
+                transform: scale(0) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .neural-puzzle-container {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .left-panel, .right-panel {
+                display: none;
+            }
+            
+            .game-boards-container {
+                flex-direction: column;
+                align-items: center;
+                gap: 20px;
+            }
+            
+            .reference-board, .puzzle-board {
+                width: 280px;
+                height: 280px;
+            }
+            
+            .puzzle-piece {
+                background-size: 280px 280px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .game-panel {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            .game-header-controls {
+                flex-direction: column;
+                gap: 15px;
+                align-items: stretch;
+            }
+            
+            .neural-stats-horizontal {
+                justify-content: space-between;
+                gap: 10px;
+            }
+            
+            .neural-stats-horizontal .stat-item {
+                min-width: 60px;
+                padding: 6px 10px;
+            }
+            
+            .neural-controls {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+            
+            .neural-title h1 {
+                font-size: 22px;
+            }
+            
+            .game-boards-container {
+                gap: 15px;
+            }
+            
+            .reference-board, .puzzle-board {
+                width: 250px;
+                height: 250px;
+            }
+            
+            .puzzle-piece {
+                background-size: 250px 250px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .neural-stats-horizontal {
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            
+            .neural-stats-horizontal .stat-item {
+                flex: 1;
+                min-width: 70px;
+            }
+            
+            .neural-stats-horizontal .stat-value {
+                font-size: 14px;
+            }
+            
+            .reference-board, .puzzle-board {
+                width: 220px;
+                height: 220px;
+            }
+            
+            .puzzle-piece {
+                background-size: 220px 220px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Particules d'arrière-plan -->
+    <div class="neural-particles" id="neuralParticles"></div>
+    
+    <!-- Grille cyberpunk -->
+    <div class="cyber-grid"></div>
+    
+    <!-- Container principal -->
+    <div class="neural-puzzle-container">
+        <!-- Panneau gauche -->
+        <div class="left-panel">
+            <div class="panel-section">
+                <div class="panel-title">🎮 Contrôles</div>
+                <div class="neural-controls">
+                    <button class="neural-btn" onclick="getAIHint()" id="hintBtn">
+                        💡 Indice IA
+                    </button>
+                    <button class="neural-btn" onclick="changeImage()">
+                        🖼️ Nouvelle Image
+                    </button>
+                    <button class="neural-btn" onclick="aiSolvePuzzle()" id="solveBtn">
+                        🤖 IA Résout
+                    </button>
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <div class="panel-title">⚙️ Options</div>
+                <div class="neural-controls">
+                    <button class="neural-btn feature-btn" onclick="changeGridSize()" id="gridSizeBtn">
+                        🎯 Niveau: 4x4 (16)
+                    </button>
+                    <button class="neural-btn feature-btn" onclick="toggleAutoSolve()" id="autoSolveBtn">
+                        ⚡ Auto-Résolution
+                    </button>
+                    <button class="neural-btn feature-btn" onclick="changeDifficulty()" id="difficultyBtn">
+                        ⚙️ Difficulté: Normal
+                    </button>
+                    <button class="neural-btn feature-btn" onclick="saveGame()" id="saveBtn">
+                        💾 Sauvegarder
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panneau central -->
+        <div class="game-panel">
+            <!-- En-tête -->
+            <div class="neural-header">
+                <div class="neural-title">
+                    <span class="neural-icon">🧩</span>
+                    <h1>Neural Puzzle Master</h1>
+                    <span class="ai-badge">🤖 IA AVANCÉE</span>
+                </div>
+                <!-- futuristic mini language selector + red close button -->
+                <div style="position:relative;display:flex;align-items:center;gap:6px">
+                    <button id="miniLangBtn" class="mini-lang-button" aria-haspopup="true" aria-expanded="false" title="Langue">
+                        <span class="mini-lang-flag" id="miniLangFlag">🇫🇷</span>
+                        <span class="mini-lang-label" id="miniLangLabel">Français</span>
+                        <span class="mini-lang-chevron">▾</span>
+                    </button>
+
+                    <div id="miniLangMenu" class="mini-lang-menu" role="menu" aria-label="Choisir la langue">
+                        <div class="mini-lang-item" data-lang="fr">🇫🇷 Français</div>
+                        <div class="mini-lang-item" data-lang="en">🇺🇸 English</div>
+                        <div class="mini-lang-item" data-lang="ar">🇸🇦 العربية</div>
+                        <div class="mini-lang-item" data-lang="es">🇪🇸 Español</div>
+                        <div class="mini-lang-item" data-lang="de">🇩🇪 Deutsch</div>
+                        <div class="mini-lang-item" data-lang="zh">🇨🇳 中文</div>
+                    </div>
+
+                    <!-- hidden select for accessibility and progressive enhancement -->
+                    <select id="miniLangSelect" aria-hidden="true" style="position:absolute;left:-9999px;top:auto;" tabindex="-1">
+                        <option value="fr">Français</option>
+                        <option value="en">English</option>
+                        <option value="ar">العربية</option>
+                        <option value="es">Español</option>
+                        <option value="de">Deutsch</option>
+                        <option value="zh">中文</option>
+                    </select>
+                    <!-- Red close button removed; overlay-aware closeToBrainova() remains available -->
+
+                    <!-- In-game fallback link to Brainova removed; parent overlay still accepts postMessage close requests -->
+
+                    <script>
+                        // Show the Brainova link only when the page is standalone (not inside an overlay iframe).
+                        (function(){
+                            function getFallbackHref(){
+                                try{
+                                    // Prefer origin-based absolute when served over http(s)
+                                    if(location && location.protocol && (location.protocol.indexOf('http') === 0)){
+                                        return (location.origin || (location.protocol + '//' + location.host)) + '/brainova.html';
+                                    }
+                                    // Otherwise try a relative brainova.html next to current document
+                                    try{ return new URL('brainova.html', location.href).href; }catch(e){}
+                                    // Final fallbacks
+                                    return './brainova.html';
+                                }catch(e){ return '/brainova.html'; }
+                            }
+
+                            // In-game Brainova link removed; parent overlay still accepts postMessage close requests
+                        })();
+
+                        // Robust close handler: send postMessage to parent, attempt OverlayManager.close(),
+                        // and force a top-level navigation to /brainova.html after a short timeout if nothing closed the overlay.
+                        function closeToBrainova(){
+                            try{
+                                if(window.parent && window.parent !== window){
+                                    try{ window.parent.postMessage({ action: 'close', reason: 'user-initiated', source: 'jeux3' }, '*'); }catch(e){}
+                                    try{
+                                        // Try to call OverlayManager.close() if parent exposes it
+                                        if(window.parent.OverlayManager && typeof window.parent.OverlayManager.close === 'function'){
+                                            window.parent.OverlayManager.close();
+                                            return;
+                                        }
+                                    }catch(e){}
+                                    // Wait briefly; if overlay is not closed, force top navigation to the origin-based Brainova URL
+                                    setTimeout(function(){
+                                        try{ window.top.location.href = new URL('/brainova.html', window.location.origin).href; }catch(e){ window.location.href = '/brainova.html'; }
+                                    }, 350);
+                                    return;
+                                }
+                            }catch(e){}
+                            // Standalone fallback: navigate immediately using origin-based absolute URL
+                            try{ window.location.href = new URL('/brainova.html', window.location.origin).href; }catch(e){ window.location.href = '/brainova.html'; }
+                        }
+                    </script>
+                </div>
+            </div>
+
+            <!-- En-tête avec sélecteur de langue et pause -->
+            <div class="game-header-controls">
+                <!-- Sélecteur de langue -->
+                <div class="language-selector">
+                    <button class="neural-btn language-btn" onclick="toggleLanguageMenu()" id="languageBtn">
+                        🌐 Français
+                    </button>
+                    <div class="language-menu" id="languageMenu">
+                        <button class="language-option" onclick="changeLanguage('fr')">🇫🇷 Français</button>
+                        <button class="language-option" onclick="changeLanguage('en')">🇺🇸 English</button>
+                        <button class="language-option" onclick="changeLanguage('ar')">🇸🇦 العربية</button>
+                        <button class="language-option" onclick="changeLanguage('es')">🇪🇸 Español</button>
+                        <button class="language-option" onclick="changeLanguage('de')">🇩🇪 Deutsch</button>
+                        <button class="language-option" onclick="changeLanguage('zh')">🇨🇳 中文</button>
+                    </div>
+                    <!-- Added visible <select> for simpler language switching -->
+                    <select id="languageSelect" aria-label="Sélecteur de langue" style="margin-left:12px;padding:8px;border-radius:8px;border:1px solid rgba(0,255,255,0.2);background:rgba(0,0,0,0.4);color:#00ffff;">
+                        <option value="fr">Français</option>
+                        <option value="en">English</option>
+                        <option value="ar">العربية</option>
+                        <option value="es">Español</option>
+                        <option value="de">Deutsch</option>
+                        <option value="zh">中文</option>
+                    </select>
+                </div>
+
+                <!-- Bouton Pause/Reprise -->
+                <div class="pause-control">
+                    <button class="neural-btn pause-btn" onclick="togglePause()" id="pauseBtn">
+                        ⏸️ Pause
+                    </button>
+                </div>
+                
+                <!-- Statistiques horizontales -->
+                <div class="neural-stats-horizontal">
+                    <div class="stat-item">
+                        <span class="stat-label">Niveau IA</span>
+                        <span class="stat-value" id="aiLevel">1</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Score</span>
+                        <span class="stat-value" id="neuralScore">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Mouvements</span>
+                        <span class="stat-value" id="moveCount">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Temps</span>
+                        <span class="stat-value" id="neuralTime">00:00</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Plateaux de jeu côte à côte -->
+            <div class="game-boards-container">
+                <div class="board-section">
+                    <canvas id="referenceImage" class="reference-board" width="300" height="300"></canvas>
+                    <div class="board-label">🖼️ Image Originale</div>
+                </div>
+                <div class="board-section">
+                    <div id="puzzleBoard" class="puzzle-board">
+                        <!-- Les cases du puzzle seront générées ici -->
+                    </div>
+                    <div class="board-label puzzle-label">🧩 Puzzle à Reconstituer</div>
+                </div>
+            </div>
+
+            <!-- Statut IA -->
+            <div class="neural-ai-status">
+                <div class="ai-thinking" id="aiThinking">
+                    <span class="ai-pulse"></span>
+                    <span id="aiMessage">IA en analyse...</span>
+                </div>
+            </div>
+
+            <!-- Barre de progression -->
+            <div class="neural-progress">
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                </div>
+                <span class="progress-text" id="progressText">0% complété</span>
+            </div>
+        </div>
+
+        <!-- Panneau droit -->
+        <div class="right-panel">
+            <div class="panel-section">
+                <div class="panel-title">🔍 Analyse IA</div>
+                <div class="stats-horizontal">
+                    <button class="neural-btn feature-btn" onclick="showOptimalPath()" id="pathBtn">
+                        🎯 Chemin Optimal
+                    </button>
+                    <button class="neural-btn feature-btn" onclick="analyzePosition()" id="analyzeBtn">
+                        🔍 Analyser Position
+                    </button>
+                    <button class="neural-btn feature-btn" onclick="showStatistics()" id="statsBtn">
+                        📊 Statistiques
+                    </button>
+                </div>
+            </div>
+
+            <!-- Panneau d'analyse -->
+            <div class="panel-section">
+                <div class="analysis-panel active" id="analysisPanel">
+                    <div class="analysis-text" id="analysisText">
+                        🤖 <span id="aiReadyText">L'IA est prête à analyser votre puzzle !</span><br><br>
+                        <span id="analysisInstructions">Utilisez les boutons ci-dessus pour obtenir des analyses détaillées de votre position actuelle.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Wire the visible language <select> to the existing changeLanguage(lang) function
+        (function(){
+            function isEmbedded(){
+                try { return window.parent && window.parent !== window; } catch(e) { return false; }
+            }
+
+            function hideInPageLanguageControls(){
+                // hide custom language menu and the fallback <select>
+                var menu = document.querySelectorAll('.language-selector');
+                menu.forEach(function(n){ n.style.display = 'none'; });
+                var sel = document.getElementById('languageSelect');
+                if(sel) sel.style.display = 'none';
+            }
+
+            function applyParentLanguageIfAny(){
+                // Parent platform stores selected language in 'brainovaLang'
+                var parentLang = localStorage.getItem('brainovaLang') || localStorage.getItem('neuralPuzzleLanguage');
+                if(parentLang && typeof changeLanguage === 'function'){
+                    // Only change if different
+                    if(gameState.currentLanguage !== parentLang){
+                        changeLanguage(parentLang);
+                    }
+                }
+            }
+
+            document.addEventListener('DOMContentLoaded', function(){
+                var sel = document.getElementById('languageSelect');
+
+                if(isEmbedded()){
+                    // When embedded in the platform, hide in-page language controls
+                    hideInPageLanguageControls();
+                    // Sync initial language from parent/localStorage
+                    applyParentLanguageIfAny();
+                }
+
+                if(!sel) return;
+
+                // set current language if gameState exists
+                try{ if(window.gameState && gameState.currentLanguage) sel.value = gameState.currentLanguage; }catch(e){}
+
+                sel.addEventListener('change', function(){
+                    var v = this.value;
+                    if(typeof changeLanguage === 'function'){
+                        changeLanguage(v);
+                    } else {
+                        console.log('changeLanguage not found, selected', v);
+                    }
+                    // update language button label if present
+                    var btn = document.getElementById('languageBtn');
+                    if(btn) btn.textContent = (v==='fr'? '🌐 Français' : v==='en'? '🌐 English' : v==='ar'? '🌐 العربية' : v==='es'? '🌐 Español' : v==='de'? '🌐 Deutsch' : '🌐 中文');
+                    // persist child-specific language as a fallback
+                    localStorage.setItem('neuralPuzzleLanguage', v);
+                });
+            });
+
+            // Listen to storage events so parent changing language updates the embedded game
+            window.addEventListener('storage', function(e){
+                if(!e) return;
+                if(e.key === 'brainovaLang' || e.key === 'neuralPuzzleLanguage'){
+                    var newLang = e.newValue;
+                    if(newLang && typeof changeLanguage === 'function'){
+                        changeLanguage(newLang);
+                    }
+                }
+            });
+
+            // Also listen for explicit postMessage from parent (fallback)
+            window.addEventListener('message', function(ev){
+                try{
+                    var data = ev.data || {};
+                    if(data && data.action === 'set-language' && data.lang){
+                        if(typeof changeLanguage === 'function') changeLanguage(data.lang);
+                    }
+                }catch(e){/* ignore */}
+            });
+        })();
+        // État du jeu
+        let gameState = {
+            board: [],
+            correctBoard: [],
+            selectedPiece: null,
+            moves: 0,
+            startTime: null,
+            timer: null,
+            aiLevel: 1,
+            score: 0,
+            isPlaying: false,
+            isSolving: false,
+            hintUsed: false,
+            autoSolve: false,
+            difficulty: 'normal',
+            optimalPath: [],
+            gameHistory: [],
+            currentImageIndex: 0,
+            imageChangeTimer: null,
+            currentImageData: null,
+            gridSize: 4,
+            currentLanguage: 'fr',
+            isPaused: false,
+            pausedTime: 0,
+            statistics: {
+                gamesPlayed: 0,
+                gamesWon: 0,
+                totalMoves: 0,
+                totalTime: 0,
+                bestScore: 0,
+                averageTime: 0
+            }
+        };
+
+        // Collection d'images variées
+        const puzzleImages = [
+            {
+                name: "Forêt enchantée",
+                type: "nature",
+                colors: ["#228B22", "#32CD32", "#006400", "#ADFF2F", "#9ACD32", "#8FBC8F", "#90EE90", "#98FB98"],
+                pattern: "enchanted_forest"
+            },
+            {
+                name: "Cascade cristalline",
+                type: "nature",
+                colors: ["#87CEEB", "#4682B4", "#B0E0E6", "#FFFFFF", "#708090", "#20B2AA", "#48D1CC", "#40E0D0"],
+                pattern: "crystal_waterfall"
+            },
+            {
+                name: "Champ de lavande",
+                type: "nature",
+                colors: ["#9370DB", "#8A2BE2", "#DDA0DD", "#E6E6FA", "#32CD32", "#9ACD32", "#ADFF2F", "#98FB98"],
+                pattern: "lavender_field"
+            },
+            {
+                name: "Nébuleuse colorée",
+                type: "space",
+                colors: ["#000000", "#4B0082", "#8A2BE2", "#FF1493", "#00CED1", "#FFD700", "#FF4500", "#FFFFFF"],
+                pattern: "nebula"
+            },
+            {
+                name: "Coucher de soleil",
+                type: "landscape",
+                colors: ["#FF4500", "#FF6347", "#FFD700", "#FFA500", "#FF8C00", "#DC143C", "#B22222", "#8B0000"],
+                pattern: "sunset"
+            }
+        ];
+
+        // Système de traduction complet
+        const translations = {
+            fr: {
+                title: "Maître des Puzzles Neuraux",
+                aiAdvanced: "IA AVANCÉE",
+                controls: "Contrôles",
+                hintAI: "Indice IA",
+                newImage: "Nouvelle Image",
+                aiSolve: "IA Résout",
+                options: "Options",
+                level: "Niveau",
+                autoSolve: "Auto-Résolution",
+                difficulty: "Difficulté",
+                save: "Sauvegarder",
+                stats: "Statistiques",
+                aiLevel: "Niveau IA",
+                score: "Score",
+                moves: "Mouvements",
+                time: "Temps",
+                originalImage: "Image Originale",
+                puzzleToSolve: "Puzzle à Reconstituer",
+                aiAnalysis: "Analyse IA",
+                optimalPath: "Chemin Optimal",
+                analyzePosition: "Analyser Position",
+                statistics: "Statistiques",
+                completed: "complété",
+                aiThinking: "IA en analyse...",
+                close: "Fermer",
+                language: "Langue",
+                solving: "Résolution...",
+                pause: "Pause",
+                resume: "Reprendre",
+                messages: {
+                    hintUsed: "Indice déjà utilisé pour ce puzzle !",
+                    wrongPiece: "La pièce en position {0} n'est pas à sa place !",
+                    allCorrect: "Toutes les pièces sont correctement placées !",
+                    newImageMsg: "Nouvelle image : {0}",
+                    puzzleSolved: "Puzzle résolu ! Score : {0}",
+                    aiSolved: "Puzzle résolu par l'IA !",
+                    gridChanged: "Grille changée : {0}x{0}",
+                    autoSolveOn: "Auto-résolution activée !",
+                    autoSolveOff: "Auto-résolution désactivée !",
+                    gameSaved: "Jeu sauvegardé !",
+                    gameLoaded: "Jeu chargé !",
+                    aiReady: "L'IA est prête à analyser votre puzzle !",
+                    gamePaused: "Jeu mis en pause",
+                    gameResumed: "Jeu repris"
+                }
+            },
+            en: {
+                title: "Neural Puzzle Master",
+                aiAdvanced: "ADVANCED AI",
+                controls: "Controls",
+                hintAI: "AI Hint",
+                newImage: "New Image",
+                aiSolve: "AI Solve",
+                options: "Options",
+                level: "Level",
+                autoSolve: "Auto-Solve",
+                difficulty: "Difficulty",
+                save: "Save",
+                stats: "Statistics",
+                aiLevel: "AI Level",
+                score: "Score",
+                moves: "Moves",
+                time: "Time",
+                originalImage: "Original Image",
+                puzzleToSolve: "Puzzle to Solve",
+                aiAnalysis: "AI Analysis",
+                optimalPath: "Optimal Path",
+                analyzePosition: "Analyze Position",
+                statistics: "Statistics",
+                completed: "completed",
+                aiThinking: "AI analyzing...",
+                close: "Close",
+                language: "Language",
+                solving: "Solving...",
+                pause: "Pause",
+                resume: "Resume",
+                messages: {
+                    hintUsed: "Hint already used for this puzzle!",
+                    wrongPiece: "Piece at position {0} is not in the right place!",
+                    allCorrect: "All pieces are correctly placed!",
+                    newImageMsg: "New image: {0}",
+                    puzzleSolved: "Puzzle solved! Score: {0}",
+                    aiSolved: "Puzzle solved by AI!",
+                    gridChanged: "Grid changed: {0}x{0}",
+                    autoSolveOn: "Auto-solve activated!",
+                    autoSolveOff: "Auto-solve deactivated!",
+                    gameSaved: "Game saved!",
+                    gameLoaded: "Game loaded!",
+                    aiReady: "AI is ready to analyze your puzzle!",
+                    gamePaused: "Game paused",
+                    gameResumed: "Game resumed"
+                }
+            },
+            ar: {
+                title: "سيد الألغاز العصبية",
+                aiAdvanced: "ذكاء اصطناعي متقدم",
+                controls: "التحكم",
+                hintAI: "تلميح الذكاء الاصطناعي",
+                newImage: "صورة جديدة",
+                aiSolve: "حل بالذكاء الاصطناعي",
+                options: "الخيارات",
+                level: "المستوى",
+                autoSolve: "الحل التلقائي",
+                difficulty: "الصعوبة",
+                save: "حفظ",
+                stats: "الإحصائيات",
+                aiLevel: "مستوى الذكاء الاصطناعي",
+                score: "النقاط",
+                moves: "الحركات",
+                time: "الوقت",
+                originalImage: "الصورة الأصلية",
+                puzzleToSolve: "اللغز المراد حله",
+                aiAnalysis: "تحليل الذكاء الاصطناعي",
+                optimalPath: "المسار الأمثل",
+                analyzePosition: "تحليل الموضع",
+                statistics: "الإحصائيات",
+                completed: "مكتمل",
+                aiThinking: "الذكاء الاصطناعي يحلل...",
+                close: "إغلاق",
+                language: "اللغة",
+                solving: "جاري الحل...",
+                pause: "إيقاف مؤقت",
+                resume: "استئناف",
+                messages: {
+                    gamePaused: "تم إيقاف اللعبة مؤقتاً",
+                    gameResumed: "تم استئناف اللعبة"
+                }
+            },
+            es: {
+                title: "Maestro de Rompecabezas Neurales",
+                aiAdvanced: "IA AVANZADA",
+                controls: "Controles",
+                hintAI: "Pista IA",
+                newImage: "Nueva Imagen",
+                aiSolve: "IA Resuelve",
+                options: "Opciones",
+                level: "Nivel",
+                autoSolve: "Auto-Resolución",
+                difficulty: "Dificultad",
+                save: "Guardar",
+                stats: "Estadísticas",
+                aiLevel: "Nivel IA",
+                score: "Puntuación",
+                moves: "Movimientos",
+                time: "Tiempo",
+                originalImage: "Imagen Original",
+                puzzleToSolve: "Rompecabezas a Resolver",
+                aiAnalysis: "Análisis IA",
+                optimalPath: "Camino Óptimo",
+                analyzePosition: "Analizar Posición",
+                statistics: "Estadísticas",
+                completed: "completado",
+                aiThinking: "IA analizando...",
+                close: "Cerrar",
+                language: "Idioma",
+                solving: "Resolviendo...",
+                pause: "Pausa",
+                resume: "Reanudar",
+                messages: {
+                    gamePaused: "Juego pausado",
+                    gameResumed: "Juego reanudado"
+                }
+            },
+            de: {
+                title: "Neuraler Puzzle-Meister",
+                aiAdvanced: "ERWEITERTE KI",
+                controls: "Steuerung",
+                hintAI: "KI-Hinweis",
+                newImage: "Neues Bild",
+                aiSolve: "KI Löst",
+                options: "Optionen",
+                level: "Level",
+                autoSolve: "Auto-Lösung",
+                difficulty: "Schwierigkeit",
+                save: "Speichern",
+                stats: "Statistiken",
+                aiLevel: "KI-Level",
+                score: "Punkte",
+                moves: "Züge",
+                time: "Zeit",
+                originalImage: "Originalbild",
+                puzzleToSolve: "Zu lösendes Puzzle",
+                aiAnalysis: "KI-Analyse",
+                optimalPath: "Optimaler Pfad",
+                analyzePosition: "Position Analysieren",
+                statistics: "Statistiken",
+                completed: "abgeschlossen",
+                aiThinking: "KI analysiert...",
+                close: "Schließen",
+                language: "Sprache",
+                solving: "Löse...",
+                pause: "Pause",
+                resume: "Fortsetzen",
+                messages: {
+                    gamePaused: "Spiel pausiert",
+                    gameResumed: "Spiel fortgesetzt"
+                }
+            },
+            zh: {
+                title: "神经拼图大师",
+                aiAdvanced: "高级人工智能",
+                controls: "控制",
+                hintAI: "AI提示",
+                newImage: "新图片",
+                aiSolve: "AI解决",
+                options: "选项",
+                level: "级别",
+                autoSolve: "自动解决",
+                difficulty: "难度",
+                save: "保存",
+                stats: "统计",
+                aiLevel: "AI级别",
+                score: "分数",
+                moves: "移动",
+                time: "时间",
+                originalImage: "原始图片",
+                puzzleToSolve: "待解拼图",
+                aiAnalysis: "AI分析",
+                optimalPath: "最优路径",
+                analyzePosition: "分析位置",
+                statistics: "统计数据",
+                completed: "已完成",
+                aiThinking: "AI分析中...",
+                close: "关闭",
+                language: "语言",
+                solving: "解决中...",
+                pause: "暂停",
+                resume: "继续",
+                messages: {
+                    gamePaused: "游戏已暂停",
+                    gameResumed: "游戏已恢复"
+                }
+            }
+        };
+
+        // Fonctions de traduction
+        function t(key, ...args) {
+            const lang = gameState.currentLanguage;
+            let text = translations[lang] && translations[lang][key] ? translations[lang][key] : key;
+            
+            if (args.length > 0) {
+                args.forEach((arg, index) => {
+                    text = text.replace(`{${index}}`, arg);
+                });
+            }
+            
+            return text;
+        }
+
+        function tm(key, ...args) {
+            const lang = gameState.currentLanguage;
+            let text = translations[lang] && translations[lang].messages && translations[lang].messages[key] 
+                ? translations[lang].messages[key] 
+                : key;
+            
+            if (args.length > 0) {
+                args.forEach((arg, index) => {
+                    text = text.replace(`{${index}}`, arg);
+                });
+            }
+            
+            return text;
+        }
+
+        // Fonctions de gestion des langues
+        function toggleLanguageMenu() {
+            const menu = document.getElementById('languageMenu');
+            menu.classList.toggle('active');
+            
+            document.addEventListener('click', function closeMenu(e) {
+                if (!e.target.closest('.language-selector')) {
+                    menu.classList.remove('active');
+                    document.removeEventListener('click', closeMenu);
+                }
+            });
+        }
+
+        function changeLanguage(lang) {
+            gameState.currentLanguage = lang;
+            
+            const languageBtn = document.getElementById('languageBtn');
+            const flags = {
+                fr: '🇫🇷 Français',
+                en: '🇺🇸 English',
+                ar: '🇸🇦 العربية',
+                es: '🇪🇸 Español',
+                de: '🇩🇪 Deutsch',
+                zh: '🇨🇳 中文'
+            };
+            languageBtn.textContent = `🌐 ${flags[lang]}`;
+            
+            document.getElementById('languageMenu').classList.remove('active');
+            updateLanguage();
+            localStorage.setItem('neuralPuzzleLanguage', lang);
+        }
+
+        function updateLanguage() {
+            document.querySelector('.neural-title h1').textContent = t('title');
+            document.querySelector('.ai-badge').textContent = `🤖 ${t('aiAdvanced')}`;
+            const closeBtn = document.querySelector('.close-btn');
+            if (closeBtn) {
+                try {
+                    // only set title if the element supports it
+                    closeBtn.title = t('close');
+                } catch (e) {
+                    // ignore if element doesn't support title or any other issue
+                    console.warn('Could not set close button title', e);
+                }
+            }
+            
+            const panelTitles = document.querySelectorAll('.panel-title');
+            panelTitles[0].textContent = `🎮 ${t('controls')}`;
+            panelTitles[1].textContent = `⚙️ ${t('options')}`;
+            panelTitles[2].textContent = `🔍 ${t('aiAnalysis')}`;
+            
+            document.querySelector('button[onclick="getAIHint()"]').innerHTML = `💡 ${t('hintAI')}`;
+            document.querySelector('button[onclick="changeImage()"]').innerHTML = `🖼️ ${t('newImage')}`;
+            document.querySelector('button[onclick="aiSolvePuzzle()"]').innerHTML = `🤖 ${t('aiSolve')}`;
+            document.querySelector('button[onclick="toggleAutoSolve()"]').innerHTML = `⚡ ${t('autoSolve')}`;
+            document.querySelector('button[onclick="saveGame()"]').innerHTML = `💾 ${t('save')}`;
+            
+            document.querySelector('button[onclick="showOptimalPath()"]').innerHTML = `🎯 ${t('optimalPath')}`;
+            document.querySelector('button[onclick="analyzePosition()"]').innerHTML = `🔍 ${t('analyzePosition')}`;
+            document.querySelector('button[onclick="showStatistics()"]').innerHTML = `📊 ${t('statistics')}`;
+            
+            const statLabels = document.querySelectorAll('.stat-label');
+            statLabels[0].textContent = t('aiLevel');
+            statLabels[1].textContent = t('score');
+            statLabels[2].textContent = t('moves');
+            statLabels[3].textContent = t('time');
+            
+            const boardLabels = document.querySelectorAll('.board-label');
+            boardLabels[0].textContent = `🖼️ ${t('originalImage')}`;
+            boardLabels[1].textContent = `🧩 ${t('puzzleToSolve')}`;
+            
+            const pauseBtn = document.getElementById('pauseBtn');
+            if(pauseBtn) {
+                if(gameState.isPaused) {
+                    pauseBtn.innerHTML = `▶️ ${t('resume')}`;
+                } else {
+                    pauseBtn.innerHTML = `⏸️ ${t('pause')}`;
+                }
+            }
+            
+            const aiReadyText = document.getElementById('aiReadyText');
+            const analysisInstructions = document.getElementById('analysisInstructions');
+            if(aiReadyText) aiReadyText.textContent = tm('aiReady');
+            if(analysisInstructions) {
+                const lang = gameState.currentLanguage;
+                const instructions = {
+                    fr: "Utilisez les boutons ci-dessus pour obtenir des analyses détaillées de votre position actuelle.",
+                    en: "Use the buttons above to get detailed analysis of your current position.",
+                    ar: "استخدم الأزرار أعلاه للحصول على تحليل مفصل لموضعك الحالي.",
+                    es: "Usa los botones de arriba para obtener análisis detallados de tu posición actual.",
+                    de: "Verwenden Sie die Schaltflächen oben, um detaillierte Analysen Ihrer aktuellen Position zu erhalten.",
+                    zh: "使用上面的按钮获取当前位置的详细分析。"
+                };
+                analysisInstructions.textContent = instructions[lang] || instructions.en;
+            }
+            
+            updateUI();
+            updateProgress();
+        }
+
+        // Ensure the mini language select reflects current language and notify parent when user changes it
+        (function(){
+            function notifyParentLanguage(lang){
+                try{ window.parent.postMessage({ action: 'set-language', lang: lang }, '*'); }catch(e){}
+            }
+
+            document.addEventListener('DOMContentLoaded', function(){
+                var mini = document.getElementById('miniLangSelect');
+                var btn = document.getElementById('miniLangBtn');
+                var menu = document.getElementById('miniLangMenu');
+                var flag = document.getElementById('miniLangFlag');
+                var label = document.getElementById('miniLangLabel');
+                if(!mini || !btn || !menu) return;
+
+                // initialize value from gameState or from parent/localStorage
+                var init = gameState.currentLanguage || localStorage.getItem('brainovaLang') || localStorage.getItem('neuralPuzzleLanguage') || 'fr';
+                mini.value = init;
+                // map for display
+                var display = { fr: ['🇫🇷','Français'], en: ['🇺🇸','English'], ar: ['🇸🇦','العربية'], es: ['🇪🇸','Español'], de: ['🇩🇪','Deutsch'], zh: ['🇨🇳','中文'] };
+                if(display[init]){
+                    flag.textContent = display[init][0];
+                    label.textContent = display[init][1];
+                }
+
+                // toggle menu
+                btn.addEventListener('click', function(e){
+                    var open = menu.classList.toggle('active');
+                    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+                });
+
+                // click outside closes
+                document.addEventListener('click', function(e){
+                    if(!e.target.closest || (!e.target.closest('#miniLangBtn') && !e.target.closest('#miniLangMenu'))){
+                        if(menu.classList.contains('active')){
+                            menu.classList.remove('active');
+                            btn.setAttribute('aria-expanded','false');
+                        }
+                    }
+                });
+
+                // handle selection from menu
+                menu.querySelectorAll('.mini-lang-item').forEach(function(it){
+                    it.addEventListener('click', function(){
+                        var v = this.getAttribute('data-lang');
+                        if(!v) return;
+                        mini.value = v;
+                        if(typeof changeLanguage === 'function') changeLanguage(v);
+                        // persist and inform parent
+                        localStorage.setItem('neuralPuzzleLanguage', v);
+                        notifyParentLanguage(v);
+                        // update visual
+                        if(display[v]){ flag.textContent = display[v][0]; label.textContent = display[v][1]; }
+                        // close menu
+                        menu.classList.remove('active');
+                        btn.setAttribute('aria-expanded','false');
+                    });
+                });
+            });
+
+            // Update mini select when language changes programmatically
+            var _oldUpdateLanguage = updateLanguage;
+            updateLanguage = function(){
+                _oldUpdateLanguage();
+                try{
+                    var mini = document.getElementById('miniLangSelect');
+                    var flag = document.getElementById('miniLangFlag');
+                    var label = document.getElementById('miniLangLabel');
+                    var display = { fr: ['🇫🇷','Français'], en: ['🇺🇸','English'], ar: ['🇸🇦','العربية'], es: ['🇪🇸','Español'], de: ['🇩🇪','Deutsch'], zh: ['🇨🇳','中文'] };
+                    if(mini && gameState && gameState.currentLanguage) {
+                        mini.value = gameState.currentLanguage;
+                        if(display[gameState.currentLanguage]){
+                            if(flag) flag.textContent = display[gameState.currentLanguage][0];
+                            if(label) label.textContent = display[gameState.currentLanguage][1];
+                        }
+                    }
+                }catch(e){}
+            };
+        })();
+
+        // Fonction pause/reprise
+        function togglePause() {
+            if(!gameState.isPlaying) return;
+            
+            const pauseBtn = document.getElementById('pauseBtn');
+            
+            if(gameState.isPaused) {
+                gameState.isPaused = false;
+                gameState.startTime = Date.now() - gameState.pausedTime;
+                startTimer();
+                
+                pauseBtn.innerHTML = `⏸️ ${t('pause')}`;
+                pauseBtn.classList.remove('paused');
+                
+                const puzzleBoard = document.getElementById('puzzleBoard');
+                puzzleBoard.style.pointerEvents = 'auto';
+                puzzleBoard.style.opacity = '1';
+                
+                showAIMessage(tm('gameResumed'), 1500);
+            } else {
+                gameState.isPaused = true;
+                gameState.pausedTime = Date.now() - gameState.startTime;
+                clearInterval(gameState.timer);
+                
+                pauseBtn.innerHTML = `▶️ ${t('resume')}`;
+                pauseBtn.classList.add('paused');
+                
+                const puzzleBoard = document.getElementById('puzzleBoard');
+                puzzleBoard.style.pointerEvents = 'none';
+                puzzleBoard.style.opacity = '0.5';
+                
+                showAIMessage(tm('gamePaused'), 1500);
+            }
+        }
+
+        // Générer une image procédurale
+        function generateProceduralImage(imageData, size = 400) {
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+            
+            const centerX = size / 2;
+            const centerY = size / 2;
+            
+            let gradient;
+            switch(imageData.type) {
+                case 'nature':
+                case 'landscape':
+                    gradient = ctx.createLinearGradient(0, 0, size, size);
+                    break;
+                case 'space':
+                    gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, size * 0.8);
+                    break;
+                default:
+                    gradient = ctx.createLinearGradient(0, 0, size, size);
+            }
+            
+            for(let i = 0; i < imageData.colors.length; i++) {
+                gradient.addColorStop(i / (imageData.colors.length - 1), imageData.colors[i]);
+            }
+            
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, size, size);
+            
+            // Ajouter des effets selon le pattern
+            addPatternEffects(ctx, imageData);
+            
+            return canvas.toDataURL();
+        }
+
+        function addPatternEffects(ctx, imageData) {
+            const size = ctx.canvas.width;
+            const scale = size / 400;
+            
+            switch(imageData.pattern) {
+                case 'enchanted_forest':
+                    drawEnchantedForest(ctx, imageData.colors, scale);
+                    break;
+                case 'crystal_waterfall':
+                    drawCrystalWaterfall(ctx, imageData.colors, scale);
+                    break;
+                case 'lavender_field':
+                    drawLavenderField(ctx, imageData.colors, scale);
+                    break;
+                case 'nebula':
+                    drawNebula(ctx, imageData.colors, scale);
+                    break;
+                case 'sunset':
+                    drawSunset(ctx, imageData.colors, scale);
+                    break;
+                default:
+                    drawGenericPattern(ctx, imageData.colors, scale);
+                    break;
+            }
+        }
+
+        function drawEnchantedForest(ctx, colors, scale = 1) {
+            const size = ctx.canvas.width;
+            
+            for(let i = 0; i < 12; i++) {
+                const x = (i * size / 12) + Math.random() * 30 * scale;
+                const treeHeight = (100 + Math.random() * 100) * scale;
+                const y = size - treeHeight;
+                
+                ctx.fillStyle = colors[3];
+                ctx.fillRect(x - 8 * scale, y, 16 * scale, treeHeight);
+                
+                for(let layer = 0; layer < 3; layer++) {
+                    ctx.fillStyle = colors[4 + layer % 4];
+                    ctx.beginPath();
+                    ctx.arc(x, y - layer * 20 * scale, (40 - layer * 5) * scale, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                
+                if(Math.random() > 0.5) {
+                    ctx.fillStyle = colors[7];
+                    ctx.shadowBlur = 10 * scale;
+                    ctx.shadowColor = colors[7];
+                    ctx.beginPath();
+                    ctx.arc(x + Math.random() * 40 * scale - 20 * scale, y - Math.random() * 60 * scale, 2 * scale, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+                }
+            }
+        }
+
+        function drawCrystalWaterfall(ctx, colors, scale = 1) {
+            const size = ctx.canvas.width;
+            
+            const waterfallGradient = ctx.createLinearGradient(size * 0.4, 0, size * 0.6, size);
+            waterfallGradient.addColorStop(0, colors[0]);
+            waterfallGradient.addColorStop(0.3, colors[1]);
+            waterfallGradient.addColorStop(0.7, colors[2]);
+            waterfallGradient.addColorStop(1, colors[3]);
+            
+            ctx.fillStyle = waterfallGradient;
+            ctx.beginPath();
+            ctx.moveTo(size * 0.45, 0);
+            ctx.quadraticCurveTo(size * 0.5, size * 0.3, size * 0.48, size * 0.6);
+            ctx.quadraticCurveTo(size * 0.52, size * 0.8, size * 0.55, size);
+            ctx.lineTo(size * 0.45, size);
+            ctx.quadraticCurveTo(size * 0.48, size * 0.7, size * 0.45, 0);
+            ctx.fill();
+            
+            for(let i = 0; i < 20; i++) {
+                ctx.fillStyle = colors[3];
+                const x = size * 0.4 + Math.random() * size * 0.3;
+                const y = size * 0.8 + Math.random() * size * 0.2;
+                const radius = Math.random() * 4 * scale + 1;
+                
+                ctx.beginPath();
+                ctx.arc(x, y, radius, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function drawLavenderField(ctx, colors, scale = 1) {
+            const size = ctx.canvas.width;
+            
+            for(let row = 0; row < 8; row++) {
+                const y = size * 0.65 + row * (size * 0.04);
+                const perspective = 1 - (row * 0.1);
+                
+                for(let i = 0; i < 15; i++) {
+                    const x = (i * size / 15) + Math.sin(row + i) * 10 * scale;
+                    
+                    ctx.fillStyle = colors[5];
+                    ctx.fillRect(x - 1 * scale * perspective, y, 2 * scale * perspective, 25 * scale * perspective);
+                    
+                    ctx.fillStyle = colors[0 + (i % 2)];
+                    for(let flower = 0; flower < 5; flower++) {
+                        ctx.beginPath();
+                        ctx.arc(
+                            x + Math.random() * 4 * scale - 2 * scale,
+                            y - flower * 4 * scale * perspective,
+                            1.5 * scale * perspective,
+                            0, Math.PI * 2
+                        );
+                        ctx.fill();
+                    }
+                }
+            }
+        }
+
+        function drawNebula(ctx, colors, scale = 1) {
+            const centerX = ctx.canvas.width / 2;
+            const centerY = ctx.canvas.height / 2;
+            
+            for(let i = 0; i < 8; i++) {
+                const gradient = ctx.createRadialGradient(
+                    centerX + (Math.random() - 0.5) * 200 * scale,
+                    centerY + (Math.random() - 0.5) * 200 * scale,
+                    0,
+                    centerX + (Math.random() - 0.5) * 200 * scale,
+                    centerY + (Math.random() - 0.5) * 200 * scale,
+                    80 * scale
+                );
+                
+                gradient.addColorStop(0, colors[1 + i % 6]);
+                gradient.addColorStop(0.5, colors[2 + i % 5] + '80');
+                gradient.addColorStop(1, 'transparent');
+                
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.arc(
+                    centerX + (Math.random() - 0.5) * 150 * scale,
+                    centerY + (Math.random() - 0.5) * 150 * scale,
+                    60 * scale + Math.random() * 40 * scale,
+                    0, Math.PI * 2
+                );
+                ctx.fill();
+            }
+        }
+
+        function drawSunset(ctx, colors, scale = 1) {
+            const size = ctx.canvas.width;
+            
+            ctx.fillStyle = colors[2];
+            ctx.beginPath();
+            ctx.arc(size * 0.5, size * 0.375, 60 * scale, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.strokeStyle = colors[3];
+            ctx.lineWidth = 4 * scale;
+            for(let i = 0; i < 12; i++) {
+                const angle = (i * Math.PI * 2) / 12;
+                ctx.beginPath();
+                ctx.moveTo(size * 0.5 + Math.cos(angle) * 70 * scale, size * 0.375 + Math.sin(angle) * 70 * scale);
+                ctx.lineTo(size * 0.5 + Math.cos(angle) * 100 * scale, size * 0.375 + Math.sin(angle) * 100 * scale);
+                ctx.stroke();
+            }
+        }
+
+        function drawGenericPattern(ctx, colors, scale = 1) {
+            const size = ctx.canvas.width;
+            
+            for(let i = 0; i < 20; i++) {
+                const x = Math.random() * size;
+                const y = Math.random() * size;
+                const radius = Math.random() * 30 * scale + 10 * scale;
+                
+                ctx.fillStyle = colors[i % colors.length];
+                ctx.beginPath();
+                ctx.arc(x, y, radius, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        // Créer les particules neurales
+        function createNeuralParticles() {
+            const container = document.getElementById('neuralParticles');
+            
+            for(let i = 0; i < 30; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'neural-particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 8 + 's';
+                particle.style.animationDuration = (8 + Math.random() * 4) + 's';
+                container.appendChild(particle);
+            }
+        }
+
+        // Initialiser le jeu
+        function initGame() {
+            gameState.currentImageIndex = 0;
+            gameState.currentImageData = puzzleImages[gameState.currentImageIndex];
+            
+            generateNewPuzzle();
+            updateUI();
+            startTimer();
+        }
+
+        // Générer un nouveau puzzle
+        function generateNewPuzzle() {
+            const totalPieces = gameState.gridSize * gameState.gridSize;
+            
+            const imageData = generateProceduralImage(gameState.currentImageData, 300);
+            const canvas = document.getElementById('referenceImage');
+            const ctx = canvas.getContext('2d');
+            
+            const img = new Image();
+            img.onload = function() {
+                ctx.drawImage(img, 0, 0, 300, 300);
+                gameState.currentImageData.imageData = imageData;
+            };
+            img.src = imageData;
+            
+            gameState.board = [];
+            gameState.correctBoard = [];
+            
+            for(let i = 0; i < totalPieces; i++) {
+                gameState.board.push(i);
+                gameState.correctBoard.push(i);
+            }
+            
+            shuffleBoard();
+            createPuzzleBoard();
+            
+            gameState.moves = 0;
+            gameState.hintUsed = false;
+            gameState.isPlaying = true;
+            gameState.isPaused = false;
+            gameState.pausedTime = 0;
+            gameState.startTime = Date.now();
+            
+            updateUI();
+            updateProgress();
+        }
+
+        // Mélanger le plateau
+        function shuffleBoard() {
+            const totalPieces = gameState.gridSize * gameState.gridSize;
+            
+            for(let i = totalPieces - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [gameState.board[i], gameState.board[j]] = [gameState.board[j], gameState.board[i]];
+            }
+            
+            let isSolved = true;
+            for(let i = 0; i < totalPieces; i++) {
+                if(gameState.board[i] !== i) {
+                    isSolved = false;
+                    break;
+                }
+            }
+            
+            if(isSolved) {
+                [gameState.board[0], gameState.board[1]] = [gameState.board[1], gameState.board[0]];
+            }
+        }
+
+        // Créer l'interface du puzzle
+        function createPuzzleBoard() {
+            const puzzleBoard = document.getElementById('puzzleBoard');
+            puzzleBoard.innerHTML = '';
+            puzzleBoard.className = `puzzle-board grid-${gameState.gridSize}x${gameState.gridSize}`;
+            
+            const totalPieces = gameState.gridSize * gameState.gridSize;
+            
+            for(let i = 0; i < totalPieces; i++) {
+                const piece = document.createElement('div');
+                piece.className = 'puzzle-piece';
+                piece.dataset.position = i;
+                piece.onclick = () => selectPiece(i);
+                
+                updatePieceImage(piece, i);
+                puzzleBoard.appendChild(piece);
+            }
+        }
+
+        // Mettre à jour l'image d'une pièce
+        function updatePieceImage(piece, position) {
+            const pieceIndex = gameState.board[position];
+            const pieceSize = 300 / gameState.gridSize;
+            
+            const row = Math.floor(pieceIndex / gameState.gridSize);
+            const col = pieceIndex % gameState.gridSize;
+            
+            const offsetX = -col * pieceSize;
+            const offsetY = -row * pieceSize;
+            
+            if(gameState.currentImageData && gameState.currentImageData.imageData) {
+                piece.style.backgroundImage = `url(${gameState.currentImageData.imageData})`;
+                piece.style.backgroundPosition = `${offsetX}px ${offsetY}px`;
+            }
+            
+            // Vérifier si la pièce est à la bonne place
+            if(pieceIndex === position) {
+                piece.classList.add('correct');
+            } else {
+                piece.classList.remove('correct');
+            }
+        }
+
+        // Sélectionner une pièce
+        function selectPiece(position) {
+            if(gameState.isPaused || !gameState.isPlaying) return;
+            
+            const pieces = document.querySelectorAll('.puzzle-piece');
+            
+            if(gameState.selectedPiece === null) {
+                gameState.selectedPiece = position;
+                pieces[position].classList.add('selected');
+            } else if(gameState.selectedPiece === position) {
+                gameState.selectedPiece = null;
+                pieces[position].classList.remove('selected');
+            } else {
+                // Échanger les pièces
+                const piece1 = gameState.selectedPiece;
+                const piece2 = position;
+                
+                [gameState.board[piece1], gameState.board[piece2]] = [gameState.board[piece2], gameState.board[piece1]];
+                
+                updatePieceImage(pieces[piece1], piece1);
+                updatePieceImage(pieces[piece2], piece2);
+                
+                pieces[piece1].classList.remove('selected');
+                gameState.selectedPiece = null;
+                
+                gameState.moves++;
+                updateUI();
+                updateProgress();
+                
+                // Vérifier si le puzzle est résolu
+                if(isPuzzleSolved()) {
+                    solvePuzzle();
+                }
+            }
+        }
+
+        // Vérifier si le puzzle est résolu
+        function isPuzzleSolved() {
+            const totalPieces = gameState.gridSize * gameState.gridSize;
+            for(let i = 0; i < totalPieces; i++) {
+                if(gameState.board[i] !== i) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        // Résoudre le puzzle
+        function solvePuzzle() {
+            gameState.isPlaying = false;
+            clearInterval(gameState.timer);
+            
+            const elapsedTime = Date.now() - gameState.startTime;
+            gameState.score = Math.max(1000 - gameState.moves * 10 - Math.floor(elapsedTime / 1000), 100);
+            
+            showVictoryEffect();
+            showAIMessage(tm('puzzleSolved', gameState.score), 3000);
+            
+            // Mettre à jour les statistiques
+            gameState.statistics.gamesPlayed++;
+            gameState.statistics.gamesWon++;
+            gameState.statistics.totalMoves += gameState.moves;
+            gameState.statistics.totalTime += elapsedTime;
+            
+            if(gameState.score > gameState.statistics.bestScore) {
+                gameState.statistics.bestScore = gameState.score;
+            }
+            
+            updateUI();
+        }
+
+        // Afficher l'effet de victoire
+        function showVictoryEffect() {
+            const effect = document.createElement('div');
+            effect.className = 'victory-effect';
+            document.body.appendChild(effect);
+            
+            for(let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'victory-particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 2 + 's';
+                effect.appendChild(particle);
+            }
+            
+            setTimeout(() => {
+                document.body.removeChild(effect);
+            }, 3000);
+        }
+
+        // Afficher un message IA
+        function showAIMessage(message, duration = 2000) {
+            const aiThinking = document.getElementById('aiThinking');
+            const aiMessage = document.getElementById('aiMessage');
+            
+            aiMessage.textContent = message;
+            aiThinking.classList.add('active');
+            
+            setTimeout(() => {
+                aiThinking.classList.remove('active');
+            }, duration);
+        }
+
+        // Démarrer le timer
+        function startTimer() {
+            if(gameState.timer) {
+                clearInterval(gameState.timer);
+            }
+            
+            gameState.timer = setInterval(() => {
+                if(!gameState.isPaused && gameState.isPlaying) {
+                    updateUI();
+                }
+            }, 1000);
+        }
+
+        // Mettre à jour l'interface utilisateur
+        function updateUI() {
+            document.getElementById('aiLevel').textContent = gameState.aiLevel;
+            document.getElementById('neuralScore').textContent = gameState.score;
+            document.getElementById('moveCount').textContent = gameState.moves;
+            
+            if(gameState.isPlaying && !gameState.isPaused) {
+                const elapsedTime = Date.now() - gameState.startTime;
+                const minutes = Math.floor(elapsedTime / 60000);
+                const seconds = Math.floor((elapsedTime % 60000) / 1000);
+                document.getElementById('neuralTime').textContent = 
+                    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
+        }
+
+        // Mettre à jour la progression
+        function updateProgress() {
+            const totalPieces = gameState.gridSize * gameState.gridSize;
+            let correctPieces = 0;
+            
+            for(let i = 0; i < totalPieces; i++) {
+                if(gameState.board[i] === i) {
+                    correctPieces++;
+                }
+            }
+            
+            const progress = (correctPieces / totalPieces) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+            document.getElementById('progressText').textContent = Math.round(progress) + '% ' + t('completed');
+        }
+
+        // Fonctions des boutons
+        function getAIHint() {
+            if(gameState.hintUsed) {
+                showAIMessage(tm('hintUsed'), 2000);
+                return;
+            }
+            
+            showAIMessage(t('aiThinking'), 2000);
+            
+            setTimeout(() => {
+                const totalPieces = gameState.gridSize * gameState.gridSize;
+                let wrongPieces = [];
+                
+                for(let i = 0; i < totalPieces; i++) {
+                    if(gameState.board[i] !== i) {
+                        wrongPieces.push(i);
+                    }
+                }
+                
+                if(wrongPieces.length === 0) {
+                    showAIMessage(tm('allCorrect'), 2000);
+                } else {
+                    const hintPosition = wrongPieces[Math.floor(Math.random() * wrongPieces.length)];
+                    showAIMessage(tm('wrongPiece', hintPosition + 1), 3000);
+                    
+                    // Mettre en évidence la pièce
+                    const pieces = document.querySelectorAll('.puzzle-piece');
+                    pieces[hintPosition].style.border = '3px solid #FFD700';
+                    pieces[hintPosition].style.boxShadow = '0 0 20px #FFD700';
+                    
+                    setTimeout(() => {
+                        pieces[hintPosition].style.border = '';
+                        pieces[hintPosition].style.boxShadow = '';
+                    }, 3000);
+                }
+                
+                gameState.hintUsed = true;
+            }, 2000);
+        }
+
+        function changeImage() {
+            gameState.currentImageIndex = (gameState.currentImageIndex + 1) % puzzleImages.length;
+            gameState.currentImageData = puzzleImages[gameState.currentImageIndex];
+            
+            showAIMessage(tm('newImageMsg', gameState.currentImageData.name), 2000);
+            generateNewPuzzle();
+        }
+
+        function aiSolvePuzzle() {
+            if(gameState.isSolving) return;
+            
+            gameState.isSolving = true;
+            showAIMessage(t('solving'), 1000);
+            
+            setTimeout(() => {
+                const totalPieces = gameState.gridSize * gameState.gridSize;
+                for(let i = 0; i < totalPieces; i++) {
+                    gameState.board[i] = i;
+                }
+                
+                const pieces = document.querySelectorAll('.puzzle-piece');
+                pieces.forEach((piece, index) => {
+                    updatePieceImage(piece, index);
+                });
+                
+                gameState.moves += 10; // Pénalité pour l'aide IA
+                gameState.isSolving = false;
+                
+                showAIMessage(tm('aiSolved'), 2000);
+                solvePuzzle();
+            }, 2000);
+        }
+
+        function changeGridSize() {
+            const sizes = [4, 5, 6];
+            const currentIndex = sizes.indexOf(gameState.gridSize);
+            const nextIndex = (currentIndex + 1) % sizes.length;
+            gameState.gridSize = sizes[nextIndex];
+            
+            const totalPieces = gameState.gridSize * gameState.gridSize;
+            document.getElementById('gridSizeBtn').innerHTML = 
+                `🎯 ${t('level')}: ${gameState.gridSize}x${gameState.gridSize} (${totalPieces})`;
+            
+            showAIMessage(tm('gridChanged', gameState.gridSize), 2000);
+            generateNewPuzzle();
+        }
+
+        function toggleAutoSolve() {
+            gameState.autoSolve = !gameState.autoSolve;
+            const btn = document.getElementById('autoSolveBtn');
+            
+            if(gameState.autoSolve) {
+                btn.classList.add('active');
+                showAIMessage(tm('autoSolveOn'), 2000);
+            } else {
+                btn.classList.remove('active');
+                showAIMessage(tm('autoSolveOff'), 2000);
+            }
+        }
+
+        function changeDifficulty() {
+            const difficulties = ['easy', 'normal', 'hard', 'expert'];
+            const currentIndex = difficulties.indexOf(gameState.difficulty);
+            const nextIndex = (currentIndex + 1) % difficulties.length;
+            gameState.difficulty = difficulties[nextIndex];
+            
+            document.getElementById('difficultyBtn').innerHTML = 
+                `⚙️ ${t('difficulty')}: ${gameState.difficulty}`;
+        }
+
+        function saveGame() {
+            const saveData = {
+                board: gameState.board,
+                moves: gameState.moves,
+                score: gameState.score,
+                gridSize: gameState.gridSize,
+                difficulty: gameState.difficulty,
+                currentImageIndex: gameState.currentImageIndex,
+                statistics: gameState.statistics
+            };
+            
+            localStorage.setItem('neuralPuzzleSave', JSON.stringify(saveData));
+            showAIMessage(tm('gameSaved'), 2000);
+        }
+
+        function loadGame() {
+            const saveData = localStorage.getItem('neuralPuzzleSave');
+            if(saveData) {
+                const data = JSON.parse(saveData);
+                gameState.board = data.board;
+                gameState.moves = data.moves;
+                gameState.score = data.score;
+                gameState.gridSize = data.gridSize;
+                gameState.difficulty = data.difficulty;
+                gameState.currentImageIndex = data.currentImageIndex;
+                gameState.statistics = data.statistics;
+                
+                gameState.currentImageData = puzzleImages[gameState.currentImageIndex];
+                createPuzzleBoard();
+                updateUI();
+                updateProgress();
+                
+                showAIMessage(tm('gameLoaded'), 2000);
+            }
+        }
+
+        function showOptimalPath() {
+            showAIMessage(t('aiThinking'), 2000);
+            
+            setTimeout(() => {
+                const analysisText = document.getElementById('analysisText');
+                analysisText.innerHTML = `
+                    🎯 <strong>${t('optimalPath')}</strong><br><br>
+                    ${t('recommendedMoves')}: ${Math.max(5, 20 - gameState.moves)}<br>
+                    ${t('currentEfficiency')}: ${Math.max(20, 100 - gameState.moves * 2)}%<br><br>
+                    <strong>${t('strategy')}:</strong> Commencer par les coins<br>
+                    <strong>${t('advice')}:</strong> Observez les motifs de couleur
+                `;
+            }, 2000);
+        }
+
+        function analyzePosition() {
+            showAIMessage(t('aiThinking'), 2000);
+            
+            setTimeout(() => {
+                const totalPieces = gameState.gridSize * gameState.gridSize;
+                let correctPieces = 0;
+                
+                for(let i = 0; i < totalPieces; i++) {
+                    if(gameState.board[i] === i) {
+                        correctPieces++;
+                    }
+                }
+                
+                const progress = Math.round((correctPieces / totalPieces) * 100);
+                const complexity = gameState.moves < 10 ? 'Faible' : gameState.moves < 30 ? 'Moyenne' : 'Élevée';
+                
+                const analysisText = document.getElementById('analysisText');
+                analysisText.innerHTML = `
+                    🔍 <strong>Analyse de Position</strong><br><br>
+                    Pièces correctes: ${correctPieces}/${totalPieces}<br>
+                    Progression: ${progress}%<br>
+                    Complexité: ${complexity}<br>
+                    Temps estimé: ${Math.max(1, Math.round((totalPieces - correctPieces) / 2))} min<br>
+                    Score potentiel: ${Math.max(100, 1000 - gameState.moves * 15)}
+                `;
+            }, 2000);
+        }
+
+        function showStatistics() {
+            const analysisText = document.getElementById('analysisText');
+            const winRate = gameState.statistics.gamesPlayed > 0 ? 
+                Math.round((gameState.statistics.gamesWon / gameState.statistics.gamesPlayed) * 100) : 0;
+            const avgMoves = gameState.statistics.gamesPlayed > 0 ? 
+                Math.round(gameState.statistics.totalMoves / gameState.statistics.gamesPlayed) : 0;
+            
+            analysisText.innerHTML = `
+                📊 <strong>Statistiques Globales</strong><br><br>
+                Parties jouées: ${gameState.statistics.gamesPlayed}<br>
+                Parties gagnées: ${gameState.statistics.gamesWon}<br>
+                Taux de réussite: ${winRate}%<br>
+                Meilleur score: ${gameState.statistics.bestScore}<br>
+                Mouvements moyens: ${avgMoves}<br><br>
+                Niveau IA actuel: ${gameState.aiLevel}<br>
+                Rang: ${gameState.aiLevel < 3 ? 'Débutant' : gameState.aiLevel < 6 ? 'Intermédiaire' : 'Expert'}
+            `;
+        }
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedLanguage = localStorage.getItem('neuralPuzzleLanguage');
+            if(savedLanguage && translations[savedLanguage]) {
+                gameState.currentLanguage = savedLanguage;
+                const flags = {
+                    fr: '🇫🇷 Français',
+                    en: '🇺🇸 English',
+                    ar: '🇸🇦 العربية',
+                    es: '🇪🇸 Español',
+                    de: '🇩🇪 Deutsch',
+                    zh: '🇨🇳 中文'
+                };
+                document.getElementById('languageBtn').textContent = `🌐 ${flags[savedLanguage]}`;
+            }
+            
+            createNeuralParticles();
+            initGame();
+            updateLanguage();
+            
+            // Charger une sauvegarde si elle existe
+            if(localStorage.getItem('neuralPuzzleSave')) {
+                setTimeout(() => loadGame(), 1000);
+            }
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98420401738b11a5',t:'MTc1ODcxNDExNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
