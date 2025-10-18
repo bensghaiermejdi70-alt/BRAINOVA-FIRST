@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Dots - Jeu Futuriste</title>
+    <style>
+        body {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(0, 245, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 0, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(255, 255, 0, 0.05) 0%, transparent 50%),
+                linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 30%, #16213e 60%, #0f3460 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(2px 2px at 20px 30px, rgba(0, 245, 255, 0.3), transparent),
+                radial-gradient(2px 2px at 40px 70px, rgba(255, 0, 255, 0.2), transparent),
+                radial-gradient(1px 1px at 90px 40px, rgba(255, 255, 0, 0.2), transparent),
+                radial-gradient(1px 1px at 130px 80px, rgba(0, 245, 255, 0.1), transparent);
+            background-repeat: repeat;
+            background-size: 200px 200px;
+            animation: starfield 20s linear infinite;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        @keyframes starfield {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-200px); }
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .title {
+            font-size: 3rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #00f5ff, #ff00ff, #ffff00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            text-shadow: 0 0 30px rgba(0, 245, 255, 0.5);
+            animation: glow 2s ease-in-out infinite alternate;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .logo {
+            font-size: 4.5rem;
+            filter: drop-shadow(0 0 30px rgba(0, 245, 255, 1)) 
+                    drop-shadow(0 0 60px rgba(255, 0, 255, 0.8))
+                    drop-shadow(0 0 90px rgba(255, 255, 0, 0.6));
+            animation: quantum-spin 3s linear infinite;
+            text-shadow: 
+                0 0 20px rgba(0, 245, 255, 1),
+                0 0 40px rgba(255, 0, 255, 0.8),
+                0 0 60px rgba(255, 255, 0, 0.6);
+            transform-origin: center;
+            display: inline-block;
+        }
+
+        @keyframes quantum-spin {
+            0% { 
+                transform: rotate(0deg) scale(1); 
+                filter: drop-shadow(0 0 30px rgba(0, 245, 255, 1)) 
+                        drop-shadow(0 0 60px rgba(255, 0, 255, 0.8))
+                        drop-shadow(0 0 90px rgba(255, 255, 0, 0.6));
+            }
+            25% { 
+                transform: rotate(90deg) scale(1.15); 
+                filter: drop-shadow(0 0 40px rgba(255, 0, 255, 1)) 
+                        drop-shadow(0 0 70px rgba(255, 255, 0, 0.8))
+                        drop-shadow(0 0 100px rgba(0, 245, 255, 0.6));
+            }
+            50% { 
+                transform: rotate(180deg) scale(1); 
+                filter: drop-shadow(0 0 35px rgba(255, 255, 0, 1)) 
+                        drop-shadow(0 0 65px rgba(0, 245, 255, 0.8))
+                        drop-shadow(0 0 95px rgba(255, 0, 255, 0.6));
+            }
+            75% { 
+                transform: rotate(270deg) scale(1.15); 
+                filter: drop-shadow(0 0 40px rgba(0, 245, 255, 1)) 
+                        drop-shadow(0 0 70px rgba(255, 0, 255, 0.8))
+                        drop-shadow(0 0 100px rgba(255, 255, 0, 0.6));
+            }
+            100% { 
+                transform: rotate(360deg) scale(1); 
+                filter: drop-shadow(0 0 30px rgba(0, 245, 255, 1)) 
+                        drop-shadow(0 0 60px rgba(255, 0, 255, 0.8))
+                        drop-shadow(0 0 90px rgba(255, 255, 0, 0.6));
+            }
+        }
+
+        @keyframes glow {
+            from { filter: brightness(1); }
+            to { filter: brightness(1.2); }
+        }
+
+        .language-selector {
+            position: absolute;
+            top: 0;
+            right: 0;
+        }
+        
+            /* global close button (fixed red circle) */
+            .global-close-btn { position: fixed; top: 14px; right: 14px; z-index: 99999; background: linear-gradient(45deg,#ff3b3b,#ff0066); color: #fff; border: none; width:52px; height:52px; border-radius:50%; font-size:22px; cursor:pointer; display:flex;align-items:center;justify-content:center; box-shadow:0 8px 22px rgba(255,59,59,0.28); }
+            .global-close-btn:hover{ transform: scale(1.06); }
+
+        .language-select {
+            padding: 8px 15px;
+            background: rgba(0, 245, 255, 0.2);
+            border: 1px solid #00f5ff;
+            border-radius: 20px;
+            color: #00f5ff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            outline: none;
+        }
+
+        .language-select:hover, .language-select:focus {
+            background: rgba(0, 245, 255, 0.3);
+            box-shadow: 0 0 15px rgba(0, 245, 255, 0.5);
+        }
+
+        .language-select option {
+            background: #1a1a2e;
+            color: #00f5ff;
+        }
+
+        .game-layout {
+            display: flex;
+            gap: 30px;
+            align-items: flex-start;
+            margin-bottom: 30px;
+        }
+
+        .level-selector {
+            flex: 0 0 auto;
+            text-align: left;
+        }
+
+        .level-selector h3 {
+            color: #ffff00;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .level-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .game-area {
+            flex: 1;
+            background: 
+                radial-gradient(circle at center, rgba(0, 245, 255, 0.05) 0%, transparent 70%),
+                linear-gradient(135deg, rgba(0, 0, 0, 0.7) 0%, rgba(26, 26, 46, 0.8) 100%);
+            border: 2px solid #00f5ff;
+            border-radius: 20px;
+            padding: 30px;
+            position: relative;
+            min-height: 400px;
+            backdrop-filter: blur(10px);
+            box-shadow: 
+                0 0 30px rgba(0, 245, 255, 0.3),
+                inset 0 0 30px rgba(0, 245, 255, 0.1);
+        }
+
+        .game-area::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #00f5ff, #ff00ff, #ffff00, #00f5ff);
+            border-radius: 20px;
+            z-index: -1;
+            animation: border-glow 3s linear infinite;
+        }
+
+        @keyframes border-glow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .game-controls {
+            flex: 0 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .control-btn {
+            padding: 12px 24px;
+            background: linear-gradient(45deg, #ff00ff, #8000ff);
+            border: none;
+            border-radius: 25px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 0, 255, 0.3);
+            white-space: nowrap;
+        }
+
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 0, 255, 0.5);
+        }
+
+        .control-btn.active {
+            background: linear-gradient(45deg, #00f5ff, #0080ff);
+            box-shadow: 0 4px 15px rgba(0, 245, 255, 0.5);
+        }
+
+        .level-btn {
+            padding: 10px 20px;
+            background: rgba(255, 255, 0, 0.2);
+            border: 1px solid #ffff00;
+            border-radius: 15px;
+            color: #ffff00;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            text-align: center;
+        }
+
+        .level-btn:hover, .level-btn.active {
+            background: #ffff00;
+            color: #000;
+            box-shadow: 0 0 15px rgba(255, 255, 0, 0.7);
+        }
+
+        .quantum-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 10px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .quantum-dot {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 2px solid #333;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            background: radial-gradient(circle, #1a1a1a, #000);
+        }
+
+        .quantum-dot.active {
+            animation: quantum-pulse 1s infinite;
+            box-shadow: 0 0 20px currentColor;
+        }
+
+        .quantum-dot.player {
+            background: radial-gradient(circle, #00f5ff, #0080ff);
+            border-color: #00f5ff;
+        }
+
+        .quantum-dot.ai {
+            background: radial-gradient(circle, #ff00ff, #ff0080);
+            border-color: #ff00ff;
+        }
+
+        .quantum-dot.neutral {
+            background: radial-gradient(circle, #ffff00, #ff8000);
+            border-color: #ffff00;
+        }
+
+        @keyframes quantum-pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .score {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .player-score {
+            color: #00f5ff;
+        }
+
+        .ai-score {
+            color: #ff00ff;
+        }
+
+        .rules-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+        }
+
+        .rules-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            padding: 30px;
+            border-radius: 20px;
+            border: 2px solid #00f5ff;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: none;
+            border: none;
+            color: #ff00ff;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .ai-thinking {
+            text-align: center;
+            color: #ff00ff;
+            font-style: italic;
+            margin: 10px 0;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .ai-thinking.visible {
+            opacity: 1;
+        }
+
+        @media (max-width: 768px) {
+            .title {
+                font-size: 2rem;
+            }
+            
+            .language-selector {
+                position: static;
+                text-align: center;
+                margin-top: 20px;
+            }
+            
+            .game-layout {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .level-buttons {
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .level-btn {
+                width: auto;
+                min-width: 60px;
+            }
+            
+            .game-controls {
+                flex-direction: row;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+            
+            .quantum-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            
+            .quantum-dot {
+                width: 50px;
+                height: 50px;
+            }
+        }
+    </style>
+    <style>
+    /* override: consistent global close button */
+    .global-close-btn { position: fixed !important; top: 14px !important; right: 14px !important; z-index: 99999 !important; background: linear-gradient(45deg,#ff3b3b,#ff0066) !important; color: #fff !important; border: none !important; width:52px !important; height:52px !important; border-radius:50% !important; font-size:22px !important; cursor:pointer !important; display:flex !important;align-items:center !important;justify-content:center !important; box-shadow:0 8px 22px rgba(255,59,59,0.28) !important; }
+    .global-close-btn:hover{ transform: scale(1.06); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">
+                <span class="logo">⚛️</span>
+                <span id="gameTitle">QUANTUM DOTS</span>
+            </h1>
+            <button class="global-close-btn" title="Fermer" aria-label="Fermer" onclick="closePlatform()">✕</button>
+            <div class="language-selector">
+                <select class="language-select" onchange="changeLanguage(this.value)">
+                    <option value="fr">🇫🇷 Français</option>
+                    <option value="en">🇬🇧 English</option>
+                    <option value="ar">🇸🇦 العربية</option>
+                    <option value="es">🇪🇸 Español</option>
+                    <option value="de">🇩🇪 Deutsch</option>
+                    <option value="zh">🇨🇳 中文</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="game-layout">
+            <div class="level-selector">
+                <h3 id="levelLabel">Niveau:</h3>
+                <div class="level-buttons">
+                    <button class="level-btn active" onclick="setLevel(1)">Niveau 1</button>
+                    <button class="level-btn" onclick="setLevel(2)">Niveau 2</button>
+                    <button class="level-btn" onclick="setLevel(3)">Niveau 3</button>
+                    <button class="level-btn" onclick="setLevel(4)">Niveau 4</button>
+                    <button class="level-btn" onclick="setLevel(5)">Niveau 5</button>
+                </div>
+            </div>
+
+            <div class="game-area">
+            <div class="game-info">
+                <div class="score player-score">
+                    <span id="playerLabel">Joueur:</span> <span id="playerScore">0</span>
+                </div>
+                <div class="score ai-score">
+                    <span id="aiLabel">IA:</span> <span id="aiScore">0</span>
+                </div>
+                <div id="turnIndicator">Votre tour</div>
+            </div>
+            
+            <div class="ai-thinking" id="aiThinking">IA en réflexion...</div>
+            
+            <div class="quantum-grid" id="gameGrid"></div>
+            </div>
+
+            <div class="game-controls">
+                <button class="control-btn" id="rulesBtn" onclick="showRules()">📋 Règles</button>
+                <button class="control-btn" id="twoPlayerBtn" onclick="setGameMode('twoPlayer')">👥 2 Joueurs</button>
+                <button class="control-btn" id="aiPlayerBtn" onclick="setGameMode('ai')">🤖 Jouer vs IA</button>
+                <button class="control-btn" id="newGameBtn" onclick="newGame()">🎮 Nouvelle Partie</button>
+                <button class="control-btn" id="resetBtn" onclick="resetGame()">🔄 Reset</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="rules-modal" id="rulesModal">
+        <div class="rules-content">
+            <button class="close-btn" onclick="hideRules()">×</button>
+            <h2 id="rulesTitle">Règles du Jeu</h2>
+            <div id="rulesText">
+                <p><strong>Objectif:</strong> Contrôlez plus de points quantiques que l'IA pour gagner!</p>
+                <p><strong>Comment jouer:</strong></p>
+                <ul>
+                    <li>Cliquez sur un point vide pour le capturer</li>
+                    <li>Les points adjacents peuvent être convertis</li>
+                    <li>L'IA joue automatiquement après vous</li>
+                    <li>Le jeu se termine quand tous les points sont occupés</li>
+                </ul>
+                <p><strong>Niveaux:</strong></p>
+                <ul>
+                    <li>Niveau 1-2: IA facile</li>
+                    <li>Niveau 3-4: IA moyenne</li>
+                    <li>Niveau 5: IA difficile</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentLanguage = 'fr';
+        let currentLevel = 1;
+        let gameState = [];
+        let playerScore = 0;
+        let aiScore = 0;
+        let isPlayerTurn = true;
+        let gameActive = true;
+        let gameMode = 'ai'; // 'ai' or 'twoPlayer'
+        let currentPlayer = 1; // 1 or 2 for two player mode
+
+        const translations = {
+            fr: {
+                gameTitle: 'QUANTUM DOTS',
+                rulesBtn: '📋 Règles',
+                twoPlayerBtn: '👥 2 Joueurs',
+                aiPlayerBtn: '🤖 Jouer vs IA',
+                newGameBtn: '🎮 Nouvelle Partie',
+                resetBtn: '🔄 Reset',
+                levelLabel: 'Niveau:',
+                playerLabel: 'Joueur:',
+                aiLabel: 'IA:',
+                player2Label: 'Joueur 2:',
+                yourTurn: 'Votre tour',
+                aiTurn: 'Tour de l\'IA',
+                player2Turn: 'Tour Joueur 2',
+                aiThinking: 'IA en réflexion...',
+                rulesTitle: 'Règles du Jeu',
+                rulesText: `
+                    <p><strong>Objectif:</strong> Contrôlez plus de points quantiques que l'IA pour gagner!</p>
+                    <p><strong>Comment jouer:</strong></p>
+                    <ul>
+                        <li>Cliquez sur un point vide pour le capturer</li>
+                        <li>Les points adjacents peuvent être convertis</li>
+                        <li>L'IA joue automatiquement après vous</li>
+                        <li>Le jeu se termine quand tous les points sont occupés</li>
+                    </ul>
+                    <p><strong>Niveaux:</strong></p>
+                    <ul>
+                        <li>Niveau 1-2: IA facile</li>
+                        <li>Niveau 3-4: IA moyenne</li>
+                        <li>Niveau 5: IA difficile</li>
+                    </ul>
+                `,
+                playerWins: 'Vous avez gagné!',
+                aiWins: 'L\'IA a gagné!',
+                tie: 'Égalité!'
+            },
+            en: {
+                gameTitle: 'QUANTUM DOTS',
+                rulesBtn: '📋 Rules',
+                twoPlayerBtn: '👥 2 Players',
+                aiPlayerBtn: '🤖 Play vs AI',
+                newGameBtn: '🎮 New Game',
+                resetBtn: '🔄 Reset',
+                levelLabel: 'Level:',
+                playerLabel: 'Player:',
+                aiLabel: 'AI:',
+                player2Label: 'Player 2:',
+                yourTurn: 'Your turn',
+                aiTurn: 'AI turn',
+                player2Turn: 'Player 2 turn',
+                aiThinking: 'AI thinking...',
+                rulesTitle: 'Game Rules',
+                rulesText: `
+                    <p><strong>Objective:</strong> Control more quantum dots than the AI to win!</p>
+                    <p><strong>How to play:</strong></p>
+                    <ul>
+                        <li>Click on an empty dot to capture it</li>
+                        <li>Adjacent dots can be converted</li>
+                        <li>AI plays automatically after you</li>
+                        <li>Game ends when all dots are occupied</li>
+                    </ul>
+                    <p><strong>Levels:</strong></p>
+                    <ul>
+                        <li>Level 1-2: Easy AI</li>
+                        <li>Level 3-4: Medium AI</li>
+                        <li>Level 5: Hard AI</li>
+                    </ul>
+                `,
+                playerWins: 'You won!',
+                aiWins: 'AI won!',
+                tie: 'Tie!'
+            },
+            ar: {
+                gameTitle: 'النقاط الكمية',
+                rulesBtn: '📋 القواعد',
+                twoPlayerBtn: '👥 لاعبان',
+                aiPlayerBtn: '🤖 العب ضد الذكاء الاصطناعي',
+                newGameBtn: '🎮 لعبة جديدة',
+                resetBtn: '🔄 إعادة تعيين',
+                levelLabel: 'المستوى:',
+                playerLabel: 'اللاعب:',
+                aiLabel: 'الذكاء الاصطناعي:',
+                player2Label: 'اللاعب 2:',
+                yourTurn: 'دورك',
+                aiTurn: 'دور الذكاء الاصطناعي',
+                player2Turn: 'دور اللاعب 2',
+                aiThinking: 'الذكاء الاصطناعي يفكر...',
+                rulesTitle: 'قواعد اللعبة',
+                rulesText: `
+                    <p><strong>الهدف:</strong> تحكم في نقاط كمية أكثر من الذكاء الاصطناعي للفوز!</p>
+                    <p><strong>كيفية اللعب:</strong></p>
+                    <ul>
+                        <li>انقر على نقطة فارغة للاستيلاء عليها</li>
+                        <li>يمكن تحويل النقاط المجاورة</li>
+                        <li>يلعب الذكاء الاصطناعي تلقائياً بعدك</li>
+                        <li>تنتهي اللعبة عندما تكون جميع النقاط مشغولة</li>
+                    </ul>
+                    <p><strong>المستويات:</strong></p>
+                    <ul>
+                        <li>المستوى 1-2: ذكاء اصطناعي سهل</li>
+                        <li>المستوى 3-4: ذكاء اصطناعي متوسط</li>
+                        <li>المستوى 5: ذكاء اصطناعي صعب</li>
+                    </ul>
+                `,
+                playerWins: 'لقد فزت!',
+                aiWins: 'فاز الذكاء الاصطناعي!',
+                tie: 'تعادل!'
+            },
+            es: {
+                gameTitle: 'PUNTOS CUÁNTICOS',
+                rulesBtn: '📋 Reglas',
+                twoPlayerBtn: '👥 2 Jugadores',
+                aiPlayerBtn: '🤖 Jugar vs IA',
+                newGameBtn: '🎮 Nuevo Juego',
+                resetBtn: '🔄 Reiniciar',
+                levelLabel: 'Nivel:',
+                playerLabel: 'Jugador:',
+                aiLabel: 'IA:',
+                player2Label: 'Jugador 2:',
+                yourTurn: 'Tu turno',
+                aiTurn: 'Turno de IA',
+                player2Turn: 'Turno Jugador 2',
+                aiThinking: 'IA pensando...',
+                rulesTitle: 'Reglas del Juego',
+                rulesText: `
+                    <p><strong>Objetivo:</strong> ¡Controla más puntos cuánticos que la IA para ganar!</p>
+                    <p><strong>Cómo jugar:</strong></p>
+                    <ul>
+                        <li>Haz clic en un punto vacío para capturarlo</li>
+                        <li>Los puntos adyacentes pueden ser convertidos</li>
+                        <li>La IA juega automáticamente después de ti</li>
+                        <li>El juego termina cuando todos los puntos están ocupados</li>
+                    </ul>
+                    <p><strong>Niveles:</strong></p>
+                    <ul>
+                        <li>Nivel 1-2: IA fácil</li>
+                        <li>Nivel 3-4: IA media</li>
+                        <li>Nivel 5: IA difícil</li>
+                    </ul>
+                `,
+                playerWins: '¡Has ganado!',
+                aiWins: '¡La IA ha ganado!',
+                tie: '¡Empate!'
+            },
+            de: {
+                gameTitle: 'QUANTUM PUNKTE',
+                rulesBtn: '📋 Regeln',
+                twoPlayerBtn: '👥 2 Spieler',
+                aiPlayerBtn: '🤖 Gegen KI spielen',
+                newGameBtn: '🎮 Neues Spiel',
+                resetBtn: '🔄 Zurücksetzen',
+                levelLabel: 'Level:',
+                playerLabel: 'Spieler:',
+                aiLabel: 'KI:',
+                player2Label: 'Spieler 2:',
+                yourTurn: 'Ihr Zug',
+                aiTurn: 'KI Zug',
+                player2Turn: 'Spieler 2 Zug',
+                aiThinking: 'KI denkt nach...',
+                rulesTitle: 'Spielregeln',
+                rulesText: `
+                    <p><strong>Ziel:</strong> Kontrolliere mehr Quantenpunkte als die KI, um zu gewinnen!</p>
+                    <p><strong>Wie zu spielen:</strong></p>
+                    <ul>
+                        <li>Klicke auf einen leeren Punkt, um ihn zu erobern</li>
+                        <li>Benachbarte Punkte können konvertiert werden</li>
+                        <li>Die KI spielt automatisch nach dir</li>
+                        <li>Das Spiel endet, wenn alle Punkte besetzt sind</li>
+                    </ul>
+                    <p><strong>Level:</strong></p>
+                    <ul>
+                        <li>Level 1-2: Einfache KI</li>
+                        <li>Level 3-4: Mittlere KI</li>
+                        <li>Level 5: Schwere KI</li>
+                    </ul>
+                `,
+                playerWins: 'Du hast gewonnen!',
+                aiWins: 'KI hat gewonnen!',
+                tie: 'Unentschieden!'
+            },
+            zh: {
+                gameTitle: '量子点',
+                rulesBtn: '📋 规则',
+                twoPlayerBtn: '👥 双人游戏',
+                aiPlayerBtn: '🤖 对战AI',
+                newGameBtn: '🎮 新游戏',
+                resetBtn: '🔄 重置',
+                levelLabel: '级别:',
+                playerLabel: '玩家:',
+                aiLabel: 'AI:',
+                player2Label: '玩家2:',
+                yourTurn: '你的回合',
+                aiTurn: 'AI回合',
+                player2Turn: '玩家2回合',
+                aiThinking: 'AI思考中...',
+                rulesTitle: '游戏规则',
+                rulesText: `
+                    <p><strong>目标:</strong> 控制比AI更多的量子点来获胜！</p>
+                    <p><strong>如何游戏:</strong></p>
+                    <ul>
+                        <li>点击空点来占领它</li>
+                        <li>相邻的点可以被转换</li>
+                        <li>AI在你之后自动游戏</li>
+                        <li>当所有点都被占领时游戏结束</li>
+                    </ul>
+                    <p><strong>级别:</strong></p>
+                    <ul>
+                        <li>级别1-2: 简单AI</li>
+                        <li>级别3-4: 中等AI</li>
+                        <li>级别5: 困难AI</li>
+                    </ul>
+                `,
+                playerWins: '你赢了！',
+                aiWins: 'AI赢了！',
+                tie: '平局！'
+            }
+        };
+
+        function changeLanguage(lang) {
+            currentLanguage = lang;
+            
+            // Update all text elements
+            const t = translations[lang];
+            document.getElementById('gameTitle').textContent = t.gameTitle;
+            document.getElementById('rulesBtn').innerHTML = t.rulesBtn;
+            document.getElementById('twoPlayerBtn').innerHTML = t.twoPlayerBtn;
+            document.getElementById('aiPlayerBtn').innerHTML = t.aiPlayerBtn;
+            document.getElementById('newGameBtn').innerHTML = t.newGameBtn;
+            document.getElementById('resetBtn').innerHTML = t.resetBtn;
+            document.getElementById('levelLabel').textContent = t.levelLabel;
+            document.getElementById('playerLabel').textContent = t.playerLabel;
+            document.getElementById('aiLabel').textContent = gameMode === 'twoPlayer' ? t.player2Label : t.aiLabel;
+            document.getElementById('aiThinking').textContent = t.aiThinking;
+            document.getElementById('rulesTitle').textContent = t.rulesTitle;
+            document.getElementById('rulesText').innerHTML = t.rulesText;
+            
+            // Update level buttons
+            const levelButtons = document.querySelectorAll('.level-btn');
+            levelButtons.forEach((btn, index) => {
+                btn.textContent = `${t.levelLabel.replace(':', '')} ${index + 1}`;
+            });
+            
+            updateTurnIndicator();
+        }
+
+        function updateTurnIndicator() {
+            const t = translations[currentLanguage];
+            if (gameMode === 'twoPlayer') {
+                document.getElementById('turnIndicator').textContent = currentPlayer === 1 ? t.yourTurn : t.player2Turn;
+            } else {
+                document.getElementById('turnIndicator').textContent = isPlayerTurn ? t.yourTurn : t.aiTurn;
+            }
+        }
+
+        function setGameMode(mode) {
+            gameMode = mode;
+            const t = translations[currentLanguage];
+            
+            // Update button states
+            document.querySelectorAll('.control-btn').forEach(btn => btn.classList.remove('active'));
+            if (mode === 'twoPlayer') {
+                document.getElementById('twoPlayerBtn').classList.add('active');
+                document.getElementById('levelLabel').style.display = 'none';
+                document.querySelector('.level-buttons').style.display = 'none';
+            } else {
+                document.getElementById('aiPlayerBtn').classList.add('active');
+                document.getElementById('levelLabel').style.display = 'block';
+                document.querySelector('.level-buttons').style.display = 'flex';
+            }
+            
+            // Update labels
+            document.getElementById('aiLabel').textContent = gameMode === 'twoPlayer' ? t.player2Label : t.aiLabel;
+            
+            newGame();
+        }
+
+        function setLevel(level) {
+            currentLevel = level;
+            document.querySelectorAll('.level-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            newGame();
+        }
+
+        function initializeGame() {
+            const grid = document.getElementById('gameGrid');
+            grid.innerHTML = '';
+            gameState = [];
+            
+            for (let i = 0; i < 36; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'quantum-dot';
+                dot.onclick = () => playerMove(i);
+                grid.appendChild(dot);
+                gameState.push(0); // 0 = empty, 1 = player, 2 = AI/Player2
+            }
+            
+            playerScore = 0;
+            aiScore = 0;
+            isPlayerTurn = true;
+            currentPlayer = 1;
+            gameActive = true;
+            updateScore();
+            updateTurnIndicator();
+        }
+
+        function playerMove(index) {
+            if (!gameActive || gameState[index] !== 0) return;
+            
+            if (gameMode === 'twoPlayer') {
+                if ((currentPlayer === 1 && !isPlayerTurn) || (currentPlayer === 2 && isPlayerTurn)) return;
+                
+                gameState[index] = currentPlayer;
+                updateDot(index);
+                convertAdjacentDots(index, currentPlayer);
+                
+                // Switch players
+                currentPlayer = currentPlayer === 1 ? 2 : 1;
+                isPlayerTurn = !isPlayerTurn;
+                updateTurnIndicator();
+                updateScore();
+                checkGameEnd();
+            } else {
+                if (!isPlayerTurn) return;
+                
+                gameState[index] = 1;
+                updateDot(index);
+                convertAdjacentDots(index, 1);
+                
+                isPlayerTurn = false;
+                updateTurnIndicator();
+                updateScore();
+                
+                if (checkGameEnd()) return;
+                
+                setTimeout(aiMove, 1000);
+            }
+        }
+
+        function aiMove() {
+            if (!gameActive || isPlayerTurn || gameMode === 'twoPlayer') return;
+            
+            document.getElementById('aiThinking').classList.add('visible');
+            
+            setTimeout(() => {
+                const move = getAIMove();
+                if (move !== -1) {
+                    gameState[move] = 2;
+                    updateDot(move);
+                    convertAdjacentDots(move, 2);
+                }
+                
+                document.getElementById('aiThinking').classList.remove('visible');
+                isPlayerTurn = true;
+                updateTurnIndicator();
+                updateScore();
+                checkGameEnd();
+            }, 1500);
+        }
+
+        function getAIMove() {
+            const emptySpots = gameState.map((state, index) => state === 0 ? index : -1).filter(i => i !== -1);
+            if (emptySpots.length === 0) return -1;
+            
+            // AI difficulty based on level
+            if (currentLevel <= 2) {
+                // Easy: Random move
+                return emptySpots[Math.floor(Math.random() * emptySpots.length)];
+            } else if (currentLevel <= 4) {
+                // Medium: Try to maximize conversions
+                let bestMove = emptySpots[0];
+                let maxConversions = 0;
+                
+                for (const spot of emptySpots) {
+                    const conversions = countPotentialConversions(spot, 2);
+                    if (conversions > maxConversions) {
+                        maxConversions = conversions;
+                        bestMove = spot;
+                    }
+                }
+                return bestMove;
+            } else {
+                // Hard: Minimax-like strategy
+                let bestMove = emptySpots[0];
+                let bestScore = -Infinity;
+                
+                for (const spot of emptySpots) {
+                    const score = evaluateMove(spot, 2) - evaluateMove(spot, 1);
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestMove = spot;
+                    }
+                }
+                return bestMove;
+            }
+        }
+
+        function countPotentialConversions(index, player) {
+            const adjacent = getAdjacentIndices(index);
+            return adjacent.filter(i => gameState[i] !== 0 && gameState[i] !== player).length;
+        }
+
+        function evaluateMove(index, player) {
+            return countPotentialConversions(index, player) + 
+                   getAdjacentIndices(index).filter(i => gameState[i] === 0).length * 0.5;
+        }
+
+        function convertAdjacentDots(index, player) {
+            const adjacent = getAdjacentIndices(index);
+            adjacent.forEach(i => {
+                if (gameState[i] !== 0 && gameState[i] !== player) {
+                    gameState[i] = player;
+                    updateDot(i);
+                }
+            });
+        }
+
+        function getAdjacentIndices(index) {
+            const row = Math.floor(index / 6);
+            const col = index % 6;
+            const adjacent = [];
+            
+            for (let r = Math.max(0, row - 1); r <= Math.min(5, row + 1); r++) {
+                for (let c = Math.max(0, col - 1); c <= Math.min(5, col + 1); c++) {
+                    const adjIndex = r * 6 + c;
+                    if (adjIndex !== index) {
+                        adjacent.push(adjIndex);
+                    }
+                }
+            }
+            return adjacent;
+        }
+
+        function updateDot(index) {
+            const dot = document.getElementById('gameGrid').children[index];
+            dot.classList.remove('player', 'ai', 'neutral');
+            
+            if (gameState[index] === 1) {
+                dot.classList.add('player', 'active');
+            } else if (gameState[index] === 2) {
+                dot.classList.add('ai', 'active');
+            }
+            
+            setTimeout(() => dot.classList.remove('active'), 500);
+        }
+
+        function updateScore() {
+            playerScore = gameState.filter(state => state === 1).length;
+            aiScore = gameState.filter(state => state === 2).length;
+            
+            document.getElementById('playerScore').textContent = playerScore;
+            document.getElementById('aiScore').textContent = aiScore;
+        }
+
+        function checkGameEnd() {
+            const emptySpots = gameState.filter(state => state === 0).length;
+            if (emptySpots === 0) {
+                gameActive = false;
+                const t = translations[currentLanguage];
+                let message;
+                
+                if (gameMode === 'twoPlayer') {
+                    if (playerScore > aiScore) {
+                        message = t.playerWins;
+                    } else if (aiScore > playerScore) {
+                        message = t.player2Label.replace(':', '') + ' ' + t.playerWins.toLowerCase();
+                    } else {
+                        message = t.tie;
+                    }
+                } else {
+                    if (playerScore > aiScore) {
+                        message = t.playerWins;
+                    } else if (aiScore > playerScore) {
+                        message = t.aiWins;
+                    } else {
+                        message = t.tie;
+                    }
+                }
+                
+                setTimeout(() => { try{ parent.postMessage({ action: 'dialog', dialogType: 'alert', text: message }, '*'); }catch(e){} }, 500);
+                return true;
+            }
+            return false;
+        }
+
+        function newGame() {
+            initializeGame();
+        }
+
+        function resetGame() {
+            initializeGame();
+        }
+
+        function showRules() {
+            document.getElementById('rulesModal').style.display = 'block';
+        }
+
+        function hideRules() {
+            document.getElementById('rulesModal').style.display = 'none';
+        }
+
+        // Initialize game on load
+        initializeGame();
+    </script>
+    <script>
+        // canonical close handler for platform overlay
+        function closePlatform(){
+            try{ console.debug('jeux19: closePlatform called'); }catch(e){}
+            try{
+                if(window.parent && window.parent !== window){
+                    window.parent.postMessage({ action:'close', reason:'user-initiated', source:'jeux19' }, '*');
+                    return;
+                }
+            }catch(e){}
+            try{
+                if(window.opener && !window.opener.closed){
+                    try{ window.opener.postMessage({ action:'child-closed', source:'jeux19' }, '*'); }catch(e){}
+                    try{ window.close(); }catch(e){}
+                    return;
+                }
+            }catch(e){}
+            // final fallback: absolute path to platform
+            window.location.href = '/brainova.html';
+        }
+        // expose for manual testing
+        window.closePlatform = closePlatform;
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98729803a1c111be',t:'MTc1OTIyMzQ5Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
