@@ -1,0 +1,2196 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyber Defense AI - Jeu Futuriste</title>
+    <style>
+        body {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Orbitron', monospace;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            color: #00ffff;
+            overflow: hidden;
+            height: 100vh;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.2) 0%, transparent 50%);
+            animation: backgroundPulse 8s ease-in-out infinite alternate;
+            z-index: 0;
+        }
+
+        @keyframes backgroundPulse {
+            0% { opacity: 0.3; }
+            100% { opacity: 0.7; }
+        }
+
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .star {
+            position: absolute;
+            background: #fff;
+            border-radius: 50%;
+            animation: twinkle 2s infinite alternate;
+        }
+
+        @keyframes twinkle {
+            0% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+
+        .floating-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            background: linear-gradient(45deg, #00ffff, #ff00ff);
+            border-radius: 50%;
+            opacity: 0.6;
+            animation: floatParticle 15s linear infinite;
+        }
+
+        @keyframes floatParticle {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.6;
+            }
+            90% {
+                opacity: 0.6;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .game-container {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            z-index: 2;
+        }
+
+        .header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 2px solid #00ffff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 0 0 20px #00ffff;
+            background: linear-gradient(45deg, #00ffff, #ff00ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .game-controls-header {
+            display: flex;
+            gap: 10px;
+        }
+
+        .language-selector {
+            position: relative;
+        }
+
+        .lang-btn {
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid #00ffff;
+            color: #00ffff;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+
+        .lang-btn:hover {
+            background: rgba(0, 255, 255, 0.2);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+        }
+
+        .lang-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: rgba(0, 0, 0, 0.9);
+            border: 1px solid #00ffff;
+            border-radius: 10px;
+            padding: 10px 0;
+            display: none;
+            min-width: 120px;
+        }
+
+        .lang-option {
+            padding: 8px 16px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .lang-option:hover {
+            background: rgba(0, 255, 255, 0.1);
+        }
+
+        .game-stats {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #00ff00;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .main-menu {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 5;
+        }
+
+        .game-title {
+            font-size: 48px;
+            font-weight: bold;
+            margin-bottom: 30px;
+            text-shadow: 0 0 30px #00ffff;
+            background: linear-gradient(45deg, #00ffff, #ff00ff, #ffff00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { filter: drop-shadow(0 0 20px #00ffff); }
+            to { filter: drop-shadow(0 0 40px #ff00ff); }
+        }
+
+        .menu-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, rgba(0, 255, 255, 0.2), rgba(255, 0, 255, 0.2));
+            border: 2px solid #00ffff;
+            color: #fff;
+            padding: 15px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            min-width: 200px;
+        }
+
+        .btn:hover {
+            background: linear-gradient(45deg, rgba(0, 255, 255, 0.4), rgba(255, 0, 255, 0.4));
+            box-shadow: 0 0 25px rgba(0, 255, 255, 0.6);
+            transform: translateY(-2px);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .game-area {
+            position: absolute;
+            top: 80px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: none;
+        }
+
+        .game-canvas {
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, rgba(0, 100, 200, 0.1) 0%, transparent 70%);
+        }
+
+
+
+        .control-btn {
+            background: rgba(0, 255, 255, 0.2);
+            border: 1px solid #00ffff;
+            color: #00ffff;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+
+        .control-btn:hover {
+            background: rgba(0, 255, 255, 0.3);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+        }
+
+
+
+
+
+
+
+        .rules-modal, .level-modal, .reward-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 20;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, rgba(26, 26, 46, 0.95), rgba(22, 33, 62, 0.95));
+            border: 2px solid #00ffff;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .modal-title {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #00ffff;
+            text-shadow: 0 0 10px #00ffff;
+        }
+
+        .modal-text {
+            line-height: 1.6;
+            margin-bottom: 20px;
+            opacity: 0.9;
+        }
+
+        .close-btn {
+            background: rgba(255, 0, 0, 0.2);
+            border: 1px solid #ff0000;
+            color: #ff0000;
+            padding: 8px 16px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+
+        .close-btn:hover {
+            background: rgba(255, 0, 0, 0.3);
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.5);
+        }
+
+        .level-grid {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 8px;
+            margin: 20px 0;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .level-btn {
+            aspect-ratio: 1;
+            background: linear-gradient(45deg, rgba(0, 255, 255, 0.1), rgba(255, 0, 255, 0.1));
+            border: 2px solid #00ffff;
+            color: #fff;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            min-height: 40px;
+            min-width: 40px;
+        }
+
+        .level-btn:hover:not(.locked) {
+            background: linear-gradient(45deg, rgba(0, 255, 255, 0.3), rgba(255, 0, 255, 0.3));
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+        }
+
+        .level-btn.locked {
+            opacity: 0.3;
+            cursor: not-allowed;
+            border-color: #666;
+        }
+
+        .level-btn.completed {
+            background: linear-gradient(45deg, rgba(0, 255, 0, 0.2), rgba(255, 255, 0, 0.2));
+            border-color: #00ff00;
+        }
+
+        .reward-card {
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            color: #000;
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+            animation: cardGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes cardGlow {
+            from { box-shadow: 0 0 30px rgba(255, 215, 0, 0.5); }
+            to { box-shadow: 0 0 50px rgba(255, 215, 0, 0.8); }
+        }
+
+        .reward-title {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .reward-message {
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+
+        .enemy {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background: radial-gradient(circle, #ff0000, #ff6600);
+            border-radius: 50%;
+            animation: enemyMove 5s linear infinite;
+        }
+
+        .enemy-target {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background: conic-gradient(from 0deg, #ff0000, #ff6600, #ffff00, #ff0000);
+            border-radius: 50%;
+            border: 3px solid #fff;
+            animation: enemyMove3D 4s linear infinite;
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.8);
+        }
+
+        .enemy-target::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px;
+            height: 20px;
+            background: radial-gradient(circle, #fff, #ffff00);
+            border-radius: 50%;
+            animation: targetPulse 1s ease-in-out infinite alternate;
+        }
+
+        .enemy-target::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 30px;
+            height: 2px;
+            background: #fff;
+            box-shadow: 0 0 0 2px #fff, 0 -14px 0 #fff, 0 14px 0 #fff;
+        }
+
+        .enemy-premium {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: conic-gradient(from 0deg, #00ffff, #ff00ff, #ffff00, #00ffff);
+            border-radius: 50%;
+            border: 4px solid #fff;
+            animation: enemyMove3D 3.5s linear infinite;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.9);
+        }
+
+        .enemy-premium::before {
+            content: '💎';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+            animation: gemSpin 2s linear infinite;
+        }
+
+        @keyframes enemyMove {
+            from { transform: translateX(-50px); }
+            to { transform: translateX(calc(100vw + 50px)); }
+        }
+
+        @keyframes enemyMove3D {
+            0% { 
+                transform: translateX(-60px) scale(0.5) rotateY(0deg);
+                opacity: 0.7;
+            }
+            25% { 
+                transform: translateX(25vw) scale(1) rotateY(90deg);
+                opacity: 1;
+            }
+            50% { 
+                transform: translateX(50vw) scale(1.2) rotateY(180deg);
+                opacity: 1;
+            }
+            75% { 
+                transform: translateX(75vw) scale(1) rotateY(270deg);
+                opacity: 1;
+            }
+            100% { 
+                transform: translateX(calc(100vw + 60px)) scale(0.5) rotateY(360deg);
+                opacity: 0.7;
+            }
+        }
+
+        @keyframes targetPulse {
+            0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1.3); opacity: 0.7; }
+        }
+
+        @keyframes gemSpin {
+            from { transform: translate(-50%, -50%) rotateZ(0deg); }
+            to { transform: translate(-50%, -50%) rotateZ(360deg); }
+        }
+
+        .player-ship {
+            position: absolute;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(45deg, #00ffff, #0080ff);
+            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+            animation: shipHover 2s ease-in-out infinite alternate;
+            filter: drop-shadow(0 0 20px #00ffff);
+            position: relative;
+            transition: transform 0.1s ease;
+        }
+
+        .player-ship::before {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 30px;
+            background: linear-gradient(to top, #ff6600, #ffff00, transparent);
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            animation: thruster 0.1s ease-in-out infinite alternate;
+        }
+
+        .player-ship::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 10px;
+            height: 20px;
+            background: linear-gradient(to top, #ff0000, #ff6600, transparent);
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            animation: thruster 0.15s ease-in-out infinite alternate;
+        }
+
+        @keyframes shipHover {
+            from { transform: translateX(-50%) translateY(0); }
+            to { transform: translateX(-50%) translateY(-10px); }
+        }
+
+        @keyframes thruster {
+            0% { opacity: 0.8; transform: translateX(-50%) scaleY(1); }
+            100% { opacity: 1; transform: translateX(-50%) scaleY(1.2); }
+        }
+
+        .auto-cannon {
+            position: absolute;
+            width: 50px;
+            height: 80px;
+            pointer-events: none;
+            z-index: 15;
+            display: none;
+            transform-origin: center bottom;
+        }
+
+        .cannon-base {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 25px;
+            background: linear-gradient(135deg, #333, #666, #333);
+            border-radius: 20px 20px 8px 8px;
+            border: 2px solid #00ffff;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.6), inset 0 0 10px rgba(0, 255, 255, 0.2);
+        }
+
+        .cannon-barrel {
+            position: absolute;
+            bottom: 22px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 14px;
+            height: 55px;
+            background: linear-gradient(180deg, #444, #777, #444);
+            border: 2px solid #00ffff;
+            border-radius: 7px 7px 3px 3px;
+            box-shadow: 0 0 12px rgba(0, 255, 255, 0.5), inset 0 0 8px rgba(0, 255, 255, 0.3);
+        }
+
+        .cannon-muzzle {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 12px;
+            height: 12px;
+            background: radial-gradient(circle, #000, #333);
+            border: 2px solid #ff6600;
+            border-radius: 50%;
+            box-shadow: 0 0 8px rgba(255, 102, 0, 0.8), inset 0 0 6px rgba(255, 102, 0, 0.5);
+        }
+
+        .cannon-energy {
+            position: absolute;
+            bottom: 6px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 28px;
+            height: 12px;
+            background: linear-gradient(90deg, transparent, #00ffff, transparent);
+            border-radius: 6px;
+            animation: energyPulse 1s ease-in-out infinite alternate;
+        }
+
+        @keyframes energyPulse {
+            0% { 
+                opacity: 0.5;
+                box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+            }
+            100% { 
+                opacity: 1;
+                box-shadow: 0 0 25px rgba(0, 255, 255, 0.9);
+            }
+        }
+
+        .cannon-firing {
+            animation: cannonRecoil 0.2s ease-out;
+        }
+
+        @keyframes cannonRecoil {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(8px); }
+            100% { transform: translateY(0); }
+        }
+
+        .cannon-targeting {
+            animation: cannonTarget 0.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes cannonTarget {
+            0% { 
+                filter: brightness(1);
+                box-shadow: 0 0 20px rgba(0, 255, 255, 0.6);
+            }
+            100% { 
+                filter: brightness(1.3);
+                box-shadow: 0 0 35px rgba(255, 0, 0, 0.8);
+            }
+        }
+
+        .laser {
+            position: absolute;
+            width: 3px;
+            height: 20px;
+            background: linear-gradient(to top, #00ffff, #ffffff);
+            animation: laserMove 1s linear;
+        }
+
+        @keyframes laserMove {
+            from { transform: translateY(0); }
+            to { transform: translateY(-100vh); }
+        }
+
+        .explosion {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: radial-gradient(circle, #ffff00, #ff0000, transparent);
+            border-radius: 50%;
+            animation: explode 0.5s ease-out forwards;
+        }
+
+        @keyframes explode {
+            0% { transform: scale(0); opacity: 1; }
+            100% { transform: scale(2); opacity: 0; }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        @media (max-width: 768px) {
+            .game-title {
+                font-size: 32px;
+            }
+            
+            .btn {
+                min-width: 150px;
+                padding: 12px 24px;
+                font-size: 14px;
+            }
+            
+            .modal-content {
+                padding: 20px;
+                margin: 20px;
+            }
+        }
+        </style>
+    <style>
+    /* override: consistent global close button */
+    .global-close-btn { position: fixed !important; top: 14px !important; right: 14px !important; z-index: 99999 !important; background: linear-gradient(45deg,#ff3b3b,#ff0066) !important; color: #fff !important; border: none !important; width:52px !important; height:52px !important; border-radius:50% !important; font-size:22px !important; cursor:pointer !important; display:flex !important;align-items:center !important;justify-content:center !important; box-shadow:0 8px 22px rgba(255,59,59,0.28) !important; }
+    .global-close-btn:hover{ transform: scale(1.06); }
+    </style>
+        <style>
+        /* nudge language selector left to avoid close button overlap */
+        @media (min-width:800px){
+            .language-selector{ right:80px !important; }
+        }
+        </style>
+</head>
+<body>
+    <div class="stars" id="stars"></div>
+    <div class="floating-particles" id="particles"></div>
+    
+    <div class="game-container">
+        <div class="header">
+            <div class="logo">CYBER DEFENSE AI</div>
+            <button class="global-close-btn" title="Fermer" aria-label="Fermer" onclick="closePlatform()">✕</button>
+            <div class="game-stats">
+                <div class="stat">
+                    <div class="stat-value" id="score">0</div>
+                    <div class="stat-label" id="scoreLabel">Score</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="targetScore">500</div>
+                    <div class="stat-label" id="targetLabel">Objectif</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="level">1</div>
+                    <div class="stat-label" id="levelLabel">Niveau</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="lives">3</div>
+                    <div class="stat-label" id="livesLabel">Vies</div>
+                </div>
+            </div>
+            <div class="header-controls">
+                <div class="game-controls-header" id="gameControlsHeader" style="display: none;">
+                    <button class="control-btn" onclick="showLevels()" id="levelsBtnHeader">🎯 Niveaux</button>
+                    <button class="control-btn" onclick="pauseGame()" id="pauseBtnHeader">⏸️ Pause</button>
+                    <button class="control-btn" onclick="showMainMenu()" id="menuBtnHeader">🏠 Menu</button>
+                </div>
+                <div class="language-selector">
+                    <button class="lang-btn" onclick="toggleLanguageDropdown()">🌐 FR</button>
+                    <div class="lang-dropdown" id="langDropdown">
+                        <div class="lang-option" onclick="changeLanguage('fr')">🇫🇷 Français</div>
+                        <div class="lang-option" onclick="changeLanguage('en')">🇬🇧 English</div>
+                        <div class="lang-option" onclick="changeLanguage('ar')">🇸🇦 العربية</div>
+                        <div class="lang-option" onclick="changeLanguage('es')">🇪🇸 Español</div>
+                        <div class="lang-option" onclick="changeLanguage('de')">🇩🇪 Deutsch</div>
+                        <div class="lang-option" onclick="changeLanguage('zh')">🇨🇳 中文</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-menu" id="mainMenu">
+            <h1 class="game-title" id="gameTitle">CYBER DEFENSE AI</h1>
+            <div class="menu-buttons">
+                <button class="btn" onclick="startGame()" id="startBtn">🚀 Démarrer</button>
+                <button class="btn" onclick="showLevels()" id="levelsBtn">🎯 Niveaux</button>
+                <button class="btn" onclick="showRules()" id="rulesBtn">📋 Règles</button>
+            </div>
+        </div>
+
+        <div class="game-area" id="gameArea">
+            <div class="game-canvas" id="gameCanvas">
+                <div class="player-ship" id="playerShip"></div>
+                <div class="auto-cannon" id="autoCannon">
+                    <div class="cannon-base"></div>
+                    <div class="cannon-barrel">
+                        <div class="cannon-muzzle"></div>
+                    </div>
+                    <div class="cannon-energy"></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div class="rules-modal" id="rulesModal">
+        <div class="modal-content">
+            <h2 class="modal-title" id="rulesTitle">Règles du Jeu</h2>
+            <div class="modal-text" id="rulesText">
+                <p><strong>Objectif :</strong> Défendez la Terre contre l'invasion alien !</p>
+                <p><strong>Contrôles :</strong></p>
+                <p>• Utilisez la souris pour déplacer votre vaisseau</p>
+                <p>• Clic gauche pour tirer des lasers</p>
+                <p>• Détruisez tous les ennemis pour passer au niveau suivant</p>
+                <p><strong>Système de points :</strong></p>
+                <p>• Ennemi détruit : +100 points</p>
+                <p>• Bonus de niveau : +500 points</p>
+                <p>• Vous avez 3 vies au début</p>
+            </div>
+            <button class="close-btn" onclick="closeModal('rulesModal')" id="closeRulesBtn">Fermer</button>
+        </div>
+    </div>
+
+    <div class="level-modal" id="levelModal">
+        <div class="modal-content">
+            <h2 class="modal-title" id="levelModalTitle">Sélection de Niveau</h2>
+            <div class="level-grid" id="levelGrid"></div>
+            <button class="close-btn" onclick="closeModal('levelModal')" id="closeLevelBtn">Fermer</button>
+        </div>
+    </div>
+
+    <div class="reward-modal" id="rewardModal">
+        <div class="modal-content">
+            <div class="reward-card">
+                <div class="reward-title" id="rewardTitle">🏆 Félicitations !</div>
+                <div class="reward-message" id="rewardMessage">Vous avez terminé le niveau 1 !</div>
+                <div id="rewardPoints">Bonus : +500 points</div>
+            </div>
+            <button class="btn" onclick="nextLevel()" id="nextLevelBtn" style="margin-top: 20px;">Niveau Suivant</button>
+            <button class="close-btn" onclick="closeModal('rewardModal')" id="closeRewardBtn">Menu Principal</button>
+        </div>
+    </div>
+
+    <script>
+        // Traductions
+        const translations = {
+            fr: {
+                gameTitle: "CYBER DEFENSE AI",
+                startBtn: "🚀 Démarrer",
+                levelsBtn: "🎯 Niveaux",
+                rulesBtn: "📋 Règles",
+                pauseBtn: "⏸️ Pause",
+                menuBtn: "🏠 Menu",
+                scoreLabel: "Score",
+                targetLabel: "Objectif",
+                levelLabel: "Niveau",
+                livesLabel: "Vies",
+                rulesTitle: "Règles du Jeu",
+                rulesText: `<p><strong>Objectif :</strong> Défendez la Terre contre l'invasion alien !</p>
+                           <p><strong>Contrôles :</strong></p>
+                           <p>• Utilisez la souris pour déplacer votre vaisseau</p>
+                           <p>• Clic gauche pour tirer des lasers</p>
+                           <p>• Détruisez tous les ennemis pour passer au niveau suivant</p>
+                           <p><strong>Système de points :</strong></p>
+                           <p>• Ennemi détruit : +100 points</p>
+                           <p>• Bonus de niveau : +500 points</p>
+                           <p>• Vous avez 3 vies au début</p>`,
+                closeBtn: "Fermer",
+                levelModalTitle: "Sélection de Niveau",
+                rewardTitle: "🏆 Félicitations !",
+                rewardMessage: "Vous avez terminé le niveau",
+                nextLevelBtn: "Niveau Suivant",
+                closeRewardBtn: "Menu Principal",
+
+            },
+            en: {
+                gameTitle: "CYBER DEFENSE AI",
+                startBtn: "🚀 Start Game",
+                levelsBtn: "🎯 Levels",
+                rulesBtn: "📋 Rules",
+                pauseBtn: "⏸️ Pause",
+                menuBtn: "🏠 Menu",
+                scoreLabel: "Score",
+                targetLabel: "Target",
+                levelLabel: "Level",
+                livesLabel: "Lives",
+                rulesTitle: "Game Rules",
+                rulesText: `<p><strong>Objective:</strong> Defend Earth against alien invasion!</p>
+                           <p><strong>Controls:</strong></p>
+                           <p>• Use mouse to move your ship</p>
+                           <p>• Left click to fire lasers</p>
+                           <p>• Destroy all enemies to advance to next level</p>
+                           <p><strong>Scoring System:</strong></p>
+                           <p>• Enemy destroyed: +100 points</p>
+                           <p>• Level bonus: +500 points</p>
+                           <p>• You start with 3 lives</p>`,
+                closeBtn: "Close",
+                levelModalTitle: "Level Selection",
+                rewardTitle: "🏆 Congratulations!",
+                rewardMessage: "You completed level",
+                nextLevelBtn: "Next Level",
+                closeRewardBtn: "Main Menu",
+
+            },
+            ar: {
+                gameTitle: "الدفاع السيبراني بالذكاء الاصطناعي",
+                startBtn: "🚀 ابدأ اللعبة",
+                levelsBtn: "🎯 المستويات",
+                rulesBtn: "📋 القواعد",
+                pauseBtn: "⏸️ إيقاف مؤقت",
+                menuBtn: "🏠 القائمة",
+                scoreLabel: "النقاط",
+                targetLabel: "الهدف",
+                levelLabel: "المستوى",
+                livesLabel: "الأرواح",
+                rulesTitle: "قواعد اللعبة",
+                rulesText: `<p><strong>الهدف:</strong> دافع عن الأرض ضد الغزو الفضائي!</p>
+                           <p><strong>التحكم:</strong></p>
+                           <p>• استخدم الماوس لتحريك سفينتك</p>
+                           <p>• انقر بالزر الأيسر لإطلاق الليزر</p>
+                           <p>• دمر جميع الأعداء للانتقال للمستوى التالي</p>
+                           <p><strong>نظام النقاط:</strong></p>
+                           <p>• عدو مدمر: +100 نقطة</p>
+                           <p>• مكافأة المستوى: +500 نقطة</p>
+                           <p>• تبدأ بـ 3 أرواح</p>`,
+                closeBtn: "إغلاق",
+                levelModalTitle: "اختيار المستوى",
+                rewardTitle: "🏆 تهانينا!",
+                rewardMessage: "لقد أكملت المستوى",
+                nextLevelBtn: "المستوى التالي",
+                closeRewardBtn: "القائمة الرئيسية",
+
+            },
+            es: {
+                gameTitle: "DEFENSA CIBERNÉTICA IA",
+                startBtn: "🚀 Iniciar Juego",
+                levelsBtn: "🎯 Niveles",
+                rulesBtn: "📋 Reglas",
+                pauseBtn: "⏸️ Pausa",
+                menuBtn: "🏠 Menú",
+                scoreLabel: "Puntos",
+                targetLabel: "Objetivo",
+                levelLabel: "Nivel",
+                livesLabel: "Vidas",
+                rulesTitle: "Reglas del Juego",
+                rulesText: `<p><strong>Objetivo:</strong> ¡Defiende la Tierra contra la invasión alienígena!</p>
+                           <p><strong>Controles:</strong></p>
+                           <p>• Usa el ratón para mover tu nave</p>
+                           <p>• Clic izquierdo para disparar láseres</p>
+                           <p>• Destruye todos los enemigos para avanzar al siguiente nivel</p>
+                           <p><strong>Sistema de Puntuación:</strong></p>
+                           <p>• Enemigo destruido: +100 puntos</p>
+                           <p>• Bonus de nivel: +500 puntos</p>
+                           <p>• Empiezas con 3 vidas</p>`,
+                closeBtn: "Cerrar",
+                levelModalTitle: "Selección de Nivel",
+                rewardTitle: "🏆 ¡Felicitaciones!",
+                rewardMessage: "Completaste el nivel",
+                nextLevelBtn: "Siguiente Nivel",
+                closeRewardBtn: "Menú Principal",
+
+            },
+            de: {
+                gameTitle: "CYBER VERTEIDIGUNG KI",
+                startBtn: "🚀 Spiel Starten",
+                levelsBtn: "🎯 Level",
+                rulesBtn: "📋 Regeln",
+                pauseBtn: "⏸️ Pause",
+                menuBtn: "🏠 Menü",
+                scoreLabel: "Punkte",
+                targetLabel: "Ziel",
+                levelLabel: "Level",
+                livesLabel: "Leben",
+                rulesTitle: "Spielregeln",
+                rulesText: `<p><strong>Ziel:</strong> Verteidige die Erde gegen die Alien-Invasion!</p>
+                           <p><strong>Steuerung:</strong></p>
+                           <p>• Verwende die Maus, um dein Schiff zu bewegen</p>
+                           <p>• Linksklick zum Abfeuern von Lasern</p>
+                           <p>• Zerstöre alle Feinde, um zum nächsten Level zu gelangen</p>
+                           <p><strong>Punktesystem:</strong></p>
+                           <p>• Feind zerstört: +100 Punkte</p>
+                           <p>• Level-Bonus: +500 Punkte</p>
+                           <p>• Du startest mit 3 Leben</p>`,
+                closeBtn: "Schließen",
+                levelModalTitle: "Level-Auswahl",
+                rewardTitle: "🏆 Glückwunsch!",
+                rewardMessage: "Du hast Level abgeschlossen",
+                nextLevelBtn: "Nächstes Level",
+                closeRewardBtn: "Hauptmenü",
+
+            },
+            zh: {
+                gameTitle: "网络防御人工智能",
+                startBtn: "🚀 开始游戏",
+                levelsBtn: "🎯 关卡",
+                rulesBtn: "📋 规则",
+                pauseBtn: "⏸️ 暂停",
+                menuBtn: "🏠 菜单",
+                scoreLabel: "得分",
+                targetLabel: "目标",
+                levelLabel: "关卡",
+                livesLabel: "生命",
+                rulesTitle: "游戏规则",
+                rulesText: `<p><strong>目标：</strong>保卫地球免受外星人入侵！</p>
+                           <p><strong>控制：</strong></p>
+                           <p>• 使用鼠标移动你的飞船</p>
+                           <p>• 左键点击发射激光</p>
+                           <p>• 消灭所有敌人进入下一关</p>
+                           <p><strong>计分系统：</strong></p>
+                           <p>• 消灭敌人：+100分</p>
+                           <p>• 关卡奖励：+500分</p>
+                           <p>• 你开始时有3条生命</p>`,
+                closeBtn: "关闭",
+                levelModalTitle: "关卡选择",
+                rewardTitle: "🏆 恭喜！",
+                rewardMessage: "你完成了关卡",
+                nextLevelBtn: "下一关",
+                closeRewardBtn: "主菜单",
+
+            }
+        };
+
+        // État du jeu
+        let gameState = {
+            currentLanguage: 'fr',
+            score: 0,
+            level: 1,
+            lives: 3,
+            maxLevel: 30, // Débloquer tous les 30 niveaux
+            isPlaying: false,
+            isPaused: false,
+            enemies: [],
+            lasers: [],
+            playerX: 0,
+            playerY: 0,
+            mouseX: 0,
+            mouseY: 0,
+            shipAngle: 0,
+            enemiesKilled: 0,
+            targetScore: 1000, // Score cible pour terminer le niveau
+            defenderAngle: 0,
+            enemySpawnTimeout: null,
+            gameLoopTimeout: null
+        };
+
+        // Initialisation
+        function init() {
+            createStars();
+            createFloatingParticles();
+            generateLevelGrid();
+            updateUI();
+            
+            // Événements de souris pour le jeu
+            document.addEventListener('mousemove', handleMouseMove);
+            document.addEventListener('click', handleClick);
+            
+            // Événements clavier pour la pause
+            document.addEventListener('keydown', handleKeyDown);
+            
+            // Fermer dropdown en cliquant ailleurs
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.language-selector')) {
+                    document.getElementById('langDropdown').style.display = 'none';
+                }
+            });
+        }
+
+        // Créer les étoiles animées
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            for (let i = 0; i < 100; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.width = star.style.height = Math.random() * 3 + 1 + 'px';
+                star.style.animationDelay = Math.random() * 2 + 's';
+                starsContainer.appendChild(star);
+            }
+        }
+
+        // Créer les particules flottantes
+        function createFloatingParticles() {
+            const particlesContainer = document.getElementById('particles');
+            
+            function addParticle() {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.width = particle.style.height = Math.random() * 6 + 2 + 'px';
+                particle.style.animationDelay = Math.random() * 2 + 's';
+                particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
+                particlesContainer.appendChild(particle);
+                
+                // Supprimer la particule après l'animation
+                setTimeout(() => {
+                    if (particle.parentNode) {
+                        particle.remove();
+                    }
+                }, 20000);
+            }
+            
+            // Ajouter des particules régulièrement
+            setInterval(addParticle, 800);
+            
+            // Ajouter quelques particules initiales
+            for (let i = 0; i < 5; i++) {
+                setTimeout(addParticle, i * 200);
+            }
+        }
+
+        // Gestion des langues
+        function toggleLanguageDropdown() {
+            const dropdown = document.getElementById('langDropdown');
+            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function changeLanguage(lang) {
+            gameState.currentLanguage = lang;
+            updateUI();
+            document.getElementById('langDropdown').style.display = 'none';
+            
+            // Mettre à jour le bouton de langue
+            const langBtn = document.querySelector('.lang-btn');
+            const flags = { fr: '🇫🇷', en: '🇬🇧', ar: '🇸🇦', es: '🇪🇸', de: '🇩🇪', zh: '🇨🇳' };
+            const codes = { fr: 'FR', en: 'EN', ar: 'AR', es: 'ES', de: 'DE', zh: 'ZH' };
+            langBtn.textContent = `${flags[lang]} ${codes[lang]}`;
+        }
+
+        function updateUI() {
+            const t = translations[gameState.currentLanguage];
+            
+            // Mettre à jour tous les textes
+            document.getElementById('gameTitle').textContent = t.gameTitle;
+            document.getElementById('startBtn').innerHTML = t.startBtn;
+            document.getElementById('levelsBtn').innerHTML = t.levelsBtn;
+            document.getElementById('rulesBtn').innerHTML = t.rulesBtn;
+            document.getElementById('levelsBtnHeader').innerHTML = t.levelsBtn;
+            document.getElementById('pauseBtnHeader').innerHTML = t.pauseBtn;
+            document.getElementById('menuBtnHeader').innerHTML = t.menuBtn;
+            document.getElementById('scoreLabel').textContent = t.scoreLabel;
+            document.getElementById('targetLabel').textContent = t.targetLabel;
+            document.getElementById('levelLabel').textContent = t.levelLabel;
+            document.getElementById('livesLabel').textContent = t.livesLabel;
+            document.getElementById('rulesTitle').textContent = t.rulesTitle;
+            document.getElementById('rulesText').innerHTML = t.rulesText;
+            document.getElementById('closeRulesBtn').textContent = t.closeBtn;
+            document.getElementById('levelModalTitle').textContent = t.levelModalTitle;
+            document.getElementById('closeLevelBtn').textContent = t.closeBtn;
+            document.getElementById('nextLevelBtn').textContent = t.nextLevelBtn;
+            document.getElementById('closeRewardBtn').textContent = t.closeRewardBtn;
+            
+
+            
+            // Mettre à jour les stats
+            document.getElementById('score').textContent = gameState.score;
+            document.getElementById('targetScore').textContent = gameState.targetScore;
+            document.getElementById('level').textContent = gameState.level;
+            document.getElementById('lives').textContent = gameState.lives;
+        }
+
+        // Gestion des modals
+        function showRules() {
+            document.getElementById('rulesModal').style.display = 'flex';
+        }
+
+        function showLevels() {
+            generateLevelGrid();
+            document.getElementById('levelModal').style.display = 'flex';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+            if (modalId === 'rewardModal') {
+                showMainMenu();
+            }
+        }
+
+        // Génération de la grille de niveaux
+        function generateLevelGrid() {
+            const grid = document.getElementById('levelGrid');
+            grid.innerHTML = '';
+            
+            for (let i = 1; i <= 30; i++) {
+                const levelBtn = document.createElement('button');
+                levelBtn.className = 'level-btn';
+                levelBtn.textContent = i;
+                
+                // Tous les niveaux sont maintenant débloqués
+                levelBtn.onclick = () => startLevel(i);
+                
+                grid.appendChild(levelBtn);
+            }
+        }
+
+        // Gestion du jeu
+        function startGame() {
+            startLevel(1);
+        }
+
+        function startLevel(level) {
+            gameState.level = level;
+            gameState.isPlaying = true;
+            gameState.isPaused = false;
+            gameState.enemies = [];
+            gameState.lasers = [];
+            gameState.enemiesKilled = 0;
+            gameState.shipAngle = 0;
+            
+            // Difficulté progressive : score cible et vies adaptés au niveau
+            gameState.targetScore = Math.min(level * 1200 + 2000, 25000); // Plafonné à 25000
+            gameState.lives = Math.max(3, 5 - Math.floor(level / 10)); // Plus de vies aux niveaux élevés
+            
+            // Réinitialiser la rotation du vaisseau
+            const ship = document.getElementById('playerShip');
+            ship.style.transform = 'translateX(-50%) rotate(0deg)';
+            
+            // Activer le canon automatique immédiatement en bas
+            const autoCannon = document.getElementById('autoCannon');
+            const gameArea = document.getElementById('gameArea');
+            const rect = gameArea.getBoundingClientRect();
+            const cannonY = rect.height - 100; // Position en bas
+            
+            autoCannon.style.left = '50%';
+            autoCannon.style.top = cannonY + 'px';
+            autoCannon.style.transform = 'translateX(-50%)';
+            autoCannon.style.display = 'block';
+            
+            // Initialiser la position de la souris au centre
+            gameState.mouseX = rect.width / 2;
+            gameState.mouseY = cannonY;
+            
+            document.getElementById('mainMenu').style.display = 'none';
+            document.getElementById('gameArea').style.display = 'block';
+            document.getElementById('gameControlsHeader').style.display = 'flex';
+            closeModal('levelModal');
+            
+            updateUI();
+            gameLoop();
+            spawnEnemies();
+        }
+
+        function pauseGame() {
+            if (!gameState.isPlaying) return;
+            
+            gameState.isPaused = !gameState.isPaused;
+            const pauseBtn = document.getElementById('pauseBtnHeader');
+            
+            if (gameState.isPaused) {
+                // PAUSE : Arrêter tout
+                clearTimeout(gameState.enemySpawnTimeout);
+                clearTimeout(gameState.gameLoopTimeout);
+                
+                // Mettre en pause toutes les animations CSS
+                const canvas = document.getElementById('gameCanvas');
+                const enemies = canvas.querySelectorAll('.enemy');
+                const lasers = canvas.querySelectorAll('.laser');
+                
+                enemies.forEach(enemy => {
+                    enemy.style.animationPlayState = 'paused';
+                });
+                
+                lasers.forEach(laser => {
+                    laser.style.animationPlayState = 'paused';
+                });
+                
+                // Afficher un overlay de pause
+                showPauseOverlay();
+                
+            } else {
+                // REPRENDRE : Relancer tout
+                const canvas = document.getElementById('gameCanvas');
+                const enemies = canvas.querySelectorAll('.enemy');
+                const lasers = canvas.querySelectorAll('.laser');
+                
+                enemies.forEach(enemy => {
+                    enemy.style.animationPlayState = 'running';
+                });
+                
+                lasers.forEach(laser => {
+                    laser.style.animationPlayState = 'running';
+                });
+                
+                // Masquer l'overlay de pause
+                hidePauseOverlay();
+                
+                // Relancer la boucle de jeu et l'apparition d'ennemis
+                gameLoop();
+                spawnEnemies();
+            }
+            
+            // Mettre à jour le texte du bouton selon la langue
+            updatePauseButtonText();
+        }
+        
+        function updatePauseButtonText() {
+            const pauseBtn = document.getElementById('pauseBtnHeader');
+            
+            if (gameState.currentLanguage === 'fr') {
+                pauseBtn.innerHTML = gameState.isPaused ? '▶️ Reprendre' : '⏸️ Pause';
+            } else if (gameState.currentLanguage === 'en') {
+                pauseBtn.innerHTML = gameState.isPaused ? '▶️ Resume' : '⏸️ Pause';
+            } else if (gameState.currentLanguage === 'ar') {
+                pauseBtn.innerHTML = gameState.isPaused ? '▶️ استئناف' : '⏸️ إيقاف مؤقت';
+            } else if (gameState.currentLanguage === 'es') {
+                pauseBtn.innerHTML = gameState.isPaused ? '▶️ Reanudar' : '⏸️ Pausa';
+            } else if (gameState.currentLanguage === 'de') {
+                pauseBtn.innerHTML = gameState.isPaused ? '▶️ Fortsetzen' : '⏸️ Pause';
+            } else if (gameState.currentLanguage === 'zh') {
+                pauseBtn.innerHTML = gameState.isPaused ? '▶️ 继续' : '⏸️ 暂停';
+            }
+        }
+        
+        function showPauseOverlay() {
+            // Créer l'overlay s'il n'existe pas
+            let overlay = document.getElementById('pauseOverlay');
+            if (!overlay) {
+                overlay = document.createElement('div');
+                overlay.id = 'pauseOverlay';
+                overlay.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0, 0, 0, 0.8);
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    z-index: 15;
+                    backdrop-filter: blur(5px);
+                `;
+                
+                const pauseContent = document.createElement('div');
+                pauseContent.style.cssText = `
+                    text-align: center;
+                    color: #00ffff;
+                    font-family: 'Orbitron', monospace;
+                `;
+                
+                const pauseTitle = document.createElement('h2');
+                pauseTitle.style.cssText = `
+                    font-size: 48px;
+                    margin-bottom: 20px;
+                    text-shadow: 0 0 20px #00ffff;
+                    animation: glow 2s ease-in-out infinite alternate;
+                `;
+                pauseTitle.textContent = '⏸️ PAUSE';
+                
+                const pauseText = document.createElement('p');
+                pauseText.style.cssText = `
+                    font-size: 18px;
+                    opacity: 0.8;
+                    margin-bottom: 30px;
+                `;
+                
+                const resumeBtn = document.createElement('button');
+                resumeBtn.style.cssText = `
+                    background: linear-gradient(45deg, rgba(0, 255, 255, 0.2), rgba(255, 0, 255, 0.2));
+                    border: 2px solid #00ffff;
+                    color: #fff;
+                    padding: 15px 30px;
+                    border-radius: 25px;
+                    cursor: pointer;
+                    font-family: inherit;
+                    font-size: 16px;
+                    font-weight: bold;
+                    transition: all 0.3s ease;
+                    margin: 0 10px;
+                `;
+                resumeBtn.onclick = pauseGame;
+                
+                const menuBtn = document.createElement('button');
+                menuBtn.style.cssText = resumeBtn.style.cssText;
+                menuBtn.onclick = showMainMenu;
+                
+                pauseContent.appendChild(pauseTitle);
+                pauseContent.appendChild(pauseText);
+                pauseContent.appendChild(resumeBtn);
+                pauseContent.appendChild(menuBtn);
+                overlay.appendChild(pauseContent);
+                document.body.appendChild(overlay);
+                
+                // Stocker les références pour la traduction
+                overlay.pauseTitle = pauseTitle;
+                overlay.pauseText = pauseText;
+                overlay.resumeBtn = resumeBtn;
+                overlay.menuBtn = menuBtn;
+            }
+            
+            // Mettre à jour les textes selon la langue
+            updatePauseOverlayText(overlay);
+            overlay.style.display = 'flex';
+        }
+        
+        function updatePauseOverlayText(overlay) {
+            const t = translations[gameState.currentLanguage];
+            
+            if (gameState.currentLanguage === 'fr') {
+                overlay.pauseText.textContent = 'Jeu en pause - Cliquez pour reprendre ou retourner au menu';
+                overlay.resumeBtn.textContent = '▶️ Reprendre';
+                overlay.menuBtn.textContent = '🏠 Menu Principal';
+            } else if (gameState.currentLanguage === 'en') {
+                overlay.pauseText.textContent = 'Game Paused - Click to resume or return to menu';
+                overlay.resumeBtn.textContent = '▶️ Resume';
+                overlay.menuBtn.textContent = '🏠 Main Menu';
+            } else if (gameState.currentLanguage === 'ar') {
+                overlay.pauseText.textContent = 'اللعبة متوقفة - انقر للمتابعة أو العودة للقائمة';
+                overlay.resumeBtn.textContent = '▶️ استئناف';
+                overlay.menuBtn.textContent = '🏠 القائمة الرئيسية';
+            } else if (gameState.currentLanguage === 'es') {
+                overlay.pauseText.textContent = 'Juego Pausado - Haz clic para reanudar o volver al menú';
+                overlay.resumeBtn.textContent = '▶️ Reanudar';
+                overlay.menuBtn.textContent = '🏠 Menú Principal';
+            } else if (gameState.currentLanguage === 'de') {
+                overlay.pauseText.textContent = 'Spiel Pausiert - Klicken zum Fortsetzen oder zurück zum Menü';
+                overlay.resumeBtn.textContent = '▶️ Fortsetzen';
+                overlay.menuBtn.textContent = '🏠 Hauptmenü';
+            } else if (gameState.currentLanguage === 'zh') {
+                overlay.pauseText.textContent = '游戏暂停 - 点击继续或返回菜单';
+                overlay.resumeBtn.textContent = '▶️ 继续';
+                overlay.menuBtn.textContent = '🏠 主菜单';
+            }
+        }
+        
+        function hidePauseOverlay() {
+            const overlay = document.getElementById('pauseOverlay');
+            if (overlay) {
+                overlay.style.display = 'none';
+            }
+        }
+
+        function showMainMenu() {
+            gameState.isPlaying = false;
+            gameState.isPaused = false;
+            
+            // Nettoyer tous les timeouts
+            clearTimeout(gameState.enemySpawnTimeout);
+            clearTimeout(gameState.gameLoopTimeout);
+            
+            // Masquer l'overlay de pause s'il est affiché
+            hidePauseOverlay();
+            
+            // Masquer le canon
+            document.getElementById('autoCannon').style.display = 'none';
+            
+            document.getElementById('mainMenu').style.display = 'block';
+            document.getElementById('gameArea').style.display = 'none';
+            document.getElementById('gameControlsHeader').style.display = 'none';
+            clearGameElements();
+        }
+
+        function clearGameElements() {
+            const canvas = document.getElementById('gameCanvas');
+            const enemies = canvas.querySelectorAll('.enemy');
+            const lasers = canvas.querySelectorAll('.laser');
+            const explosions = canvas.querySelectorAll('.explosion');
+            
+            enemies.forEach(enemy => enemy.remove());
+            lasers.forEach(laser => laser.remove());
+            explosions.forEach(explosion => explosion.remove());
+        }
+
+        // Fonctionnalités avancées du canon automatique
+        function updateCannonFeatures(cannon, x, y) {
+            // Détection d'ennemis dans la zone de visée
+            const enemies = document.querySelectorAll('.enemy, .enemy-target, .enemy-premium');
+            let nearestEnemy = null;
+            let minDistance = Infinity;
+            
+            enemies.forEach(enemy => {
+                const enemyRect = enemy.getBoundingClientRect();
+                const gameArea = document.getElementById('gameArea');
+                const gameRect = gameArea.getBoundingClientRect();
+                
+                const enemyX = enemyRect.left - gameRect.left + enemyRect.width / 2;
+                const enemyY = enemyRect.top - gameRect.top + enemyRect.height / 2;
+                
+                const distance = Math.sqrt((x - enemyX) ** 2 + (y - enemyY) ** 2);
+                
+                if (distance < 120 && distance < minDistance) { // Zone de détection plus large pour le canon
+                    minDistance = distance;
+                    nearestEnemy = enemy;
+                }
+            });
+            
+            // Changer l'apparence du canon selon la détection
+            if (nearestEnemy) {
+                // Canon en mode ciblage quand un ennemi est détecté
+                cannon.classList.add('cannon-targeting');
+                
+                // Ajouter un indicateur de verrouillage
+                if (!cannon.querySelector('.lock-indicator')) {
+                    const lockIndicator = document.createElement('div');
+                    lockIndicator.className = 'lock-indicator';
+                    lockIndicator.style.cssText = `
+                        position: absolute;
+                        top: -25px;
+                        left: 50%;
+                        transform: translateX(-50%);
+                        color: #ff0000;
+                        font-size: 12px;
+                        font-weight: bold;
+                        text-shadow: 0 0 10px #ff0000;
+                        animation: lockBlink 0.5s ease-in-out infinite alternate;
+                        background: rgba(0,0,0,0.7);
+                        padding: 2px 8px;
+                        border-radius: 10px;
+                        border: 1px solid #ff0000;
+                    `;
+                    lockIndicator.textContent = '🎯 CIBLE ACQUISE';
+                    cannon.appendChild(lockIndicator);
+                }
+                
+                // Marquer l'ennemi visé
+                document.querySelectorAll('.enemy-marked').forEach(e => e.classList.remove('enemy-marked'));
+                nearestEnemy.classList.add('enemy-marked');
+                nearestEnemy.style.boxShadow = '0 0 25px rgba(255, 0, 0, 0.9)';
+                
+            } else {
+                // Canon normal
+                cannon.classList.remove('cannon-targeting');
+                
+                // Supprimer l'indicateur de verrouillage
+                const lockIndicator = cannon.querySelector('.lock-indicator');
+                if (lockIndicator) {
+                    lockIndicator.remove();
+                }
+                
+                // Supprimer le marquage des ennemis
+                document.querySelectorAll('.enemy-marked').forEach(e => {
+                    e.classList.remove('enemy-marked');
+                    e.style.boxShadow = '';
+                });
+            }
+            
+            // Afficher les coordonnées du canon (optionnel)
+            updateCannonCoordinates(cannon, x, y);
+        }
+        
+        function updateCannonCoordinates(cannon, x, y) {
+            let coordDisplay = cannon.querySelector('.coord-display');
+            if (!coordDisplay) {
+                coordDisplay = document.createElement('div');
+                coordDisplay.className = 'coord-display';
+                coordDisplay.style.cssText = `
+                    position: absolute;
+                    top: -45px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    color: #00ffff;
+                    font-size: 10px;
+                    font-family: 'Orbitron', monospace;
+                    text-shadow: 0 0 5px #00ffff;
+                    opacity: 0.7;
+                    pointer-events: none;
+                    background: rgba(0,0,0,0.5);
+                    padding: 2px 6px;
+                    border-radius: 8px;
+                `;
+                cannon.appendChild(coordDisplay);
+            }
+            
+            coordDisplay.textContent = `X:${Math.round(x)} Y:${Math.round(y)}`;
+        }
+
+        // Gestion des événements souris
+        function handleMouseMove(e) {
+            if (!gameState.isPlaying || gameState.isPaused) return;
+            
+            const gameArea = document.getElementById('gameArea');
+            const rect = gameArea.getBoundingClientRect();
+            const ship = document.getElementById('playerShip');
+            const autoCannon = document.getElementById('autoCannon');
+            
+            // Position de la souris (seulement horizontale)
+            gameState.mouseX = e.clientX - rect.left;
+            
+            // Position du vaisseau
+            const shipRect = ship.getBoundingClientRect();
+            const shipCenterX = shipRect.left - rect.left + shipRect.width / 2;
+            
+            // Calculer l'angle de rotation du vaisseau basé sur la position horizontale
+            const deltaX = gameState.mouseX - shipCenterX;
+            gameState.shipAngle = Math.atan2(deltaX, 200) * (180 / Math.PI); // 200px de distance fixe
+            
+            // Limiter la rotation horizontale (-45° à +45°)
+            gameState.shipAngle = Math.max(-45, Math.min(45, gameState.shipAngle));
+            
+            // Appliquer la rotation au vaisseau
+            ship.style.transform = `translateX(-50%) rotate(${gameState.shipAngle}deg)`;
+            
+            // Positionner le canon en bas de l'écran (toujours vertical)
+            const cannonY = rect.height - 100; // Position fixe en bas (100px du bas)
+            gameState.mouseY = cannonY; // Stocker pour le tir
+            
+            // Le canon suit horizontalement la souris mais reste vertical
+            const cannonCenterX = gameState.mouseX; // Le canon suit horizontalement la souris
+            
+            autoCannon.style.left = (cannonCenterX - 25) + 'px'; // Centrer le canon (largeur 50px)
+            autoCannon.style.top = cannonY + 'px';
+            autoCannon.style.transform = 'none'; // Pas de rotation, toujours vertical
+            autoCannon.style.display = 'block';
+            
+            // Fonctionnalités avancées du canon
+            updateCannonFeatures(autoCannon, gameState.mouseX, cannonY);
+        }
+
+        function handleClick(e) {
+            if (!gameState.isPlaying || gameState.isPaused) return;
+            
+            // Vérifier si le clic est dans la zone de jeu
+            const gameArea = document.getElementById('gameArea');
+            const rect = gameArea.getBoundingClientRect();
+            
+            if (e.clientX >= rect.left && e.clientX <= rect.right && 
+                e.clientY >= rect.top && e.clientY <= rect.bottom) {
+                
+                e.preventDefault(); // Empêcher les actions par défaut
+                
+                console.log('🎯 CLIC DÉTECTÉ - Position:', { x: e.clientX - rect.left, y: e.clientY - rect.top });
+                
+                // Tirer immédiatement vers la position du viseur
+                fireLaser();
+                
+                // Effet visuel sur le canon
+                const autoCannon = document.getElementById('autoCannon');
+                if (autoCannon && autoCannon.style.display !== 'none') {
+                    autoCannon.classList.add('cannon-firing');
+                    setTimeout(() => {
+                        autoCannon.classList.remove('cannon-firing');
+                    }, 200);
+                }
+                
+                // Vibration du vaisseau lors du tir
+                const ship = document.getElementById('playerShip');
+                ship.style.filter = 'brightness(1.5)';
+                setTimeout(() => {
+                    ship.style.filter = 'drop-shadow(0 0 20px #00ffff)';
+                }, 100);
+            }
+        }
+
+        function handleKeyDown(e) {
+            // Pause avec la barre d'espace ou Échap
+            if ((e.code === 'Space' || e.code === 'Escape') && gameState.isPlaying) {
+                e.preventDefault();
+                pauseGame();
+            }
+            
+            // Tir avec la barre d'espace (si pas en pause)
+            if (e.code === 'Space' && gameState.isPlaying && !gameState.isPaused) {
+                e.preventDefault();
+                fireLaser();
+            }
+        }
+
+        // Système de tir
+        function fireLaser() {
+            if (!gameState.isPlaying || gameState.isPaused) return;
+            
+            console.log('🎯 TENTATIVE DE TIR - État du jeu:', { isPlaying: gameState.isPlaying, isPaused: gameState.isPaused });
+            
+            const canvas = document.getElementById('gameCanvas');
+            const ship = document.getElementById('playerShip');
+            
+            if (!canvas || !ship) {
+                console.error('❌ Éléments manquants:', { canvas: !!canvas, ship: !!ship });
+                return;
+            }
+            
+            // Obtenir les positions du canon et de la cible
+            const canvasRect = canvas.getBoundingClientRect();
+            const autoCannon = document.getElementById('autoCannon');
+            const cannonRect = autoCannon.getBoundingClientRect();
+            
+            // Position de départ du laser (bouche du canon)
+            const cannonX = cannonRect.left - canvasRect.left + cannonRect.width / 2;
+            const cannonY = cannonRect.top - canvasRect.top + 20; // Légèrement en dessous du haut du canon
+            
+            // Position cible (position de la souris)
+            const targetX = gameState.mouseX || cannonX;
+            const targetY = gameState.mouseY - 200 || cannonY - 200; // Tirer vers le haut
+            
+            console.log('📍 POSITIONS:', { 
+                cannon: { x: cannonX, y: cannonY }, 
+                target: { x: targetX, y: targetY },
+                mouse: { x: gameState.mouseX, y: gameState.mouseY }
+            });
+            
+            // Créer le laser visible
+            const laser = document.createElement('div');
+            laser.style.cssText = `
+                position: absolute;
+                left: ${cannonX - 3}px;
+                top: ${cannonY}px;
+                width: 6px;
+                height: 25px;
+                background: linear-gradient(to top, #00ffff 0%, #ffffff 50%, #00ffff 100%);
+                box-shadow: 0 0 20px #00ffff, 0 0 40px #00ffff, inset 0 0 15px rgba(255,255,255,0.8);
+                border-radius: 3px;
+                z-index: 12;
+                pointer-events: none;
+            `;
+            
+            // Calculer la direction vers la cible
+            const deltaX = targetX - cannonX;
+            const deltaY = targetY - cannonY;
+            const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+            
+            if (distance > 0) {
+                // Angle de rotation du laser
+                const angle = Math.atan2(deltaX, -deltaY) * (180 / Math.PI);
+                laser.style.transform = `rotate(${angle}deg)`;
+                laser.style.transformOrigin = 'center bottom';
+                
+                // Stocker les données de mouvement
+                laser.velocityX = (deltaX / distance) * 12; // Vitesse horizontale
+                laser.velocityY = (deltaY / distance) * 12; // Vitesse verticale
+                laser.currentX = cannonX;
+                laser.currentY = cannonY;
+                laser.startTime = Date.now();
+            } else {
+                // Tir vers le haut par défaut
+                laser.velocityX = 0;
+                laser.velocityY = -12;
+                laser.currentX = cannonX;
+                laser.currentY = cannonY;
+                laser.startTime = Date.now();
+            }
+            
+            canvas.appendChild(laser);
+            gameState.lasers.push(laser);
+            
+            // Effets visuels
+            createMuzzleFlash(cannonX, cannonY);
+            createCannonFireEffect();
+            
+            // Démarrer l'animation
+            moveLaser(laser);
+            
+            console.log('✅ LASER CRÉÉ ET AJOUTÉ!', { 
+                laserCount: gameState.lasers.length,
+                velocity: { x: laser.velocityX, y: laser.velocityY }
+            });
+        }
+        
+        // Créer un effet de flash au moment du tir
+        function createMuzzleFlash(x, y) {
+            const canvas = document.getElementById('gameCanvas');
+            const flash = document.createElement('div');
+            flash.style.cssText = `
+                position: absolute;
+                left: ${x - 15}px;
+                top: ${y - 15}px;
+                width: 30px;
+                height: 30px;
+                background: radial-gradient(circle, #ffffff, #00ffff, transparent);
+                border-radius: 50%;
+                animation: muzzleFlash 0.2s ease-out forwards;
+                z-index: 11;
+                pointer-events: none;
+            `;
+            
+            // Ajouter l'animation CSS si elle n'existe pas
+            if (!document.getElementById('muzzleFlashStyle')) {
+                const style = document.createElement('style');
+                style.id = 'muzzleFlashStyle';
+                style.textContent = `
+                    @keyframes muzzleFlash {
+                        0% { transform: scale(0.5); opacity: 1; }
+                        100% { transform: scale(2); opacity: 0; }
+                    }
+                    @keyframes crosshairFire {
+                        0% { transform: scale(1); border-color: #00ffff; }
+                        50% { transform: scale(1.4); border-color: #ffffff; }
+                        100% { transform: scale(1); border-color: #00ffff; }
+                    }
+                    @keyframes sparkFly {
+                        0% { 
+                            transform: scale(1) translate(0, 0); 
+                            opacity: 1; 
+                        }
+                        100% { 
+                            transform: scale(0.2) translate(${Math.random() * 60 - 30}px, ${Math.random() * 60 - 30}px); 
+                            opacity: 0; 
+                        }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+            
+            canvas.appendChild(flash);
+            
+            setTimeout(() => {
+                if (flash.parentNode) {
+                    flash.remove();
+                }
+            }, 200);
+        }
+
+        // Effet visuel sur le canon lors du tir
+        function createCannonFireEffect() {
+            const autoCannon = document.getElementById('autoCannon');
+            if (!autoCannon) return;
+            
+            // Animation de tir sur le canon (déjà gérée par la classe cannon-firing)
+            
+            // Créer un flash au niveau de la bouche du canon
+            const canvas = document.getElementById('gameCanvas');
+            const cannonRect = autoCannon.getBoundingClientRect();
+            const canvasRect = canvas.getBoundingClientRect();
+            
+            const cannonFlash = document.createElement('div');
+            cannonFlash.style.cssText = `
+                position: absolute;
+                left: ${cannonRect.left - canvasRect.left + cannonRect.width/2 - 25}px;
+                top: ${cannonRect.top - canvasRect.top + 10}px;
+                width: 50px;
+                height: 50px;
+                background: radial-gradient(circle, rgba(255,255,255,0.9), rgba(255,102,0,0.7), rgba(0,255,255,0.5), transparent);
+                border-radius: 50%;
+                animation: muzzleFlash 0.3s ease-out forwards;
+                z-index: 16;
+                pointer-events: none;
+            `;
+            
+            canvas.appendChild(cannonFlash);
+            
+            // Créer des étincelles autour du canon
+            for (let i = 0; i < 5; i++) {
+                const spark = document.createElement('div');
+                spark.style.cssText = `
+                    position: absolute;
+                    left: ${cannonRect.left - canvasRect.left + cannonRect.width/2 + (Math.random() - 0.5) * 40}px;
+                    top: ${cannonRect.top - canvasRect.top + 15 + (Math.random() - 0.5) * 20}px;
+                    width: 4px;
+                    height: 4px;
+                    background: #ffff00;
+                    border-radius: 50%;
+                    animation: sparkFly 0.4s ease-out forwards;
+                    z-index: 15;
+                    pointer-events: none;
+                `;
+                canvas.appendChild(spark);
+                
+                setTimeout(() => {
+                    if (spark.parentNode) {
+                        spark.remove();
+                    }
+                }, 400);
+            }
+            
+            setTimeout(() => {
+                if (cannonFlash.parentNode) {
+                    cannonFlash.remove();
+                }
+            }, 300);
+        }
+
+        function moveLaser(laser) {
+            if (!laser.parentNode) {
+                // Nettoyer le laser de la liste s'il n'est plus dans le DOM
+                gameState.lasers = gameState.lasers.filter(l => l !== laser);
+                return;
+            }
+            
+            // Mettre à jour la position
+            laser.currentX += laser.velocityX;
+            laser.currentY += laser.velocityY;
+            
+            // Appliquer la nouvelle position
+            laser.style.left = (laser.currentX - 3) + 'px';
+            laser.style.top = laser.currentY + 'px';
+            
+            // Effet de traînée lumineuse (fade out progressif)
+            const elapsed = Date.now() - laser.startTime;
+            const opacity = Math.max(0.1, 1 - elapsed / 2000); // Fade sur 2 secondes
+            laser.style.opacity = opacity;
+            
+            // Vérifier les limites de l'écran
+            const canvas = document.getElementById('gameCanvas');
+            const canvasRect = canvas.getBoundingClientRect();
+            
+            if (laser.currentX < -50 || laser.currentX > canvasRect.width + 50 || 
+                laser.currentY < -50 || laser.currentY > canvasRect.height + 50 || 
+                elapsed > 3000) { // Supprimer après 3 secondes max
+                
+                console.log('🗑️ LASER SUPPRIMÉ - Raison:', {
+                    outOfBounds: laser.currentX < -50 || laser.currentX > canvasRect.width + 50 || laser.currentY < -50 || laser.currentY > canvasRect.height + 50,
+                    timeout: elapsed > 3000,
+                    position: { x: laser.currentX, y: laser.currentY }
+                });
+                
+                laser.remove();
+                gameState.lasers = gameState.lasers.filter(l => l !== laser);
+                return;
+            }
+            
+            // Continuer l'animation
+            requestAnimationFrame(() => moveLaser(laser));
+        }
+
+        // Fonction de compatibilité (garder l'ancienne pour éviter les erreurs)
+        function animateLaser(laser) {
+            moveLaser(laser);
+        }
+
+        // Système d'ennemis
+        function spawnEnemies() {
+            if (!gameState.isPlaying || gameState.isPaused) return;
+            
+            const canvas = document.getElementById('gameCanvas');
+            let enemy;
+            let enemyType = 'basic';
+            let points = 100;
+            let animationDuration = 5000;
+            
+            // Déterminer le type d'ennemi selon le niveau
+            if (gameState.level >= 10) {
+                const rand = Math.random();
+                if (rand < 0.4) {
+                    // Ennemi cible (40% de chance)
+                    enemy = document.createElement('div');
+                    enemy.className = 'enemy-target';
+                    enemyType = 'target';
+                    points = 200;
+                    animationDuration = 4000;
+                } else if (rand < 0.6) {
+                    // Ennemi premium (20% de chance)
+                    enemy = document.createElement('div');
+                    enemy.className = 'enemy-premium';
+                    enemyType = 'premium';
+                    points = 500;
+                    animationDuration = 3500;
+                } else {
+                    // Ennemi basique (40% de chance)
+                    enemy = document.createElement('div');
+                    enemy.className = 'enemy';
+                    enemyType = 'basic';
+                    points = 100;
+                    animationDuration = 5000;
+                }
+            } else if (gameState.level >= 5) {
+                // À partir du niveau 5, introduire les cibles
+                const rand = Math.random();
+                if (rand < 0.3) {
+                    enemy = document.createElement('div');
+                    enemy.className = 'enemy-target';
+                    enemyType = 'target';
+                    points = 200;
+                    animationDuration = 4000;
+                } else {
+                    enemy = document.createElement('div');
+                    enemy.className = 'enemy';
+                    enemyType = 'basic';
+                    points = 100;
+                    animationDuration = 5000;
+                }
+            } else {
+                // Niveaux 1-4 : seulement des ennemis basiques
+                enemy = document.createElement('div');
+                enemy.className = 'enemy';
+                enemyType = 'basic';
+                points = 100;
+                animationDuration = 5000;
+            }
+            
+            enemy.style.top = Math.random() * 200 + 100 + 'px';
+            enemy.style.left = '-60px';
+            enemy.dataset.points = points;
+            enemy.dataset.type = enemyType;
+            
+            canvas.appendChild(enemy);
+            gameState.enemies.push(enemy);
+            
+            // Supprimer l'ennemi après l'animation
+            setTimeout(() => {
+                if (enemy.parentNode) {
+                    enemy.remove();
+                    gameState.enemies = gameState.enemies.filter(e => e !== enemy);
+                    
+                    // Perdre une vie si l'ennemi atteint la fin
+                    gameState.lives--;
+                    updateUI();
+                    
+                    if (gameState.lives <= 0) {
+                        gameOver();
+                    }
+                }
+            }, animationDuration);
+            
+            // Programmer le prochain ennemi avec difficulté progressive
+            if (gameState.isPlaying && !gameState.isPaused) {
+                const spawnDelay = Math.max(300, 2500 - gameState.level * 80); // Plus rapide aux niveaux élevés
+                gameState.enemySpawnTimeout = setTimeout(spawnEnemies, spawnDelay);
+            }
+        }
+
+        // Boucle de jeu principale
+        function gameLoop() {
+            if (!gameState.isPlaying || gameState.isPaused) {
+                if (gameState.isPlaying && !gameState.isPaused) {
+                    gameState.gameLoopTimeout = setTimeout(gameLoop, 50);
+                }
+                return;
+            }
+            
+            checkCollisions();
+            
+            // Vérifier si le niveau est terminé (score cible atteint)
+            if (gameState.score >= gameState.targetScore) {
+                setTimeout(() => {
+                    if (gameState.isPlaying && gameState.score >= gameState.targetScore) {
+                        levelComplete();
+                    }
+                }, 500);
+            }
+            
+            gameState.gameLoopTimeout = setTimeout(gameLoop, 50);
+        }
+
+        // Détection des collisions
+        function checkCollisions() {
+            gameState.lasers.forEach(laser => {
+                if (!laser.parentNode) return;
+                
+                gameState.enemies.forEach(enemy => {
+                    if (!enemy.parentNode) return;
+                    
+                    const laserRect = laser.getBoundingClientRect();
+                    const enemyRect = enemy.getBoundingClientRect();
+                    
+                    if (laserRect.left < enemyRect.right &&
+                        laserRect.right > enemyRect.left &&
+                        laserRect.top < enemyRect.bottom &&
+                        laserRect.bottom > enemyRect.top) {
+                        
+                        // Collision détectée
+                        const points = parseInt(enemy.dataset.points) || 100;
+                        const enemyType = enemy.dataset.type || 'basic';
+                        
+                        // Créer explosion avec couleur selon le type
+                        createExplosion(enemyRect.left + enemyRect.width/2, enemyRect.top + enemyRect.height/2, enemyType);
+                        
+                        laser.remove();
+                        enemy.remove();
+                        
+                        gameState.lasers = gameState.lasers.filter(l => l !== laser);
+                        gameState.enemies = gameState.enemies.filter(e => e !== enemy);
+                        
+                        gameState.score += points;
+                        
+                        // Afficher les points gagnés
+                        showPointsPopup(enemyRect.left + enemyRect.width/2, enemyRect.top + enemyRect.height/2, points);
+                        
+                        updateUI();
+                    }
+                });
+            });
+        }
+
+        // Créer une explosion
+        function createExplosion(x, y, enemyType = 'basic') {
+            const canvas = document.getElementById('gameCanvas');
+            const canvasRect = canvas.getBoundingClientRect();
+            
+            const explosion = document.createElement('div');
+            explosion.className = 'explosion';
+            explosion.style.left = (x - canvasRect.left - 30) + 'px';
+            explosion.style.top = (y - canvasRect.top - 30) + 'px';
+            
+            // Couleur d'explosion selon le type d'ennemi
+            if (enemyType === 'target') {
+                explosion.style.background = 'radial-gradient(circle, #ffff00, #ff6600, transparent)';
+                explosion.style.boxShadow = '0 0 40px rgba(255, 255, 0, 0.8)';
+            } else if (enemyType === 'premium') {
+                explosion.style.background = 'radial-gradient(circle, #00ffff, #ff00ff, transparent)';
+                explosion.style.boxShadow = '0 0 50px rgba(0, 255, 255, 0.9)';
+            } else {
+                explosion.style.background = 'radial-gradient(circle, #ffff00, #ff0000, transparent)';
+            }
+            
+            canvas.appendChild(explosion);
+            
+            setTimeout(() => {
+                if (explosion.parentNode) {
+                    explosion.remove();
+                }
+            }, 500);
+        }
+
+        // Afficher popup de points
+        function showPointsPopup(x, y, points) {
+            const canvas = document.getElementById('gameCanvas');
+            const canvasRect = canvas.getBoundingClientRect();
+            
+            const popup = document.createElement('div');
+            popup.textContent = `+${points}`;
+            popup.style.cssText = `
+                position: absolute;
+                left: ${x - canvasRect.left}px;
+                top: ${y - canvasRect.top}px;
+                color: #00ff00;
+                font-family: 'Orbitron', monospace;
+                font-weight: bold;
+                font-size: 18px;
+                text-shadow: 0 0 10px #00ff00;
+                pointer-events: none;
+                z-index: 10;
+                animation: pointsFloat 1s ease-out forwards;
+            `;
+            
+            // Ajouter l'animation CSS si elle n'existe pas
+            if (!document.getElementById('pointsFloatStyle')) {
+                const style = document.createElement('style');
+                style.id = 'pointsFloatStyle';
+                style.textContent = `
+                    @keyframes pointsFloat {
+                        0% { transform: translateY(0) scale(1); opacity: 1; }
+                        100% { transform: translateY(-50px) scale(1.5); opacity: 0; }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+            
+            canvas.appendChild(popup);
+            
+            setTimeout(() => {
+                if (popup.parentNode) {
+                    popup.remove();
+                }
+            }, 1000);
+        }
+
+        // Fin de niveau
+        function levelComplete() {
+            gameState.isPlaying = false;
+            const levelBonus = gameState.level * 200; // Bonus proportionnel au niveau
+            gameState.score += levelBonus;
+            
+            if (gameState.level >= gameState.maxLevel) {
+                gameState.maxLevel = gameState.level + 1;
+            }
+            
+            const t = translations[gameState.currentLanguage];
+            document.getElementById('rewardTitle').textContent = t.rewardTitle;
+            document.getElementById('rewardMessage').textContent = `${t.rewardMessage} ${gameState.level} !`;
+            document.getElementById('rewardPoints').textContent = `Bonus : +${levelBonus} points`;
+            
+            document.getElementById('rewardModal').style.display = 'flex';
+            updateUI();
+        }
+
+        // Niveau suivant
+        function nextLevel() {
+            gameState.level++;
+            closeModal('rewardModal');
+            startLevel(gameState.level);
+        }
+
+        // Game Over
+        function gameOver() {
+            gameState.isPlaying = false;
+            try{ parent.postMessage({ action: 'dialog', dialogType: 'alert', text: 'Game Over! Score final: ' + gameState.score }, '*'); }catch(e){}
+            showMainMenu();
+            
+            // Réinitialiser le jeu
+            gameState.score = 0;
+            gameState.level = 1;
+            gameState.lives = 3;
+            gameState.enemiesKilled = 0;
+            gameState.targetScore = 2000;
+            updateUI();
+        }
+
+        // Initialiser le jeu au chargement
+        window.addEventListener('load', init);
+    </script>
+<script>
+/* Canonical child-side overlay closer for platform pages */
+function closePlatform(){
+    try{ console.debug('jeux26: closePlatform called'); }catch(e){}
+    if(window.parent && window.parent !== window){
+        window.parent.postMessage({ action: 'close', reason: 'user-initiated', source: 'jeux26' }, '*');
+        return;
+    }
+    if(window.opener && !window.opener.closed){
+        try{ window.opener.postMessage({ action: 'child-closed', source: 'jeux26' }, '*'); }catch(e){}
+        try{ window.close(); }catch(e){}
+        return;
+    }
+    window.location.href = '/brainova.html';
+}
+window.closePlatform = closePlatform;
+
+(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98ab02ebc048704e',t:'MTc1OTgxNTA3Ny4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
