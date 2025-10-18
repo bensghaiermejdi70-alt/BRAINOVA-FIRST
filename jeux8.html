@@ -1,0 +1,1889 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 Speed Challenge - IA Futuriste</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            box-sizing: border-box;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0a0f 0%, #1a0a2e 30%, #16213e 70%, #0f3460 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Particules cyber d'arrière-plan */
+        .cyber-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .cyber-particle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: #00ffff;
+            border-radius: 50%;
+            animation: cyberFloat 12s infinite linear;
+            box-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff;
+        }
+
+        @keyframes cyberFloat {
+            0% {
+                transform: translateY(100vh) translateX(0) rotate(0deg) scale(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+                transform: translateY(90vh) translateX(20px) rotate(45deg) scale(1);
+            }
+            50% {
+                transform: translateY(50vh) translateX(-30px) rotate(180deg) scale(1.2);
+            }
+            90% {
+                opacity: 1;
+                transform: translateY(10vh) translateX(40px) rotate(315deg) scale(1);
+            }
+            100% {
+                transform: translateY(-10vh) translateX(80px) rotate(360deg) scale(0);
+                opacity: 0;
+            }
+        }
+
+        /* Grille cyber de fond */
+        .cyber-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(0, 255, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 255, 0.1) 1px, transparent 1px);
+            background-size: 60px 60px;
+            animation: cyberGridMove 25s linear infinite;
+            z-index: 1;
+        }
+
+        @keyframes cyberGridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(60px, 60px); }
+        }
+
+        /* Container principal */
+        .speed-challenge-container {
+            position: relative;
+            z-index: 10;
+            display: grid;
+            grid-template-columns: 250px 1fr 250px;
+            grid-template-rows: auto 1fr;
+            gap: 15px;
+            min-height: 100vh;
+            padding: 15px;
+            max-width: 100%;
+            margin: 0;
+        }
+
+        .game-panel {
+            background: linear-gradient(145deg, 
+                rgba(20, 20, 40, 0.95) 0%,
+                rgba(30, 15, 80, 0.95) 50%,
+                rgba(15, 52, 96, 0.95) 100%);
+            backdrop-filter: blur(25px);
+            border-radius: 20px;
+            padding: 20px;
+            width: 100%;
+            height: fit-content;
+            box-shadow: 
+                0 25px 50px rgba(0, 0, 0, 0.8),
+                0 0 100px rgba(0, 255, 255, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(0, 255, 255, 0.4);
+            animation: cyberPanelGlow 4s ease-in-out infinite alternate;
+            grid-column: 2;
+        }
+
+        .left-panel, .right-panel {
+            background: linear-gradient(145deg, 
+                rgba(20, 20, 40, 0.95) 0%,
+                rgba(30, 15, 80, 0.95) 50%,
+                rgba(15, 52, 96, 0.95) 100%);
+            backdrop-filter: blur(25px);
+            border-radius: 15px;
+            padding: 15px;
+            height: fit-content;
+            box-shadow: 
+                0 15px 30px rgba(0, 0, 0, 0.6),
+                0 0 60px rgba(0, 255, 255, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(0, 255, 255, 0.3);
+        }
+
+        .panel-section {
+            margin-bottom: 20px;
+        }
+
+        @keyframes cyberPanelGlow {
+            from { 
+                box-shadow: 
+                    0 25px 50px rgba(0, 0, 0, 0.8),
+                    0 0 100px rgba(0, 255, 255, 0.2),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            }
+            to { 
+                box-shadow: 
+                    0 30px 60px rgba(0, 0, 0, 0.8),
+                    0 0 120px rgba(0, 255, 255, 0.3),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            }
+        }
+
+        /* En-tête du jeu */
+        .cyber-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid rgba(0, 255, 255, 0.4);
+        }
+
+        .cyber-title {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .cyber-title h1 {
+            color: #00ffff;
+            margin: 0;
+            font-size: 26px;
+            font-weight: 700;
+            text-shadow: 0 0 30px rgba(0, 255, 255, 0.9);
+            animation: cyberTitlePulse 3s infinite alternate;
+        }
+
+        @keyframes cyberTitlePulse {
+            from { 
+                text-shadow: 0 0 30px rgba(0, 255, 255, 0.9);
+                transform: scale(1);
+            }
+            to { 
+                text-shadow: 0 0 40px rgba(0, 255, 255, 1);
+                transform: scale(1.03);
+            }
+        }
+
+        .cyber-icon {
+            font-size: 32px;
+            animation: cyberIconSpin 4s ease-in-out infinite;
+            filter: drop-shadow(0 0 20px #00ffff);
+        }
+
+        @keyframes cyberIconSpin {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.15) rotate(10deg); }
+        }
+
+        .cyber-badge {
+            background: linear-gradient(45deg, #00ffff, #ff00ff, #ffff00, #00ff00);
+            background-size: 400% 400%;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            animation: cyberBadgeShine 4s ease-in-out infinite;
+            box-shadow: 0 0 25px rgba(0, 255, 255, 0.6);
+        }
+
+        @keyframes cyberBadgeShine {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        /* Sélecteur de langue */
+        .language-selector {
+            background: linear-gradient(145deg, 
+                rgba(20, 20, 40, 0.95) 0%,
+                rgba(30, 15, 80, 0.95) 30%,
+                rgba(15, 52, 96, 0.95) 70%,
+                rgba(0, 255, 255, 0.95) 100%);
+            color: #00ffff;
+            border: 2px solid rgba(0, 255, 255, 0.6);
+            border-radius: 15px;
+            padding: 12px 18px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            box-shadow: 
+                0 0 25px rgba(0, 255, 255, 0.4),
+                0 0 40px rgba(255, 0, 255, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            min-width: 160px;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.8);
+        }
+
+        .language-selector:hover {
+            background: linear-gradient(145deg, 
+                rgba(0, 255, 255, 0.9) 0%,
+                rgba(255, 0, 255, 0.9) 30%,
+                rgba(255, 255, 0, 0.9) 70%,
+                rgba(0, 255, 0, 0.9) 100%);
+            transform: translateY(-2px);
+            box-shadow: 
+                0 8px 25px rgba(0, 255, 255, 0.6),
+                0 0 50px rgba(255, 0, 255, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            color: white;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+        }
+
+        .language-selector option {
+            background: linear-gradient(145deg, 
+                rgba(15, 15, 30, 0.98) 0%,
+                rgba(25, 10, 70, 0.98) 50%,
+                rgba(10, 42, 86, 0.98) 100%);
+            color: #00ffff;
+            padding: 10px 14px;
+            font-weight: bold;
+            font-size: 14px;
+            border: none;
+            text-shadow: 0 0 12px rgba(0, 255, 255, 0.9);
+            border-bottom: 1px solid rgba(0, 255, 255, 0.3);
+        }
+
+        .language-selector option:hover,
+        .language-selector option:focus,
+        .language-selector option:checked {
+            background: linear-gradient(145deg, 
+                rgba(0, 255, 255, 0.9) 0%,
+                rgba(255, 0, 255, 0.9) 30%,
+                rgba(255, 255, 0, 0.9) 70%,
+                rgba(0, 255, 0, 0.9) 100%) !important;
+            color: white !important;
+            text-shadow: 0 0 18px rgba(255, 255, 255, 1) !important;
+        }
+
+        /* Panneau de titre des sections */
+        .panel-title {
+            color: #00ffff;
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 18px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 15px rgba(0, 255, 255, 0.9);
+            border-bottom: 2px solid rgba(0, 255, 255, 0.4);
+            padding-bottom: 10px;
+        }
+
+        /* Zone de jeu principale */
+        .speed-arena {
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border: 3px solid rgba(0, 255, 255, 0.5);
+            box-shadow: 
+                0 0 40px rgba(0, 255, 255, 0.3),
+                inset 0 0 20px rgba(0, 255, 255, 0.1);
+            min-height: 75vh;
+            height: 75vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Cibles de vitesse */
+        .speed-target {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+            border: 3px solid rgba(255, 255, 255, 0.6);
+            animation: targetPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes targetPulse {
+            0%, 100% { 
+                transform: scale(1);
+                box-shadow: 0 0 20px currentColor;
+            }
+            50% { 
+                transform: scale(1.1);
+                box-shadow: 0 0 30px currentColor;
+            }
+        }
+
+        .speed-target:hover {
+            transform: scale(1.2);
+            box-shadow: 0 0 40px currentColor;
+        }
+
+        .speed-target.hit {
+            animation: targetHit 0.5s ease-out;
+        }
+
+        @keyframes targetHit {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(0); opacity: 0; }
+        }
+
+        .speed-target.miss {
+            animation: targetMiss 0.8s ease-out;
+        }
+
+        @keyframes targetMiss {
+            0%, 100% { transform: scale(1); }
+            25% { transform: scale(1.1) rotate(-5deg); }
+            75% { transform: scale(1.1) rotate(5deg); }
+        }
+
+        /* Types de cibles - 8 VITESSES */
+        .target-normal {
+            background: linear-gradient(145deg, #00ffff, #0099cc);
+        }
+
+        .target-fast {
+            background: linear-gradient(145deg, #ff00ff, #cc0099);
+        }
+
+        .target-bonus {
+            background: linear-gradient(145deg, #ffff00, #cccc00);
+        }
+
+        .target-danger {
+            background: linear-gradient(145deg, #ff0000, #cc0000);
+        }
+
+        .target-lightning {
+            background: linear-gradient(145deg, #ffff00, #ff8800, #ffff00);
+            background-size: 200% 200%;
+            animation: lightningPulse 0.3s ease-in-out infinite alternate;
+            box-shadow: 0 0 30px #ffff00, 0 0 50px #ff8800;
+        }
+
+        @keyframes lightningPulse {
+            0% { 
+                background-position: 0% 50%;
+                transform: scale(1);
+            }
+            100% { 
+                background-position: 100% 50%;
+                transform: scale(1.15);
+            }
+        }
+
+        .target-mega {
+            background: linear-gradient(145deg, #00ffff, #ff00ff, #ffff00, #00ff00);
+            background-size: 400% 400%;
+            animation: megaShine 0.8s ease-in-out infinite;
+            box-shadow: 0 0 40px #00ffff, 0 0 60px #ff00ff;
+        }
+
+        @keyframes megaShine {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .target-toxic {
+            background: linear-gradient(145deg, #00ff00, #008800, #004400);
+            animation: toxicGlow 1s ease-in-out infinite alternate;
+            box-shadow: 0 0 25px #00ff00, 0 0 45px #008800;
+        }
+
+        @keyframes toxicGlow {
+            0% { 
+                box-shadow: 0 0 25px #00ff00, 0 0 45px #008800;
+                filter: hue-rotate(0deg);
+            }
+            100% { 
+                box-shadow: 0 0 35px #00ff00, 0 0 55px #008800;
+                filter: hue-rotate(30deg);
+            }
+        }
+
+        .target-ultimate {
+            background: linear-gradient(145deg, #ffffff, #ffff00, #ff00ff, #00ffff, #ffffff);
+            background-size: 500% 500%;
+            animation: ultimateBlaze 0.4s ease-in-out infinite;
+            box-shadow: 0 0 50px #ffffff, 0 0 80px #ffff00, 0 0 100px #ff00ff;
+            border: 3px solid #ffffff;
+        }
+
+        @keyframes ultimateBlaze {
+            0%, 100% { 
+                background-position: 0% 50%;
+                transform: scale(1) rotate(0deg);
+            }
+            50% { 
+                background-position: 100% 50%;
+                transform: scale(1.2) rotate(5deg);
+            }
+        }
+
+        /* Contrôles du jeu */
+        .game-controls {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .cyber-btn {
+            padding: 15px 30px;
+            background: linear-gradient(145deg, #00ffff, #0099cc);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            min-width: 150px;
+        }
+
+        .cyber-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .cyber-btn:hover::before {
+            left: 100%;
+        }
+
+        .cyber-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 255, 255, 0.5);
+            background: linear-gradient(145deg, #00ccff, #0077aa);
+        }
+
+        .cyber-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .start-btn {
+            background: linear-gradient(145deg, #00ff00, #00cc00);
+        }
+
+        .start-btn:hover {
+            background: linear-gradient(145deg, #00cc00, #009900);
+        }
+
+        .reset-btn {
+            background: linear-gradient(145deg, #ff0066, #cc0044);
+        }
+
+        .reset-btn:hover {
+            background: linear-gradient(145deg, #cc0044, #990033);
+        }
+
+        /* Statistiques du jeu */
+        .game-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .stat-item {
+            background: rgba(0, 255, 255, 0.1);
+            padding: 12px;
+            border-radius: 12px;
+            text-align: center;
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.2), transparent);
+            animation: statCyberScan 4s linear infinite;
+        }
+
+        @keyframes statCyberScan {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .stat-label {
+            display: block;
+            color: #9ca3af;
+            font-size: 11px;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-value {
+            display: block;
+            color: #00ffff;
+            font-size: 18px;
+            font-weight: bold;
+            text-shadow: 0 0 15px rgba(0, 255, 255, 0.9);
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Messages de jeu */
+        .game-message {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 18px;
+            border-radius: 12px;
+            background: rgba(0, 255, 255, 0.1);
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            color: #00ffff;
+            font-weight: bold;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        /* Compteur de temps */
+        .time-display {
+            font-size: 48px;
+            font-weight: bold;
+            color: #00ffff;
+            text-shadow: 0 0 25px rgba(0, 255, 255, 0.9);
+            margin-bottom: 20px;
+            text-align: center;
+            animation: timeGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes timeGlow {
+            from { 
+                text-shadow: 0 0 25px rgba(0, 255, 255, 0.9);
+                transform: scale(1);
+            }
+            to { 
+                text-shadow: 0 0 35px rgba(0, 255, 255, 1);
+                transform: scale(1.05);
+            }
+        }
+
+        /* Barre de progression */
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            border: 1px solid rgba(0, 255, 255, 0.3);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ffff, #ff00ff);
+            border-radius: 10px;
+            transition: width 0.3s ease;
+            box-shadow: 0 0 12px rgba(0, 255, 255, 0.6);
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .speed-challenge-container {
+                grid-template-columns: 200px 1fr 200px;
+                gap: 10px;
+                padding: 10px;
+            }
+            
+            .left-panel, .right-panel {
+                padding: 12px;
+            }
+        }
+
+        @media (max-width: 900px) {
+            .speed-challenge-container {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto 1fr;
+                gap: 10px;
+            }
+            
+            .left-panel {
+                grid-row: 2;
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 15px;
+            }
+            
+            .right-panel {
+                grid-row: 3;
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 15px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .game-panel {
+                padding: 15px;
+            }
+            
+            .cyber-title h1 {
+                font-size: 18px;
+            }
+            
+            .speed-arena {
+                min-height: 65vh;
+                height: 65vh;
+                padding: 15px;
+            }
+            
+            .speed-target {
+                width: 60px;
+                height: 60px;
+                font-size: 18px;
+            }
+            
+            .game-controls {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .cyber-btn {
+                min-width: 120px;
+                padding: 12px 20px;
+            }
+            
+            .left-panel, .right-panel {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .speed-target {
+                width: 50px;
+                height: 50px;
+                font-size: 16px;
+            }
+            
+            .game-stats {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .cyber-title {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .cyber-title h1 {
+                font-size: 16px;
+            }
+            
+            .game-controls {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .cyber-btn {
+                min-width: 100px;
+                padding: 10px 15px;
+                font-size: 12px;
+            }
+        }
+
+        /* Animations de victoire et défaite */
+        .victory-animation, .defeat-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(15px);
+        }
+
+        .victory-content, .defeat-content {
+            background: linear-gradient(145deg, rgba(20, 20, 40, 0.95), rgba(15, 52, 96, 0.95));
+            border: 3px solid #00ffff;
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+            max-width: 500px;
+            box-shadow: 0 0 50px rgba(0, 255, 255, 0.7);
+            animation: victoryPulse 2s ease-in-out infinite alternate;
+        }
+
+        .defeat-content {
+            border-color: #ff0066;
+            box-shadow: 0 0 50px rgba(255, 0, 102, 0.7);
+            animation: defeatShake 1s ease-in-out infinite;
+        }
+
+        @keyframes victoryPulse {
+            from { 
+                box-shadow: 0 0 50px rgba(0, 255, 255, 0.7);
+                transform: scale(1);
+            }
+            to { 
+                box-shadow: 0 0 70px rgba(0, 255, 255, 1);
+                transform: scale(1.03);
+            }
+        }
+
+        @keyframes defeatShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        /* Effets spéciaux */
+        .combo-effect {
+            position: absolute;
+            font-size: 24px;
+            font-weight: bold;
+            color: #ffff00;
+            text-shadow: 0 0 20px #ffff00;
+            animation: comboFloat 2s ease-out forwards;
+            pointer-events: none;
+        }
+
+        @keyframes comboFloat {
+            0% {
+                transform: scale(0.5) translateY(0);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1.5) translateY(-100px);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Particules cyber d'arrière-plan -->
+    <div class="cyber-particles" id="cyberParticles"></div>
+    
+    <!-- Grille cyber -->
+    <div class="cyber-grid"></div>
+    
+    <!-- Container principal -->
+    <div class="speed-challenge-container">
+        <!-- Panneau gauche -->
+        <div class="left-panel">
+            <div class="panel-section">
+                <div class="panel-title" id="controlsTitle">⚡ Contrôles Cyber</div>
+                <div style="display: grid; gap: 12px;">
+                    <button class="cyber-btn start-btn" onclick="startGame()" id="startBtn">
+                        🚀 <span id="startText">Démarrer</span>
+                    </button>
+                    <button class="cyber-btn reset-btn" onclick="resetGame()">
+                        🔄 <span id="resetText">Réinitialiser</span>
+                    </button>
+
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <div class="panel-title" id="statsTitle">📊 Statistiques</div>
+                <div class="game-stats">
+                    <div class="stat-item">
+                        <span class="stat-label" id="scoreLabel">Score</span>
+                        <span class="stat-value" id="scoreValue">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label" id="hitsLabel">Cibles</span>
+                        <span class="stat-value" id="hitsValue">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label" id="accuracyLabel">Précision</span>
+                        <span class="stat-value" id="accuracyValue">100%</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label" id="bestLabel">Record</span>
+                        <span class="stat-value" id="bestValue">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <div class="panel-title" id="progressTitle">⏱️ Progression</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill" style="width: 0%;"></div>
+                </div>
+                <div style="color: #9ca3af; font-size: 12px; text-align: center;" id="progressText">
+                    Prêt pour le défi
+                </div>
+            </div>
+        </div>
+
+        <!-- Panneau central -->
+        <div class="game-panel">
+            <!-- En-tête -->
+            <div class="cyber-header">
+                <div class="cyber-title">
+                    <span class="cyber-icon">⚡</span>
+                    <h1 id="gameTitle">Speed Challenge</h1>
+                    <span class="cyber-badge" id="cyberBadge">🚀 IA FUTURISTE</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 20px;">
+                    <select id="languageSelector" onchange="changeLanguage()" class="language-selector">
+                        <option value="fr">🇫🇷 Français</option>
+                        <option value="en">🇺🇸 English</option>
+                        <option value="ar">🇸🇦 العربية</option>
+                        <option value="es">🇪🇸 Español</option>
+                        <option value="de">🇩🇪 Deutsch</option>
+                        <option value="zh">🇨🇳 中文</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Message de jeu et compteur temps -->
+            <div style="display: flex; gap: 20px; align-items: center; margin-bottom: 20px;">
+                <div class="game-message" id="gameMessage" style="flex: 1; margin-bottom: 0;">
+                    <span id="welcomeMessage">Bienvenue dans Speed Challenge ! Cliquez sur les cibles le plus rapidement possible.</span>
+                </div>
+                <div style="display: flex; gap: 15px; align-items: center;">
+                    <div class="time-display" style="font-size: 32px; margin: 0;" id="timeDisplay">30.0s</div>
+                    <select id="timeSelector" onchange="changeGameDuration()" class="cyber-btn" style="background: linear-gradient(145deg, #ffff00, #ff8800); min-width: 140px; cursor: pointer; border: none; color: white; font-weight: bold; appearance: menulist;">
+                        <option value="30" style="background: rgba(15, 15, 30, 0.98); color: #00ffff; padding: 10px;">⏱️ 30.0s</option>
+                        <option value="45" style="background: rgba(15, 15, 30, 0.98); color: #00ffff; padding: 10px;">⏱️ 45.0s</option>
+                        <option value="60" style="background: rgba(15, 15, 30, 0.98); color: #00ffff; padding: 10px;">⏱️ 1 minute</option>
+                    </select>
+                </div>
+            </div>
+
+
+
+            <!-- Zone de jeu -->
+            <div class="speed-arena" id="speedArena">
+                <div style="color: #00ffff; font-size: 18px; text-align: center;">
+                    <span id="readyMessage">Prêt pour le défi de vitesse ?</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panneau droit -->
+        <div class="right-panel">
+            <div class="panel-section">
+                <div class="panel-title" id="instructionsTitle">📖 Instructions</div>
+                <div style="color: #9ca3af; font-size: 13px; line-height: 1.7;">
+                    <p id="instructionsText">
+                        • Cliquez sur les cibles qui apparaissent<br>
+                        • Plus vous êtes rapide, plus vous gagnez<br>
+                        • Évitez les cibles rouges (danger)<br>
+                        • Cibles jaunes = bonus de points<br>
+                        • L'IA analyse votre vitesse de réaction
+                    </p>
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <div class="panel-title" id="targetsTitle">🎯 8 Types de Cibles</div>
+                <div style="color: #9ca3af; font-size: 12px; line-height: 1.6;">
+                    <div style="margin-bottom: 8px;">
+                        <span style="color: #00ffff;">🔵</span> <span id="normalText">Normale (+10 pts)</span>
+                    </div>
+                    <div style="margin-bottom: 8px;">
+                        <span style="color: #ff00ff;">🟣</span> <span id="fastText">Rapide (+20 pts)</span>
+                    </div>
+                    <div style="margin-bottom: 8px;">
+                        <span style="color: #ffff00;">🟡</span> <span id="bonusText">Bonus (+50 pts)</span>
+                    </div>
+                    <div style="margin-bottom: 8px;">
+                        <span style="color: #ff0000;">🔴</span> <span id="dangerText">Danger (-30 pts)</span>
+                    </div>
+                    <div style="margin-bottom: 8px;">
+                        <span style="color: #ffff00;">⚡</span> <span id="lightningText">Éclair (+75 pts)</span>
+                    </div>
+                    <div style="margin-bottom: 8px;">
+                        <span style="color: #00ffff;">💎</span> <span id="megaText">Méga (+100 pts)</span>
+                    </div>
+                    <div style="margin-bottom: 8px;">
+                        <span style="color: #00ff00;">☢️</span> <span id="toxicText">Toxique (-50 pts)</span>
+                    </div>
+                    <div style="margin-bottom: 8px;">
+                        <span style="color: #ffffff;">🌟</span> <span id="ultimateText">Ultime (+200 pts)</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <div class="panel-title" id="aiStatusTitle">🤖 Analyse IA</div>
+                <div id="aiStatus" style="color: #00ffff; font-size: 13px; text-align: center; padding: 12px;">
+                    <span id="aiStatusText">IA Cyber Active</span>
+                </div>
+                <div style="color: #9ca3af; font-size: 11px; text-align: center; margin-top: 10px;" id="aiAnalysis">
+                    <span id="aiAnalysisText">Analyse des réflexes en cours...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .global-close-btn { position: fixed; top: 14px; right: 14px; z-index: 99999; background: #ff3b3b; color: #fff; border: none; width:52px; height:52px; border-radius:50%; font-size:22px; cursor:pointer; box-shadow:0 6px 18px rgba(255,59,59,0.3);} 
+        .global-close-btn:hover{ transform: scale(1.05); }
+    </style>
+    <button class="global-close-btn" title="Fermer" aria-label="Fermer" onclick="closePlatform()">✕</button>
+    <script>
+        function closePlatform(){
+            try{ console.debug('jeux8: closePlatform called'); }catch(e){}
+            try{
+                if(window.parent && window.parent !== window){
+                    window.parent.postMessage({ action: 'close', reason: 'user-initiated', source: 'jeux8' }, '*');
+                    return;
+                }
+            }catch(e){}
+            try{
+                if(window.opener && !window.opener.closed){
+                    try{ window.opener.postMessage({ action: 'child-closed', source: 'jeux8' }, '*'); }catch(e){}
+                    try{ window.close(); }catch(e){}
+                    return;
+                }
+            }catch(e){}
+            try{ window.location.href = '/global_platform.html'; }catch(e){}
+        }
+    </script>
+    <script>
+        // Traductions multilingues
+        const translations = {
+            fr: {
+                gameTitle: "Speed Challenge - 8 Vitesses",
+                cyberBadge: "🚀 IA FUTURISTE",
+                controlsTitle: "⚡ Contrôles Cyber",
+                statsTitle: "📊 Statistiques",
+                progressTitle: "⏱️ Progression",
+                instructionsTitle: "📖 Instructions",
+                targetsTitle: "🎯 8 Types de Cibles",
+                aiStatusTitle: "🤖 Analyse IA",
+                startText: "Démarrer",
+                resetText: "Réinitialiser",
+
+                scoreLabel: "Score",
+                hitsLabel: "Cibles",
+                accuracyLabel: "Précision",
+                bestLabel: "Record",
+                welcomeMessage: "Bienvenue dans Speed Challenge ! Cliquez sur les cibles le plus rapidement possible.",
+                readyMessage: "Prêt pour le défi de vitesse ?",
+                instructionsText: "• Cliquez sur les cibles qui apparaissent<br>• Plus vous êtes rapide, plus vous gagnez de points<br>• Évitez les cibles rouges (danger)<br>• Cibles jaunes = bonus de points<br>• L'IA analyse votre vitesse de réaction en temps réel",
+                normalText: "Normale (+10 pts)",
+                fastText: "Rapide (+20 pts)",
+                bonusText: "Bonus (+50 pts)",
+                dangerText: "Danger (-30 pts)",
+                lightningText: "Éclair (+75 pts)",
+                megaText: "Méga (+100 pts)",
+                toxicText: "Toxique (-50 pts)",
+                ultimateText: "Ultime (+200 pts)",
+                aiStatusText: "IA Cyber Active",
+                aiAnalysisText: "Analyse des réflexes en cours...",
+                progressReady: "Prêt pour le défi",
+                progressActive: "Défi en cours...",
+                progressFinished: "Défi terminé !",
+                gameStarted: "Défi démarré ! Cliquez sur les cibles !",
+                gameOver: "Temps écoulé ! Score final :",
+                newRecord: "Nouveau record !",
+                victoryTitle: "🎉 EXCELLENT ! 🎉",
+                victoryMessage: "Réflexes exceptionnels !",
+                defeatTitle: "⏱️ TEMPS ÉCOULÉ ⏱️",
+                defeatMessage: "Entraînez vos réflexes !",
+                tryAgainText: "Réessayer",
+                continueText: "Continuer",
+                aiExcellent: "IA : Réflexes exceptionnels détectés !",
+                aiGood: "IA : Bonne vitesse de réaction",
+                aiAverage: "IA : Réflexes moyens",
+                aiSlow: "IA : Entraînement recommandé",
+                combo2: "COMBO x2 !",
+                combo3: "COMBO x3 !",
+                combo5: "COMBO x5 !",
+                perfect: "PARFAIT !"
+            },
+            en: {
+                gameTitle: "Speed Challenge - 8 Speeds",
+                cyberBadge: "🚀 FUTURISTIC AI",
+                controlsTitle: "⚡ Cyber Controls",
+                statsTitle: "📊 Statistics",
+                progressTitle: "⏱️ Progress",
+                instructionsTitle: "📖 Instructions",
+                targetsTitle: "🎯 8 Target Types",
+                aiStatusTitle: "🤖 AI Analysis",
+                startText: "Start",
+                resetText: "Reset",
+
+                scoreLabel: "Score",
+                hitsLabel: "Targets",
+                accuracyLabel: "Accuracy",
+                bestLabel: "Best",
+                welcomeMessage: "Welcome to Speed Challenge! Click targets as fast as possible.",
+                readyMessage: "Ready for the speed challenge?",
+                instructionsText: "• Click on targets that appear<br>• Faster clicks = more points<br>• Avoid red targets (danger)<br>• Yellow targets = bonus points<br>• AI analyzes your reaction speed in real-time",
+                normalText: "Normal (+10 pts)",
+                fastText: "Fast (+20 pts)",
+                bonusText: "Bonus (+50 pts)",
+                dangerText: "Danger (-30 pts)",
+                lightningText: "Lightning (+75 pts)",
+                megaText: "Mega (+100 pts)",
+                toxicText: "Toxic (-50 pts)",
+                ultimateText: "Ultimate (+200 pts)",
+                aiStatusText: "Cyber AI Active",
+                aiAnalysisText: "Reflex analysis in progress...",
+                progressReady: "Ready for challenge",
+                progressActive: "Challenge in progress...",
+                progressFinished: "Challenge completed!",
+                gameStarted: "Challenge started! Click the targets!",
+                gameOver: "Time's up! Final score:",
+                newRecord: "New record!",
+                victoryTitle: "🎉 EXCELLENT! 🎉",
+                victoryMessage: "Exceptional reflexes!",
+                defeatTitle: "⏱️ TIME'S UP ⏱️",
+                defeatMessage: "Train your reflexes!",
+                tryAgainText: "Try Again",
+                continueText: "Continue",
+                aiExcellent: "AI: Exceptional reflexes detected!",
+                aiGood: "AI: Good reaction speed",
+                aiAverage: "AI: Average reflexes",
+                aiSlow: "AI: Training recommended",
+                combo2: "COMBO x2!",
+                combo3: "COMBO x3!",
+                combo5: "COMBO x5!",
+                perfect: "PERFECT!"
+            },
+            ar: {
+                gameTitle: "تحدي السرعة - 8 سرعات",
+                cyberBadge: "🚀 ذكاء مستقبلي",
+                controlsTitle: "⚡ تحكم سيبراني",
+                statsTitle: "📊 إحصائيات",
+                progressTitle: "⏱️ التقدم",
+                instructionsTitle: "📖 التعليمات",
+                targetsTitle: "🎯 8 أنواع أهداف",
+                aiStatusTitle: "🤖 تحليل الذكاء",
+                startText: "ابدأ",
+                resetText: "إعادة تعيين",
+
+                scoreLabel: "النقاط",
+                hitsLabel: "الأهداف",
+                accuracyLabel: "الدقة",
+                bestLabel: "الأفضل",
+                welcomeMessage: "مرحباً بك في تحدي السرعة! انقر على الأهداف بأسرع ما يمكن.",
+                readyMessage: "جاهز لتحدي السرعة؟",
+                instructionsText: "• انقر على الأهداف التي تظهر<br>• النقر السريع = نقاط أكثر<br>• تجنب الأهداف الحمراء (خطر)<br>• الأهداف الصفراء = نقاط إضافية<br>• الذكاء الاصطناعي يحلل سرعة ردود أفعالك في الوقت الفعلي",
+                normalText: "عادي (+10 نقاط)",
+                fastText: "سريع (+20 نقطة)",
+                bonusText: "مكافأة (+50 نقطة)",
+                dangerText: "خطر (-30 نقطة)",
+                lightningText: "برق (+75 نقطة)",
+                megaText: "ميجا (+100 نقطة)",
+                toxicText: "سام (-50 نقطة)",
+                ultimateText: "نهائي (+200 نقطة)",
+                aiStatusText: "الذكاء السيبراني نشط",
+                aiAnalysisText: "تحليل ردود الأفعال جاري...",
+                progressReady: "جاهز للتحدي",
+                progressActive: "التحدي جاري...",
+                progressFinished: "التحدي مكتمل!",
+                gameStarted: "بدأ التحدي! انقر على الأهداف!",
+                gameOver: "انتهى الوقت! النقاط النهائية:",
+                newRecord: "رقم قياسي جديد!",
+                victoryTitle: "🎉 ممتاز! 🎉",
+                victoryMessage: "ردود أفعال استثنائية!",
+                defeatTitle: "⏱️ انتهى الوقت ⏱️",
+                defeatMessage: "درب ردود أفعالك!",
+                tryAgainText: "حاول مرة أخرى",
+                continueText: "متابعة",
+                aiExcellent: "الذكاء: تم اكتشاف ردود أفعال استثنائية!",
+                aiGood: "الذكاء: سرعة رد فعل جيدة",
+                aiAverage: "الذكاء: ردود أفعال متوسطة",
+                aiSlow: "الذكاء: ينصح بالتدريب",
+                combo2: "كومبو x2!",
+                combo3: "كومبو x3!",
+                combo5: "كومبو x5!",
+                perfect: "مثالي!"
+            },
+            es: {
+                gameTitle: "Desafío de Velocidad - 8 Velocidades",
+                cyberBadge: "🚀 IA FUTURISTA",
+                controlsTitle: "⚡ Controles Cyber",
+                statsTitle: "📊 Estadísticas",
+                progressTitle: "⏱️ Progreso",
+                instructionsTitle: "📖 Instrucciones",
+                targetsTitle: "🎯 8 Tipos de Objetivos",
+                aiStatusTitle: "🤖 Análisis IA",
+                startText: "Iniciar",
+                resetText: "Reiniciar",
+
+                scoreLabel: "Puntuación",
+                hitsLabel: "Objetivos",
+                accuracyLabel: "Precisión",
+                bestLabel: "Mejor",
+                welcomeMessage: "¡Bienvenido al Desafío de Velocidad! Haz clic en los objetivos lo más rápido posible.",
+                readyMessage: "¿Listo para el desafío de velocidad?",
+                instructionsText: "• Haz clic en los objetivos que aparecen<br>• Clics más rápidos = más puntos<br>• Evita los objetivos rojos (peligro)<br>• Objetivos amarillos = puntos bonus<br>• La IA analiza tu velocidad de reacción en tiempo real",
+                normalText: "Normal (+10 pts)",
+                fastText: "Rápido (+20 pts)",
+                bonusText: "Bonus (+50 pts)",
+                dangerText: "Peligro (-30 pts)",
+                lightningText: "Rayo (+75 pts)",
+                megaText: "Mega (+100 pts)",
+                toxicText: "Tóxico (-50 pts)",
+                ultimateText: "Supremo (+200 pts)",
+                aiStatusText: "IA Cyber Activa",
+                aiAnalysisText: "Análisis de reflejos en progreso...",
+                progressReady: "Listo para el desafío",
+                progressActive: "Desafío en progreso...",
+                progressFinished: "¡Desafío completado!",
+                gameStarted: "¡Desafío iniciado! ¡Haz clic en los objetivos!",
+                gameOver: "¡Se acabó el tiempo! Puntuación final:",
+                newRecord: "¡Nuevo récord!",
+                victoryTitle: "🎉 ¡EXCELENTE! 🎉",
+                victoryMessage: "¡Reflejos excepcionales!",
+                defeatTitle: "⏱️ SE ACABÓ EL TIEMPO ⏱️",
+                defeatMessage: "¡Entrena tus reflejos!",
+                tryAgainText: "Intentar de nuevo",
+                continueText: "Continuar",
+                aiExcellent: "IA: ¡Reflejos excepcionales detectados!",
+                aiGood: "IA: Buena velocidad de reacción",
+                aiAverage: "IA: Reflejos promedio",
+                aiSlow: "IA: Entrenamiento recomendado",
+                combo2: "¡COMBO x2!",
+                combo3: "¡COMBO x3!",
+                combo5: "¡COMBO x5!",
+                perfect: "¡PERFECTO!"
+            },
+            de: {
+                gameTitle: "Geschwindigkeits-Challenge - 8 Geschwindigkeiten",
+                cyberBadge: "🚀 FUTURISTISCHE KI",
+                controlsTitle: "⚡ Cyber-Steuerung",
+                statsTitle: "📊 Statistiken",
+                progressTitle: "⏱️ Fortschritt",
+                instructionsTitle: "📖 Anweisungen",
+                targetsTitle: "🎯 8 Zieltypen",
+                aiStatusTitle: "🤖 KI-Analyse",
+                startText: "Start",
+                resetText: "Zurücksetzen",
+
+                scoreLabel: "Punkte",
+                hitsLabel: "Ziele",
+                accuracyLabel: "Genauigkeit",
+                bestLabel: "Beste",
+                welcomeMessage: "Willkommen zur Geschwindigkeits-Challenge! Klicke so schnell wie möglich auf die Ziele.",
+                readyMessage: "Bereit für die Geschwindigkeits-Challenge?",
+                instructionsText: "• Klicke auf erscheinende Ziele<br>• Schnellere Klicks = mehr Punkte<br>• Vermeide rote Ziele (Gefahr)<br>• Gelbe Ziele = Bonuspunkte<br>• KI analysiert deine Reaktionsgeschwindigkeit in Echtzeit",
+                normalText: "Normal (+10 Pkt)",
+                fastText: "Schnell (+20 Pkt)",
+                bonusText: "Bonus (+50 Pkt)",
+                dangerText: "Gefahr (-30 Pkt)",
+                lightningText: "Blitz (+75 Pkt)",
+                megaText: "Mega (+100 Pkt)",
+                toxicText: "Giftig (-50 Pkt)",
+                ultimateText: "Ultimativ (+200 Pkt)",
+                aiStatusText: "Cyber-KI Aktiv",
+                aiAnalysisText: "Reflexanalyse läuft...",
+                progressReady: "Bereit für Challenge",
+                progressActive: "Challenge läuft...",
+                progressFinished: "Challenge abgeschlossen!",
+                gameStarted: "Challenge gestartet! Klicke auf die Ziele!",
+                gameOver: "Zeit abgelaufen! Endpunktzahl:",
+                newRecord: "Neuer Rekord!",
+                victoryTitle: "🎉 AUSGEZEICHNET! 🎉",
+                victoryMessage: "Außergewöhnliche Reflexe!",
+                defeatTitle: "⏱️ ZEIT ABGELAUFEN ⏱️",
+                defeatMessage: "Trainiere deine Reflexe!",
+                tryAgainText: "Nochmal versuchen",
+                continueText: "Weiter",
+                aiExcellent: "KI: Außergewöhnliche Reflexe erkannt!",
+                aiGood: "KI: Gute Reaktionsgeschwindigkeit",
+                aiAverage: "KI: Durchschnittliche Reflexe",
+                aiSlow: "KI: Training empfohlen",
+                combo2: "COMBO x2!",
+                combo3: "COMBO x3!",
+                combo5: "COMBO x5!",
+                perfect: "PERFEKT!"
+            },
+            zh: {
+                gameTitle: "速度挑战 - 8种速度",
+                cyberBadge: "🚀 未来人工智能",
+                controlsTitle: "⚡ 网络控制",
+                statsTitle: "📊 统计数据",
+                progressTitle: "⏱️ 进度",
+                instructionsTitle: "📖 说明",
+                targetsTitle: "🎯 8种目标类型",
+                aiStatusTitle: "🤖 AI分析",
+                startText: "开始",
+                resetText: "重置",
+
+                scoreLabel: "得分",
+                hitsLabel: "目标",
+                accuracyLabel: "准确度",
+                bestLabel: "最佳",
+                welcomeMessage: "欢迎来到速度挑战！尽可能快地点击目标。",
+                readyMessage: "准备好速度挑战了吗？",
+                instructionsText: "• 点击出现的目标<br>• 点击越快得分越多<br>• 避免红色目标（危险）<br>• 黄色目标 = 奖励分数<br>• AI实时分析你的反应速度",
+                normalText: "普通 (+10分)",
+                fastText: "快速 (+20分)",
+                bonusText: "奖励 (+50分)",
+                dangerText: "危险 (-30分)",
+                lightningText: "闪电 (+75分)",
+                megaText: "超级 (+100分)",
+                toxicText: "毒性 (-50分)",
+                ultimateText: "终极 (+200分)",
+                aiStatusText: "网络AI激活",
+                aiAnalysisText: "反射分析进行中...",
+                progressReady: "准备挑战",
+                progressActive: "挑战进行中...",
+                progressFinished: "挑战完成！",
+                gameStarted: "挑战开始！点击目标！",
+                gameOver: "时间到！最终得分：",
+                newRecord: "新记录！",
+                victoryTitle: "🎉 优秀！🎉",
+                victoryMessage: "反应超凡！",
+                defeatTitle: "⏱️ 时间到 ⏱️",
+                defeatMessage: "训练你的反应！",
+                tryAgainText: "再试一次",
+                continueText: "继续",
+                aiExcellent: "AI：检测到超凡反应！",
+                aiGood: "AI：良好的反应速度",
+                aiAverage: "AI：平均反应",
+                aiSlow: "AI：建议训练",
+                combo2: "连击 x2！",
+                combo3: "连击 x3！",
+                combo5: "连击 x5！",
+                perfect: "完美！"
+            }
+        };
+
+        // État du jeu
+        let gameState = {
+            currentLanguage: 'fr',
+            isPlaying: false,
+            timeLeft: 30.0,
+            gameDuration: 30.0,
+            score: 0,
+            hits: 0,
+            totalClicks: 0,
+            bestScore: 0,
+            targets: [],
+            gameTimer: null,
+            spawnTimer: null,
+            combo: 0,
+            lastHitTime: 0
+        };
+
+        // Types de cibles - 8 VITESSES
+        const targetTypes = {
+            normal: { points: 10, color: 'target-normal', icon: '🔵', duration: 2000 },
+            fast: { points: 20, color: 'target-fast', icon: '🟣', duration: 1200 },
+            bonus: { points: 50, color: 'target-bonus', icon: '🟡', duration: 1800 },
+            danger: { points: -30, color: 'target-danger', icon: '🔴', duration: 2500 },
+            lightning: { points: 75, color: 'target-lightning', icon: '⚡', duration: 800 },
+            mega: { points: 100, color: 'target-mega', icon: '💎', duration: 1500 },
+            toxic: { points: -50, color: 'target-toxic', icon: '☢️', duration: 3000 },
+            ultimate: { points: 200, color: 'target-ultimate', icon: '🌟', duration: 600 }
+        };
+
+        // Créer les particules cyber
+        function createCyberParticles() {
+            const container = document.getElementById('cyberParticles');
+            
+            for(let i = 0; i < 35; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'cyber-particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 12 + 's';
+                particle.style.animationDuration = (12 + Math.random() * 6) + 's';
+                container.appendChild(particle);
+            }
+        }
+
+        // Fonction de changement de durée de jeu
+        function changeGameDuration() {
+            if(gameState.isPlaying) return; // Ne pas changer pendant le jeu
+            
+            const selector = document.getElementById('timeSelector');
+            const selectedTime = parseInt(selector.value);
+            gameState.gameDuration = selectedTime;
+            gameState.timeLeft = selectedTime;
+            
+            // Mettre à jour l'affichage du temps
+            updateTimeDisplay();
+            updateProgressText();
+            updateProgressBar();
+            
+            // Afficher un message de confirmation
+            const t = translations[gameState.currentLanguage];
+            let timeText = '';
+            if(selectedTime === 30) timeText = '30 secondes';
+            else if(selectedTime === 45) timeText = '45 secondes';
+            else if(selectedTime === 60) timeText = '1 minute';
+            
+            showMessage(`Durée sélectionnée: ${timeText}`, 2000);
+            
+            console.log('Durée changée:', selectedTime, 'secondes');
+        }
+
+        // Fonction de changement de langue
+        function changeLanguage() {
+            const selector = document.getElementById('languageSelector');
+            const selectedLang = selector.value;
+            gameState.currentLanguage = selectedLang;
+            
+            const t = translations[selectedLang];
+            
+            // Mettre à jour tous les textes
+            document.getElementById('gameTitle').textContent = t.gameTitle;
+            document.getElementById('cyberBadge').textContent = t.cyberBadge;
+            document.getElementById('controlsTitle').textContent = t.controlsTitle;
+            document.getElementById('statsTitle').textContent = t.statsTitle;
+            document.getElementById('progressTitle').textContent = t.progressTitle;
+            document.getElementById('instructionsTitle').textContent = t.instructionsTitle;
+            document.getElementById('targetsTitle').textContent = t.targetsTitle;
+            document.getElementById('aiStatusTitle').textContent = t.aiStatusTitle;
+            
+            document.getElementById('startText').textContent = t.startText;
+            document.getElementById('resetText').textContent = t.resetText;
+            
+            document.getElementById('scoreLabel').textContent = t.scoreLabel;
+            document.getElementById('hitsLabel').textContent = t.hitsLabel;
+            document.getElementById('accuracyLabel').textContent = t.accuracyLabel;
+            document.getElementById('bestLabel').textContent = t.bestLabel;
+            
+            document.getElementById('welcomeMessage').textContent = t.welcomeMessage;
+            document.getElementById('readyMessage').textContent = t.readyMessage;
+            document.getElementById('instructionsText').innerHTML = t.instructionsText;
+            document.getElementById('normalText').textContent = t.normalText;
+            document.getElementById('fastText').textContent = t.fastText;
+            document.getElementById('bonusText').textContent = t.bonusText;
+            document.getElementById('dangerText').textContent = t.dangerText;
+            document.getElementById('lightningText').textContent = t.lightningText;
+            document.getElementById('megaText').textContent = t.megaText;
+            document.getElementById('toxicText').textContent = t.toxicText;
+            document.getElementById('ultimateText').textContent = t.ultimateText;
+            document.getElementById('aiStatusText').textContent = t.aiStatusText;
+            document.getElementById('aiAnalysisText').textContent = t.aiAnalysisText;
+            
+            updateProgressText();
+        }
+
+        // Démarrer le jeu
+        function startGame() {
+            if(gameState.isPlaying) return;
+            
+            gameState.isPlaying = true;
+            gameState.timeLeft = gameState.gameDuration;
+            gameState.score = 0;
+            gameState.hits = 0;
+            gameState.totalClicks = 0;
+            gameState.combo = 0;
+            gameState.targets = [];
+            
+            // Désactiver le sélecteur de temps pendant le jeu
+            document.getElementById('timeSelector').disabled = true;
+            
+            const t = translations[gameState.currentLanguage];
+            showMessage(t.gameStarted, 2000);
+            
+            // Vider l'arène
+            const arena = document.getElementById('speedArena');
+            arena.innerHTML = '';
+            
+            // Démarrer les timers
+            startGameTimer();
+            startTargetSpawning();
+            
+            updateDisplay();
+            updateProgressText();
+        }
+
+        // Timer principal du jeu
+        function startGameTimer() {
+            gameState.gameTimer = setInterval(() => {
+                gameState.timeLeft -= 0.1;
+                
+                if(gameState.timeLeft <= 0) {
+                    gameState.timeLeft = 0;
+                    endGame();
+                    return;
+                }
+                
+                updateTimeDisplay();
+                updateProgressText();
+                updateProgressBar();
+            }, 100);
+        }
+
+        // Génération des cibles
+        function startTargetSpawning() {
+            const spawnTarget = () => {
+                if(!gameState.isPlaying) return;
+                
+                createTarget();
+                
+                // Intervalle variable selon le temps restant
+                const baseInterval = 800;
+                const speedMultiplier = Math.max(0.3, gameState.timeLeft / 30);
+                const nextSpawn = baseInterval * speedMultiplier + Math.random() * 400;
+                
+                gameState.spawnTimer = setTimeout(spawnTarget, nextSpawn);
+            };
+            
+            setTimeout(spawnTarget, 1000);
+        }
+
+        // Créer une cible
+        function createTarget() {
+            const arena = document.getElementById('speedArena');
+            const arenaRect = arena.getBoundingClientRect();
+            
+            // Choisir le type de cible - 8 VITESSES
+            const rand = Math.random();
+            let type;
+            if(rand < 0.35) type = 'normal';
+            else if(rand < 0.55) type = 'fast';
+            else if(rand < 0.7) type = 'bonus';
+            else if(rand < 0.8) type = 'danger';
+            else if(rand < 0.88) type = 'lightning';
+            else if(rand < 0.94) type = 'mega';
+            else if(rand < 0.97) type = 'toxic';
+            else type = 'ultimate';
+            
+            const targetInfo = targetTypes[type];
+            
+            // Créer l'élément cible
+            const target = document.createElement('div');
+            target.className = `speed-target ${targetInfo.color}`;
+            target.textContent = targetInfo.icon;
+            target.dataset.type = type;
+            target.dataset.points = targetInfo.points;
+            
+            // Position aléatoire
+            const maxX = arena.clientWidth - 80;
+            const maxY = arena.clientHeight - 80;
+            target.style.left = Math.random() * maxX + 'px';
+            target.style.top = Math.random() * maxY + 'px';
+            
+            // Événement de clic
+            target.addEventListener('click', () => hitTarget(target));
+            
+            arena.appendChild(target);
+            gameState.targets.push(target);
+            
+            // Supprimer automatiquement après la durée
+            setTimeout(() => {
+                if(target.parentNode) {
+                    target.classList.add('miss');
+                    setTimeout(() => {
+                        if(target.parentNode) {
+                            arena.removeChild(target);
+                            const index = gameState.targets.indexOf(target);
+                            if(index > -1) gameState.targets.splice(index, 1);
+                        }
+                    }, 800);
+                }
+            }, targetInfo.duration);
+        }
+
+        // Cible touchée
+        function hitTarget(target) {
+            if(!gameState.isPlaying) return;
+            
+            const points = parseInt(target.dataset.points);
+            const type = target.dataset.type;
+            
+            gameState.totalClicks++;
+            
+            if(points > 0) {
+                gameState.hits++;
+                gameState.score += points;
+                
+                // Système de combo
+                const now = Date.now();
+                if(now - gameState.lastHitTime < 1000) {
+                    gameState.combo++;
+                } else {
+                    gameState.combo = 1;
+                }
+                gameState.lastHitTime = now;
+                
+                // Bonus de combo
+                if(gameState.combo >= 5) {
+                    gameState.score += 25;
+                    showComboEffect(target, 'combo5');
+                } else if(gameState.combo >= 3) {
+                    gameState.score += 15;
+                    showComboEffect(target, 'combo3');
+                } else if(gameState.combo >= 2) {
+                    gameState.score += 5;
+                    showComboEffect(target, 'combo2');
+                }
+                
+                target.classList.add('hit');
+            } else {
+                gameState.score += points; // Points négatifs
+                gameState.combo = 0;
+                target.classList.add('miss');
+            }
+            
+            // Supprimer la cible
+            setTimeout(() => {
+                if(target.parentNode) {
+                    target.parentNode.removeChild(target);
+                    const index = gameState.targets.indexOf(target);
+                    if(index > -1) gameState.targets.splice(index, 1);
+                }
+            }, 500);
+            
+            updateDisplay();
+        }
+
+        // Effet de combo
+        function showComboEffect(target, comboType) {
+            const t = translations[gameState.currentLanguage];
+            const effect = document.createElement('div');
+            effect.className = 'combo-effect';
+            effect.textContent = t[comboType];
+            
+            const rect = target.getBoundingClientRect();
+            const arena = document.getElementById('speedArena');
+            const arenaRect = arena.getBoundingClientRect();
+            
+            effect.style.left = (rect.left - arenaRect.left + 40) + 'px';
+            effect.style.top = (rect.top - arenaRect.top + 40) + 'px';
+            
+            arena.appendChild(effect);
+            
+            setTimeout(() => {
+                if(effect.parentNode) {
+                    arena.removeChild(effect);
+                }
+            }, 2000);
+        }
+
+        // Fin de jeu
+        function endGame() {
+            gameState.isPlaying = false;
+            
+            // Réactiver le sélecteur de temps
+            document.getElementById('timeSelector').disabled = false;
+            
+            // Arrêter les timers
+            if(gameState.gameTimer) {
+                clearInterval(gameState.gameTimer);
+                gameState.gameTimer = null;
+            }
+            if(gameState.spawnTimer) {
+                clearTimeout(gameState.spawnTimer);
+                gameState.spawnTimer = null;
+            }
+            
+            // Vérifier le record
+            if(gameState.score > gameState.bestScore) {
+                gameState.bestScore = gameState.score;
+                localStorage.setItem('speedChallengeBest', gameState.bestScore);
+            }
+            
+            // Nettoyer l'arène
+            const arena = document.getElementById('speedArena');
+            arena.innerHTML = `<div style="color: #00ffff; font-size: 18px; text-align: center;">
+                <span id="readyMessage">${translations[gameState.currentLanguage].readyMessage}</span>
+            </div>`;
+            
+            const t = translations[gameState.currentLanguage];
+            showMessage(`${t.gameOver} ${gameState.score}`, 5000);
+            
+            updateDisplay();
+            updateAIAnalysis();
+            updateProgressText();
+            
+            // Afficher l'écran de fin
+            setTimeout(() => {
+                if(gameState.score >= 500) {
+                    showVictory();
+                } else {
+                    showDefeat();
+                }
+            }, 1000);
+        }
+
+        // Réinitialiser le jeu
+        function resetGame() {
+            // Fermer les overlays
+            const victoryOverlay = document.querySelector('.victory-animation');
+            const defeatOverlay = document.querySelector('.defeat-animation');
+            if(victoryOverlay) document.body.removeChild(victoryOverlay);
+            if(defeatOverlay) document.body.removeChild(defeatOverlay);
+            
+            gameState.isPlaying = false;
+            gameState.timeLeft = gameState.gameDuration;
+            gameState.score = 0;
+            gameState.hits = 0;
+            gameState.totalClicks = 0;
+            gameState.combo = 0;
+            gameState.targets = [];
+            
+            // Réactiver le sélecteur de temps
+            document.getElementById('timeSelector').disabled = false;
+            
+            // Arrêter les timers
+            if(gameState.gameTimer) {
+                clearInterval(gameState.gameTimer);
+                gameState.gameTimer = null;
+            }
+            if(gameState.spawnTimer) {
+                clearTimeout(gameState.spawnTimer);
+                gameState.spawnTimer = null;
+            }
+            
+            // Réinitialiser l'arène
+            const arena = document.getElementById('speedArena');
+            arena.innerHTML = `<div style="color: #00ffff; font-size: 18px; text-align: center;">
+                <span id="readyMessage">${translations[gameState.currentLanguage].readyMessage}</span>
+            </div>`;
+            
+            const t = translations[gameState.currentLanguage];
+            showMessage(t.welcomeMessage);
+            
+            updateDisplay();
+            updateTimeDisplay();
+            updateProgressText();
+        }
+
+        // Afficher un message
+        function showMessage(message, duration = 0) {
+            const messageElement = document.getElementById('gameMessage');
+            messageElement.textContent = message;
+            
+            if(duration > 0) {
+                setTimeout(() => {
+                    const t = translations[gameState.currentLanguage];
+                    if(!gameState.isPlaying) {
+                        messageElement.textContent = t.welcomeMessage;
+                    }
+                }, duration);
+            }
+        }
+
+        // Mettre à jour l'affichage
+        function updateDisplay() {
+            document.getElementById('scoreValue').textContent = gameState.score;
+            document.getElementById('hitsValue').textContent = gameState.hits;
+            document.getElementById('bestValue').textContent = gameState.bestScore;
+            
+            // Calculer la précision
+            const accuracy = gameState.totalClicks > 0 ? 
+                Math.round((gameState.hits / gameState.totalClicks) * 100) : 100;
+            document.getElementById('accuracyValue').textContent = accuracy + '%';
+        }
+
+        // Mettre à jour l'affichage du temps
+        function updateTimeDisplay() {
+            const timeDisplay = document.getElementById('timeDisplay');
+            if(gameState.isPlaying) {
+                timeDisplay.textContent = gameState.timeLeft.toFixed(1) + 's';
+                // Changer la couleur selon le temps restant
+                if(gameState.timeLeft <= 5) {
+                    timeDisplay.style.color = '#ff0000';
+                    timeDisplay.style.textShadow = '0 0 25px rgba(255, 0, 0, 0.9)';
+                } else if(gameState.timeLeft <= 10) {
+                    timeDisplay.style.color = '#ffff00';
+                    timeDisplay.style.textShadow = '0 0 25px rgba(255, 255, 0, 0.9)';
+                } else {
+                    timeDisplay.style.color = '#00ffff';
+                    timeDisplay.style.textShadow = '0 0 25px rgba(0, 255, 255, 0.9)';
+                }
+            } else {
+                timeDisplay.textContent = gameState.timeLeft.toFixed(1) + 's';
+                timeDisplay.style.color = '#00ffff';
+                timeDisplay.style.textShadow = '0 0 25px rgba(0, 255, 255, 0.9)';
+            }
+            
+            // Mettre à jour aussi le sélecteur
+            const selector = document.getElementById('timeSelector');
+            selector.value = gameState.gameDuration.toString();
+        }
+
+        // Mettre à jour la barre de progression
+        function updateProgressBar() {
+            if(gameState.isPlaying) {
+                const progress = ((gameState.gameDuration - gameState.timeLeft) / gameState.gameDuration) * 100;
+                document.getElementById('progressFill').style.width = `${progress}%`;
+            } else {
+                // Réinitialiser la barre quand le jeu n'est pas en cours
+                document.getElementById('progressFill').style.width = '0%';
+            }
+        }
+
+        // Mettre à jour le texte de progression
+        function updateProgressText() {
+            const t = translations[gameState.currentLanguage];
+            const progressText = document.getElementById('progressText');
+            
+            if(!gameState.isPlaying && gameState.timeLeft === gameState.gameDuration) {
+                // Afficher la durée sélectionnée quand prêt
+                let timeText = '';
+                if(gameState.gameDuration === 30) timeText = '30 secondes';
+                else if(gameState.gameDuration === 45) timeText = '45 secondes';
+                else if(gameState.gameDuration === 60) timeText = '1 minute';
+                progressText.textContent = `${t.progressReady} - ${timeText}`;
+            } else if(gameState.isPlaying) {
+                progressText.textContent = `${t.progressActive} ${gameState.timeLeft.toFixed(1)}s`;
+            } else {
+                progressText.textContent = t.progressFinished;
+            }
+        }
+
+        // Mettre à jour l'analyse IA
+        function updateAIAnalysis() {
+            const t = translations[gameState.currentLanguage];
+            const aiAnalysisElement = document.getElementById('aiAnalysisText');
+            
+            const accuracy = gameState.totalClicks > 0 ? 
+                (gameState.hits / gameState.totalClicks) : 0;
+            const avgReactionTime = gameState.hits > 0 ? 
+                (30000 - gameState.timeLeft * 1000) / gameState.hits : 1000;
+            
+            if(accuracy >= 0.9 && avgReactionTime < 800) {
+                aiAnalysisElement.textContent = t.aiExcellent;
+            } else if(accuracy >= 0.7 && avgReactionTime < 1200) {
+                aiAnalysisElement.textContent = t.aiGood;
+            } else if(accuracy >= 0.5) {
+                aiAnalysisElement.textContent = t.aiAverage;
+            } else {
+                aiAnalysisElement.textContent = t.aiSlow;
+            }
+        }
+
+        // Afficher la victoire
+        function showVictory() {
+            const t = translations[gameState.currentLanguage];
+            
+            const overlay = document.createElement('div');
+            overlay.className = 'victory-animation';
+            
+            const content = document.createElement('div');
+            content.className = 'victory-content';
+            content.innerHTML = `
+                <h2>${t.victoryTitle}</h2>
+                <p style="margin: 20px 0;">${t.victoryMessage}</p>
+                <p style="margin: 15px 0; color: #00ffff;">Score Final: ${gameState.score}</p>
+                <p style="margin: 15px 0; color: #ffff00;">Précision: ${Math.round((gameState.hits / gameState.totalClicks) * 100)}%</p>
+                ${gameState.score > gameState.bestScore ? `<p style="margin: 15px 0; color: #ff00ff;">${t.newRecord}</p>` : ''}
+                <button onclick="resetGame()" style="
+                    margin: 20px 10px 10px 10px;
+                    padding: 15px 30px;
+                    background: linear-gradient(145deg, #00ffff, #0099cc);
+                    color: white;
+                    border: none;
+                    border-radius: 15px;
+                    font-size: 16px;
+                    font-weight: bold;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                ">${t.continueText}</button>
+            `;
+            
+            overlay.appendChild(content);
+            document.body.appendChild(overlay);
+        }
+
+        // Afficher la défaite
+        function showDefeat() {
+            const t = translations[gameState.currentLanguage];
+            
+            const overlay = document.createElement('div');
+            overlay.className = 'defeat-animation';
+            
+            const content = document.createElement('div');
+            content.className = 'defeat-content';
+            content.innerHTML = `
+                <h2>${t.defeatTitle}</h2>
+                <p style="margin: 20px 0;">${t.defeatMessage}</p>
+                <p style="margin: 15px 0; color: #ff0066;">Score Final: ${gameState.score}</p>
+                <p style="margin: 15px 0; color: #ffff00;">Cibles Touchées: ${gameState.hits}</p>
+                ${gameState.score > gameState.bestScore ? `<p style="margin: 15px 0; color: #00ffff;">${t.newRecord}</p>` : ''}
+                <button onclick="resetGame()" style="
+                    margin: 20px 10px 10px 10px;
+                    padding: 15px 30px;
+                    background: linear-gradient(145deg, #00ffff, #0099cc);
+                    color: white;
+                    border: none;
+                    border-radius: 15px;
+                    font-size: 16px;
+                    font-weight: bold;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                ">${t.tryAgainText}</button>
+            `;
+            
+            overlay.appendChild(content);
+            document.body.appendChild(overlay);
+        }
+
+        // Charger le meilleur score
+        function loadBestScore() {
+            const saved = localStorage.getItem('speedChallengeBest');
+            if(saved) {
+                gameState.bestScore = parseInt(saved);
+            }
+        }
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            createCyberParticles();
+            loadBestScore();
+            updateDisplay();
+            updateTimeDisplay();
+            updateProgressText();
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'985188751748e1b2',t:'MTc1ODg3NjgyOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
