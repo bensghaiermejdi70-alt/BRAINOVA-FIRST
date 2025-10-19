@@ -13,7 +13,6 @@ html,body{
   color:#fff;
   overflow-x:hidden;
 }
-
 /* --- Header --- */
 header{
   display:flex;
@@ -34,7 +33,6 @@ header h1{
   color:#ff568c;
   text-shadow:0 0 10px #ff568c,0 0 20px #ffd700;
 }
-
 /* --- Intro --- */
 .intro{
   text-align:center;
@@ -50,7 +48,6 @@ header h1{
   margin-bottom:8px;
   text-shadow:0 0 6px #ffd700;
 }
-
 /* --- Grid of games --- */
 .games-grid{
   display:grid;
@@ -90,8 +87,6 @@ header h1{
   box-shadow:0 0 25px #ff568c,0 0 50px #ffd700,0 0 75px #ff568c;
   background: rgba(255,255,255,0.05);
 }
-
-/* --- Card not available --- */
 .card.na{
   opacity:0.5;
   cursor: not-allowed;
@@ -99,14 +94,11 @@ header h1{
   color: #999;
   text-shadow: none;
 }
-
-/* --- Neon pulse animation --- */
 @keyframes neonPulse{
   0% { box-shadow:0 0 5px #ff568c,0 0 15px #ffd700; }
   50% { box-shadow:0 0 15px #ff568c,0 0 30px #ffd700; }
   100% { box-shadow:0 0 5px #ff568c,0 0 15px #ffd700; }
 }
-
 /* --- Overlay --- */
 #gameOverlay{
   display:none;
@@ -169,7 +161,7 @@ header h1{
 
 <div id="gameOverlay">
   <div id="overlayInner">
-    <button id="overlayClose">✖</button>
+    <button id="overlayClose">🔙 Retour</button>
     <iframe id="gameFrame" allow="fullscreen; autoplay; camera; microphone; geolocation"></iframe>
   </div>
 </div>
@@ -185,7 +177,7 @@ const games = {
   7:{title:'Simon Says',file:'jeux7.html'},
   8:{title:'Speed Challenge',file:'jeux8.html'},
   9:{title:'Cyber Checker',file:'jeux9.html'},
-  10:{title:'Demo Playground',file:null}, // Jeu non disponible
+  10:{title:'Demo Playground',file:'jeux10.html'}, // <--- corrigé
   11:{title:'Quantum Monopoly',file:'jeux11.html'},
   12:{title:'Neural Poker',file:'jeux12.html'},
   13:{title:'Blackjack Quantum',file:'jeux13.html'},
@@ -214,13 +206,12 @@ const games = {
   36:{title:'Conscience Artificielle',file:'jeux36.html'}
 };
 
-const grid = document.getElementById('gamesGrid');
+const grid=document.getElementById('gamesGrid');
 for(let i=1;i<=36;i++){
   const c=document.createElement('div');
   c.className='card';
-  if(!games[i].file) c.classList.add('na');
-  c.innerHTML=`<div>Jeu ${i}</div><div>${games[i].file ? games[i].title : 'Jeu non disponible'}</div>`;
-  c.addEventListener('click',()=>{if(games[i].file) openGame(i);});
+  c.innerHTML=`<div>Jeu ${i}</div><div>${games[i].title}</div>`;
+  c.addEventListener('click',()=>openGame(i));
   grid.appendChild(c);
 }
 
@@ -239,22 +230,14 @@ async function openGame(n){
 }
 
 async function closeGame(){
-  try{
-    if(document.fullscreenElement) await document.exitFullscreen();
-    else if(document.webkitFullscreenElement) document.webkitExitFullscreen();
-  }catch(e){}
   frame.src='about:blank';
   overlay.style.display='none';
+  window.scrollTo({top:0,behavior:'smooth'}); 
 }
 
 closeBtn.addEventListener('click',closeGame);
-document.addEventListener('keydown',e=>{if(e.key==='Escape') closeGame();});
-document.addEventListener('fullscreenchange',()=>{
-  if(!document.fullscreenElement && overlay.style.display==='block'){
-    overlay.style.display='none';
-    frame.src='about:blank';
-  }
-});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeGame();});
+document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement && overlay.style.display==='block'){overlay.style.display='none';frame.src='about:blank';}});
 </script>
 
 </body>
