@@ -1,148 +1,57 @@
 <!doctype html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>BRAINOVA — Plateforme jeux (optimisée)</title>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@400;600&display=swap" rel="stylesheet">
-  <style>
-    :root{
-      --bg:#0f1724;
-      --accent:#00d4ff;
-      --muted:#bfcbdc;
-      --card-bg:rgba(10,10,20,0.75);
-      --glass: rgba(255,255,255,0.03);
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%;margin:0;font-family:'Rajdhani',sans-serif;background:linear-gradient(135deg,#05060a,#0f1724);color:#fff}
-    header{position:sticky;top:0;z-index:10;background:linear-gradient(180deg,rgba(0,0,0,0.6),transparent);display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-bottom:1px solid rgba(255,255,255,0.04)}
-    .logo{display:flex;gap:12px;align-items:center}
-    .logo h1{font-family:'Orbitron',sans-serif;margin:0;font-size:1.3rem;background:linear-gradient(90deg,var(--accent),#ff6aa2);-webkit-background-clip:text;color:transparent}
-    .nav{display:flex;gap:8px;align-items:center}
-    .btn{background:var(--glass);border:1px solid rgba(255,255,255,0.06);padding:8px 12px;border-radius:999px;cursor:pointer;color:var(--muted);font-weight:600}
-    .main{max-width:1200px;margin:20px auto;padding:18px}
-    .hero{padding:18px;border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);margin-bottom:18px;text-align:center}
-    .hero h2{font-family:'Orbitron',sans-serif;margin:0 0 6px;font-size:1.6rem;color:var(--accent)}
-    .filters{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:12px}
-    .games-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:18px}
-    .card{background:var(--card-bg);border:1px solid rgba(255,255,255,0.04);padding:14px;border-radius:12px;cursor:pointer;transition:transform .18s,box-shadow .18s;display:flex;flex-direction:column;align-items:center;gap:8px;min-height:140px}
-    .card:hover{transform:translateY(-6px);box-shadow:0 12px 30px rgba(0,0,0,0.6)}
-    .game-number{background:linear-gradient(90deg,var(--accent),#ff6aa2);padding:6px 8px;border-radius:10px;font-family:'Orbitron';font-weight:700}
-    .game-title{font-weight:700;color:var(--accent);text-align:center}
-    .game-desc{font-size:0.9rem;color:var(--muted);text-align:center}
-    .tags{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
-    .tag{font-size:.75rem;padding:6px 8px;border-radius:999px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03);color:var(--muted)}
-    /* Overlay unique */
-    #gameOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:9999;align-items:center;justify-content:center;padding:12px}
-    #overlayInner{width:100%;max-width:1200px;height:90vh;background:#000;border-radius:10px;position:relative;overflow:hidden;display:flex;flex-direction:column}
-    #overlayClose{position:absolute;right:12px;top:12px;z-index:10;background:#ff3860;border:none;color:#fff;border-radius:6px;padding:8px 10px;cursor:pointer}
-    #gameFrame{flex:1;border:none;width:100%}
-    #overlayMsg{flex:1;display:flex;align-items:center;justify-content:center;color:var(--muted);padding:20px;text-align:center}
-    /* Responsive */
-    @media (max-width:600px){
-      .hero h2{font-size:1.2rem}
-      #overlayInner{height:95vh}
-    }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>BRAINOVA — Jeux (plein écran)</title>
+<style>
+  html,body{height:100%;margin:0;font-family:Arial,Helvetica,sans-serif;background:#071021;color:#fff}
+  .games-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;padding:18px}
+  .card{background:#0b1220;padding:12px;border-radius:10px;cursor:pointer;text-align:center}
+  .card:hover{transform:translateY(-4px);transition:transform .18s}
+  /* overlay full viewport - by default hidden */
+  #gameOverlay{display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.95);align-items:center;justify-content:center;padding:8px}
+  #overlayInner{position:relative;width:100%;height:100%;border-radius:0;overflow:hidden;display:flex;flex-direction:column}
+  #overlayClose{position:absolute;right:12px;top:12px;z-index:50;background:#ff3860;border:none;color:#fff;border-radius:6px;padding:8px 10px;cursor:pointer}
+  #gameFrame{width:100%;height:100%;border:0;display:block}
+  #overlayMsg{position:absolute;left:0;right:0;top:0;bottom:0;display:flex;align-items:center;justify-content:center;padding:20px;color:#cbd5e1;font-size:1rem}
+</style>
 </head>
 <body>
 
-<header>
-  <div class="logo"><h1>🧠 BRAINOVA</h1></div>
-  <nav class="nav">
-    <button class="btn" onclick="showComingSoon('Classements')">🏆 Classements</button>
-    <button class="btn" onclick="showComingSoon('Paramètres')">⚙️ Paramètres</button>
-    <div style="width:8px"></div>
-    <div style="position:relative">
-      <button class="btn" id="langBtn">FR</button>
-    </div>
-  </nav>
-</header>
+<div style="padding:12px">
+  <h1>BRAINOVA — Cliquez sur une carte</h1>
+  <div class="games-grid" id="gamesGrid"></div>
+</div>
 
-<main class="main">
-  <section class="hero">
-    <h2>🎮 Découvrez nos 36 jeux intelligents</h2>
-    <p style="color:var(--muted)">Cliquez sur une carte pour lancer le jeu en plein écran. Les jeux sont chargés uniquement au lancement pour alléger la page.</p>
-
-    <div class="filters" id="filters">
-      <button class="btn" data-filter="all">Tous</button>
-      <button class="btn" data-filter="memory">Mémoire</button>
-      <button class="btn" data-filter="reflexion">Réflexion</button>
-      <button class="btn" data-filter="arcade">Arcade</button>
-      <button class="btn" data-filter="societe">Société</button>
-      <button class="btn" data-filter="mystique">Mystique</button>
-      <button class="btn" data-filter="science">Science</button>
-    </div>
-  </section>
-
-  <section class="games-grid" id="gamesGrid">
-    <!-- cartes générées par JS -->
-  </section>
-</main>
-
-<!-- Overlay réutilisable (1 seul dans la page) -->
+<!-- Overlay unique -->
 <div id="gameOverlay" role="dialog" aria-modal="true">
   <div id="overlayInner">
     <button id="overlayClose" aria-label="Fermer">✖</button>
-    <iframe id="gameFrame" title="Jeu" src="" style="display:none"></iframe>
+    <iframe id="gameFrame" title="Jeu" src="" allow="fullscreen; autoplay; geolocation; microphone; camera"></iframe>
     <div id="overlayMsg" style="display:none"></div>
   </div>
 </div>
 
 <script>
-/* ----- Liste des jeux (36 entrées).
-   Modifie les champs 'title', 'desc', 'category' ou 'file' si nécessaire.
-   Par défaut, les fichiers doivent être à la racine: jeux1.html ... jeux36.html
-*/
+/* Ex: 12 cartes pour démonstration ; adapte à 36 */
 const games = [];
 for(let i=1;i<=36;i++){
-  games.push({
-    id: i,
-    title: `Jeu ${String(i).padStart(2,'0')}`,
-    icon: i%7===0 ? '🧩' : (i%5===0 ? '🃏' : '🎮'),
-    desc: 'Cliquez pour jouer',
-    category: (i%5===0)? 'societe' : (i%4===0)? 'reflexion' : (i%3===0)? 'memory' : 'arcade',
-    file: `jeux${i}.html`
-  });
+  games.push({id:i, title:`Jeu ${i}`, file:`jeux${i}.html`});
 }
-
-/* ----- Génération de la grille ---- */
 const grid = document.getElementById('gamesGrid');
 function makeCard(g){
-  const el = document.createElement('article');
+  const el = document.createElement('div');
   el.className = 'card';
-  el.dataset.category = g.category;
-  el.dataset.file = g.file;
-  el.innerHTML = `
-    <div class="game-number">${String(g.id).padStart(2,'0')}</div>
-    <div style="font-size:40px">${g.icon}</div>
-    <div class="game-title">${escapeHtml(g.title)}</div>
-    <div class="game-desc">${escapeHtml(g.desc)}</div>
-    <div class="tags"><span class="tag">${g.category}</span></div>
-  `;
-  el.addEventListener('click', ()=> openGame(g.file, g.title));
+  el.innerHTML = `<div style="font-weight:700">#${g.id}</div><div style="margin-top:8px">${g.title}</div>`;
+  el.addEventListener('click', ()=> openGameFullscreen(g.file, g.title));
   return el;
 }
+games.forEach(g=>grid.appendChild(makeCard(g)));
 
-function renderGrid(list){
-  grid.innerHTML = '';
-  const frag = document.createDocumentFragment();
-  list.forEach(g => frag.appendChild(makeCard(g)));
-  grid.appendChild(frag);
-}
-renderGrid(games);
-
-/* ----- Filtrage simple ----- */
-document.getElementById('filters').addEventListener('click', e=>{
-  const btn = e.target.closest('button');
-  if(!btn) return;
-  const filter = btn.dataset.filter;
-  if(filter==='all') renderGrid(games);
-  else renderGrid(games.filter(g=>g.category===filter));
-});
-
-/* ----- Overlay unique et lazy load iframe with existence check ----- */
+/* Overlay and fullscreen logic */
 const overlay = document.getElementById('gameOverlay');
+const inner = document.getElementById('overlayInner');
 const frame = document.getElementById('gameFrame');
 const msg = document.getElementById('overlayMsg');
 const closeBtn = document.getElementById('overlayClose');
@@ -151,57 +60,89 @@ async function fileExists(path){
   try{
     const res = await fetch(path, {method:'HEAD'});
     return res.ok;
-  } catch(e){
-    return false;
-  }
+  }catch(e){ return false; }
 }
 
-async function openGame(file, title){
-  if(!file || !/^jeux\d+\.html$/.test(file)) {
-    showOverlayMessage('Jeu non disponible (nom de fichier invalide).');
+/* Open game in real fullscreen when possible */
+async function openGameFullscreen(file, title){
+  if(!/^jeux\d+\.html$/.test(file)){
+    alert('Nom de fichier invalide.');
     return;
   }
-  showOverlayMessage('Vérification du jeu...');
   overlay.style.display = 'flex';
   document.body.style.overflow = 'hidden';
-  const ok = await fileExists(file);
-  if(!ok){
-    showOverlayMessage(`Le fichier <strong>${escapeHtml(file)}</strong> est introuvable.<br><br>Vérifie que <code>${escapeHtml(file)}</code> existe dans le même dossier que cette page. Vous pouvez aussi consulter votre dépôt GitHub.`);
-    return;
-  }
-  // load iframe only when exists
-  msg.style.display = 'none';
-  frame.style.display = '';
-  frame.src = file;
-  frame.title = title || 'Jeu';
-  frame.focus();
-}
-
-function showOverlayMessage(html){
+  msg.style.display = 'flex';
+  msg.innerHTML = 'Vérification du jeu...';
   frame.style.display = 'none';
   frame.src = 'about:blank';
-  msg.style.display = '';
-  msg.innerHTML = html;
-  overlay.style.display = 'flex';
+  const ok = await fileExists(file);
+  if(!ok){
+    msg.innerHTML = `Le fichier <strong>${file}</strong> est introuvable. Vérifie qu'il existe dans le même dossier.`;
+    return;
+  }
+  // ready: set src then request fullscreen
+  msg.style.display = 'none';
+  frame.style.display = 'block';
+  frame.src = file;
+  frame.title = title || 'Jeu';
+  // small delay to ensure iframe set before fullscreen request (important sur certains navigateurs)
+  setTimeout(async ()=>{
+    // Prefer requesting fullscreen on the iframe element (some browsers require it on an element inside the document)
+    const target = inner; // we use inner container to include close button overlay (keeps control)
+    if(target.requestFullscreen){
+      try{
+        await target.requestFullscreen({navigationUI: 'hide'});
+        /* some browsers show the page controls; navigationUI hint helps hide them */
+      }catch(err){
+        /* user agent may block or fail: fallback to showing overlay full */
+        makeOverlayFullManual();
+      }
+    } else if (target.webkitRequestFullscreen){
+      // Safari iOS (older)
+      target.webkitRequestFullscreen();
+    } else {
+      // no fullscreen API -> fallback to manual full overlay
+      makeOverlayFullManual();
+    }
+  }, 120);
 }
 
-function closeGame(){
+/* Fallback: force overlay to cover viewport (already position:fixed inset:0) — ensure no border radius */
+function makeOverlayFullManual(){
+  overlay.style.display = 'flex';
+  inner.style.width = '100%';
+  inner.style.height = '100%';
+  // iframe already width/height 100%
+}
+
+/* Close and cleanup */
+async function closeGame(){
+  // exit fullscreen if active
+  if(document.fullscreenElement){
+    try { await document.exitFullscreen(); } catch(e) { /* ignore */ }
+  } else if (document.webkitFullscreenElement){ // Safari
+    try { document.webkitExitFullscreen(); } catch(e) {}
+  }
+  // hide overlay and cleanup iframe
   overlay.style.display = 'none';
-  // clean src to free memory and stop sounds/timers inside iframe
-  try { frame.src = 'about:blank'; } catch(e) { frame.removeAttribute('src'); }
+  frame.src = 'about:blank';
   frame.style.display = 'none';
   msg.style.display = 'none';
   document.body.style.overflow = '';
 }
 
+/* events */
 closeBtn.addEventListener('click', closeGame);
 overlay.addEventListener('click', (e)=>{ if(e.target===overlay) closeGame(); });
 document.addEventListener('keydown', function(e){ if(e.key==='Escape' && overlay.style.display==='flex') closeGame(); }, true);
 
-/* ----- Helpers ----- */
-function showComingSoon(name){ alert(`🚀 ${name} — bientôt disponible !`); }
-function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-
+/* Accessibility / handle exiting fullscreen via ESC by user */
+document.addEventListener('fullscreenchange', ()=> {
+  if(!document.fullscreenElement){
+    // user exited fullscreen -> close overlay and clean iframe
+    closeGame();
+  }
+});
 </script>
 </body>
 </html>
