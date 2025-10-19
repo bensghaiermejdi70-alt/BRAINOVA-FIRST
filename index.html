@@ -13,6 +13,7 @@ html,body{
   color:#fff;
   overflow-x:hidden;
 }
+
 /* --- Header --- */
 header{
   display:flex;
@@ -33,6 +34,7 @@ header h1{
   color:#ff568c;
   text-shadow:0 0 10px #ff568c,0 0 20px #ffd700;
 }
+
 /* --- Intro --- */
 .intro{
   text-align:center;
@@ -48,6 +50,7 @@ header h1{
   margin-bottom:8px;
   text-shadow:0 0 6px #ffd700;
 }
+
 /* --- Grid of games --- */
 .games-grid{
   display:grid;
@@ -71,6 +74,7 @@ header h1{
   font-size:18px;
   color:#fff;
   box-shadow:0 0 5px #ff568c,0 0 15px #ffd700;
+  animation: neonPulse 2.5s infinite alternate;
 }
 .card div:first-child{
   font-weight:bold;
@@ -82,9 +86,25 @@ header h1{
   text-shadow:0 0 4px #ffd700;
 }
 .card:hover{
-  transform: rotateY(15deg) rotateX(10deg) scale(1.05);
-  box-shadow:0 0 20px #ff568c,0 0 40px #ffd700,0 0 60px #ff568c;
+  transform: rotateY(15deg) rotateX(10deg) scale(1.07);
+  box-shadow:0 0 25px #ff568c,0 0 50px #ffd700,0 0 75px #ff568c;
   background: rgba(255,255,255,0.05);
+}
+
+/* --- Card not available --- */
+.card.na{
+  opacity:0.5;
+  cursor: not-allowed;
+  box-shadow: none;
+  color: #999;
+  text-shadow: none;
+}
+
+/* --- Neon pulse animation --- */
+@keyframes neonPulse{
+  0% { box-shadow:0 0 5px #ff568c,0 0 15px #ffd700; }
+  50% { box-shadow:0 0 15px #ff568c,0 0 30px #ffd700; }
+  100% { box-shadow:0 0 5px #ff568c,0 0 15px #ffd700; }
 }
 
 /* --- Overlay --- */
@@ -165,7 +185,7 @@ const games = {
   7:{title:'Simon Says',file:'jeux7.html'},
   8:{title:'Speed Challenge',file:'jeux8.html'},
   9:{title:'Cyber Checker',file:'jeux9.html'},
-  10:{title:'Demo Playground',file:'https://bensghaiermejdi70-alt.github.io/BRAINOVA-FIRST/jeux10.html'},
+  10:{title:'Demo Playground',file:null}, // Jeu non disponible
   11:{title:'Quantum Monopoly',file:'jeux11.html'},
   12:{title:'Neural Poker',file:'jeux12.html'},
   13:{title:'Blackjack Quantum',file:'jeux13.html'},
@@ -198,8 +218,9 @@ const grid = document.getElementById('gamesGrid');
 for(let i=1;i<=36;i++){
   const c=document.createElement('div');
   c.className='card';
-  c.innerHTML=`<div>Jeu ${i}</div><div>${games[i].title}</div>`;
-  c.addEventListener('click',()=>openGame(i));
+  if(!games[i].file) c.classList.add('na');
+  c.innerHTML=`<div>Jeu ${i}</div><div>${games[i].file ? games[i].title : 'Jeu non disponible'}</div>`;
+  c.addEventListener('click',()=>{if(games[i].file) openGame(i);});
   grid.appendChild(c);
 }
 
