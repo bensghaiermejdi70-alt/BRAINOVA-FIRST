@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BRAINOVA — Jeux plein écran total</title>
+<title>BRAINOVA â€” Jeux plein Ã©cran total</title>
 <style>
 html,body{
   height:100%;
@@ -138,6 +138,16 @@ header h1{
 <body>
 
 <header>
+  <div class="language-selector">
+    <select id="langSelect">
+      <option value="fr">Français</option>
+      <option value="en">English</option>
+      <option value="es">Español</option>
+      <option value="de">Deutsch</option>
+      <option value="zh">中文</option>
+      <option value="ar">العربية</option>
+    </select>
+  </div>
   <svg viewBox="0 0 100 100">
     <defs>
       <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -152,16 +162,16 @@ header h1{
 </header>
 
 <div class="intro">
-  <h2>🎮 Découvrez nos 36 Jeux Intelligents</h2>
-  <p>Entraînez votre cerveau avec notre collection complète de jeux adaptatifs alimentés par l'IA</p>
-  <p>🎮 Tous les Jeux | 🧠 Mémoire | 🧩 Réflexion | 🎲 Société | 🕹️ Arcade | 🔬 Science | 🔮 Mystique</p>
+  <h2>ðŸŽ® DÃ©couvrez nos 36 Jeux Intelligents</h2>
+  <p>EntraÃ®nez votre cerveau avec notre collection complÃ¨te de jeux adaptatifs alimentÃ©s par l'IA</p>
+  <p>ðŸŽ® Tous les Jeux | ðŸ§  MÃ©moire | ðŸ§© RÃ©flexion | ðŸŽ² SociÃ©tÃ© | ðŸ•¹ï¸ Arcade | ðŸ”¬ Science | ðŸ”® Mystique</p>
 </div>
 
 <div class="games-grid" id="gamesGrid"></div>
 
 <div id="gameOverlay">
   <div id="overlayInner">
-    <button id="overlayClose">🔙 Retour</button>
+    <button id="overlayClose">ðŸ”™ Retour</button>
     <iframe id="gameFrame" allow="fullscreen; autoplay; camera; microphone; geolocation"></iframe>
   </div>
 </div>
@@ -177,7 +187,7 @@ const games = {
   7:{title:'Simon Says',file:'jeux7.html'},
   8:{title:'Speed Challenge',file:'jeux8.html'},
   9:{title:'Cyber Checker',file:'jeux9.html'},
-  10:{title:'Demo Playground',file:'jeux10.html'}, // <--- corrigé
+  10:{title:'Demo Playground',file:'jeux10.html'}, // <--- corrigÃ©
   11:{title:'Quantum Monopoly',file:'jeux11.html'},
   12:{title:'Neural Poker',file:'jeux12.html'},
   13:{title:'Blackjack Quantum',file:'jeux13.html'},
@@ -202,7 +212,7 @@ const games = {
   32:{title:'Neural Infinity',file:'jeux32.html'},
   33:{title:'Algorithme Visuel',file:'jeux33.html'},
   34:{title:'Physique Quantique',file:'jeux34.html'},
-  35:{title:'Géométrie Sacrée',file:'jeux35.html'},
+  35:{title:'GÃ©omÃ©trie SacrÃ©e',file:'jeux35.html'},
   36:{title:'Conscience Artificielle',file:'jeux36.html'}
 };
 
@@ -240,5 +250,34 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeGame();});
 document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement && overlay.style.display==='block'){overlay.style.display='none';frame.src='about:blank';}});
 </script>
 
-</body>
+<script>
+// Traductions multilingues pour header, intro et cartes
+const translations = { /* … copier le contenu complet de translations JS que nous avons préparé … */ };
+
+// Fonction pour appliquer la langue
+function updateLanguage(lang){
+    const t = translations[lang]; if(!t) return;
+    const intro = document.querySelector('.intro');
+    intro.querySelector('h2').textContent = t.introTitle;
+    const ps = intro.querySelectorAll('p');
+    if(ps.length>=2){ ps[0].textContent = t.introDesc; ps[1].textContent = t.introTags; }
+    for(let i=1;i<=36;i++){
+        const card = document.querySelectorAll('.card')[i-1];
+        if(card){ card.innerHTML = <div>Jeu </div><div></div>; }
+    }
+}
+document.getElementById('langSelect').addEventListener('change', e=>{updateLanguage(e.target.value);});
+updateLanguage(document.getElementById('langSelect').value);
+</script>
+
 </html>
+
+
+<div id='premiumModal' class='modal' aria-hidden='true'>
+  <div class='modalCard'>
+    <h3>Abonnement requis</h3>
+    <p>Pour débloquer ces jeux, veuillez souscrire à l'abonnement annuel.</p>
+    <button id='subscribeBtn' class='btn'>S'abonner maintenant</button>
+    <button class='btn' id='premiumCancel' style='background:transparent;color:#fff;border:1px solid rgba(255,255,255,0.08)'>Annuler</button>
+  </div>
+</div>

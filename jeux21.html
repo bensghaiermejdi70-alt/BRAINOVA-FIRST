@@ -469,6 +469,7 @@
     </style>
 </head>
 <body>
+<button id='backToMenuBtn' class='header-btn' style='position:absolute; top:10px; left:10px; z-index:1000;'>?? Menu</button>
     <!-- Étoiles animées -->
     <div class="stars" id="stars"></div>
 
@@ -1852,5 +1853,50 @@
         }
         window.closePlatform = closePlatform;
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9894ccec930de183',t:'MTc1OTU4MjE3OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9894ccec930de183',t:'MTc1OTU4MjE3OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
+<script>
+function addBackToMenuButton() {
+    if(document.getElementById('backToMenuBtn')) return;
+
+    const btn = document.createElement('button');
+    btn.id = 'backToMenuBtn';
+    btn.className = 'header-btn';
+    btn.style.position = 'absolute';
+    btn.style.top = '10px';
+    btn.style.left = '10px';
+    btn.style.zIndex = '1000';
+    btn.innerHTML = '?? Menu';
+
+    btn.addEventListener('click', function() {
+        if(window.parent && window.parent !== window){
+            window.parent.postMessage({action:'close', reason:'menu-button', source:document.title}, '*');
+        } else {
+            window.location.href='index.html';
+        }
+    });
+
+    document.body.appendChild(btn);
+}
+
+// Appeler au chargement et toutes les 500ms pour persister
+window.addEventListener('load', addBackToMenuButton);
+setInterval(addBackToMenuButton, 500);
+</script>
+<script>
+/* closeToMenuInjected */
+const closeBtn = document.querySelector('.global-close-btn, .close-btn');
+if (closeBtn) {
+    closeBtn.addEventListener('click', function() {
+        if(window.parent && window.parent !== window){
+            window.parent.postMessage({action:'close', reason:'menu-button', source:document.title}, '*');
+        } else {
+            window.location.href='index.html';
+        }
+    });
+}
+</script>
+</body>
 </html>
+
+
+
