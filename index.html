@@ -106,11 +106,11 @@ header{display:flex;justify-content:space-between;align-items:center;padding:14p
       </select>
     </div>
     <div id="authContainer">
-      <button class="authBtn premium-only" id="loginBtn" data-tooltip="Connexion premium requise">
+      <button class="authBtn" id="newLoginBtn" onclick="document.getElementById('loginModal').style.display='flex'">
         <span class="auth-icon">🔐</span>
         <span class="auth-text">Connexion</span>
       </button>
-      <button class="authBtn premium-only" id="signupBtn" data-tooltip="Inscription premium requise">
+      <button class="authBtn" id="newSignupBtn" onclick="document.getElementById('signupModal').style.display='flex'">
         <span class="auth-icon">✨</span>
         <span class="auth-text">Inscription</span>
       </button>
