@@ -508,35 +508,15 @@ function updatePremiumStatusIndicator(elementId, isPremium) {
   }
 }
 
-// Gestionnaires d'événements pour les boutons
+// Gestionnaires d'événements pour les boutons - ACCÈS LIBRE (plus de restriction premium)
 document.getElementById('loginBtn').addEventListener('click', () => {
-  // Debug complet
-  console.log('🔍 CLIC LOGIN - Avant checkPremiumStatus:', {userPremium, isPremium});
-  checkPremiumStatus(); // S'assurer que les variables sont à jour
-  console.log('🔍 CLIC LOGIN - Après checkPremiumStatus:', {userPremium, isPremium});
-  console.log('🔍 URL actuelle:', window.location.href);
-  console.log('🔍 localStorage premium:', localStorage.getItem('brainova_premium'));
-  
-  updatePremiumStatusIndicator('premiumStatusIndicator', userPremium || isPremium);
-  
-  if (userPremium || isPremium) {
-    console.log('✅ CLIC LOGIN - Accès autorisé');
-    loginModal.style.display = 'flex';
-  } else {
-    console.log('❌ CLIC LOGIN - Accès refusé');
-    showPremiumRequiredMessage('connexion');
-  }
+  console.log('� CLIC LOGIN - Accès libre autorisé');
+  loginModal.style.display = 'flex';
 });
 
 document.getElementById('signupBtn').addEventListener('click', () => {
-  // Debug complet
-  console.log('🔍 CLIC SIGNUP - Avant checkPremiumStatus:', {userPremium, isPremium});
-  checkPremiumStatus(); // S'assurer que les variables sont à jour
-  console.log('🔍 CLIC SIGNUP - Après checkPremiumStatus:', {userPremium, isPremium});
-  console.log('🔍 URL actuelle:', window.location.href);
-  console.log('🔍 localStorage premium:', localStorage.getItem('brainova_premium'));
-  
-  updatePremiumStatusIndicator('premiumStatusIndicatorSignup', userPremium || isPremium);
+  console.log('� CLIC SIGNUP - Accès libre autorisé');
+  signupModal.style.display = 'flex';
   
   if (userPremium || isPremium) {
     console.log('✅ CLIC SIGNUP - Accès autorisé');
@@ -612,12 +592,7 @@ document.getElementById('signupCancel').addEventListener('click', () => signupMo
 document.getElementById('loginForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   
-  // S'assurer que le statut premium est à jour
-  checkPremiumStatus();
-  if (!userPremium && !isPremium) {
-    showPremiumRequiredMessage('connexion');
-    return;
-  }
+  // Plus de vérification premium - accès libre pour l'authentification
   
   const email = document.getElementById('loginEmail').value.trim();
   const password = document.getElementById('loginPassword').value;
@@ -677,12 +652,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
 document.getElementById('signupForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   
-  // S'assurer que le statut premium est à jour
-  checkPremiumStatus();
-  if (!userPremium && !isPremium) {
-    showPremiumRequiredMessage('inscription');
-    return;
-  }
+  // Plus de vérification premium - accès libre pour l'authentification
   
   const email = document.getElementById('signupEmail').value.trim();
   const password = document.getElementById('signupPassword').value;
