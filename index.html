@@ -1151,34 +1151,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Fonction pour initialiser les boutons d'authentification
 function initializeAuthButtons() {
-  const isPremium = checkPremiumStatus();
+  // ACCÈS LIBRE TOTAL - Plus de restrictions premium pour l'authentification
   const loginBtn = document.getElementById('loginBtn');
   const signupBtn = document.getElementById('signupBtn');
   
-  if (!isPremium) {
-    // Utilisateur non premium : désactiver les boutons
-    if (loginBtn) {
-      loginBtn.style.opacity = '0.6';
-      loginBtn.style.pointerEvents = 'none';
-      loginBtn.title = 'Connexion disponible après abonnement premium';
-    }
-    if (signupBtn) {
-      signupBtn.style.opacity = '0.6';
-      signupBtn.style.pointerEvents = 'none';
-      signupBtn.title = 'Inscription disponible après abonnement premium';
-    }
-  } else {
-    // Utilisateur premium : activer les boutons
-    if (loginBtn) {
-      loginBtn.style.opacity = '1';
-      loginBtn.style.pointerEvents = 'auto';
-      loginBtn.title = 'Se connecter';
-    }
-    if (signupBtn) {
-      signupBtn.style.opacity = '1';
-      signupBtn.style.pointerEvents = 'auto';
-      signupBtn.title = "S'inscrire";
-    }
+  // Toujours activer les boutons d'authentification
+  if (loginBtn) {
+    loginBtn.style.opacity = '1';
+    loginBtn.style.pointerEvents = 'auto';
+    loginBtn.title = 'Se connecter';
+  }
+  if (signupBtn) {
+    signupBtn.style.opacity = '1';
+    signupBtn.style.pointerEvents = 'auto';
+    signupBtn.title = "S'inscrire";
   }
 }
 
