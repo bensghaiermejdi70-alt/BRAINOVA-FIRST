@@ -518,71 +518,9 @@ document.getElementById('signupBtn').addEventListener('click', () => {
   console.log('� CLIC SIGNUP - Accès libre autorisé');
   signupModal.style.display = 'flex';
   
-  if (userPremium || isPremium) {
-    console.log('✅ CLIC SIGNUP - Accès autorisé');
-    signupModal.style.display = 'flex';
-  } else {
-    console.log('❌ CLIC SIGNUP - Accès refusé');
-    showPremiumRequiredMessage('inscription');
-  }
-});
+// Code supprimé - nouveaux boutons utilisent onclick direct
 
-// Fonction pour afficher le message premium requis
-function showPremiumRequiredMessage(action) {
-  const modal = document.createElement('div');
-  modal.style.cssText = `
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.9); display: flex; align-items: center;
-    justify-content: center; z-index: 10040;
-  `;
-  
-  const card = document.createElement('div');
-  card.style.cssText = `
-    background: linear-gradient(135deg, #ff6b6b, #ffa500);
-    padding: 40px; border-radius: 20px; text-align: center;
-    color: white; max-width: 400px; box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-    border: 2px solid rgba(255,255,255,0.2);
-  `;
-  
-  card.innerHTML = `
-    <div style="font-size: 48px; margin-bottom: 20px;">🔒</div>
-    <h3 style="margin-bottom: 15px; color: #fff;">Accès Premium Requis</h3>
-    <p style="margin-bottom: 25px; font-size: 16px;">
-      La ${action} n'est disponible que pour les membres premium. 
-      Abonnez-vous d'abord pour débloquer cette fonctionnalité.
-    </p>
-    <button id="goToPremium" style="
-      background: linear-gradient(90deg, #ffd700, #ffb347);
-      color: #333; border: none; padding: 15px 30px;
-      border-radius: 25px; font-weight: bold; cursor: pointer;
-      margin-right: 10px; font-size: 16px;
-    ">S'abonner maintenant</button>
-    <button id="closePremiumMessage" style="
-      background: transparent; border: 2px solid rgba(255,255,255,0.5);
-      color: white; padding: 15px 30px; border-radius: 25px;
-      cursor: pointer; font-size: 16px;
-    ">Fermer</button>
-  `;
-  
-  modal.appendChild(card);
-  document.body.appendChild(modal);
-  
-  // Événements
-  document.getElementById('goToPremium').addEventListener('click', () => {
-    document.body.removeChild(modal);
-    showSubscriptionMessage();
-  });
-  
-  document.getElementById('closePremiumMessage').addEventListener('click', () => {
-    document.body.removeChild(modal);
-  });
-  
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) {
-      document.body.removeChild(modal);
-    }
-  });
-}
+// Fonction showPremiumRequiredMessage SUPPRIMÉE - Plus de restrictions premium pour l'authentification
 
 // Événements de fermeture des modaux
 document.getElementById('loginCancel').addEventListener('click', () => loginModal.style.display = 'none');
