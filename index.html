@@ -390,7 +390,7 @@ function renderGrid(lang){
   
 
   
-  if(userPremium || isPremium) {
+  if(userPremium) {
     // Utilisateur premium : masquer premium, BLOQUER partager, activer connexion/inscription
     premiumBtn.style.display = 'none';
     if (shareBtn) {
@@ -487,8 +487,8 @@ const premiumModal = document.getElementById('premiumModal');
 
 // Fonction pour vérifier le statut premium
 function checkPremiumStatus() {
-  const isPremium = localStorage.getItem('brainova_premium') === 'true';
-  return isPremium;
+  const premium = localStorage.getItem('brainova_premium') === 'true';
+  return premium;
 }
 
 // Fonction pour mettre à jour l'indicateur de statut
@@ -512,10 +512,10 @@ function updatePremiumStatusIndicator(elementId, isPremium) {
 
 // Gestionnaires d'événements pour les boutons
 document.getElementById('loginBtn').addEventListener('click', () => {
-  const isPremium = checkPremiumStatus();
-  updatePremiumStatusIndicator('premiumStatusIndicator', isPremium);
+  const premiumStatus = checkPremiumStatus();
+  updatePremiumStatusIndicator('premiumStatusIndicator', premiumStatus);
   
-  if (isPremium) {
+  if (premiumStatus) {
     loginModal.style.display = 'flex';
   } else {
     // Afficher un message d'erreur stylé
@@ -524,10 +524,10 @@ document.getElementById('loginBtn').addEventListener('click', () => {
 });
 
 document.getElementById('signupBtn').addEventListener('click', () => {
-  const isPremium = checkPremiumStatus();
-  updatePremiumStatusIndicator('premiumStatusIndicatorSignup', isPremium);
+  const premiumStatus = checkPremiumStatus();
+  updatePremiumStatusIndicator('premiumStatusIndicatorSignup', premiumStatus);
   
-  if (isPremium) {
+  if (premiumStatus) {
     signupModal.style.display = 'flex';
   } else {
     // Afficher un message d'erreur stylé
@@ -1158,7 +1158,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Fonction pour initialiser les boutons d'authentification
 function initializeAuthButtons() {
-  const isPremium = checkPremiumStatus();
+  const premiumStatus = checkPremiumStatus();
   const loginBtn = document.getElementById('loginBtn');
   const signupBtn = document.getElementById('signupBtn');
   
