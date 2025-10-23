@@ -106,11 +106,11 @@ header{display:flex;justify-content:space-between;align-items:center;padding:14p
       </select>
     </div>
     <div id="authContainer">
-      <button class="authBtn" id="newLoginBtn" onclick="document.getElementById('loginModal').style.display='flex'">
+      <button class="authBtn" id="newLoginBtn" onclick="console.log('FORCE LOGIN'); event.stopPropagation(); event.preventDefault(); document.getElementById('loginModal').style.display='flex'; return false;">
         <span class="auth-icon">🔐</span>
         <span class="auth-text">Connexion</span>
       </button>
-      <button class="authBtn" id="newSignupBtn" onclick="document.getElementById('signupModal').style.display='flex'">
+      <button class="authBtn" id="newSignupBtn" onclick="console.log('FORCE SIGNUP'); event.stopPropagation(); event.preventDefault(); document.getElementById('signupModal').style.display='flex'; return false;">
         <span class="auth-icon">✨</span>
         <span class="auth-text">Inscription</span>
       </button>
