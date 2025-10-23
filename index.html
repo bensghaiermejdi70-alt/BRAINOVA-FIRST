@@ -116,6 +116,7 @@ header{display:flex;justify-content:space-between;align-items:center;padding:14p
       </button>
       <button id="premiumBtn">Premium</button>
       <button id="shareBtn">Partager</button>
+      <button id="testPremiumBtn" style="background: #ff4444; color: white; padding: 8px 14px; border: none; border-radius: 12px; cursor: pointer; margin-left: 8px;">🧪 TEST</button>
     </div>
   </div>
 </header>
@@ -334,8 +335,10 @@ function renderGrid(lang){
   
   grid.innerHTML='';
   const t=TRANSLATIONS[lang]||TRANSLATIONS['fr'];
-  const userPremium = checkPremiumStatus();
-  console.log('✅ Grille trouvée, userPremium:', userPremium);
+  
+  // Utiliser la fonction checkPremiumStatus complète qui met à jour les variables globales
+  checkPremiumStatus();
+  console.log('✅ Grille trouvée, userPremium:', userPremium, 'isPremium:', isPremium);
   
   for(let i=1;i<=36;i++){
     const card=document.createElement('div'); card.className='card';
@@ -390,7 +393,7 @@ function renderGrid(lang){
   
 
   
-  if(userPremium) {
+  if(userPremium || isPremium) {
     // Utilisateur premium : masquer premium, BLOQUER partager, activer connexion/inscription
     premiumBtn.style.display = 'none';
     if (shareBtn) {
@@ -486,11 +489,6 @@ const signupModal = document.getElementById('signupModal');
 const premiumModal = document.getElementById('premiumModal');
 
 // Fonction pour vérifier le statut premium
-function checkPremiumStatus() {
-  const premium = localStorage.getItem('brainova_premium') === 'true';
-  return premium;
-}
-
 // Fonction pour mettre à jour l'indicateur de statut
 function updatePremiumStatusIndicator(elementId, isPremium) {
   const indicator = document.getElementById(elementId);
@@ -512,10 +510,11 @@ function updatePremiumStatusIndicator(elementId, isPremium) {
 
 // Gestionnaires d'événements pour les boutons
 document.getElementById('loginBtn').addEventListener('click', () => {
-  const premiumStatus = checkPremiumStatus();
-  updatePremiumStatusIndicator('premiumStatusIndicator', premiumStatus);
+  // Utiliser les variables globales mises à jour par checkPremiumStatus()
+  checkPremiumStatus(); // S'assurer que les variables sont à jour
+  updatePremiumStatusIndicator('premiumStatusIndicator', userPremium || isPremium);
   
-  if (premiumStatus) {
+  if (userPremium || isPremium) {
     loginModal.style.display = 'flex';
   } else {
     // Afficher un message d'erreur stylé
@@ -524,10 +523,11 @@ document.getElementById('loginBtn').addEventListener('click', () => {
 });
 
 document.getElementById('signupBtn').addEventListener('click', () => {
-  const premiumStatus = checkPremiumStatus();
-  updatePremiumStatusIndicator('premiumStatusIndicatorSignup', premiumStatus);
+  // Utiliser les variables globales mises à jour par checkPremiumStatus()
+  checkPremiumStatus(); // S'assurer que les variables sont à jour
+  updatePremiumStatusIndicator('premiumStatusIndicatorSignup', userPremium || isPremium);
   
-  if (premiumStatus) {
+  if (userPremium || isPremium) {
     signupModal.style.display = 'flex';
   } else {
     // Afficher un message d'erreur stylé
@@ -600,8 +600,9 @@ document.getElementById('signupCancel').addEventListener('click', () => signupMo
 document.getElementById('loginForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   
-  // Vérifier à nouveau le statut premium
-  if (!checkPremiumStatus()) {
+  // S'assurer que le statut premium est à jour
+  checkPremiumStatus();
+  if (!userPremium && !isPremium) {
     showPremiumRequiredMessage('connexion');
     return;
   }
@@ -664,8 +665,9 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
 document.getElementById('signupForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   
-  // Vérifier à nouveau le statut premium
-  if (!checkPremiumStatus()) {
+  // S'assurer que le statut premium est à jour
+  checkPremiumStatus();
+  if (!userPremium && !isPremium) {
     showPremiumRequiredMessage('inscription');
     return;
   }
@@ -1144,6 +1146,15 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
   
+  // Bouton de test premium temporaire
+  const testPremiumBtn = document.getElementById('testPremiumBtn');
+  if (testPremiumBtn) {
+    testPremiumBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      testActivatePremium();
+    });
+  }
+  
   // Initialiser la grille de jeux
   if (langSelect && langSelect.value) {
     renderGrid(langSelect.value);
@@ -1158,7 +1169,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Fonction pour initialiser les boutons d'authentification
 function initializeAuthButtons() {
-  const premiumStatus = checkPremiumStatus();
+  const isPremium = checkPremiumStatus();
   const loginBtn = document.getElementById('loginBtn');
   const signupBtn = document.getElementById('signupBtn');
   
