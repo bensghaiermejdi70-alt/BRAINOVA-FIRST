@@ -510,27 +510,39 @@ function updatePremiumStatusIndicator(elementId, isPremium) {
 
 // Gestionnaires d'événements pour les boutons
 document.getElementById('loginBtn').addEventListener('click', () => {
-  // Utiliser les variables globales mises à jour par checkPremiumStatus()
+  // Debug complet
+  console.log('🔍 CLIC LOGIN - Avant checkPremiumStatus:', {userPremium, isPremium});
   checkPremiumStatus(); // S'assurer que les variables sont à jour
+  console.log('🔍 CLIC LOGIN - Après checkPremiumStatus:', {userPremium, isPremium});
+  console.log('🔍 URL actuelle:', window.location.href);
+  console.log('🔍 localStorage premium:', localStorage.getItem('brainova_premium'));
+  
   updatePremiumStatusIndicator('premiumStatusIndicator', userPremium || isPremium);
   
   if (userPremium || isPremium) {
+    console.log('✅ CLIC LOGIN - Accès autorisé');
     loginModal.style.display = 'flex';
   } else {
-    // Afficher un message d'erreur stylé
+    console.log('❌ CLIC LOGIN - Accès refusé');
     showPremiumRequiredMessage('connexion');
   }
 });
 
 document.getElementById('signupBtn').addEventListener('click', () => {
-  // Utiliser les variables globales mises à jour par checkPremiumStatus()
+  // Debug complet
+  console.log('🔍 CLIC SIGNUP - Avant checkPremiumStatus:', {userPremium, isPremium});
   checkPremiumStatus(); // S'assurer que les variables sont à jour
+  console.log('🔍 CLIC SIGNUP - Après checkPremiumStatus:', {userPremium, isPremium});
+  console.log('🔍 URL actuelle:', window.location.href);
+  console.log('🔍 localStorage premium:', localStorage.getItem('brainova_premium'));
+  
   updatePremiumStatusIndicator('premiumStatusIndicatorSignup', userPremium || isPremium);
   
   if (userPremium || isPremium) {
+    console.log('✅ CLIC SIGNUP - Accès autorisé');
     signupModal.style.display = 'flex';
   } else {
-    // Afficher un message d'erreur stylé
+    console.log('❌ CLIC SIGNUP - Accès refusé');
     showPremiumRequiredMessage('inscription');
   }
 });
