@@ -1,283 +1,598 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BRAINOVA â€” Jeux plein Ã©cran total</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BRAINOVA — Plateforme 36 jeux (multilangue + Auth + Premium)</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet">
 <style>
-html,body{
-  height:100%;
-  margin:0;
-  font-family:'Segoe UI',sans-serif;
-  background: linear-gradient(135deg,#0f0c29,#302b63,#24243e);
-  color:#fff;
-  overflow-x:hidden;
+:root{
+  --bg1:#0f0c29; --bg2:#302b63; --bg3:#24243e;
+  --accent1:#00ffff; --accent2:#ff00ff; --neon:#ff568c; --gold:#ffd700;
 }
-/* --- Header --- */
-header{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  padding:16px;
-  gap:12px;
-  background:rgba(0,0,0,0.6);
-  backdrop-filter:blur(8px);
-}
-header svg{
-  width:48px;
-  height:48px;
-}
-header h1{
-  font-size:28px;
-  margin:0;
-  color:#ff568c;
-  text-shadow:0 0 10px #ff568c,0 0 20px #ffd700;
-}
-/* --- Intro --- */
-.intro{
-  text-align:center;
-  padding:24px 16px;
-  line-height:1.6;
-  background: rgba(0,0,0,0.5);
-  margin:12px;
-  border-radius:12px;
-}
-.intro h2{
-  font-size:22px;
-  color:#ffd700;
-  margin-bottom:8px;
-  text-shadow:0 0 6px #ffd700;
-}
-/* --- Grid of games --- */
-.games-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
-  gap:20px;
-  padding:16px;
-  perspective:1200px;
-}
-.card{
-  background: rgba(0,0,0,0.2);
-  border: 2px solid rgba(255,255,255,0.2);
-  border-radius:16px;
-  padding:24px 12px;
-  text-align:center;
-  cursor:pointer;
-  transition: transform 0.5s, box-shadow 0.3s;
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  align-items:center;
-  font-size:18px;
-  color:#fff;
-  box-shadow:0 0 5px #ff568c,0 0 15px #ffd700;
-  animation: neonPulse 2.5s infinite alternate;
-}
-.card div:first-child{
-  font-weight:bold;
-  margin-bottom:6px;
-  text-shadow: 0 0 6px #ff568c;
-}
-.card div:last-child{
-  font-size:18px;
-  text-shadow:0 0 4px #ffd700;
-}
-.card:hover{
-  transform: rotateY(15deg) rotateX(10deg) scale(1.07);
-  box-shadow:0 0 25px #ff568c,0 0 50px #ffd700,0 0 75px #ff568c;
-  background: rgba(255,255,255,0.05);
-}
-.card.na{
-  opacity:0.5;
-  cursor: not-allowed;
-  box-shadow: none;
-  color: #999;
-  text-shadow: none;
-}
-@keyframes neonPulse{
-  0% { box-shadow:0 0 5px #ff568c,0 0 15px #ffd700; }
-  50% { box-shadow:0 0 15px #ff568c,0 0 30px #ffd700; }
-  100% { box-shadow:0 0 5px #ff568c,0 0 15px #ffd700; }
-}
-/* --- Overlay --- */
-#gameOverlay{
-  display:none;
-  position:fixed;
-  inset:0;
-  z-index:9999;
-  background:rgba(0,0,0,0.95);
-}
-#overlayInner{
-  width:100%;
-  height:100%;
-  display:flex;
-  flex-direction:column;
-}
-#gameFrame{
-  width:100%;
-  height:100%;
-  border:0;
-  display:block;
-}
-#overlayClose{
-  position:absolute;
-  top:16px;
-  right:20px;
-  z-index:10000;
-  background:#ff3860;
-  color:#fff;
-  border:none;
-  border-radius:12px;
-  padding:10px 16px;
-  font-size:18px;
-  cursor:pointer;
-  pointer-events:auto;
-}
+html,body{height:100%;margin:0;font-family:'Segoe UI',sans-serif;background:linear-gradient(135deg,var(--bg1),var(--bg2),var(--bg3));color:#fff;overflow-x:hidden;}
+header{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;background:rgba(0,0,0,0.6);backdrop-filter:blur(6px);gap:12px}
+#logoText{font-family:'Orbitron',sans-serif;font-size:34px;font-weight:700;color:var(--accent1);text-shadow:0 0 6px var(--accent1),0 0 16px var(--accent2);display:flex;align-items:center;gap:10px}
+#logoText .emoji{font-size:34px}
+.controls{display:flex;align-items:center;gap:12px}
+#langWrap{position:relative}
+#langSelect{appearance:none;-webkit-appearance:none;padding:8px 12px;border-radius:14px;border:0;font-weight:700;background:linear-gradient(90deg,rgba(255,255,255,0.04),rgba(255,255,255,0.02));color:#fff;cursor:pointer;min-width:140px;box-shadow:0 6px 20px rgba(0,0,0,0.4)}
+#langWrap::after{content:"▾";position:absolute;right:12px;top:50%;transform:translateY(-50%);pointer-events:none;color:#fff}
+#langSelect:focus{outline:none;box-shadow:0 0 24px var(--accent1)}
+#langSelect option{color:#000;background-color:#fff}
+#authContainer{display:flex;gap:8px;align-items:center}
+.authBtn{padding:8px 12px;border-radius:10px;border:none;font-weight:800;cursor:pointer;background:linear-gradient(90deg,var(--accent1),var(--accent2));color:#001;box-shadow:0 6px 18px rgba(0,0,0,0.35)}
+.authBtn:hover{transform:translateY(-2px)}
+#shareBtn,#premiumBtn{padding:8px 14px;border-radius:12px;border:none;font-weight:700;cursor:pointer;color:#001;margin-left:8px;box-shadow:0 6px 18px rgba(0,0,0,0.35)}
+#shareBtn{background:linear-gradient(90deg,#ffec00,#ff7800)}
+#premiumBtn{background:linear-gradient(90deg,#00ffea,#0078ff)}
+#shareBtn.locked,#premiumBtn.locked{opacity:0.3;cursor:not-allowed}
+.intro{max-width:1100px;margin:14px auto;padding:18px;border-radius:12px;background:rgba(0,0,0,0.45);text-align:center}
+.intro h2{margin:6px 0;color:var(--gold);text-shadow:0 0 6px var(--gold)}
+.games-grid{max-width:1200px;margin:16px auto;padding:18px;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px;perspective:1200px}
+.card{background:rgba(0,0,0,0.16);border-radius:14px;padding:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;border:1px solid rgba(255,255,255,0.04);box-shadow:0 6px 22px rgba(0,0,0,0.4);transition:transform .35s,box-shadow .35s;position:relative}
+.card:hover{transform:translateY(-8px) rotateY(6deg);box-shadow:0 12px 40px rgba(0,0,0,0.6)}
+.card .num{font-size:22px;font-weight:900;margin-bottom:6px;background:linear-gradient(90deg,var(--accent1),#8a2be2);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.card .title{font-size:16px;text-align:center;color:#fff;text-shadow:0 0 6px rgba(255,215,0,0.06)}
+.card.premium::after{content:"🌐";position:absolute;top:6px;right:10px;font-size:20px;}
+.card.free{border:3px solid #00ffaa;box-shadow:0 0 25px #00ffaa, inset 0 0 10px rgba(0,255,170,0.2);}
+.card.locked{border:3px solid #ffea00;box-shadow:0 0 25px #ffea00, inset 0 0 10px rgba(255,234,0,0.2);}
+.card.locked.premium{border:3px solid #ffea00 !important;box-shadow:0 0 25px #ffea00, inset 0 0 10px rgba(255,234,0,0.2) !important;}
+.card.testqi{border:3px solid #ffea00;box-shadow:0 0 25px #ffea00, inset 0 0 10px rgba(255,234,0,0.2);}
+#gameOverlay{display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.96);align-items:stretch}
+#overlayInner{position:relative;flex:1;display:flex;flex-direction:column}
+#gameFrame{width:100%;height:100%;border:0;display:block}
+.overlayTopLeft{position:absolute;top:16px;left:16px;z-index:10010;display:flex;gap:8px}
+.overlayBtn{background:#ff3860;border:none;color:#fff;padding:10px 14px;border-radius:11px;font-weight:700;cursor:pointer;box-shadow:0 8px 30px rgba(255,56,96,0.12)}
+.overlayBtn.secondary{background:linear-gradient(90deg,var(--accent1),var(--accent2));color:#001}
+.modal{display:none;position:fixed;inset:0;z-index:10020;background:rgba(0,0,0,0.85);align-items:center;justify-content:center}
+.modalCard{width:360px;background:rgba(0,0,0,0.95);padding:18px;border-radius:12px;display:flex;flex-direction:column;gap:10px;color:#fff;box-shadow:0 10px 40px rgba(0,0,0,0.6)}
+.modalCard input, .modalCard textarea, .modalCard select{padding:10px;border-radius:8px;border:0;background:rgba(255,255,255,0.02);color:#fff}
+.modalCard .btn{padding:10px;border-radius:8px;border:0;font-weight:800;cursor:pointer;background:linear-gradient(90deg,var(--accent1),var(--accent2));color:#001}
+@media(max-width:640px){#logoText{font-size:24px}.modalCard{width:90%}#langSelect{min-width:100px}}
 </style>
 </head>
 <body>
 
 <header>
-  <div class="language-selector">
-    <select id="langSelect">
-      <option value="fr">Français</option>
-      <option value="en">English</option>
-      <option value="es">Español</option>
-      <option value="de">Deutsch</option>
-      <option value="zh">中文</option>
-      <option value="ar">العربية</option>
-    </select>
+  <div id="logoText"><span class="emoji">🧠</span><span>Brainova</span></div>
+  <div class="controls">
+    <div id="langWrap">
+      <select id="langSelect" aria-label="Langue">
+        <option value="fr">Français</option>
+        <option value="en">English</option>
+        <option value="ar">العربية</option>
+        <option value="es">Español</option>
+        <option value="de">Deutsch</option>
+        <option value="zh">中文</option>
+      </select>
+    </div>
+    <div id="authContainer">
+      <button class="authBtn" id="loginBtn">Connexion</button>
+      <button class="authBtn" id="signupBtn">Inscription</button>
+      <button id="premiumBtn">Premium</button>
+      <button id="shareBtn">Partager</button>
+    </div>
   </div>
-  <svg viewBox="0 0 100 100">
-    <defs>
-      <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" style="stop-color:#ff568c;stop-opacity:1"/>
-        <stop offset="100%" style="stop-color:#ffd700;stop-opacity:1"/>
-      </linearGradient>
-    </defs>
-    <circle cx="50" cy="50" r="45" stroke="url(#grad1)" stroke-width="5" fill="none"/>
-    <polygon points="50,10 60,50 50,90 40,50" fill="url(#grad1)"/>
-  </svg>
-  <h1>BRAINOVA</h1>
 </header>
 
-<div class="intro">
-  <h2>ðŸŽ® DÃ©couvrez nos 36 Jeux Intelligents</h2>
-  <p>EntraÃ®nez votre cerveau avec notre collection complÃ¨te de jeux adaptatifs alimentÃ©s par l'IA</p>
-  <p>ðŸŽ® Tous les Jeux | ðŸ§  MÃ©moire | ðŸ§© RÃ©flexion | ðŸŽ² SociÃ©tÃ© | ðŸ•¹ï¸ Arcade | ðŸ”¬ Science | ðŸ”® Mystique</p>
-</div>
+<section class="intro">
+  <h2 id="introTitle">🎮 Découvrez nos 36 Jeux Intelligents</h2>
+  <p id="introDesc">Entraînez votre cerveau avec notre collection complète de jeux adaptatifs alimentés par l'IA</p>
+</section>
 
-<div class="games-grid" id="gamesGrid"></div>
+<main class="games-grid" id="gamesGrid" aria-live="polite"></main>
 
-<div id="gameOverlay">
+<!-- Overlay -->
+<div id="gameOverlay" role="dialog" aria-modal="true">
   <div id="overlayInner">
-    <button id="overlayClose">ðŸ”™ Retour</button>
+    <div class="overlayTopLeft">
+      <button id="overlayMenu" class="overlayBtn secondary">🔙 Retour</button>
+    </div>
     <iframe id="gameFrame" allow="fullscreen; autoplay; camera; microphone; geolocation"></iframe>
   </div>
 </div>
 
-<script>
-const games = {
-  1:{title:'Quantum Tetris 2077',file:'jeux1.html'},
-  2:{title:'Memory Quantique',file:'jeux2.html'},
-  3:{title:'Neural Puzzle Master',file:'jeux3.html'},
-  4:{title:'Quantum Chess',file:'jeux4.html'},
-  5:{title:'Jeux de Dames',file:'jeux5.html'},
-  6:{title:'Pac-Man',file:'jeux6.html'},
-  7:{title:'Simon Says',file:'jeux7.html'},
-  8:{title:'Speed Challenge',file:'jeux8.html'},
-  9:{title:'Cyber Checker',file:'jeux9.html'},
-  10:{title:'Demo Playground',file:'jeux10.html'}, // <--- corrigÃ©
-  11:{title:'Quantum Monopoly',file:'jeux11.html'},
-  12:{title:'Neural Poker',file:'jeux12.html'},
-  13:{title:'Blackjack Quantum',file:'jeux13.html'},
-  14:{title:'Solitaire Fusion',file:'jeux14.html'},
-  15:{title:'Mystic Forest Quest',file:'jeux15.html'},
-  16:{title:'Enigma Hunter',file:'jeux16.html'},
-  17:{title:'Neural Racing',file:'jeux17.html'},
-  18:{title:'Cyber Shooter',file:'jeux18.html'},
-  19:{title:'Quantum Dots',file:'jeux19.html'},
-  20:{title:'Neural Rhythm',file:'jeux20.html'},
-  21:{title:'Cyber Pinball',file:'jeux21.html'},
-  22:{title:'Quantum Pipes',file:'jeux22.html'},
-  23:{title:'Neural Slots',file:'jeux23.html'},
-  24:{title:'Cyber Darts',file:'jeux24.html'},
-  25:{title:'Quantum Bubbles',file:'jeux25.html'},
-  26:{title:'Neural Dice',file:'jeux26.html'},
-  27:{title:'Cyber Pool',file:'jeux27.html'},
-  28:{title:'Quantum Tiles',file:'jeux28.html'},
-  29:{title:'Neural Trivia',file:'jeux29.html'},
-  30:{title:'Cyber Asteroids',file:'jeux30.html'},
-  31:{title:'Quantum Crystals',file:'jeux31.html'},
-  32:{title:'Neural Infinity',file:'jeux32.html'},
-  33:{title:'Algorithme Visuel',file:'jeux33.html'},
-  34:{title:'Physique Quantique',file:'jeux34.html'},
-  35:{title:'GÃ©omÃ©trie SacrÃ©e',file:'jeux35.html'},
-  36:{title:'Conscience Artificielle',file:'jeux36.html'}
-};
-
-const grid=document.getElementById('gamesGrid');
-for(let i=1;i<=36;i++){
-  const c=document.createElement('div');
-  c.className='card';
-  c.innerHTML=`<div>Jeu ${i}</div><div>${games[i].title}</div>`;
-  c.addEventListener('click',()=>openGame(i));
-  grid.appendChild(c);
-}
-
-const overlay=document.getElementById('gameOverlay');
-const frame=document.getElementById('gameFrame');
-const closeBtn=document.getElementById('overlayClose');
-
-async function openGame(n){
-  frame.src=games[n].file;
-  overlay.style.display='block';
-  frame.focus();
-  setTimeout(()=>{
-    if(frame.requestFullscreen){frame.requestFullscreen().catch(()=>{});}
-    else if(frame.webkitRequestFullscreen){frame.webkitRequestFullscreen();}
-  },300);
-}
-
-async function closeGame(){
-  frame.src='about:blank';
-  overlay.style.display='none';
-  window.scrollTo({top:0,behavior:'smooth'}); 
-}
-
-closeBtn.addEventListener('click',closeGame);
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeGame();});
-document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement && overlay.style.display==='block'){overlay.style.display='none';frame.src='about:blank';}});
-</script>
-
-<script>
-// Traductions multilingues pour header, intro et cartes
-const translations = { /* … copier le contenu complet de translations JS que nous avons préparé … */ };
-
-// Fonction pour appliquer la langue
-function updateLanguage(lang){
-    const t = translations[lang]; if(!t) return;
-    const intro = document.querySelector('.intro');
-    intro.querySelector('h2').textContent = t.introTitle;
-    const ps = intro.querySelectorAll('p');
-    if(ps.length>=2){ ps[0].textContent = t.introDesc; ps[1].textContent = t.introTags; }
-    for(let i=1;i<=36;i++){
-        const card = document.querySelectorAll('.card')[i-1];
-        if(card){ card.innerHTML = <div>Jeu </div><div></div>; }
-    }
-}
-document.getElementById('langSelect').addEventListener('change', e=>{updateLanguage(e.target.value);});
-updateLanguage(document.getElementById('langSelect').value);
-</script>
-
-</html>
-
-
-<div id='premiumModal' class='modal' aria-hidden='true'>
-  <div class='modalCard'>
-    <h3>Abonnement requis</h3>
-    <p>Pour débloquer ces jeux, veuillez souscrire à l'abonnement annuel.</p>
-    <button id='subscribeBtn' class='btn'>S'abonner maintenant</button>
-    <button class='btn' id='premiumCancel' style='background:transparent;color:#fff;border:1px solid rgba(255,255,255,0.08)'>Annuler</button>
+<!-- Auth Modals -->
+<div id="loginModal" class="modal" aria-hidden="true">
+  <div class="modalCard">
+    <h3>Connexion</h3>
+    <input id="loginEmail" type="email" placeholder="Email">
+    <input id="loginPassword" type="password" placeholder="Mot de passe">
+    <button class="btn" id="loginSubmit">Se connecter</button>
+    <button class="btn" id="loginCancel" style="background:transparent;color:#fff;border:1px solid rgba(255,255,255,0.08)">Annuler</button>
   </div>
 </div>
+
+<div id="signupModal" class="modal" aria-hidden="true">
+  <div class="modalCard">
+    <h3>Inscription</h3>
+    <input id="signupName" type="text" placeholder="Nom complet">
+    <input id="signupEmail" type="email" placeholder="Email">
+    <input id="signupPassword" type="password" placeholder="Mot de passe">
+    <button class="btn" id="signupSubmit">S'inscrire</button>
+    <button class="btn" id="signupCancel" style="background:transparent;color:#fff;border:1px solid rgba(255,255,255,0.08)">Annuler</button>
+  </div>
+</div>
+
+<!-- Premium Modal -->
+<div id="premiumModal" class="modal" aria-hidden="true">
+  <div class="modalCard">
+    <h3>Abonnement Premium</h3>
+    <p>Débloquez tous les jeux Brainova pour seulement 20 EUR / an.</p>
+    <button class="btn" id="premiumSubscribeBtn">S'abonner</button>
+    <button class="btn" id="premiumCancel" style="background:transparent;color:#fff;border:1px solid rgba(255,255,255,0.08)">Annuler</button>
+  </div>
+</div>
+
+<script src="https://js.stripe.com/v3/"></script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
+
+// Firebase Config
+const firebaseConfig = {
+  apiKey: "AIzaSyAjnpgNwDdGtb46XRCvT_cU7AAU-25zw1U",
+  authDomain: "brainova-c0295.firebaseapp.com",
+  projectId: "brainova-c0295",
+  storageBucket: "brainova-c0295.firebasestorage.app",
+  messagingSenderId: "437705478313",
+  appId: "1:437705478313:web:8b7a4c97b5d80e6d49d9b8",
+  measurementId: "G-79M4HWKQ35"
+};
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+// Gestion de l'état d'authentification
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    // Utilisateur connecté - vérifier son statut premium
+    const savedPremium = localStorage.getItem('brainova_premium') === 'true';
+    userPremium = savedPremium;
+    isPremium = savedPremium;
+    updateUIForAuthenticatedUser(user);
+  } else {
+    // Utilisateur déconnecté
+    userPremium = false;
+    isPremium = false;
+    updateUIForGuestUser();
+  }
+  renderGrid(langSelect.value);
+});
+
+// Fonction pour mettre à jour l'UI utilisateur connecté
+function updateUIForAuthenticatedUser(user) {
+  document.getElementById('loginBtn').style.display = 'none';
+  document.getElementById('signupBtn').style.display = 'none';
+  
+  // Créer un bouton de déconnexion s'il n'existe pas
+  if (!document.getElementById('logoutBtn')) {
+    const logoutBtn = document.createElement('button');
+    logoutBtn.id = 'logoutBtn';
+    logoutBtn.className = 'authBtn';
+    logoutBtn.textContent = 'Déconnexion';
+    logoutBtn.addEventListener('click', () => auth.signOut());
+    document.getElementById('authContainer').appendChild(logoutBtn);
+  }
+}
+
+// Fonction pour mettre à jour l'UI utilisateur invité
+function updateUIForGuestUser() {
+  document.getElementById('loginBtn').style.display = 'inline-block';
+  document.getElementById('signupBtn').style.display = 'inline-block';
+  
+  const logoutBtn = document.getElementById('logoutBtn');
+  if (logoutBtn) {
+    logoutBtn.remove();
+  }
+}
+
+// ================= GRID & PREMIUM LOGIC
+// ================= TRANSLATIONS (6 langues)
+const TRANSLATIONS = {
+  fr: {introTitle:"🎮 Découvrez nos 36 Jeux Intelligents",introDesc:"Entraînez votre cerveau avec notre collection complète de jeux adaptatifs alimentés par l'IA",overlayBack:"🔙 Retour",
+    games:["Quantum Tetris 2077","Memory Quantique","Neural Puzzle Master","Quantum Chess","Jeux de Dames","Pac-Man","Simon Says","Speed Challenge","Cyber Checker","Demo Playground","Quantum Monopoly","Neural Poker","Blackjack Quantum","Solitaire Fusion","Mystic Forest Quest","Enigma Hunter","Neural Racing","Cyber Shooter","Quantum Dots","Neural Rhythm","Cyber Pinball","Quantum Pipes","Neural Slots","Cyber Darts","Quantum Bubbles","Neural Dice","Cyber Pool","Quantum Tiles","Neural Trivia","Cyber Asteroids","Quantum Crystals","Neural Infinity","Algorithme Visuel","Physique Quantique","Test QI","Conscience Artificielle"]},
+  en: {introTitle:"🎮 Discover our 36 Smart Games",introDesc:"Train your brain with our full collection of AI-powered adaptive games",overlayBack:"🔙 Back",
+    games:["Quantum Tetris 2077","Quantum Memory","Neural Puzzle Master","Quantum Chess","Checkers Game","Pac-Man","Simon Says","Speed Challenge","Cyber Checker","Demo Playground","Quantum Monopoly","Neural Poker","Quantum Blackjack","Fusion Solitaire","Mystic Forest Quest","Enigma Hunter","Neural Racing","Cyber Shooter","Quantum Dots","Neural Rhythm","Cyber Pinball","Quantum Pipes","Neural Slots","Cyber Darts","Quantum Bubbles","Neural Dice","Cyber Pool","Quantum Tiles","Neural Trivia","Cyber Asteroids","Quantum Crystals","Neural Infinity","Visual Algorithm","Quantum Physics","IQ Test","Artificial Consciousness"]},
+  ar: {introTitle:"🎮 اكتشف 36 لعبة ذكية",introDesc:"درّب عقلك مع مجموعتنا الكاملة من الألعاب التفاعلية المدعومة بالذكاء الاصطناعي",overlayBack:"🔙 رجوع",
+    games:["تيتريس الكمومي","ذاكرة الكم","سيد الألغاز العصبي","شطرنج الكم","لعبة الداما","باك مان","سيمون يقول","تحدي السرعة","الفاحص السيبراني","ملعب تجريبي","احتكار الكم","بوكر عصبي","بلاك جاك الكمومي","سوليتير الاندماج","مغامرة الغابة الغامضة","صياد الألغاز","سباق عصبي","مطلق النار السيبراني","نقاط الكم","الإيقاع العصبي","دبابيس السيبرانية","أنابيب الكم","آلات الحظ العصبية","سهام سيبرانية","فقاعات الكم","نرد عصبي","بلياردو الكم","بلاط عصبي","اختبار المعرفة","كويكبات سيبرانية","بلورات الكم","اللانهاية العصبية","الخوارزمية البصرية","الفيزياء الكمومية","اختبار الذكاء","الوعي الاصطناعي"]},
+  es: {introTitle:"🎮 Descubre nuestros 36 Juegos Inteligentes",introDesc:"Entrena tu cerebro con nuestra colección completa de juegos adaptativos con IA",overlayBack:"🔙 Volver",
+    games:["Tetris Cuántico 2077","Memoria Cuántica","Maestro de Rompecabezas Neural","Ajedrez Cuántico","Juego de Damas","Pac-Man","Simón Dice","Desafío de Velocidad","Verificador Cibernético","Campo de Pruebas","Monopolio Cuántico","Póker Neural","Blackjack Cuántico","Solitario Fusión","Bosque Místico","Cazador de Enigmas","Carrera Neural","Tirador Cibernético","Puntos Cuánticos","Ritmo Neural","Pinball Cibernético","Tuberías Cuánticas","Tragamonedas Neurales","Dardos Cibernéticos","Burbujas Cuánticas","Dados Neurales","Billar Cibernético","Fichas Cuánticas","Trivia Neural","Asteroides Cibernéticos","Cristales Cuánticos","Infinito Neural","Algoritmo Visual","Física Cuántica","Prueba de IQ","Conciencia Artificial"]},
+  de: {introTitle:"🎮 Entdecken Sie unsere 36 intelligenten Spiele",introDesc:"Trainieren Sie Ihr Gehirn mit unserer vollständigen Sammlung KI-gestützter Spiele",overlayBack:"🔙 Zurück",
+    games:["Quantum Tetris 2077","Quantum Memory","Neural Puzzle Master","Quantum Chess","Dame Spiel","Pac-Man","Simon Says","Speed Challenge","Cyber Checker","Demo Playground","Quantum Monopoly","Neural Poker","Quantum Blackjack","Fusion Solitaire","Mystic Forest Quest","Enigma Hunter","Neural Racing","Cyber Shooter","Quantum Dots","Neural Rhythm","Cyber Pinball","Quantum Pipes","Neural Slots","Cyber Darts","Quantum Bubbles","Neural Dice","Cyber Pool","Quantum Tiles","Neural Trivia","Cyber Asteroids","Quantum Crystals","Neural Infinity","Visueller Algorithmus","Quantenphysik","IQ Test","Künstliches Bewusstsein"]},
+  zh: {introTitle:"🎮 探索我们的36款智能游戏",introDesc:"通过我们完整的AI驱动自适应游戏系列训练你的大脑",overlayBack:"🔙 返回",
+    games:["量子俄罗斯方块2077","量子记忆","神经拼图大师","量子国际象棋","跳棋游戏","吃豆人","西蒙说","速度挑战","网络检查","演示游乐场","量子大富翁","神经扑克","量子二十一点","融合接龙","神秘森林探险","谜题猎人","神经赛车","网络射手","量子点","神经节奏","网络弹球","量子管道","神经老虎机","网络飞镖","量子泡泡","神经骰子","网络台球","量子方块","神经问答","网络小行星","量子水晶","神经无限","视觉算法","量子物理","智商测试","人工意识"]}
+};
+const grid=document.getElementById('gamesGrid');
+let userPremium=false;
+
+// Fonction de validation d'email
+function isValidEmail(email) {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+}
+
+function renderGrid(lang){
+  grid.innerHTML='';
+  const t=TRANSLATIONS[lang]||TRANSLATIONS['fr'];
+  for(let i=1;i<=36;i++){
+    const card=document.createElement('div'); card.className='card';
+    
+    // Jeux 11 à 36 verrouillés sauf si premium (y compris le test QI)
+    const isLocked = (i >= 11 && !userPremium);
+    
+    // Appliquer les contours néon selon le groupe de jeux
+    if (i >= 1 && i <= 10) {
+      // Jeux 1-10 : contour vert (gratuits)
+      card.classList.add('free');
+    } else if (i >= 11 && i <= 36) {
+      // Jeux 11-36 : contour jaune (premium)
+      card.classList.add('locked');
+    }
+    
+    if(isLocked) {
+      card.classList.add('premium');
+      // Réduire légèrement l'opacité mais garder les contours visibles
+      card.style.opacity = '0.8';
+      // Ajouter un cadenas
+      const lockIcon = document.createElement('div');
+      lockIcon.innerHTML = '🔒';
+      lockIcon.style.cssText = 'position: absolute; top: 10px; right: 10px; font-size: 20px; z-index: 1; filter: none;';
+      card.appendChild(lockIcon);
+    }
+    
+    if(i===35) card.classList.add('testqi');
+    
+    const num=document.createElement('div'); num.className='num'; num.textContent=i;
+    const title=document.createElement('div'); title.className='title'; title.textContent=t.games[i-1]||`Jeu ${i}`;
+    card.appendChild(num); card.appendChild(title);
+    
+    card.addEventListener('click',()=>{
+      if(isLocked){
+        showSubscriptionMessage();
+        return;
+      }
+      openGame(i);
+    });
+    
+    grid.appendChild(card);
+  }
+  
+  // Gestion de la visibilité des boutons Premium et Partager
+  const premiumBtn = document.getElementById('premiumBtn');
+  const shareBtn = document.getElementById('shareBtn');
+  
+  if(userPremium || isPremium) {
+    // Utilisateur premium : cacher les boutons
+    premiumBtn.style.display = 'none';
+    shareBtn.style.display = 'none';
+  } else {
+    // Utilisateur non premium : afficher les boutons
+    premiumBtn.style.display = 'inline-block';
+    shareBtn.style.display = 'inline-block';
+  }
+}
+
+// ================= GAME OVERLAY
+const overlay=document.getElementById('gameOverlay');
+const frame=document.getElementById('gameFrame');
+const btnMenu=document.getElementById('overlayMenu');
+let currentGame=null;
+function openGame(n){ frame.src=`jeux${n}.html`; currentGame=n; overlay.style.display='flex'; setTimeout(()=>{ document.documentElement.requestFullscreen?.().catch(()=>{}); },100); }
+function closeGame(){ frame.src='about:blank'; overlay.style.display='none'; currentGame=null; if(document.fullscreenElement){ document.exitFullscreen?.(); } }
+btnMenu.addEventListener('click',closeGame);
+document.addEventListener('keydown',e=>{if(e.key==='Escape' && overlay.style.display==='flex'){closeGame();}});
+
+// ================= LANGUAGE
+const langSelect=document.getElementById('langSelect');
+function applyLanguage(lang){
+  if(!TRANSLATIONS[lang]) lang='fr';
+  localStorage.setItem('brainova_lang',lang);
+  const t=TRANSLATIONS[lang];
+  document.getElementById('introTitle').textContent=t.introTitle;
+  document.getElementById('introDesc').textContent=t.introDesc;
+  document.getElementById('overlayMenu').textContent=t.overlayBack;
+  document.documentElement.dir=(lang==='ar')?'rtl':'ltr';
+  renderGrid(lang);
+}
+langSelect.addEventListener('change',()=>applyLanguage(langSelect.value));
+applyLanguage(localStorage.getItem('brainova_lang')||'fr');
+
+// ================= AUTH
+const loginModal=document.getElementById('loginModal');
+const signupModal=document.getElementById('signupModal');
+const premiumModal=document.getElementById('premiumModal');
+document.getElementById('loginBtn').addEventListener('click',()=>loginModal.style.display='flex');
+document.getElementById('signupBtn').addEventListener('click',()=>signupModal.style.display='flex');
+document.getElementById('loginCancel').addEventListener('click',()=>loginModal.style.display='none');
+document.getElementById('signupCancel').addEventListener('click',()=>signupModal.style.display='none');
+
+document.getElementById('loginSubmit').addEventListener('click',async ()=>{
+  try{
+    const email=document.getElementById('loginEmail').value.trim();
+    const pwd=document.getElementById('loginPassword').value;
+    
+    // Validation des champs
+    if (!email || !pwd) {
+      alert('Veuillez remplir tous les champs');
+      return;
+    }
+    
+    if (!isValidEmail(email)) {
+      alert('Format d\'email invalide');
+      return;
+    }
+    
+    await signInWithEmailAndPassword(auth,email,pwd);
+    // L'état premium sera géré par onAuthStateChanged
+    loginModal.style.display='none';
+    alert("Connexion réussie !");
+  }catch(e){
+    let errorMessage = "Erreur de connexion";
+    if (e.code === 'auth/user-not-found') {
+      errorMessage = "Aucun compte trouvé avec cet email";
+    } else if (e.code === 'auth/wrong-password') {
+      errorMessage = "Mot de passe incorrect";
+    } else if (e.code === 'auth/invalid-email') {
+      errorMessage = "Format d'email invalide";
+    }
+    alert(errorMessage);
+  }
+});
+document.getElementById('signupSubmit').addEventListener('click',async ()=>{
+  try{
+    const name=document.getElementById('signupName').value.trim();
+    const email=document.getElementById('signupEmail').value.trim();
+    const pwd=document.getElementById('signupPassword').value;
+    
+    // Validation des champs
+    if (!name || !email || !pwd) {
+      alert('Veuillez remplir tous les champs');
+      return;
+    }
+    
+    if (name.length < 2) {
+      alert('Le nom doit contenir au moins 2 caractères');
+      return;
+    }
+    
+    if (!isValidEmail(email)) {
+      alert('Format d\'email invalide');
+      return;
+    }
+    
+    if (pwd.length < 6) {
+      alert('Le mot de passe doit contenir au moins 6 caractères');
+      return;
+    }
+    
+    const userCred=await createUserWithEmailAndPassword(auth,email,pwd);
+    await updateProfile(userCred.user,{displayName:name});
+    // L'état premium sera géré par onAuthStateChanged
+    signupModal.style.display='none';
+    alert("Inscription réussie ! Bienvenue " + name + " !");
+  }catch(e){
+    let errorMessage = "Erreur d'inscription";
+    if (e.code === 'auth/email-already-in-use') {
+      errorMessage = "Cette adresse email est déjà utilisée";
+    } else if (e.code === 'auth/weak-password') {
+      errorMessage = "Le mot de passe est trop faible";
+    } else if (e.code === 'auth/invalid-email') {
+      errorMessage = "Format d'email invalide";
+    }
+    alert(errorMessage);
+  }
+});
+
+// ================= PREMIUM & STRIPE
+// Vérifier l'état premium dans localStorage
+let isPremium = localStorage.getItem('brainova_premium') === 'true';
+
+// Fonction pour débloquer le premium
+function unlockPremium() {
+  isPremium = true;
+  localStorage.setItem('brainova_premium', 'true');
+  userPremium = true;
+  renderGrid(langSelect.value);
+  alert('Félicitations ! Tous les jeux sont maintenant débloqués !');
+}
+
+// Message d'abonnement personnalisé
+function showSubscriptionMessage() {
+  const customModal = document.createElement('div');
+  customModal.style.cssText = `
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.9); display: flex; align-items: center;
+    justify-content: center; z-index: 10030;
+  `;
+  
+  const messageCard = document.createElement('div');
+  messageCard.style.cssText = `
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    padding: 40px; border-radius: 20px; text-align: center;
+    color: white; max-width: 400px; box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+  `;
+  
+  messageCard.innerHTML = `
+    <h2 style="color: #ffd700; margin-bottom: 20px;">🌟 Abonnement Brainova</h2>
+    <h3 style="color: #00ffff; margin-bottom: 15px;">Pack 36 jeux</h3>
+    <p style="font-size: 18px; margin-bottom: 25px;">Débloquez tous les jeux premium</p>
+    <div style="font-size: 32px; font-weight: bold; color: #ff6b6b; margin-bottom: 25px;">
+      Seulement 20 EUR
+    </div>
+    <button id="subscribeNowBtn" style="
+      background: linear-gradient(90deg, #ff6b6b, #ffa500);
+      border: none; padding: 15px 30px; border-radius: 25px;
+      color: white; font-size: 18px; font-weight: bold;
+      cursor: pointer; margin-right: 10px;
+      box-shadow: 0 5px 15px rgba(255,107,107,0.4);
+    ">S'abonner</button>
+    <button id="cancelSubscribeBtn" style="
+      background: transparent; border: 2px solid rgba(255,255,255,0.3);
+      padding: 15px 30px; border-radius: 25px; color: white;
+      font-size: 16px; cursor: pointer;
+    ">Annuler</button>
+  `;
+  
+  customModal.appendChild(messageCard);
+  document.body.appendChild(customModal);
+  
+  // Gestion des boutons
+  document.getElementById('subscribeNowBtn').addEventListener('click', () => {
+    // Redirection directe vers Stripe
+    window.location.href = 'https://buy.stripe.com/cNi8wR7IC77o54icy49EI01';
+  });
+  
+  document.getElementById('cancelSubscribeBtn').addEventListener('click', () => {
+    document.body.removeChild(customModal);
+  });
+}
+
+// Gestion du clic sur Premium et Partager (gérée maintenant dans DOMContentLoaded)
+
+// Gestion du clic sur les jeux verrouillés
+function handleLockedGameClick() {
+  showSubscriptionMessage();
+}
+
+// Fonction pour afficher les options de partage
+function showShareOptions() {
+  const shareModal = document.createElement('div');
+  shareModal.style.cssText = `
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.9); display: flex; align-items: center;
+    justify-content: center; z-index: 10030;
+  `;
+  
+  const shareCard = document.createElement('div');
+  shareCard.style.cssText = `
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    padding: 40px; border-radius: 20px; text-align: center;
+    color: white; max-width: 450px; box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+  `;
+  
+  const currentUrl = window.location.href;
+  
+  shareCard.innerHTML = `
+    <h2 style="color: #ffd700; margin-bottom: 20px;">🚀 Partager Brainova</h2>
+    <p style="margin-bottom: 25px;">Partagez cette plateforme de jeux intelligents avec vos amis !</p>
+    
+    <div style="margin-bottom: 20px; padding: 10px; background: rgba(255,255,255,0.1); border-radius: 10px;">
+      <input type="text" id="shareUrl" value="${currentUrl}" readonly style="
+        width: 100%; padding: 10px; border: none; border-radius: 5px;
+        background: rgba(255,255,255,0.9); color: #333; text-align: center;
+      ">
+    </div>
+    
+    <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 25px;">
+      <button id="copyUrlBtn" style="
+        background: linear-gradient(90deg, #00ff88, #00cc6a);
+        border: none; padding: 12px 20px; border-radius: 25px;
+        color: white; font-weight: bold; cursor: pointer;
+      ">📋 Copier le lien</button>
+      
+      <button id="shareTwitterBtn" style="
+        background: linear-gradient(90deg, #1da1f2, #0d8bd9);
+        border: none; padding: 12px 20px; border-radius: 25px;
+        color: white; font-weight: bold; cursor: pointer;
+      ">🐦 Twitter</button>
+      
+      <button id="shareFacebookBtn" style="
+        background: linear-gradient(90deg, #4267B2, #365899);
+        border: none; padding: 12px 20px; border-radius: 25px;
+        color: white; font-weight: bold; cursor: pointer;
+      ">📘 Facebook</button>
+    </div>
+    
+    <button id="closeShareBtn" style="
+      background: transparent; border: 2px solid rgba(255,255,255,0.3);
+      padding: 10px 25px; border-radius: 25px; color: white;
+      cursor: pointer;
+    ">Fermer</button>
+  `;
+  
+  shareModal.appendChild(shareCard);
+  document.body.appendChild(shareModal);
+  
+  // Gestion des boutons
+  document.getElementById('copyUrlBtn').addEventListener('click', () => {
+    const urlInput = document.getElementById('shareUrl');
+    urlInput.select();
+    navigator.clipboard.writeText(currentUrl).then(() => {
+      document.getElementById('copyUrlBtn').innerHTML = '✅ Copié !';
+      setTimeout(() => {
+        document.getElementById('copyUrlBtn').innerHTML = '📋 Copier le lien';
+      }, 2000);
+    });
+  });
+  
+  document.getElementById('shareTwitterBtn').addEventListener('click', () => {
+    const text = encodeURIComponent('Découvrez Brainova - 36 jeux intelligents pour entraîner votre cerveau ! 🧠✨');
+    const url = encodeURIComponent(currentUrl);
+    window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank');
+  });
+  
+  document.getElementById('shareFacebookBtn').addEventListener('click', () => {
+    const url = encodeURIComponent(currentUrl);
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank');
+  });
+  
+  document.getElementById('closeShareBtn').addEventListener('click', () => {
+    document.body.removeChild(shareModal);
+  });
+  
+  // Fermer en cliquant en dehors
+  shareModal.addEventListener('click', (e) => {
+    if (e.target === shareModal) {
+      document.body.removeChild(shareModal);
+    }
+  });
+}
+
+document.getElementById('premiumCancel').addEventListener('click',()=>premiumModal.style.display='none');
+
+// Vérifier le statut premium au chargement
+if (isPremium) {
+  userPremium = true;
+}
+
+// Fonction pour vérifier le retour de Stripe
+function checkStripeReturn() {
+  const urlParams = new URLSearchParams(window.location.search);
+  
+  // Si l'utilisateur revient de Stripe avec succès
+  if (urlParams.get('success') === 'true' || urlParams.get('payment_intent_status') === 'succeeded') {
+    unlockPremium();
+    // Nettoyer l'URL
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
+  
+  // Si l'utilisateur annule le paiement
+  if (urlParams.get('canceled') === 'true') {
+    alert('Paiement annulé. Vous pouvez réessayer à tout moment.');
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
+}
+
+// Vérifier au chargement de la page
+document.addEventListener('DOMContentLoaded', () => {
+  checkStripeReturn();
+  
+  // Attacher les événements après le chargement du DOM
+  const premiumBtn = document.getElementById('premiumBtn');
+  const shareBtn = document.getElementById('shareBtn');
+  
+  if (premiumBtn) {
+    premiumBtn.addEventListener('click', showSubscriptionMessage);
+  }
+  
+  if (shareBtn) {
+    shareBtn.addEventListener('click', showShareOptions);
+  }
+});
+
+// Production ready - Système de paiement Stripe intégré
+</script>
+
+</body>
+</html>
