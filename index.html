@@ -115,6 +115,7 @@ header{display:flex;justify-content:space-between;align-items:center;padding:14p
         <span class="auth-text">Inscription</span>
       </button>
       <button id="premiumBtn">Premium</button>
+      <button id="testBtn" style="background: #00ff88; color: #000; font-weight: bold;">🧪 Test Codes</button>
       <button id="shareBtn" onclick="showShareOptions()">Partager</button>
     </div>
   </div>
@@ -276,6 +277,12 @@ function updateUIForGuestUser() {
     logoutBtn.remove();
   }
   
+  // IMPORTANT: Réinitialiser le statut premium à la déconnexion
+  userPremium = false;
+  isPremium = false;
+  localStorage.removeItem('brainova_premium');
+  localStorage.removeItem('brainova_premium_status');
+  
   // Remettre les boutons connexion/inscription à l'affichage
   const loginBtn = document.getElementById('loginBtn');
   const signupBtn = document.getElementById('signupBtn');
@@ -286,6 +293,9 @@ function updateUIForGuestUser() {
   if (signupBtn) {
     signupBtn.style.display = 'block';
   }
+  
+  // Recharger la grille pour appliquer les changements de statut
+  renderGrid(langSelect.value);
 }
 
 // ================= GRID & PREMIUM LOGIC
@@ -397,43 +407,44 @@ function renderGrid(lang){
 
   
   if(userPremium || isPremium) {
-    // Utilisateur premium : masquer premium seulement, garder partager visible
+    // Utilisateur premium : masquer le bouton premium (déjà abonné)
     premiumBtn.style.display = 'none';
-    if (shareBtn) {
-      shareBtn.style.display = 'inline-block'; // TOUJOURS visible pour premium
-    }
     
-    // Activer les boutons connexion/inscription
+    // Boutons connexion/inscription TOUJOURS actifs pour premium
     if(loginBtn) {
       loginBtn.style.opacity = '1';
       loginBtn.style.pointerEvents = 'auto';
       loginBtn.title = 'Se connecter';
+      loginBtn.classList.remove('premium-only');
     }
     if(signupBtn) {
       signupBtn.style.opacity = '1';
       signupBtn.style.pointerEvents = 'auto';
       signupBtn.title = 'S\'inscrire';
+      signupBtn.classList.remove('premium-only');
     }
   } else {
-    // Utilisateur non premium : afficher premium/partager, désactiver connexion/inscription
+    // Utilisateur non premium : afficher le bouton premium
     premiumBtn.style.display = 'inline-block';
-    if (shareBtn) {
-      shareBtn.style.display = 'inline-block'; // TOUJOURS visible pour non-premium aussi
-    }
     
-    // Désactiver les boutons connexion/inscription (style premium-only mais désactivés)
+    // Boutons connexion/inscription TOUJOURS actifs (même pour non-premium)
     if(loginBtn) {
-      loginBtn.style.opacity = '0.6';
-      loginBtn.style.pointerEvents = 'none';
-      loginBtn.title = 'Connexion disponible après abonnement premium';
-      loginBtn.classList.add('premium-only');
+      loginBtn.style.opacity = '1';
+      loginBtn.style.pointerEvents = 'auto';
+      loginBtn.title = 'Se connecter';
+      loginBtn.classList.remove('premium-only');
     }
     if(signupBtn) {
-      signupBtn.style.opacity = '0.6';
-      signupBtn.style.pointerEvents = 'none';
-      signupBtn.title = 'Inscription disponible après abonnement premium';
-      signupBtn.classList.add('premium-only');
+      signupBtn.style.opacity = '1';
+      signupBtn.style.pointerEvents = 'auto';
+      signupBtn.title = 'S\'inscrire';
+      signupBtn.classList.remove('premium-only');
     }
+  }
+  
+  // Bouton partager TOUJOURS visible
+  if (shareBtn) {
+    shareBtn.style.display = 'inline-block';
   }
   
   console.log('renderGrid completed - Cards added to grid:', grid.children.length);
@@ -1013,6 +1024,49 @@ function showShareOptions() {
 }
 
 document.getElementById('premiumCancel').addEventListener('click',()=>premiumModal.style.display='none');
+
+// Gestionnaire pour le bouton test
+document.getElementById('testBtn').addEventListener('click', () => {
+  // Créer une modal de test
+  const testModal = document.createElement('div');
+  testModal.style.cssText = `
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+    background: rgba(0,0,0,0.8); z-index: 10000; display: flex; 
+    align-items: center; justify-content: center;
+  `;
+  
+  testModal.innerHTML = `
+    <div style="background: white; padding: 30px; border-radius: 15px; text-align: center; max-width: 500px; margin: 20px;">
+      <h2 style="color: #333; margin-bottom: 20px;">🧪 Test des Codes Premium</h2>
+      <p style="margin-bottom: 15px;">Codes disponibles pour test :</p>
+      <div style="background: #f0f0f0; padding: 15px; border-radius: 8px; margin: 15px 0;">
+        <strong>BRAIN-2024-DEMO1</strong><br>
+        <strong>BRAIN-2024-DEMO2</strong>
+      </div>
+      <p style="color: #666; font-size: 14px; margin: 15px 0;">
+        Ces codes permettent d'accéder à tous les jeux premium.<br>
+        Limitation : 1 appareil par code.
+      </p>
+      <button onclick="window.location.href='premium.html'" 
+              style="background: #00ff88; color: #000; padding: 12px 25px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; margin: 10px;">
+        🎯 Utiliser un Code
+      </button>
+      <button onclick="this.parentElement.parentElement.remove()" 
+              style="background: #ccc; color: #333; padding: 12px 25px; border: none; border-radius: 8px; cursor: pointer; margin: 10px;">
+        Fermer
+      </button>
+    </div>
+  `;
+  
+  document.body.appendChild(testModal);
+  
+  // Fermer en cliquant sur l'arrière-plan
+  testModal.addEventListener('click', (e) => {
+    if (e.target === testModal) {
+      document.body.removeChild(testModal);
+    }
+  });
+});
 
 // Vérifier le statut premium au chargement
 if (isPremium) {
