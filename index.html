@@ -68,7 +68,7 @@ header{display:flex;justify-content:space-between;align-items:center;padding:14p
 .intro{max-width:1100px;margin:14px auto;padding:18px;border-radius:12px;background:rgba(0,0,0,0.45);text-align:center}
 .intro h2{margin:6px 0;color:var(--gold);text-shadow:0 0 6px var(--gold)}
 .games-grid{max-width:1200px;margin:16px auto;padding:18px;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px;perspective:1200px}
-.card{background:rgba(0,0,0,0.16) !important;border-radius:14px;padding:20px;display:flex !important;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;border:1px solid rgba(255,255,255,0.04);box-shadow:0 6px 22px rgba(0,0,0,0.4);transition:transform .35s,box-shadow .35s;position:relative;min-height:120px !important;width:auto !important;visibility:visible !important;opacity:1 !important}
+.card{background:rgba(0,0,0,0.16);border-radius:14px;padding:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;border:1px solid rgba(255,255,255,0.04);box-shadow:0 6px 22px rgba(0,0,0,0.4);transition:transform .35s,box-shadow .35s;position:relative}
 .card:hover{transform:translateY(-8px) rotateY(6deg);box-shadow:0 12px 40px rgba(0,0,0,0.6)}
 .card .num{font-size:22px;font-weight:900;margin-bottom:6px;background:linear-gradient(90deg,var(--accent1),#8a2be2);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .card .title{font-size:16px;text-align:center;color:#fff;text-shadow:0 0 6px rgba(255,215,0,0.06)}
@@ -106,13 +106,16 @@ header{display:flex;justify-content:space-between;align-items:center;padding:14p
       </select>
     </div>
     <div id="authContainer">
-      <!-- INTERFACE SIMPLIFIÉE - SEULEMENT LES BOUTONS ESSENTIELS -->
-      <button id="premiumAccessBtn" class="authBtn" style="background: linear-gradient(135deg, #ffd700 0%, #ffb347 100%); color: #333; font-weight: bold;">
-        🔑 Accès Premium
+      <button class="authBtn premium-only" id="loginBtn" data-tooltip="Connexion premium requise">
+        <span class="auth-icon">🔐</span>
+        <span class="auth-text">Connexion</span>
       </button>
-      <button id="shareBtn" class="authBtn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-        � Partager
+      <button class="authBtn premium-only" id="signupBtn" data-tooltip="Inscription premium requise">
+        <span class="auth-icon">✨</span>
+        <span class="auth-text">Inscription</span>
       </button>
+      <button id="premiumBtn">Premium</button>
+      <button id="shareBtn" onclick="showShareOptions()">Partager</button>
     </div>
   </div>
 </header>
@@ -216,9 +219,6 @@ header{display:flex;justify-content:space-between;align-items:center;padding:14p
 <script src="https://www.gstatic.com/firebasejs/12.4.0/firebase-auth-compat.js"></script>
 <script>
 
-// Configuration Stripe avec votre clé publique LIVE (publishable)
-const stripe = Stripe('pk_live_51QIYCOP5iQ9gRxAtuBEOgE9SQ1u0x2KWhVoNvgjleCrDLtGkpkvVqcivwXdvNyWGbwKkmKfZdZ8kqUAMTvNP98Ea003rVxvZ6p');
-
 // Firebase Config
 const firebaseConfig = {
   apiKey: "AIzaSyAjnpgNwDdGtb46XRCvT_cU7AAU-25zw1U",
@@ -270,10 +270,21 @@ function updateUIForAuthenticatedUser(user) {
 
 // Fonction pour mettre à jour l'UI utilisateur invité
 function updateUIForGuestUser() {
-  // Les boutons connexion/inscription seront gérés par renderGrid selon le statut premium
+  // Supprimer le bouton de déconnexion
   const logoutBtn = document.getElementById('logoutBtn');
   if (logoutBtn) {
     logoutBtn.remove();
+  }
+  
+  // Remettre les boutons connexion/inscription à l'affichage
+  const loginBtn = document.getElementById('loginBtn');
+  const signupBtn = document.getElementById('signupBtn');
+  
+  if (loginBtn) {
+    loginBtn.style.display = 'block';
+  }
+  if (signupBtn) {
+    signupBtn.style.display = 'block';
   }
 }
 
@@ -283,37 +294,30 @@ const TRANSLATIONS = {
   fr: {introTitle:"🎮 Découvrez nos 36 Jeux Intelligents",introDesc:"Entraînez votre cerveau avec notre collection complète de jeux adaptatifs alimentés par l'IA",overlayBack:"🔙 Retour",
     subscriptionTitle:"🌟 Abonnement Brainova",subscriptionPack:"Pack 36 jeux",subscriptionDesc:"Débloquez tous les jeux premium",subscriptionPrice:"Seulement 20 EUR / an",subscriptionBtn:"S'abonner",subscriptionCancel:"Annuler",
     shareBtn:"Partager",shareTitle:"🚀 Partager Brainova",shareDesc:"Partagez cette plateforme et aidez vos amis à développer leur intelligence !",shareTip:"💡 Plus vous partagez, plus vos amis découvrent Brainova !",shareClose:"Fermer",shareMode:"📱 Mode de partage",shareEmailSubject:"🧠 Découvrez Brainova - Jeux Intelligents",shareEmailBody:"Bonjour,\n\nJe vous recommande Brainova, une plateforme avec 36 jeux intelligents pour booster votre cerveau !\n\n🎮 36 jeux variés\n🧠 Entraînement cérébral\n✨ Interface moderne\n\nCliquez ici pour découvrir : ",
-    loginBtn:"Connexion",signupBtn:"Inscription",loginTooltip:"Connexion premium requise",signupTooltip:"Inscription premium requise",
     games:["Quantum Tetris 2077","Memory Quantique","Neural Puzzle Master","Quantum Chess","Jeux de Dames","Pac-Man","Simon Says","Speed Challenge","Cyber Checker","Demo Playground","Quantum Monopoly","Neural Poker","Blackjack Quantum","Solitaire Fusion","Mystic Forest Quest","Enigma Hunter","Neural Racing","Cyber Shooter","Quantum Dots","Neural Rhythm","Cyber Pinball","Quantum Pipes","Neural Slots","Cyber Darts","Quantum Bubbles","Neural Dice","Cyber Pool","Quantum Tiles","Neural Trivia","Cyber Asteroids","Quantum Crystals","Neural Infinity","Algorithme Visuel","Physique Quantique","Test QI","Conscience Artificielle"]},
   en: {introTitle:"🎮 Discover our 36 Smart Games",introDesc:"Train your brain with our full collection of AI-powered adaptive games",overlayBack:"🔙 Back",
     subscriptionTitle:"🌟 Brainova Subscription",subscriptionPack:"36 Games Pack",subscriptionDesc:"Unlock all premium games",subscriptionPrice:"Only 20 EUR / year",subscriptionBtn:"Subscribe",subscriptionCancel:"Cancel",
     shareBtn:"Share",shareTitle:"🚀 Share Brainova",shareDesc:"Share this platform and help your friends develop their intelligence!",shareTip:"💡 The more you share, the more your friends discover Brainova!",shareClose:"Close",shareMode:"📱 Share mode",shareEmailSubject:"🧠 Discover Brainova - Smart Games",shareEmailBody:"Hello,\n\nI recommend Brainova, a platform with 36 smart games to boost your brain!\n\n🎮 36 varied games\n🧠 Brain training\n✨ Modern interface\n\nClick here to discover: ",
-    loginBtn:"Login",signupBtn:"Sign Up",loginTooltip:"Premium login required",signupTooltip:"Premium signup required",
     games:["Quantum Tetris 2077","Quantum Memory","Neural Puzzle Master","Quantum Chess","Checkers Game","Pac-Man","Simon Says","Speed Challenge","Cyber Checker","Demo Playground","Quantum Monopoly","Neural Poker","Quantum Blackjack","Fusion Solitaire","Mystic Forest Quest","Enigma Hunter","Neural Racing","Cyber Shooter","Quantum Dots","Neural Rhythm","Cyber Pinball","Quantum Pipes","Neural Slots","Cyber Darts","Quantum Bubbles","Neural Dice","Cyber Pool","Quantum Tiles","Neural Trivia","Cyber Asteroids","Quantum Crystals","Neural Infinity","Visual Algorithm","Quantum Physics","IQ Test","Artificial Consciousness"]},
   ar: {introTitle:"🎮 اكتشف 36 لعبة ذكية",introDesc:"درّب عقلك مع مجموعتنا الكاملة من الألعاب التفاعلية المدعومة بالذكاء الاصطناعي",overlayBack:"🔙 رجوع",
     subscriptionTitle:"🌟 اشتراك برينوفا",subscriptionPack:"حزمة 36 لعبة",subscriptionDesc:"افتح جميع الألعاب المميزة",subscriptionPrice:"فقط 20 يورو / سنة",subscriptionBtn:"اشترك",subscriptionCancel:"إلغاء",
     shareBtn:"مشاركة",shareTitle:"🚀 شارك برينوفا",shareDesc:"شارك هذه المنصة وساعد أصدقائك على تطوير ذكائهم!",shareTip:"💡 كلما شاركت أكثر، كلما اكتشف أصدقاؤك برينوفا أكثر!",shareClose:"إغلاق",shareEmailSubject:"🧠 اكتشف برينوفا - ألعاب ذكية",shareEmailBody:"مرحبا،\n\nأنصحك ببرينوفا، منصة تحتوي على 36 لعبة ذكية لتعزيز دماغك!\n\n🎮 36 لعبة متنوعة\n🧠 تدريب الدماغ\n✨ واجهة عصرية\n\nانقر هنا للاكتشاف: ",
-    loginBtn:"تسجيل الدخول",signupBtn:"التسجيل",loginTooltip:"تسجيل الدخول المميز مطلوب",signupTooltip:"التسجيل المميز مطلوب",
     games:["تيتريس الكمومي","ذاكرة الكم","سيد الألغاز العصبي","شطرنج الكم","لعبة الداما","باك مان","سيمون يقول","تحدي السرعة","الفاحص السيبراني","ملعب تجريبي","احتكار الكم","بوكر عصبي","بلاك جاك الكمومي","سوليتير الاندماج","مغامرة الغابة الغامضة","صياد الألغاز","سباق عصبي","مطلق النار السيبراني","نقاط الكم","الإيقاع العصبي","دبابيس السيبرانية","أنابيب الكم","آلات الحظ العصبية","سهام سيبرانية","فقاعات الكم","نرد عصبي","بلياردو الكم","بلاط عصبي","اختبار المعرفة","كويكبات سيبرانية","بلورات الكم","اللانهاية العصبية","الخوارزمية البصرية","الفيزياء الكمومية","اختبار الذكاء","الوعي الاصطناعي"]},
   es: {introTitle:"🎮 Descubre nuestros 36 Juegos Inteligentes",introDesc:"Entrena tu cerebro con nuestra colección completa de juegos adaptativos con IA",overlayBack:"🔙 Volver",
     subscriptionTitle:"🌟 Suscripción Brainova",subscriptionPack:"Paquete 36 juegos",subscriptionDesc:"Desbloquea todos los juegos premium",subscriptionPrice:"Solo 20 EUR / año",subscriptionBtn:"Suscribirse",subscriptionCancel:"Cancelar",
     shareBtn:"Compartir",shareTitle:"🚀 Compartir Brainova",shareDesc:"¡Comparte esta plataforma y ayuda a tus amigos a desarrollar su inteligencia!",shareTip:"💡 ¡Cuanto más compartas, más descubrirán tus amigos Brainova!",shareClose:"Cerrar",shareEmailSubject:"🧠 Descubre Brainova - Juegos Inteligentes",shareEmailBody:"Hola,\n\n¡Te recomiendo Brainova, una plataforma con 36 juegos inteligentes para potenciar tu cerebro!\n\n🎮 36 juegos variados\n🧠 Entrenamiento cerebral\n✨ Interfaz moderna\n\nHaz clic aquí para descubrir: ",
-    loginBtn:"Iniciar Sesión",signupBtn:"Registrarse",loginTooltip:"Inicio de sesión premium requerido",signupTooltip:"Registro premium requerido",
     games:["Tetris Cuántico 2077","Memoria Cuántica","Maestro de Rompecabezas Neural","Ajedrez Cuántico","Juego de Damas","Pac-Man","Simón Dice","Desafío de Velocidad","Verificador Cibernético","Campo de Pruebas","Monopolio Cuántico","Póker Neural","Blackjack Cuántico","Solitario Fusión","Bosque Místico","Cazador de Enigmas","Carrera Neural","Tirador Cibernético","Puntos Cuánticos","Ritmo Neural","Pinball Cibernético","Tuberías Cuánticas","Tragamonedas Neurales","Dardos Cibernéticos","Burbujas Cuánticas","Dados Neurales","Billar Cibernético","Fichas Cuánticas","Trivia Neural","Asteroides Cibernéticos","Cristales Cuánticos","Infinito Neural","Algoritmo Visual","Física Cuántica","Prueba de IQ","Conciencia Artificial"]},
   de: {introTitle:"🎮 Entdecken Sie unsere 36 intelligenten Spiele",introDesc:"Trainieren Sie Ihr Gehirn mit unserer vollständigen Sammlung KI-gestützter Spiele",overlayBack:"🔙 Zurück",
     subscriptionTitle:"🌟 Brainova Abonnement",subscriptionPack:"36 Spiele Paket",subscriptionDesc:"Alle Premium-Spiele freischalten",subscriptionPrice:"Nur 20 EUR / Jahr",subscriptionBtn:"Abonnieren",subscriptionCancel:"Abbrechen",
     shareBtn:"Teilen",shareTitle:"🚀 Brainova teilen",shareDesc:"Teilen Sie diese Plattform und helfen Sie Ihren Freunden, ihre Intelligenz zu entwickeln!",shareTip:"💡 Je mehr Sie teilen, desto mehr entdecken Ihre Freunde Brainova!",shareClose:"Schließen",shareEmailSubject:"🧠 Entdecken Sie Brainova - Intelligente Spiele",shareEmailBody:"Hallo,\n\nIch empfehle Ihnen Brainova, eine Plattform mit 36 intelligenten Spielen zur Stärkung Ihres Gehirns!\n\n🎮 36 verschiedene Spiele\n🧠 Gehirntraining\n✨ Moderne Benutzeroberfläche\n\nKlicken Sie hier zum Entdecken: ",
-    loginBtn:"Anmelden",signupBtn:"Registrieren",loginTooltip:"Premium-Anmeldung erforderlich",signupTooltip:"Premium-Registrierung erforderlich",
     games:["Quantum Tetris 2077","Quantum Memory","Neural Puzzle Master","Quantum Chess","Dame Spiel","Pac-Man","Simon Says","Speed Challenge","Cyber Checker","Demo Playground","Quantum Monopoly","Neural Poker","Quantum Blackjack","Fusion Solitaire","Mystic Forest Quest","Enigma Hunter","Neural Racing","Cyber Shooter","Quantum Dots","Neural Rhythm","Cyber Pinball","Quantum Pipes","Neural Slots","Cyber Darts","Quantum Bubbles","Neural Dice","Cyber Pool","Quantum Tiles","Neural Trivia","Cyber Asteroids","Quantum Crystals","Neural Infinity","Visueller Algorithmus","Quantenphysik","IQ Test","Künstliches Bewusstsein"]},
   zh: {introTitle:"🎮 探索我们的36款智能游戏",introDesc:"通过我们完整的AI驱动自适应游戏系列训练你的大脑",overlayBack:"🔙 返回",
     subscriptionTitle:"🌟 Brainova订阅",subscriptionPack:"36款游戏包",subscriptionDesc:"解锁所有高级游戏",subscriptionPrice:"仅需20欧元/年",subscriptionBtn:"订阅",subscriptionCancel:"取消",
     shareBtn:"分享",shareTitle:"🚀 分享Brainova",shareDesc:"分享这个平台，帮助您的朋友开发他们的智力！",shareTip:"💡 您分享得越多，您的朋友就越能发现Brainova！",shareClose:"关闭",shareEmailSubject:"🧠 发现Brainova - 智能游戏",shareEmailBody:"您好，\n\n我向您推荐Brainova，一个拥有36款智能游戏来增强大脑的平台！\n\n🎮 36款多样化游戏\n🧠 大脑训练\n✨ 现代界面\n\n点击这里发现：",
-    loginBtn:"登录",signupBtn:"注册",loginTooltip:"需要高级登录",signupTooltip:"需要高级注册",
     games:["量子俄罗斯方块2077","量子记忆","神经拼图大师","量子国际象棋","跳棋游戏","吃豆人","西蒙说","速度挑战","网络检查","演示游乐场","量子大富翁","神经扑克","量子二十一点","融合接龙","神秘森林探险","谜题猎人","神经赛车","网络射手","量子点","神经节奏","网络弹球","量子管道","神经老虎机","网络飞镖","量子泡泡","神经骰子","网络台球","量子方块","神经问答","网络小行星","量子水晶","神经无限","视觉算法","量子物理","智商测试","人工意识"]}
 };
 const grid=document.getElementById('gamesGrid');
 let userPremium=false;
-let isPremium=false;
 
 // Fonction de validation d'email
 function isValidEmail(email) {
@@ -321,184 +325,118 @@ function isValidEmail(email) {
   return emailRegex.test(email);
 }
 
-// FONCTION D'URGENCE POUR FORCER L'AFFICHAGE
-function forceRenderCards() {
-  console.log('🚨 FORCE RENDER CARDS - FONCTION D\'URGENCE');
+function renderGrid(lang){
+  console.log('renderGrid called with lang:', lang);
+  
   const grid = document.getElementById('gamesGrid');
+  console.log('grid element found:', !!grid);
+  
   if (!grid) {
-    console.error('❌ GRID INTROUVABLE !');
+    console.error('Grid element not found!');
     return;
   }
   
-  // Nettoyer
-  grid.innerHTML = '';
+  console.log('TRANSLATIONS available:', !!TRANSLATIONS);
   
-  // Créer HTML directement
-  const html = `
-    <div class="card" style="background: rgba(0,0,0,0.3); border: 3px solid #00ff00; border-radius: 15px; padding: 20px; display: flex; flex-direction: column; align-items: center; cursor: pointer; min-height: 120px;">
-      <div style="font-size: 28px; font-weight: bold; color: white; margin-bottom: 10px;">1</div>
-      <div style="font-size: 14px; color: white; text-align: center;">Quantum Tetris 2077</div>
-    </div>
-    <div class="card" style="background: rgba(0,0,0,0.3); border: 3px solid #00ff00; border-radius: 15px; padding: 20px; display: flex; flex-direction: column; align-items: center; cursor: pointer; min-height: 120px;">
-      <div style="font-size: 28px; font-weight: bold; color: white; margin-bottom: 10px;">2</div>
-      <div style="font-size: 14px; color: white; text-align: center;">Memory Quantique</div>
-    </div>
-    <div class="card" style="background: rgba(0,0,0,0.3); border: 3px solid #00ff00; border-radius: 15px; padding: 20px; display: flex; flex-direction: column; align-items: center; cursor: pointer; min-height: 120px;">
-      <div style="font-size: 28px; font-weight: bold; color: white; margin-bottom: 10px;">3</div>
-      <div style="font-size: 14px; color: white; text-align: center;">Neural Puzzle Master</div>
-    </div>
-    <div class="card" style="background: rgba(0,0,0,0.3); border: 3px solid #ffd700; border-radius: 15px; padding: 20px; display: flex; flex-direction: column; align-items: center; cursor: pointer; min-height: 120px; position: relative;">
-      <div style="position: absolute; top: 8px; right: 8px; font-size: 18px; color: #ffd700;">🔒</div>
-      <div style="font-size: 28px; font-weight: bold; color: white; margin-bottom: 10px;">11</div>
-      <div style="font-size: 14px; color: white; text-align: center;">Quantum Monopoly</div>
-    </div>
-  `;
+  grid.innerHTML='';
+  const t=TRANSLATIONS[lang]||TRANSLATIONS['fr'];
+  const userPremium = checkPremiumStatus(); // Utiliser la fonction de vérification du statut premium
   
-  grid.innerHTML = html;
-  console.log('✅ FORCE RENDER TERMINÉ - 4 cartes de test ajoutées');
-}
-
-function renderGrid(lang) {
-  console.log('🎮 RENDERGRID START - Version corrigée');
-  const grid = document.getElementById('gamesGrid');
-  if (!grid) {
-    console.error('❌ FATAL: gamesGrid introuvable !');
-    return;
-  }
+  console.log('User premium status:', userPremium);
+  console.log('Games available:', t.games ? t.games.length : 0);
   
-  // Nettoyer complètement la grille
-  grid.innerHTML = '';
-  
-  const gameNames = [
-    "Quantum Tetris 2077", "Memory Quantique", "Neural Puzzle Master", "Quantum Chess", "Jeux de Dames", 
-    "Pac-Man", "Simon Says", "Speed Challenge", "Cyber Checker", "Demo Playground",
-    "Quantum Monopoly", "Neural Poker", "Blackjack Quantum", "Solitaire Fusion", "Mystic Forest Quest",
-    "Enigma Hunter", "Neural Racing", "Cyber Shooter", "Quantum Dots", "Neural Rhythm",
-    "Cyber Pinball", "Quantum Pipes", "Neural Slots", "Cyber Darts", "Quantum Bubbles",
-    "Neural Dice", "Cyber Pool", "Quantum Tiles", "Neural Trivia", "Cyber Asteroids",
-    "Quantum Crystals", "Neural Infinity", "Algorithme Visuel", "Physique Quantique", "Test QI", "Conscience Artificielle"
-  ];
-  
-  // Vérifier le statut premium
-  let isPremium = false;
-  try {
-    isPremium = localStorage.getItem('brainova_premium_status') === 'true';
-  } catch(e) {
-    console.log('LocalStorage inaccessible, mode gratuit');
-  }
-  
-  console.log('🔐 Statut Premium:', isPremium);
-  
-  // Créer les 36 cartes
-  for (let i = 1; i <= 36; i++) {
-    const card = document.createElement('div');
-    card.className = 'card';
+  for(let i=1;i<=36;i++){
+    const card=document.createElement('div'); card.className='card';
     
-    // Logique premium : jeux 1-10 gratuits, 11-36 premium
-    const isLocked = (i > 10 && !isPremium);
+    // Jeux 11 à 36 verrouillés sauf si premium (y compris le test QI)
+    const isLocked = (i >= 11 && !userPremium);
     
-    // Styles CSS directs pour éviter les conflits
-    const cardStyles = {
-      background: 'rgba(0,0,0,0.3)',
-      borderRadius: '15px',
-      padding: '20px',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      cursor: 'pointer',
-      minHeight: '120px',
-      position: 'relative',
-      transition: 'transform 0.3s ease',
-      border: i <= 10 ? '3px solid #00ff00' : '3px solid #ffd700',
-      boxShadow: i <= 10 ? '0 0 20px rgba(0,255,0,0.3)' : '0 0 20px rgba(255,215,0,0.3)'
-    };
+    // Appliquer les contours néon selon le groupe de jeux
+    if (i >= 1 && i <= 10) {
+      // Jeux 1-10 : contour vert (gratuits)
+      card.classList.add('free');
+    } else if (i >= 11 && i <= 36) {
+      // Jeux 11-36 : contour jaune (premium)
+      card.classList.add('locked');
+    }
     
-    Object.assign(card.style, cardStyles);
-    
-    // Cadenas pour les jeux premium verrouillés
-    if (isLocked) {
-      card.style.opacity = '0.7';
+    if(isLocked) {
+      card.classList.add('premium');
+      // Réduire légèrement l'opacité mais garder les contours visibles
+      card.style.opacity = '0.8';
+      // Ajouter un cadenas
       const lockIcon = document.createElement('div');
       lockIcon.innerHTML = '🔒';
-      lockIcon.style.cssText = 'position: absolute; top: 8px; right: 8px; font-size: 18px; color: #ffd700;';
+      lockIcon.style.cssText = 'position: absolute; top: 10px; right: 10px; font-size: 20px; z-index: 1; filter: none;';
       card.appendChild(lockIcon);
     }
     
-    // Numéro du jeu
-    const numDiv = document.createElement('div');
-    numDiv.textContent = i;
-    numDiv.style.cssText = 'font-size: 28px; font-weight: bold; color: white; margin-bottom: 10px;';
+    if(i===35) card.classList.add('testqi');
     
-    // Titre du jeu
-    const titleDiv = document.createElement('div');
-    titleDiv.textContent = gameNames[i-1];
-    titleDiv.style.cssText = 'font-size: 14px; color: white; text-align: center; line-height: 1.3;';
+    const num=document.createElement('div'); num.className='num'; num.textContent=i;
+    const title=document.createElement('div'); title.className='title'; title.textContent=t.games[i-1]||`Jeu ${i}`;
+    card.appendChild(num); card.appendChild(title);
     
-    // Assembler la carte
-    card.appendChild(numDiv);
-    card.appendChild(titleDiv);
-    
-    // Effet hover
-    card.addEventListener('mouseenter', () => {
-      card.style.transform = 'translateY(-5px)';
-    });
-    card.addEventListener('mouseleave', () => {
-      card.style.transform = 'translateY(0)';
-    });
-    
-    // Click handler
-    card.addEventListener('click', () => {
-      if (isLocked) {
-        console.log(`🔒 Jeu ${i} verrouillé - ouverture système premium`);
-        openPremiumCodeTest();
-      } else {
-        console.log(`🎮 Lancement jeu ${i}: ${gameNames[i-1]}`);
-        // Pour l'instant juste une alerte, plus tard openGame(i)
-        alert(`🎮 Jeu ${i}: ${gameNames[i-1]}\n\n(Ouverture du jeu bientôt disponible)`);
+    card.addEventListener('click',()=>{
+      if(isLocked){
+        showSubscriptionMessage();
+        return;
       }
+      openGame(i);
     });
     
-    // Ajouter à la grille
     grid.appendChild(card);
   }
-  
-  console.log(`🎯 RENDERGRID TERMINÉ - ${grid.children.length} cartes ajoutées`);
-  
-  // Vérification après 1 seconde
-  setTimeout(() => {
-    console.log(`📊 Vérification finale: ${grid.children.length} cartes visibles`);
-  }, 1000);
   
   // Gestion de la visibilité et activation des boutons selon le statut premium
   const premiumBtn = document.getElementById('premiumBtn');
   const shareBtn = document.getElementById('shareBtn');
-  // Plus de manipulation des boutons d'authentification - géré par le système clean
+  const loginBtn = document.getElementById('loginBtn');
+  const signupBtn = document.getElementById('signupBtn');
   
 
   
   if(userPremium || isPremium) {
-    // Utilisateur premium : masquer premium, BLOQUER partager, activer connexion/inscription
+    // Utilisateur premium : masquer premium/partager, activer connexion/inscription
     premiumBtn.style.display = 'none';
     if (shareBtn) {
-      shareBtn.style.display = 'inline-block';
-      shareBtn.style.opacity = '0.3';
-      shareBtn.style.pointerEvents = 'none';
-      shareBtn.style.cursor = 'not-allowed';
-      shareBtn.title = '🔒 Fonction de partage bloquée pour les utilisateurs premium';
+      shareBtn.style.display = 'none';
     }
     
-    // Système d'authentification géré par initCleanAuth()
+    // Activer les boutons connexion/inscription
+    if(loginBtn) {
+      loginBtn.style.opacity = '1';
+      loginBtn.style.pointerEvents = 'auto';
+      loginBtn.title = 'Se connecter';
+    }
+    if(signupBtn) {
+      signupBtn.style.opacity = '1';
+      signupBtn.style.pointerEvents = 'auto';
+      signupBtn.title = 'S\'inscrire';
+    }
   } else {
-    // Utilisateur non premium : afficher premium/partager
+    // Utilisateur non premium : afficher premium/partager, désactiver connexion/inscription
     premiumBtn.style.display = 'inline-block';
     if (shareBtn) {
       shareBtn.style.display = 'inline-block';
     }
     
-    // Système d'authentification géré par initCleanAuth()
+    // Désactiver les boutons connexion/inscription (style premium-only mais désactivés)
+    if(loginBtn) {
+      loginBtn.style.opacity = '0.6';
+      loginBtn.style.pointerEvents = 'none';
+      loginBtn.title = 'Connexion disponible après abonnement premium';
+      loginBtn.classList.add('premium-only');
+    }
+    if(signupBtn) {
+      signupBtn.style.opacity = '0.6';
+      signupBtn.style.pointerEvents = 'none';
+      signupBtn.title = 'Inscription disponible après abonnement premium';
+      signupBtn.classList.add('premium-only');
+    }
   }
   
+  console.log('renderGrid completed - Cards added to grid:', grid.children.length);
 }
 
 // ================= GAME OVERLAY
@@ -527,18 +465,6 @@ function applyLanguage(lang){
     shareBtn.textContent = t.shareBtn;
   }
   
-  // Mettre à jour les boutons d'authentification
-  const loginBtn = document.getElementById('loginBtn');
-  const signupBtn = document.getElementById('signupBtn');
-  if (loginBtn && t.loginBtn) {
-    loginBtn.textContent = t.loginBtn;
-    loginBtn.title = t.loginTooltip || t.loginBtn;
-  }
-  if (signupBtn && t.signupBtn) {
-    signupBtn.textContent = t.signupBtn;
-    signupBtn.title = t.signupTooltip || t.signupBtn;
-  }
-  
   document.documentElement.dir=(lang==='ar')?'rtl':'ltr';
   renderGrid(lang);
 }
@@ -551,6 +477,11 @@ const signupModal = document.getElementById('signupModal');
 const premiumModal = document.getElementById('premiumModal');
 
 // Fonction pour vérifier le statut premium
+function checkPremiumStatus() {
+  const isPremium = localStorage.getItem('brainova_premium') === 'true';
+  return isPremium;
+}
+
 // Fonction pour mettre à jour l'indicateur de statut
 function updatePremiumStatusIndicator(elementId, isPremium) {
   const indicator = document.getElementById(elementId);
@@ -570,19 +501,87 @@ function updatePremiumStatusIndicator(elementId, isPremium) {
   }
 }
 
-// Gestionnaires d'événements pour les boutons - ACCÈS LIBRE (plus de restriction premium)
+// Gestionnaires d'événements pour les boutons
 document.getElementById('loginBtn').addEventListener('click', () => {
-  console.log('� CLIC LOGIN - Accès libre autorisé');
-  loginModal.style.display = 'flex';
+  const isPremium = checkPremiumStatus();
+  updatePremiumStatusIndicator('premiumStatusIndicator', isPremium);
+  
+  if (isPremium) {
+    loginModal.style.display = 'flex';
+  } else {
+    // Afficher un message d'erreur stylé
+    showPremiumRequiredMessage('connexion');
+  }
 });
 
 document.getElementById('signupBtn').addEventListener('click', () => {
-  console.log('� CLIC SIGNUP - Accès libre autorisé');
-  signupModal.style.display = 'flex';
+  const isPremium = checkPremiumStatus();
+  updatePremiumStatusIndicator('premiumStatusIndicatorSignup', isPremium);
   
-// Code supprimé - nouveaux boutons utilisent onclick direct
+  if (isPremium) {
+    signupModal.style.display = 'flex';
+  } else {
+    // Afficher un message d'erreur stylé
+    showPremiumRequiredMessage('inscription');
+  }
+});
 
-// Fonction showPremiumRequiredMessage SUPPRIMÉE - Plus de restrictions premium pour l'authentification
+// Fonction pour afficher le message premium requis
+function showPremiumRequiredMessage(action) {
+  const modal = document.createElement('div');
+  modal.style.cssText = `
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.9); display: flex; align-items: center;
+    justify-content: center; z-index: 10040;
+  `;
+  
+  const card = document.createElement('div');
+  card.style.cssText = `
+    background: linear-gradient(135deg, #ff6b6b, #ffa500);
+    padding: 40px; border-radius: 20px; text-align: center;
+    color: white; max-width: 400px; box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    border: 2px solid rgba(255,255,255,0.2);
+  `;
+  
+  card.innerHTML = `
+    <div style="font-size: 48px; margin-bottom: 20px;">🔒</div>
+    <h3 style="margin-bottom: 15px; color: #fff;">Accès Premium Requis</h3>
+    <p style="margin-bottom: 25px; font-size: 16px;">
+      La ${action} n'est disponible que pour les membres premium. 
+      Abonnez-vous d'abord pour débloquer cette fonctionnalité.
+    </p>
+    <button id="goToPremium" style="
+      background: linear-gradient(90deg, #ffd700, #ffb347);
+      color: #333; border: none; padding: 15px 30px;
+      border-radius: 25px; font-weight: bold; cursor: pointer;
+      margin-right: 10px; font-size: 16px;
+    ">S'abonner maintenant</button>
+    <button id="closePremiumMessage" style="
+      background: transparent; border: 2px solid rgba(255,255,255,0.5);
+      color: white; padding: 15px 30px; border-radius: 25px;
+      cursor: pointer; font-size: 16px;
+    ">Fermer</button>
+  `;
+  
+  modal.appendChild(card);
+  document.body.appendChild(modal);
+  
+  // Événements
+  document.getElementById('goToPremium').addEventListener('click', () => {
+    document.body.removeChild(modal);
+    showSubscriptionMessage();
+  });
+  
+  document.getElementById('closePremiumMessage').addEventListener('click', () => {
+    document.body.removeChild(modal);
+  });
+  
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      document.body.removeChild(modal);
+    }
+  });
+}
 
 // Événements de fermeture des modaux
 document.getElementById('loginCancel').addEventListener('click', () => loginModal.style.display = 'none');
@@ -592,7 +591,11 @@ document.getElementById('signupCancel').addEventListener('click', () => signupMo
 document.getElementById('loginForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   
-  // Plus de vérification premium - accès libre pour l'authentification
+  // Vérifier à nouveau le statut premium
+  if (!checkPremiumStatus()) {
+    showPremiumRequiredMessage('connexion');
+    return;
+  }
   
   const email = document.getElementById('loginEmail').value.trim();
   const password = document.getElementById('loginPassword').value;
@@ -652,7 +655,11 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
 document.getElementById('signupForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   
-  // Plus de vérification premium - accès libre pour l'authentification
+  // Vérifier à nouveau le statut premium
+  if (!checkPremiumStatus()) {
+    showPremiumRequiredMessage('inscription');
+    return;
+  }
   
   const email = document.getElementById('signupEmail').value.trim();
   const password = document.getElementById('signupPassword').value;
@@ -769,7 +776,7 @@ function createToast(message, type) {
 
 // ================= PREMIUM & STRIPE
 // Vérifier l'état premium dans localStorage
-isPremium = localStorage.getItem('brainova_premium') === 'true';
+let isPremium = localStorage.getItem('brainova_premium') === 'true';
 
 // Fonction pour débloquer le premium
 function unlockPremium() {
@@ -828,44 +835,9 @@ function showSubscriptionMessage() {
   document.body.appendChild(customModal);
   
   // Gestion des boutons
-  document.getElementById('subscribeNowBtn').addEventListener('click', async () => {
-    const btn = document.getElementById('subscribeNowBtn');
-    const originalText = btn.textContent;
-    
-    try {
-      // Animation de chargement
-      btn.textContent = '⏳ Préparation...';
-      btn.disabled = true;
-      
-      // Appeler la fonction Netlify pour créer une session Stripe
-      const response = await fetch('https://brainovafirst.netlify.app/.netlify/functions/create-checkout-session', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        
-        if (data.success && data.url) {
-          btn.textContent = '🔄 Redirection...';
-          window.location.href = data.url;
-        } else {
-          throw new Error(data.details || 'Session URL manquante');
-        }
-      } else {
-        const errorData = await response.json();
-        throw new Error(errorData.details || 'Erreur serveur');
-      }
-    } catch (error) {
-      // Restaurer le bouton
-      btn.disabled = false;
-      btn.textContent = originalText;
-      
-      // Fallback direct vers Stripe en cas d'erreur
-      window.location.href = 'https://buy.stripe.com/cNi8wR7IC77o54icy49EI01';
-    }
+  document.getElementById('subscribeNowBtn').addEventListener('click', () => {
+    // Redirection directe vers Stripe
+    window.location.href = 'https://buy.stripe.com/cNi8wR7IC77o54icy49EI01';
   });
   
   document.getElementById('cancelSubscribeBtn').addEventListener('click', () => {
@@ -882,12 +854,6 @@ function handleLockedGameClick() {
 
 // NOUVEAU SYSTÈME DE PARTAGE - Optimisé pour jeux verrouillés
 function showShareOptions() {
-  // Vérifier si l'utilisateur est premium - si oui, bloquer l'accès
-  if (userPremium || isPremium) {
-    alert('🔒 Fonction de partage désactivée\n\n✅ Vous êtes déjà abonné Premium !\n🎮 Profitez de tous vos jeux débloqués');
-    return;
-  }
-  
   // Récupérer la langue actuelle et les traductions
   const currentLang = langSelect.value || 'fr';
   const t = TRANSLATIONS[currentLang] || TRANSLATIONS['fr'];
@@ -984,11 +950,9 @@ function showShareOptions() {
   document.body.appendChild(shareModal);
   
   // Gestion des événements de partage améliorés
-  console.log('🔗 Événements de partage attachés...');
   
   // Facebook - Méthode améliorée avec fallback
   document.getElementById('shareFacebookBtn').addEventListener('click', () => {
-    console.log('📘 Clic Facebook détecté');
     const url = currentUrl;
     
     // Essayer l'API native si disponible
@@ -1009,14 +973,12 @@ function showShareOptions() {
   
   // WhatsApp - Message complet optimisé
   document.getElementById('shareWhatsAppBtn').addEventListener('click', () => {
-    console.log('💬 Clic WhatsApp détecté');
     const message = encodeURIComponent(`🧠 *Brainova - Jeux Intelligents*\n\nDécouvrez 36 jeux pour booster votre intelligence !\n\n✨ Cliquez ici: ${currentUrl}`);
     window.open(`https://wa.me/?text=${message}`, '_blank');
   });
   
   // Copier le lien avec conseils
   document.getElementById('copyLinkBtn').addEventListener('click', () => {
-    console.log('🔗 Clic Copier lien détecté');
     navigator.clipboard.writeText(currentUrl).then(() => {
       const btn = document.getElementById('copyLinkBtn');
       const originalText = btn.innerHTML;
@@ -1039,16 +1001,7 @@ function showShareOptions() {
   
   // Fermer le modal
   document.getElementById('closeShareModal').addEventListener('click', () => {
-    console.log('❌ Clic Fermer détecté');
     document.body.removeChild(shareModal);
-  });
-  
-  // Fermer aussi en cliquant à l'extérieur
-  shareModal.addEventListener('click', (e) => {
-    if (e.target === shareModal) {
-      console.log('❌ Clic extérieur détecté - fermeture');
-      document.body.removeChild(shareModal);
-    }
   });
   
   // Fermer en cliquant en dehors
@@ -1067,66 +1020,37 @@ if (isPremium) {
 }
 
 // Fonction pour vérifier le retour de Stripe
-// Vérification du statut premium au chargement de la page
-function checkPremiumStatus() {
-  // 1. Vérifier le localStorage pour premium classique
-  const savedPremium = localStorage.getItem('brainova_premium') === 'true';
-  
-  // 2. Vérifier le code premium + appareil
-  const premiumCode = localStorage.getItem('brainova_premium_code');
-  const premiumDevice = localStorage.getItem('brainova_premium_device');
-  const currentDevice = localStorage.getItem('brainova_device_id');
-  
-  // 3. Vérifier si l'utilisateur revient de Stripe (toute URL)
+function checkStripeReturn() {
   const urlParams = new URLSearchParams(window.location.search);
-  const hasStripeSuccess = urlParams.get('success') === 'true' || 
-                          urlParams.get('premium') === 'activated' ||
-                          urlParams.get('payment') === 'completed';
   
-  // 4. Si paiement Stripe détecté, activer premium automatiquement
-  if (hasStripeSuccess) {
-    console.log('✅ Paiement Stripe détecté - Activation premium automatique');
-    localStorage.setItem('brainova_premium', 'true');
-    localStorage.setItem('brainova_premium_date', new Date().toISOString());
-    localStorage.setItem('brainova_premium_source', 'stripe_payment');
-    isPremium = true;
-    userPremium = true;
-    
-    // Message de bienvenue
-    setTimeout(() => {
-      alert('🎉 Paiement confirmé !\n\n✅ Votre accès Premium est activé\n🎮 Tous les jeux sont débloqués\n� Vous recevrez un code premium par email\n\nBienvenue dans Brainova Premium !');
-    }, 1000);
-    
+  // Si l'utilisateur revient de Stripe avec succès
+  if (urlParams.get('success') === 'true' || urlParams.get('payment_intent_status') === 'succeeded') {
+    unlockPremium();
     // Nettoyer l'URL
     window.history.replaceState({}, document.title, window.location.pathname);
   }
   
-  // 5. Vérification premium par code + sécurité appareil
-  const hasValidCode = premiumCode && premiumDevice && currentDevice && premiumDevice === currentDevice;
-  
-  // 6. Appliquer le statut premium
-  if (savedPremium || hasStripeSuccess || hasValidCode) {
-    isPremium = true;
-    userPremium = true;
-    console.log('🌟 Statut Premium : ACTIF', {savedPremium, hasStripeSuccess, hasValidCode});
-  } else {
-    isPremium = false;
-    userPremium = false;
-    console.log('🔒 Statut Premium : INACTIF');
+  // Si l'utilisateur annule le paiement
+  if (urlParams.get('canceled') === 'true') {
+    alert('Paiement annulé. Vous pouvez réessayer à tout moment.');
+    window.history.replaceState({}, document.title, window.location.pathname);
   }
 }
 
 // Vérifier au chargement de la page
 document.addEventListener('DOMContentLoaded', () => {
-  checkPremiumStatus(); // Nouvelle fonction unifiée
+  console.log('=== DOMContentLoaded START ===');
+  checkStripeReturn();
   
   // Attacher les événements après le chargement du DOM
   const premiumBtn = document.getElementById('premiumBtn');
   const shareBtn = document.getElementById('shareBtn');
-  const premiumAccessBtn = document.getElementById('premiumAccessBtn');
+  
+  console.log('DOM loaded. Premium button:', premiumBtn, 'Share button:', shareBtn);
   
   if (premiumBtn) {
     premiumBtn.addEventListener('click', showSubscriptionMessage);
+    console.log('Premium button event attached');
   }
   
   if (shareBtn) {
@@ -1135,75 +1059,60 @@ document.addEventListener('DOMContentLoaded', () => {
       e.stopPropagation();
       showShareOptions();
     });
-  }
-  
-  // Nouveau bouton d'accès premium
-  if (premiumAccessBtn) {
-    premiumAccessBtn.addEventListener('click', function(e) {
-      e.preventDefault();
-      console.log('🔑 Clic sur Accès Premium');
-      openPremiumCodeTest();
-    });
-  }
-  
-  // Bouton de test premium temporaire
-  const testPremiumBtn = document.getElementById('testPremiumBtn');
-  if (testPremiumBtn) {
-    testPremiumBtn.addEventListener('click', function(e) {
-      e.preventDefault();
-      testActivatePremium();
-    });
+    console.log('Share button event attached');
   }
   
   // Initialiser la grille de jeux
-  console.log('🎮 Initialisation de la grille au chargement DOM');
+  console.log('=== INITIALIZING GAMES GRID ===');
+  const langSelect = document.getElementById('langSelect');
+  console.log('langSelect element:', langSelect);
+  
   if (langSelect && langSelect.value) {
+    console.log('Calling renderGrid with:', langSelect.value);
     renderGrid(langSelect.value);
+    console.log('Games grid initialized with language:', langSelect.value);
   } else {
     // Fallback si langSelect n'est pas encore prêt
+    console.log('Calling renderGrid with fallback: fr');
     renderGrid('fr');
+    console.log('Games grid initialized with default language: fr');
   }
-  
-  // FORCE IMMÉDIATE - Version d'urgence
-  console.log('🚨 FORCE IMMEDIATE RENDER');
-  forceRenderCards();
-  
-  setTimeout(() => {
-    const grid = document.getElementById('gamesGrid');
-    if (grid && grid.children.length === 0) {
-      console.log('🔄 Tentative 2 - Force renderGrid');
-      forceRenderCards();
-    }
-  }, 500);
-  
-  setTimeout(() => {
-    const grid = document.getElementById('gamesGrid');
-    if (grid && grid.children.length === 0) {
-      console.log('🔄 Tentative 3 - DERNIÈRE CHANCE');
-      forceRenderCards();
-    }
-  }, 1500);
   
   // Initialiser le statut des boutons d'authentification
   initializeAuthButtons();
+  console.log('Auth buttons initialized');
 });
 
 // Fonction pour initialiser les boutons d'authentification
 function initializeAuthButtons() {
-  // ACCÈS LIBRE TOTAL - Plus de restrictions premium pour l'authentification
+  const isPremium = checkPremiumStatus();
   const loginBtn = document.getElementById('loginBtn');
   const signupBtn = document.getElementById('signupBtn');
   
-  // Toujours activer les boutons d'authentification
-  if (loginBtn) {
-    loginBtn.style.opacity = '1';
-    loginBtn.style.pointerEvents = 'auto';
-    loginBtn.title = 'Se connecter';
-  }
-  if (signupBtn) {
-    signupBtn.style.opacity = '1';
-    signupBtn.style.pointerEvents = 'auto';
-    signupBtn.title = "S'inscrire";
+  if (!isPremium) {
+    // Utilisateur non premium : désactiver les boutons
+    if (loginBtn) {
+      loginBtn.style.opacity = '0.6';
+      loginBtn.style.pointerEvents = 'none';
+      loginBtn.title = 'Connexion disponible après abonnement premium';
+    }
+    if (signupBtn) {
+      signupBtn.style.opacity = '0.6';
+      signupBtn.style.pointerEvents = 'none';
+      signupBtn.title = 'Inscription disponible après abonnement premium';
+    }
+  } else {
+    // Utilisateur premium : activer les boutons
+    if (loginBtn) {
+      loginBtn.style.opacity = '1';
+      loginBtn.style.pointerEvents = 'auto';
+      loginBtn.title = 'Se connecter';
+    }
+    if (signupBtn) {
+      signupBtn.style.opacity = '1';
+      signupBtn.style.pointerEvents = 'auto';
+      signupBtn.title = "S'inscrire";
+    }
   }
 }
 
@@ -1217,324 +1126,6 @@ document.addEventListener('click', function(e) {
 });
 
 // Production ready - Système de paiement Stripe intégré
-
-// SYSTÈME DE SYNCHRONISATION PREMIUM UNIVERSEL
-// Ce code permet de synchroniser le statut premium entre différentes versions
-
-// Vérifier périodiquement les mises à jour premium
-setInterval(() => {
-  const premiumStatus = localStorage.getItem('brainova_premium');
-  if (premiumStatus === 'true' && !isPremium) {
-    console.log('🔄 Synchronisation : Premium détecté, mise à jour...');
-    isPremium = true;
-    userPremium = true;
-    renderGrid(langSelect.value);
-    initializeAuthButtons();
-  }
-}, 5000); // Vérification toutes les 5 secondes
-
-// Token de synchronisation premium (pour partage entre appareils/versions)
-window.syncPremiumFromToken = function(token) {
-  if (token === 'BRAINOVA_PREMIUM_2024' || 
-      token === 'BRAINOVA_PREMIUM_2024_PAID' || 
-      token.includes('stripe_') || 
-      token.includes('PREMIUM')) {
-    localStorage.setItem('brainova_premium', 'true');
-    localStorage.setItem('brainova_premium_sync', new Date().toISOString());
-    localStorage.setItem('brainova_premium_method', 'token_sync');
-    isPremium = true;
-    userPremium = true;
-    renderGrid(langSelect.value);
-    initializeAuthButtons();
-    alert('🎉 Premium synchronisé avec succès !\n\n✅ Statut : Premium actif\n🎮 Tous les jeux sont accessibles\n🔐 Connexion/inscription activées');
-    return true;
-  }
-  return false;
-}
-
-// Génération d'un token de partage premium (pour les clients payants)
-window.generatePremiumToken = function() {
-  if (localStorage.getItem('brainova_premium') === 'true') {
-    const token = 'BRAINOVA_PREMIUM_' + btoa(new Date().toISOString()).substring(0,16);
-    console.log('🎫 Votre token premium:', token);
-    alert('🎫 Token Premium généré :\n\n' + token + '\n\nCopiez ce token pour synchroniser vos autres appareils.\nUtilisez : syncPremiumFromToken("' + token + '")');
-    return token;
-  }
-  alert('❌ Aucun statut premium détecté');
-  return null;
-}
-
-// Activation permanente du premium (pour les vrais paiements)
-window.activatePremiumPermanent = function() {
-  localStorage.setItem('brainova_premium', 'true');
-  localStorage.setItem('brainova_premium_date', new Date().toISOString());
-  localStorage.setItem('brainova_premium_method', 'real_payment');
-  isPremium = true;
-  userPremium = true;
-  renderGrid(langSelect.value);
-  initializeAuthButtons();
-  alert('🎉 PREMIUM ACTIVÉ DE FAÇON PERMANENTE !\n\n✅ Statut : Premium actif\n🎮 Tous les jeux débloqués\n🔐 Authentification activée\n💾 Sauvegardé dans le navigateur');
-  console.log('🌟 Premium permanent activé avec succès !');
-}
-
-// Pour voir le statut actuel, tapez dans la console : 
-// activatePremiumPermanent() - pour activer définitivement
-// testActivatePremium() - pour tester temporairement
-// localStorage.getItem('brainova_premium') - pour voir le statut
-
-// ========================
-// SYSTÈME D'AUTHENTIFICATION CLEAN
-// ========================
-
-function initCleanAuth() {
-  console.log('🧹 Initialisation du système d\'authentification clean');
-  const loginBtn = document.getElementById('cleanLoginBtn');
-  const signupBtn = document.getElementById('cleanSignupBtn');
-  
-  // Vérifier le statut premium
-  const isPremiumUser = checkPremiumStatus();
-  console.log('🔍 Statut premium détecté:', {isPremiumUser, userPremium, isPremium});
-  
-  if (!isPremiumUser && !userPremium && !isPremium) {
-    // UTILISATEUR NON PREMIUM - Authentification disponible (LOGIQUE INVERSÉE)
-    console.log('✅ Utilisateur non premium - Authentification libre');
-    if (loginBtn) {
-      loginBtn.style.opacity = '1';
-      loginBtn.style.cursor = 'pointer';
-      loginBtn.style.pointerEvents = 'auto';
-      loginBtn.onclick = (e) => {
-        e.stopPropagation();
-        console.log('✅ Connexion autorisée pour utilisateur non premium');
-        document.getElementById('loginModal').style.display = 'flex';
-      };
-    }
-    
-    if (signupBtn) {
-      signupBtn.style.opacity = '1';
-      signupBtn.style.cursor = 'pointer';
-      signupBtn.style.pointerEvents = 'auto';
-      signupBtn.onclick = (e) => {
-        e.stopPropagation();
-        console.log('✅ Inscription autorisée pour utilisateur non premium');
-        document.getElementById('signupModal').style.display = 'flex';
-      };
-    }
-  } else {
-    // UTILISATEUR PREMIUM - Rediriger vers message (LOGIQUE INVERSÉE)
-    console.log('❌ Utilisateur premium - Authentification bloquée');
-    if (loginBtn) {
-      loginBtn.style.opacity = '0.6';
-      loginBtn.style.cursor = 'not-allowed';
-      loginBtn.style.pointerEvents = 'auto';
-      loginBtn.onclick = (e) => {
-        e.stopPropagation();
-        showCleanPremiumMessage('connexion', 'Les utilisateurs premium ont accès via le système de jeux uniquement.');
-      };
-    }
-    
-    if (signupBtn) {
-      signupBtn.style.opacity = '0.6';
-      signupBtn.style.cursor = 'not-allowed';
-      signupBtn.style.pointerEvents = 'auto';
-      signupBtn.onclick = (e) => {
-        e.stopPropagation();
-        showCleanPremiumMessage('inscription', 'Les utilisateurs premium ont accès via le système de jeux uniquement.');
-      };
-    }
-  }
-}
-
-function showCleanPremiumMessage(action, customMessage) {
-  console.log('🔒 Redirection vers page premium pour:', action);
-  const modal = document.createElement('div');
-  modal.style.cssText = `
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.9); display: flex; align-items: center;
-    justify-content: center; z-index: 10040;
-  `;
-  
-  modal.innerHTML = `
-    <div style="
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      padding: 40px; border-radius: 20px; text-align: center;
-      color: white; max-width: 400px; box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-    ">
-      <div style="font-size: 48px; margin-bottom: 20px;">🎮</div>
-      <h3 style="margin-bottom: 15px;">Accès Premium</h3>
-      <p style="margin-bottom: 25px;">
-        ${customMessage || `Pour ${action}, vous devez d'abord obtenir votre accès premium.`}
-      </p>
-      <button onclick="window.location.href='premium.html'" style="
-        background: #ffd700; color: #333; border: none; padding: 15px 30px;
-        border-radius: 25px; font-weight: bold; cursor: pointer; margin-right: 10px;
-      ">🔑 Accès Premium</button>
-      <button onclick="showSubscriptionMessage(); this.closest('div').parentElement.remove();" style="
-        background: transparent; border: 2px solid rgba(255,255,255,0.5);
-        color: white; padding: 12px 25px; border-radius: 25px; cursor: pointer; margin-right: 10px;
-      ">💳 Acheter</button>
-      <button onclick="this.closest('div').parentElement.remove();" style="
-        background: transparent; border: 2px solid rgba(255,255,255,0.5);
-        color: white; padding: 12px 25px; border-radius: 25px; cursor: pointer;
-      ">Fermer</button>
-    </div>
-  `;
-  
-  document.body.appendChild(modal);
-}
-
-// Initialiser le système clean au chargement
-document.addEventListener('DOMContentLoaded', () => {
-  setTimeout(initCleanAuth, 1000); // Attendre que tout soit chargé
-});
-
-// Réinitialiser après changement de statut premium
-setInterval(() => {
-  if (checkPremiumStatus()) {
-    initCleanAuth(); // Réinitialiser si le statut change
-  }
-}, 2000);
-
-console.log('🧹 Système d\'authentification clean chargé');
-
-// === SYSTÈME DE TEST CODES PREMIUM INTÉGRÉ ===
-function generateDeviceId() {
-  const canvas = document.createElement('canvas');
-  const ctx = canvas.getContext('2d');
-  ctx.textBaseline = 'top';
-  ctx.font = '14px Arial';
-  ctx.fillText('Device fingerprint', 2, 2);
-  
-  const fingerprint = canvas.toDataURL();
-  const userAgent = navigator.userAgent;
-  const screen = `${window.screen.width}x${window.screen.height}`;
-  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-  
-  const combined = fingerprint + userAgent + screen + timezone;
-  
-  let hash = 0;
-  for (let i = 0; i < combined.length; i++) {
-    const char = combined.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    hash = hash & hash;
-  }
-  
-  return 'DEVICE_' + Math.abs(hash).toString(16);
-}
-
-function openPremiumCodeTest() {
-  const modal = document.createElement('div');
-  modal.style.cssText = `
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.9); display: flex; align-items: center;
-    justify-content: center; z-index: 10050;
-  `;
-  
-  const deviceId = generateDeviceId();
-  
-  modal.innerHTML = `
-    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px; border-radius: 20px; text-align: center; max-width: 500px; width: 90%; box-shadow: 0 20px 40px rgba(0,0,0,0.3);">
-      <div style="font-size: 64px; margin-bottom: 20px;">🎮</div>
-      <h2 style="color: #ffd700; margin-bottom: 20px;">BRAINOVA PREMIUM</h2>
-      <p style="margin-bottom: 30px; color: #ecf0f1;">Entrez votre code d'accès premium</p>
-      
-      <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; margin-bottom: 20px; font-size: 12px;">
-        <strong>🖥️ ID Appareil:</strong><br>
-        <code style="color: #ffd700;">${deviceId}</code>
-      </div>
-      
-      <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; margin-bottom: 20px;">
-        <strong>📝 Codes de Test:</strong><br>
-        <code style="color: #00ff00;">BRAIN-2024-DEMO1</code><br>
-        <code style="color: #00ff00;">BRAIN-2024-DEMO2</code>
-      </div>
-      
-      <input type="text" id="premiumCodeInput" placeholder="Entrez votre code premium" 
-             style="width: 100%; padding: 15px; border: none; border-radius: 10px; background: rgba(255,255,255,0.1); color: white; margin-bottom: 20px; text-align: center; font-size: 16px; text-transform: uppercase;" />
-      
-      <div style="display: flex; gap: 10px;">
-        <button onclick="verifyPremiumCode()" style="flex: 1; background: linear-gradient(135deg, #ffd700 0%, #ffb347 100%); color: #333; padding: 15px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer;">
-          🔓 Vérifier le Code
-        </button>
-        <button onclick="closePremiumModal()" style="flex: 1; background: rgba(255,255,255,0.2); color: white; padding: 15px; border: none; border-radius: 10px; cursor: pointer;">
-          ❌ Fermer
-        </button>
-      </div>
-      
-      <div id="premiumResult" style="margin-top: 20px; padding: 15px; border-radius: 10px; display: none;"></div>
-    </div>
-  `;
-  
-  document.body.appendChild(modal);
-  window.premiumModal = modal;
-}
-
-function verifyPremiumCode() {
-  const codeInput = document.getElementById('premiumCodeInput');
-  const resultDiv = document.getElementById('premiumResult');
-  const code = codeInput.value.trim().toUpperCase();
-  
-  if (!code) {
-    showPremiumResult('❌ Veuillez entrer un code', 'error');
-    return;
-  }
-  
-  // Codes de démonstration
-  const validCodes = {
-    'BRAIN-2024-DEMO1': { used: false, deviceId: null },
-    'BRAIN-2024-DEMO2': { used: false, deviceId: null }
-  };
-  
-  // Récupérer les codes utilisés du localStorage
-  const usedCodes = JSON.parse(localStorage.getItem('brainova_used_codes') || '{}');
-  Object.keys(usedCodes).forEach(key => {
-    if (validCodes[key]) {
-      validCodes[key] = usedCodes[key];
-    }
-  });
-  
-  if (!validCodes[code]) {
-    showPremiumResult('❌ Code invalide', 'error');
-    return;
-  }
-  
-  const deviceId = generateDeviceId();
-  
-  if (validCodes[code].used && validCodes[code].deviceId !== deviceId) {
-    showPremiumResult('⚠️ Ce code est déjà utilisé sur un autre appareil', 'error');
-    return;
-  }
-  
-  // Activer le code
-  validCodes[code].used = true;
-  validCodes[code].deviceId = deviceId;
-  
-  // Sauvegarder
-  localStorage.setItem('brainova_used_codes', JSON.stringify(validCodes));
-  localStorage.setItem('brainova_premium_status', 'true');
-  localStorage.setItem('brainova_device_id', deviceId);
-  
-  showPremiumResult('✅ Code activé avec succès!<br>Redirection vers la plateforme...', 'success');
-  
-  setTimeout(() => {
-    closePremiumModal();
-    location.reload(); // Recharger pour appliquer le statut premium
-  }, 2000);
-}
-
-function showPremiumResult(message, type) {
-  const resultDiv = document.getElementById('premiumResult');
-  resultDiv.style.display = 'block';
-  resultDiv.style.background = type === 'success' ? 'rgba(0,255,0,0.2)' : 'rgba(255,0,0,0.2)';
-  resultDiv.style.border = `2px solid ${type === 'success' ? '#00ff00' : '#ff0000'}`;
-  resultDiv.innerHTML = message;
-}
-
-function closePremiumModal() {
-  if (window.premiumModal) {
-    document.body.removeChild(window.premiumModal);
-    window.premiumModal = null;
-  }
-}
 
 </script>
 
