@@ -117,6 +117,11 @@ header{display:flex;justify-content:space-between;align-items:center;padding:14p
       <button id="premiumBtn">Premium</button>
       <button id="shareBtn">Partager</button>
       <button id="testPremiumBtn" style="background: #ff4444; color: white; padding: 8px 14px; border: none; border-radius: 12px; cursor: pointer; margin-left: 8px;">🧪 TEST</button>
+      
+      <!-- SYSTÈME DE TEST CODES PREMIUM INTÉGRÉ -->
+      <button onclick="openPremiumCodeTest()" style="background: linear-gradient(135deg, #00ff00 0%, #32cd32 100%); color: white; padding: 10px 16px; border: none; border-radius: 12px; cursor: pointer; margin-left: 8px; font-weight: bold;">
+        🔑 CODES PREMIUM
+      </button>
     </div>
   </div>
 </header>
@@ -1279,6 +1284,146 @@ setInterval(() => {
 }, 2000);
 
 console.log('🧹 Système d\'authentification clean chargé');
+
+// === SYSTÈME DE TEST CODES PREMIUM INTÉGRÉ ===
+function generateDeviceId() {
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  ctx.textBaseline = 'top';
+  ctx.font = '14px Arial';
+  ctx.fillText('Device fingerprint', 2, 2);
+  
+  const fingerprint = canvas.toDataURL();
+  const userAgent = navigator.userAgent;
+  const screen = `${window.screen.width}x${window.screen.height}`;
+  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  
+  const combined = fingerprint + userAgent + screen + timezone;
+  
+  let hash = 0;
+  for (let i = 0; i < combined.length; i++) {
+    const char = combined.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash;
+  }
+  
+  return 'DEVICE_' + Math.abs(hash).toString(16);
+}
+
+function openPremiumCodeTest() {
+  const modal = document.createElement('div');
+  modal.style.cssText = `
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.9); display: flex; align-items: center;
+    justify-content: center; z-index: 10050;
+  `;
+  
+  const deviceId = generateDeviceId();
+  
+  modal.innerHTML = `
+    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px; border-radius: 20px; text-align: center; max-width: 500px; width: 90%; box-shadow: 0 20px 40px rgba(0,0,0,0.3);">
+      <div style="font-size: 64px; margin-bottom: 20px;">🎮</div>
+      <h2 style="color: #ffd700; margin-bottom: 20px;">BRAINOVA PREMIUM</h2>
+      <p style="margin-bottom: 30px; color: #ecf0f1;">Entrez votre code d'accès premium</p>
+      
+      <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; margin-bottom: 20px; font-size: 12px;">
+        <strong>🖥️ ID Appareil:</strong><br>
+        <code style="color: #ffd700;">${deviceId}</code>
+      </div>
+      
+      <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+        <strong>📝 Codes de Test:</strong><br>
+        <code style="color: #00ff00;">BRAIN-2024-DEMO1</code><br>
+        <code style="color: #00ff00;">BRAIN-2024-DEMO2</code>
+      </div>
+      
+      <input type="text" id="premiumCodeInput" placeholder="Entrez votre code premium" 
+             style="width: 100%; padding: 15px; border: none; border-radius: 10px; background: rgba(255,255,255,0.1); color: white; margin-bottom: 20px; text-align: center; font-size: 16px; text-transform: uppercase;" />
+      
+      <div style="display: flex; gap: 10px;">
+        <button onclick="verifyPremiumCode()" style="flex: 1; background: linear-gradient(135deg, #ffd700 0%, #ffb347 100%); color: #333; padding: 15px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer;">
+          🔓 Vérifier le Code
+        </button>
+        <button onclick="closePremiumModal()" style="flex: 1; background: rgba(255,255,255,0.2); color: white; padding: 15px; border: none; border-radius: 10px; cursor: pointer;">
+          ❌ Fermer
+        </button>
+      </div>
+      
+      <div id="premiumResult" style="margin-top: 20px; padding: 15px; border-radius: 10px; display: none;"></div>
+    </div>
+  `;
+  
+  document.body.appendChild(modal);
+  window.premiumModal = modal;
+}
+
+function verifyPremiumCode() {
+  const codeInput = document.getElementById('premiumCodeInput');
+  const resultDiv = document.getElementById('premiumResult');
+  const code = codeInput.value.trim().toUpperCase();
+  
+  if (!code) {
+    showPremiumResult('❌ Veuillez entrer un code', 'error');
+    return;
+  }
+  
+  // Codes de démonstration
+  const validCodes = {
+    'BRAIN-2024-DEMO1': { used: false, deviceId: null },
+    'BRAIN-2024-DEMO2': { used: false, deviceId: null }
+  };
+  
+  // Récupérer les codes utilisés du localStorage
+  const usedCodes = JSON.parse(localStorage.getItem('brainova_used_codes') || '{}');
+  Object.keys(usedCodes).forEach(key => {
+    if (validCodes[key]) {
+      validCodes[key] = usedCodes[key];
+    }
+  });
+  
+  if (!validCodes[code]) {
+    showPremiumResult('❌ Code invalide', 'error');
+    return;
+  }
+  
+  const deviceId = generateDeviceId();
+  
+  if (validCodes[code].used && validCodes[code].deviceId !== deviceId) {
+    showPremiumResult('⚠️ Ce code est déjà utilisé sur un autre appareil', 'error');
+    return;
+  }
+  
+  // Activer le code
+  validCodes[code].used = true;
+  validCodes[code].deviceId = deviceId;
+  
+  // Sauvegarder
+  localStorage.setItem('brainova_used_codes', JSON.stringify(validCodes));
+  localStorage.setItem('brainova_premium_status', 'true');
+  localStorage.setItem('brainova_device_id', deviceId);
+  
+  showPremiumResult('✅ Code activé avec succès!<br>Redirection vers la plateforme...', 'success');
+  
+  setTimeout(() => {
+    closePremiumModal();
+    location.reload(); // Recharger pour appliquer le statut premium
+  }, 2000);
+}
+
+function showPremiumResult(message, type) {
+  const resultDiv = document.getElementById('premiumResult');
+  resultDiv.style.display = 'block';
+  resultDiv.style.background = type === 'success' ? 'rgba(0,255,0,0.2)' : 'rgba(255,0,0,0.2)';
+  resultDiv.style.border = `2px solid ${type === 'success' ? '#00ff00' : '#ff0000'}`;
+  resultDiv.innerHTML = message;
+}
+
+function closePremiumModal() {
+  if (window.premiumModal) {
+    document.body.removeChild(window.premiumModal);
+    window.premiumModal = null;
+  }
+}
 
 </script>
 
