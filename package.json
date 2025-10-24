@@ -1,0 +1,26 @@
+{
+  "name": "brainova-netlify-functions",
+  "version": "1.0.0",
+  "description": "Netlify Functions for Brainova Gaming Platform",
+  "main": "index.js",
+  "scripts": {
+    "dev": "netlify dev",
+    "build": "echo 'No build step required'",
+    "deploy": "netlify deploy --prod"
+  },
+  "dependencies": {
+    "stripe": "^14.0.0"
+  },
+  "devDependencies": {
+    "netlify-cli": "^17.0.0"
+  },
+  "keywords": [
+    "netlify",
+    "functions",
+    "stripe",
+    "gaming",
+    "brainova"
+  ],
+  "author": "Brainova Team",
+  "license": "MIT"
+}

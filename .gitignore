@@ -13,6 +13,7 @@ build/
 
 # Netlify
 .netlify/
+netlify.toml.backup
 
 # Cache directories
 .cache/
@@ -30,3 +31,7 @@ Thumbs.db
 
 # Other directories to ignore
 BRAINOVA/
+
+# Logs
+*.log
+logs/
