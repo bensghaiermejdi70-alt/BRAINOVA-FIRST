@@ -3,5 +3,11 @@
 # Redirection pour la page premium
 /premium /premium.html 200
 
-# Redirection par défaut pour les erreurs 404
-/* /index.html 404
+# Pages statiques spécifiques
+/premium.html /premium.html 200
+/test-premium.html /test-premium.html 200
+
+# SPA fallback seulement pour les routes non-existantes
+/api/* /api/:splat 200
+/games/* /index.html 200
+/* /index.html 200
