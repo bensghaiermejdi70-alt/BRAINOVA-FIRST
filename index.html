@@ -1171,16 +1171,16 @@ function initCleanAuth() {
   const isPremiumUser = checkPremiumStatus();
   console.log('🔍 Statut premium détecté:', {isPremiumUser, userPremium, isPremium});
   
-  if (isPremiumUser || userPremium || isPremium) {
-    // UTILISATEUR PREMIUM - Authentification disponible
-    console.log('✅ Utilisateur premium - Authentification activée');
+  if (!isPremiumUser && !userPremium && !isPremium) {
+    // UTILISATEUR NON PREMIUM - Authentification disponible (LOGIQUE INVERSÉE)
+    console.log('✅ Utilisateur non premium - Authentification libre');
     if (loginBtn) {
       loginBtn.style.opacity = '1';
       loginBtn.style.cursor = 'pointer';
       loginBtn.style.pointerEvents = 'auto';
       loginBtn.onclick = (e) => {
         e.stopPropagation();
-        console.log('✅ Connexion autorisée pour utilisateur premium');
+        console.log('✅ Connexion autorisée pour utilisateur non premium');
         document.getElementById('loginModal').style.display = 'flex';
       };
     }
@@ -1191,20 +1191,20 @@ function initCleanAuth() {
       signupBtn.style.pointerEvents = 'auto';
       signupBtn.onclick = (e) => {
         e.stopPropagation();
-        console.log('✅ Inscription autorisée pour utilisateur premium');
+        console.log('✅ Inscription autorisée pour utilisateur non premium');
         document.getElementById('signupModal').style.display = 'flex';
       };
     }
   } else {
-    // UTILISATEUR NON PREMIUM - Rediriger vers abonnement
-    console.log('❌ Utilisateur non premium - Authentification bloquée');
+    // UTILISATEUR PREMIUM - Rediriger vers message (LOGIQUE INVERSÉE)
+    console.log('❌ Utilisateur premium - Authentification bloquée');
     if (loginBtn) {
       loginBtn.style.opacity = '0.6';
       loginBtn.style.cursor = 'not-allowed';
       loginBtn.style.pointerEvents = 'auto';
       loginBtn.onclick = (e) => {
         e.stopPropagation();
-        showCleanPremiumMessage('connexion');
+        showCleanPremiumMessage('connexion', 'Les utilisateurs premium ont accès via le système de jeux uniquement.');
       };
     }
     
@@ -1214,7 +1214,7 @@ function initCleanAuth() {
       signupBtn.style.pointerEvents = 'auto';
       signupBtn.onclick = (e) => {
         e.stopPropagation();
-        showCleanPremiumMessage('inscription');
+        showCleanPremiumMessage('inscription', 'Les utilisateurs premium ont accès via le système de jeux uniquement.');
       };
     }
   }
