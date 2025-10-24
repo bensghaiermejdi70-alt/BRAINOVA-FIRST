@@ -397,10 +397,10 @@ function renderGrid(lang){
 
   
   if(userPremium || isPremium) {
-    // Utilisateur premium : masquer premium/partager, activer connexion/inscription
+    // Utilisateur premium : masquer premium seulement, garder partager visible
     premiumBtn.style.display = 'none';
     if (shareBtn) {
-      shareBtn.style.display = 'none';
+      shareBtn.style.display = 'inline-block'; // TOUJOURS visible pour premium
     }
     
     // Activer les boutons connexion/inscription
@@ -418,7 +418,7 @@ function renderGrid(lang){
     // Utilisateur non premium : afficher premium/partager, désactiver connexion/inscription
     premiumBtn.style.display = 'inline-block';
     if (shareBtn) {
-      shareBtn.style.display = 'inline-block';
+      shareBtn.style.display = 'inline-block'; // TOUJOURS visible pour non-premium aussi
     }
     
     // Désactiver les boutons connexion/inscription (style premium-only mais désactivés)
