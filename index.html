@@ -331,25 +331,37 @@ function isValidEmail(email) {
 }
 
 function renderGrid(lang){
-  console.log('🎮 Initialisation de renderGrid avec langue:', lang);
+  console.log('🎮 [DEBUG] Début renderGrid avec langue:', lang);
   const grid = document.getElementById('gamesGrid');
   if (!grid) {
-    console.error('❌ Élément gamesGrid introuvable !');
+    console.error('❌ [ERROR] Élément gamesGrid introuvable !');
     return;
   }
   
+  console.log('✅ [DEBUG] Grille trouvée, élément:', grid);
   grid.innerHTML='';
   const t=TRANSLATIONS[lang]||TRANSLATIONS['fr'];
+  console.log('📝 [DEBUG] Traductions chargées:', t ? 'OK' : 'ERREUR');
   
-  // Utiliser la fonction checkPremiumStatus complète qui met à jour les variables globales
-  checkPremiumStatus();
-  console.log('✅ Grille trouvée, userPremium:', userPremium, 'isPremium:', isPremium);
+  // Simplifier la vérification premium pour le debug
+  let premiumStatus = false;
+  try {
+    premiumStatus = localStorage.getItem('brainova_premium_status') === 'true';
+    console.log('🔐 [DEBUG] Statut premium:', premiumStatus);
+  } catch(e) {
+    console.error('❌ [ERROR] Erreur localStorage:', e);
+  }
+  
+  console.log('🎮 [DEBUG] Début création des 36 cartes...');
   
   for(let i=1;i<=36;i++){
-    const card=document.createElement('div'); card.className='card';
+    console.log(`🎯 [DEBUG] Création carte ${i}/36`);
+    const card=document.createElement('div'); 
+    card.className='card';
     
-    // Jeux 11 à 36 verrouillés sauf si premium (y compris le test QI)
-    const isLocked = (i >= 11 && !userPremium);
+    // Simplifier pour le debug - jeux 11-36 verrouillés sauf si premium
+    const isLocked = (i >= 11 && !premiumStatus);
+    console.log(`🔒 [DEBUG] Carte ${i} - verrouillée: ${isLocked}`);
     
     // Appliquer les contours néon selon le groupe de jeux
     if (i >= 1 && i <= 10) {
@@ -386,9 +398,11 @@ function renderGrid(lang){
     });
     
     grid.appendChild(card);
+    console.log(`✅ [DEBUG] Carte ${i} ajoutée à la grille`);
   }
   
-  console.log('🎯 Grille de jeux créée avec succès - 36 cartes ajoutées');
+  console.log('🎯 [DEBUG] FIN renderGrid - 36 cartes créées et ajoutées');
+  console.log('📊 [DEBUG] Nombre d\'enfants dans la grille:', grid.children.length);
   
   // Gestion de la visibilité et activation des boutons selon le statut premium
   const premiumBtn = document.getElementById('premiumBtn');
