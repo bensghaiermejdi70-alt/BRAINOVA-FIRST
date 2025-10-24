@@ -107,7 +107,7 @@ header{display:flex;justify-content:space-between;align-items:center;padding:14p
     </div>
     <div id="authContainer">
       <!-- INTERFACE SIMPLIFIÉE - SEULEMENT LES BOUTONS ESSENTIELS -->
-      <button onclick="openPremiumCodeTest()" class="authBtn" style="background: linear-gradient(135deg, #ffd700 0%, #ffb347 100%); color: #333; font-weight: bold;">
+      <button id="premiumAccessBtn" class="authBtn" style="background: linear-gradient(135deg, #ffd700 0%, #ffb347 100%); color: #333; font-weight: bold;">
         🔑 Accès Premium
       </button>
       <button id="shareBtn" class="authBtn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
@@ -1086,6 +1086,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Attacher les événements après le chargement du DOM
   const premiumBtn = document.getElementById('premiumBtn');
   const shareBtn = document.getElementById('shareBtn');
+  const premiumAccessBtn = document.getElementById('premiumAccessBtn');
   
   if (premiumBtn) {
     premiumBtn.addEventListener('click', showSubscriptionMessage);
@@ -1096,6 +1097,15 @@ document.addEventListener('DOMContentLoaded', () => {
       e.preventDefault();
       e.stopPropagation();
       showShareOptions();
+    });
+  }
+  
+  // Nouveau bouton d'accès premium
+  if (premiumAccessBtn) {
+    premiumAccessBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      console.log('🔑 Clic sur Accès Premium');
+      openPremiumCodeTest();
     });
   }
   
