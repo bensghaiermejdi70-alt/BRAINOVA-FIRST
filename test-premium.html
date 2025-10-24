@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Premium - BRAINOVA</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .test-container {
+            max-width: 600px;
+            margin: 50px auto;
+            background: rgba(0,0,0,0.3);
+            padding: 30px;
+            border-radius: 15px;
+        }
+        .test-btn {
+            background: linear-gradient(135deg, #00ff00 0%, #32cd32 100%);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+            transition: all 0.3s ease;
+        }
+        .test-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,255,0,0.3);
+        }
+        .code-demo {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 Test du Système Premium</h1>
+        <p>Page de test pour vérifier l'accès au système de codes premium</p>
+        
+        <div class="code-demo">
+            <h3>Codes de Test Disponibles :</h3>
+            <p><strong>BRAIN-2024-DEMO1</strong></p>
+            <p><strong>BRAIN-2024-DEMO2</strong></p>
+        </div>
+        
+        <button class="test-btn" onclick="window.location.href='premium.html'">
+            🔑 Accéder à Premium
+        </button>
+        
+        <button class="test-btn" onclick="window.location.href='index.html'">
+            🏠 Retour à l'accueil
+        </button>
+        
+        <div style="margin-top: 30px; font-size: 12px; opacity: 0.7;">
+            <p>Si cette page s'affiche, le routing Netlify fonctionne.</p>
+            <p>URL de test : https://brainovafirst.netlify.app/test-premium.html</p>
+        </div>
+    </div>
+</body>
+</html>
