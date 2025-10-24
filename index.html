@@ -67,7 +67,8 @@ header{display:flex;justify-content:space-between;align-items:center;padding:14p
 #shareBtn.locked,#premiumBtn.locked,#emailBtn.locked{opacity:0.3;cursor:not-allowed}
 .intro{max-width:1100px;margin:14px auto;padding:18px;border-radius:12px;background:rgba(0,0,0,0.45);text-align:center}
 .intro h2{margin:6px 0;color:var(--gold);text-shadow:0 0 6px var(--gold)}
-.games-grid{max-width:1200px;margin:16px auto;padding:18px;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px;perspective:1200px}
+.games-grid{max-width:1200px;margin:16px auto;padding:18px;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px;perspective:1200px;opacity:0;transition:opacity 0.3s ease-in-out}
+.games-grid.loaded{opacity:1}
 .card{background:rgba(0,0,0,0.16);border-radius:14px;padding:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;border:1px solid rgba(255,255,255,0.04);box-shadow:0 6px 22px rgba(0,0,0,0.4);transition:transform .35s,box-shadow .35s;position:relative}
 .card:hover{transform:translateY(-8px) rotateY(6deg);box-shadow:0 12px 40px rgba(0,0,0,0.6)}
 .card .num{font-size:22px;font-weight:900;margin-bottom:6px;background:linear-gradient(90deg,var(--accent1),#8a2be2);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
@@ -446,6 +447,11 @@ function renderGrid(lang){
   if (shareBtn) {
     shareBtn.style.display = 'inline-block';
   }
+  
+  // Afficher la grille avec transition une fois tout prêt
+  setTimeout(() => {
+    grid.classList.add('loaded');
+  }, 100);
   
   console.log('renderGrid completed - Cards added to grid:', grid.children.length);
 }
@@ -1142,30 +1148,28 @@ function initializeAuthButtons() {
   const isPremium = checkPremiumStatus();
   const loginBtn = document.getElementById('loginBtn');
   const signupBtn = document.getElementById('signupBtn');
+  const premiumBtn = document.getElementById('premiumBtn');
   
-  if (!isPremium) {
-    // Utilisateur non premium : désactiver les boutons
-    if (loginBtn) {
-      loginBtn.style.opacity = '0.6';
-      loginBtn.style.pointerEvents = 'none';
-      loginBtn.title = 'Connexion disponible après abonnement premium';
-    }
-    if (signupBtn) {
-      signupBtn.style.opacity = '0.6';
-      signupBtn.style.pointerEvents = 'none';
-      signupBtn.title = 'Inscription disponible après abonnement premium';
-    }
-  } else {
-    // Utilisateur premium : activer les boutons
-    if (loginBtn) {
-      loginBtn.style.opacity = '1';
-      loginBtn.style.pointerEvents = 'auto';
-      loginBtn.title = 'Se connecter';
-    }
-    if (signupBtn) {
-      signupBtn.style.opacity = '1';
-      signupBtn.style.pointerEvents = 'auto';
-      signupBtn.title = "S'inscrire";
+  // Boutons connexion/inscription TOUJOURS actifs
+  if (loginBtn) {
+    loginBtn.style.opacity = '1';
+    loginBtn.style.pointerEvents = 'auto';
+    loginBtn.title = 'Se connecter';
+    loginBtn.classList.remove('premium-only');
+  }
+  if (signupBtn) {
+    signupBtn.style.opacity = '1';
+    signupBtn.style.pointerEvents = 'auto';
+    signupBtn.title = "S'inscrire";
+    signupBtn.classList.remove('premium-only');
+  }
+  
+  // Bouton Premium : masquer si déjà premium
+  if (premiumBtn) {
+    if (isPremium) {
+      premiumBtn.style.display = 'none';
+    } else {
+      premiumBtn.style.display = 'inline-block';
     }
   }
 }
