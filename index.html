@@ -68,7 +68,7 @@ header{display:flex;justify-content:space-between;align-items:center;padding:14p
 .intro{max-width:1100px;margin:14px auto;padding:18px;border-radius:12px;background:rgba(0,0,0,0.45);text-align:center}
 .intro h2{margin:6px 0;color:var(--gold);text-shadow:0 0 6px var(--gold)}
 .games-grid{max-width:1200px;margin:16px auto;padding:18px;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px;perspective:1200px}
-.card{background:rgba(0,0,0,0.16);border-radius:14px;padding:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;border:1px solid rgba(255,255,255,0.04);box-shadow:0 6px 22px rgba(0,0,0,0.4);transition:transform .35s,box-shadow .35s;position:relative}
+.card{background:rgba(0,0,0,0.16) !important;border-radius:14px;padding:20px;display:flex !important;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;border:1px solid rgba(255,255,255,0.04);box-shadow:0 6px 22px rgba(0,0,0,0.4);transition:transform .35s,box-shadow .35s;position:relative;min-height:120px !important;width:auto !important;visibility:visible !important;opacity:1 !important}
 .card:hover{transform:translateY(-8px) rotateY(6deg);box-shadow:0 12px 40px rgba(0,0,0,0.6)}
 .card .num{font-size:22px;font-weight:900;margin-bottom:6px;background:linear-gradient(90deg,var(--accent1),#8a2be2);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .card .title{font-size:16px;text-align:center;color:#fff;text-shadow:0 0 6px rgba(255,215,0,0.06)}
@@ -106,21 +106,12 @@ header{display:flex;justify-content:space-between;align-items:center;padding:14p
       </select>
     </div>
     <div id="authContainer">
-      <button class="authBtn" id="cleanLoginBtn">
-        <span class="auth-icon">🔐</span>
-        <span class="auth-text">Connexion</span>
+      <!-- INTERFACE SIMPLIFIÉE - SEULEMENT LES BOUTONS ESSENTIELS -->
+      <button onclick="openPremiumCodeTest()" class="authBtn" style="background: linear-gradient(135deg, #ffd700 0%, #ffb347 100%); color: #333; font-weight: bold;">
+        🔑 Accès Premium
       </button>
-      <button class="authBtn" id="cleanSignupBtn">
-        <span class="auth-icon">✨</span>
-        <span class="auth-text">Inscription</span>
-      </button>
-      <button id="premiumBtn">Premium</button>
-      <button id="shareBtn">Partager</button>
-      <button id="testPremiumBtn" style="background: #ff4444; color: white; padding: 8px 14px; border: none; border-radius: 12px; cursor: pointer; margin-left: 8px;">🧪 TEST</button>
-      
-      <!-- SYSTÈME DE TEST CODES PREMIUM INTÉGRÉ -->
-      <button onclick="openPremiumCodeTest()" style="background: linear-gradient(135deg, #00ff00 0%, #32cd32 100%); color: white; padding: 10px 16px; border: none; border-radius: 12px; cursor: pointer; margin-left: 8px; font-weight: bold;">
-        🔑 CODES PREMIUM
+      <button id="shareBtn" class="authBtn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+        � Partager
       </button>
     </div>
   </div>
@@ -331,78 +322,88 @@ function isValidEmail(email) {
 }
 
 function renderGrid(lang){
-  console.log('🎮 [DEBUG] Début renderGrid avec langue:', lang);
+  console.log('🎮 RENDERGRID START - Langue:', lang);
   const grid = document.getElementById('gamesGrid');
   if (!grid) {
-    console.error('❌ [ERROR] Élément gamesGrid introuvable !');
+    console.error('❌ FATAL: gamesGrid introuvable !');
     return;
   }
   
-  console.log('✅ [DEBUG] Grille trouvée, élément:', grid);
-  grid.innerHTML='';
-  const t=TRANSLATIONS[lang]||TRANSLATIONS['fr'];
-  console.log('📝 [DEBUG] Traductions chargées:', t ? 'OK' : 'ERREUR');
+  // Nettoyer la grille
+  grid.innerHTML = '';
   
-  // Simplifier la vérification premium pour le debug
-  let premiumStatus = false;
-  try {
-    premiumStatus = localStorage.getItem('brainova_premium_status') === 'true';
-    console.log('🔐 [DEBUG] Statut premium:', premiumStatus);
-  } catch(e) {
-    console.error('❌ [ERROR] Erreur localStorage:', e);
-  }
+  // Traductions simples
+  const gameNames = [
+    "Quantum Tetris 2077", "Memory Quantique", "Neural Puzzle Master", "Quantum Chess", "Jeux de Dames", 
+    "Pac-Man", "Simon Says", "Speed Challenge", "Cyber Checker", "Demo Playground",
+    "Quantum Monopoly", "Neural Poker", "Blackjack Quantum", "Solitaire Fusion", "Mystic Forest Quest",
+    "Enigma Hunter", "Neural Racing", "Cyber Shooter", "Quantum Dots", "Neural Rhythm",
+    "Cyber Pinball", "Quantum Pipes", "Neural Slots", "Cyber Darts", "Quantum Bubbles",
+    "Neural Dice", "Cyber Pool", "Quantum Tiles", "Neural Trivia", "Cyber Asteroids",
+    "Quantum Crystals", "Neural Infinity", "Algorithme Visuel", "Physique Quantique", "Test QI", "Conscience Artificielle"
+  ];
   
-  console.log('🎮 [DEBUG] Début création des 36 cartes...');
+  // Statut premium simple
+  const isPremium = localStorage.getItem('brainova_premium_status') === 'true';
+  console.log('🔐 Premium:', isPremium);
   
-  for(let i=1;i<=36;i++){
-    console.log(`🎯 [DEBUG] Création carte ${i}/36`);
-    const card=document.createElement('div'); 
-    card.className='card';
+  // Créer 36 cartes de jeu
+  for(let i = 1; i <= 36; i++){
+    const card = document.createElement('div');
+    card.className = 'card';
     
-    // Simplifier pour le debug - jeux 11-36 verrouillés sauf si premium
-    const isLocked = (i >= 11 && !premiumStatus);
-    console.log(`🔒 [DEBUG] Carte ${i} - verrouillée: ${isLocked}`);
+    // Jeux 1-10 gratuits, 11-36 premium
+    const isLocked = (i > 10 && !isPremium);
     
-    // Appliquer les contours néon selon le groupe de jeux
-    if (i >= 1 && i <= 10) {
-      // Jeux 1-10 : contour vert (gratuits)
-      card.classList.add('free');
-    } else if (i >= 11 && i <= 36) {
-      // Jeux 11-36 : contour jaune (premium)
-      card.classList.add('locked');
-    }
-    
-    if(isLocked) {
-      card.classList.add('premium');
-      // Réduire légèrement l'opacité mais garder les contours visibles
-      card.style.opacity = '0.8';
-      // Ajouter un cadenas
-      const lockIcon = document.createElement('div');
-      lockIcon.innerHTML = '🔒';
-      lockIcon.style.cssText = 'position: absolute; top: 10px; right: 10px; font-size: 20px; z-index: 1; filter: none;';
-      card.appendChild(lockIcon);
-    }
-    
-    if(i===36) card.classList.add('testqi');
-    
-    const num=document.createElement('div'); num.className='num'; num.textContent=i;
-    const title=document.createElement('div'); title.className='title'; title.textContent=t.games[i-1]||`Jeu ${i}`;
-    card.appendChild(num); card.appendChild(title);
-    
-    card.addEventListener('click',()=>{
-      if(isLocked){
-        showSubscriptionMessage();
-        return;
+    // Styles visuels selon le statut
+    if (i <= 10) {
+      card.style.border = '2px solid #00ff00'; // Vert pour gratuit
+    } else {
+      card.style.border = '2px solid #ffd700'; // Or pour premium
+      if (isLocked) {
+        card.style.opacity = '0.7';
+        // Ajouter cadenas
+        const lock = document.createElement('div');
+        lock.innerHTML = '🔒';
+        lock.style.cssText = 'position: absolute; top: 8px; right: 8px; font-size: 18px;';
+        card.appendChild(lock);
       }
-      openGame(i);
+    }
+    
+    // Numéro du jeu
+    const num = document.createElement('div');
+    num.className = 'num';
+    num.textContent = i;
+    num.style.cssText = 'font-size: 24px; font-weight: bold; color: #fff; margin-bottom: 8px;';
+    
+    // Titre du jeu
+    const title = document.createElement('div');
+    title.className = 'title';
+    title.textContent = gameNames[i-1] || `Jeu ${i}`;
+    title.style.cssText = 'font-size: 14px; color: #fff; text-align: center;';
+    
+    // Assembler la carte
+    card.appendChild(num);
+    card.appendChild(title);
+    
+    // Click handler simple
+    card.addEventListener('click', () => {
+      if (isLocked) {
+        alert('🔒 Jeu Premium ! Utilisez un code d\'accès.');
+        openPremiumCodeTest();
+      } else {
+        alert(`🎮 Ouverture du jeu ${i}: ${gameNames[i-1]}`);
+        // openGame(i); // Désactivé pour debug
+      }
     });
     
+    // Ajouter à la grille
     grid.appendChild(card);
-    console.log(`✅ [DEBUG] Carte ${i} ajoutée à la grille`);
+    console.log(`✅ Carte ${i} créée et ajoutée`);
   }
   
-  console.log('🎯 [DEBUG] FIN renderGrid - 36 cartes créées et ajoutées');
-  console.log('📊 [DEBUG] Nombre d\'enfants dans la grille:', grid.children.length);
+  console.log('🎯 RENDERGRID COMPLETE - 36 cartes ajoutées');
+  console.log('📊 Grille enfants:', grid.children.length);
   
   // Gestion de la visibilité et activation des boutons selon le statut premium
   const premiumBtn = document.getElementById('premiumBtn');
