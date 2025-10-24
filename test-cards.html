@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Cartes Brainova</title>
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .test-card {
+            background: rgba(0,0,0,0.3);
+            border: 2px solid #00ff00;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            min-height: 100px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        .test-card:hover {
+            transform: translateY(-5px);
+        }
+        .test-card.premium {
+            border-color: #ffd700;
+        }
+        .card-num {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .card-title {
+            font-size: 14px;
+        }
+        .debug {
+            background: rgba(0,0,0,0.8);
+            padding: 10px;
+            margin: 20px 0;
+            border-radius: 10px;
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test des Cartes de Jeux</h1>
+    
+    <div class="debug" id="debug">
+        <strong>Debug Log:</strong><br>
+        Chargement en cours...
+    </div>
+    
+    <div class="test-grid" id="testGrid">
+        <!-- Les cartes seront ajoutées ici par JavaScript -->
+    </div>
+    
+    <script>
+        function log(message) {
+            const debug = document.getElementById('debug');
+            debug.innerHTML += '<br>' + new Date().toLocaleTimeString() + ' - ' + message;
+        }
+        
+        log('🎮 Début du test');
+        
+        // Attendre que le DOM soit chargé
+        document.addEventListener('DOMContentLoaded', function() {
+            log('✅ DOM chargé');
+            
+            const grid = document.getElementById('testGrid');
+            if (!grid) {
+                log('❌ Grille introuvable !');
+                return;
+            }
+            
+            log('📋 Création de 36 cartes...');
+            
+            const gameNames = [
+                "Quantum Tetris 2077", "Memory Quantique", "Neural Puzzle Master", "Quantum Chess", "Jeux de Dames", 
+                "Pac-Man", "Simon Says", "Speed Challenge", "Cyber Checker", "Demo Playground",
+                "Quantum Monopoly", "Neural Poker", "Blackjack Quantum", "Solitaire Fusion", "Mystic Forest Quest",
+                "Enigma Hunter", "Neural Racing", "Cyber Shooter", "Quantum Dots", "Neural Rhythm",
+                "Cyber Pinball", "Quantum Pipes", "Neural Slots", "Cyber Darts", "Quantum Bubbles",
+                "Neural Dice", "Cyber Pool", "Quantum Tiles", "Neural Trivia", "Cyber Asteroids",
+                "Quantum Crystals", "Neural Infinity", "Algorithme Visuel", "Physique Quantique", "Test QI", "Conscience Artificielle"
+            ];
+            
+            for (let i = 1; i <= 36; i++) {
+                const card = document.createElement('div');
+                card.className = 'test-card';
+                
+                if (i > 10) {
+                    card.classList.add('premium');
+                    card.innerHTML = `
+                        <div style="position: absolute; top: 5px; right: 5px; font-size: 16px;">🔒</div>
+                        <div class="card-num">${i}</div>
+                        <div class="card-title">${gameNames[i-1]}</div>
+                    `;
+                } else {
+                    card.innerHTML = `
+                        <div class="card-num">${i}</div>
+                        <div class="card-title">${gameNames[i-1]}</div>
+                    `;
+                }
+                
+                card.style.position = 'relative';
+                
+                card.addEventListener('click', function() {
+                    alert(`Jeu ${i}: ${gameNames[i-1]}`);
+                });
+                
+                grid.appendChild(card);
+                log(`✅ Carte ${i} ajoutée`);
+            }
+            
+            log(`🎯 Test terminé - ${grid.children.length} cartes dans la grille`);
+            
+            // Test après 2 secondes
+            setTimeout(() => {
+                const finalCount = grid.children.length;
+                log(`📊 Vérification finale: ${finalCount} cartes visibles`);
+                if (finalCount === 36) {
+                    log('✅ SUCCÈS: Toutes les cartes sont créées !');
+                } else {
+                    log('❌ ÉCHEC: Certaines cartes manquent !');
+                }
+            }, 2000);
+        });
+        
+        log('📝 Script chargé');
+    </script>
+</body>
+</html>
