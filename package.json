@@ -6,7 +6,11 @@
   "scripts": {
     "dev": "netlify dev",
     "build": "echo 'No build step required'",
-    "deploy": "netlify deploy --prod"
+    "deploy": "netlify deploy --prod",
+    "deploy:functions": "netlify deploy --prod --functions=netlify/functions",
+    "test:functions": "netlify functions:serve",
+    "setup": "npm install && netlify login && netlify init",
+    "health": "curl https://your-site.netlify.app/.netlify/functions/health-check"
   },
   "dependencies": {
     "stripe": "^14.0.0"
