@@ -106,11 +106,11 @@ header{display:flex;justify-content:space-between;align-items:center;padding:14p
       </select>
     </div>
     <div id="authContainer">
-      <button class="authBtn" id="newLoginBtn" onclick="console.log('FORCE LOGIN'); event.stopPropagation(); event.preventDefault(); document.getElementById('loginModal').style.display='flex'; return false;">
+      <button class="authBtn" id="cleanLoginBtn">
         <span class="auth-icon">🔐</span>
         <span class="auth-text">Connexion</span>
       </button>
-      <button class="authBtn" id="newSignupBtn" onclick="console.log('FORCE SIGNUP'); event.stopPropagation(); event.preventDefault(); document.getElementById('signupModal').style.display='flex'; return false;">
+      <button class="authBtn" id="cleanSignupBtn">
         <span class="auth-icon">✨</span>
         <span class="auth-text">Inscription</span>
       </button>
@@ -388,8 +388,7 @@ function renderGrid(lang){
   // Gestion de la visibilité et activation des boutons selon le statut premium
   const premiumBtn = document.getElementById('premiumBtn');
   const shareBtn = document.getElementById('shareBtn');
-  const loginBtn = document.getElementById('newLoginBtn');
-  const signupBtn = document.getElementById('newSignupBtn');
+  // Plus de manipulation des boutons d'authentification - géré par le système clean
   
 
   
@@ -404,37 +403,15 @@ function renderGrid(lang){
       shareBtn.title = '🔒 Fonction de partage bloquée pour les utilisateurs premium';
     }
     
-    // Activer les boutons connexion/inscription
-    if(loginBtn) {
-      loginBtn.style.opacity = '1';
-      loginBtn.style.pointerEvents = 'auto';
-      loginBtn.title = 'Se connecter';
-    }
-    if(signupBtn) {
-      signupBtn.style.opacity = '1';
-      signupBtn.style.pointerEvents = 'auto';
-      signupBtn.title = 'S\'inscrire';
-    }
+    // Système d'authentification géré par initCleanAuth()
   } else {
-    // Utilisateur non premium : afficher premium/partager, désactiver connexion/inscription
+    // Utilisateur non premium : afficher premium/partager
     premiumBtn.style.display = 'inline-block';
     if (shareBtn) {
       shareBtn.style.display = 'inline-block';
     }
     
-    // Désactiver les boutons connexion/inscription (style premium-only mais désactivés)
-    if(loginBtn) {
-      loginBtn.style.opacity = '0.6';
-      loginBtn.style.pointerEvents = 'none';
-      loginBtn.title = 'Connexion disponible après abonnement premium';
-      loginBtn.classList.add('premium-only');
-    }
-    if(signupBtn) {
-      signupBtn.style.opacity = '0.6';
-      signupBtn.style.pointerEvents = 'none';
-      signupBtn.title = 'Inscription disponible après abonnement premium';
-      signupBtn.classList.add('premium-only');
-    }
+    // Système d'authentification géré par initCleanAuth()
   }
   
 }
@@ -1180,6 +1157,117 @@ window.activatePremiumPermanent = function() {
 // activatePremiumPermanent() - pour activer définitivement
 // testActivatePremium() - pour tester temporairement
 // localStorage.getItem('brainova_premium') - pour voir le statut
+
+// ========================
+// SYSTÈME D'AUTHENTIFICATION CLEAN
+// ========================
+
+function initCleanAuth() {
+  console.log('🧹 Initialisation du système d\'authentification clean');
+  const loginBtn = document.getElementById('cleanLoginBtn');
+  const signupBtn = document.getElementById('cleanSignupBtn');
+  
+  // Vérifier le statut premium
+  const isPremiumUser = checkPremiumStatus();
+  console.log('🔍 Statut premium détecté:', {isPremiumUser, userPremium, isPremium});
+  
+  if (isPremiumUser || userPremium || isPremium) {
+    // UTILISATEUR PREMIUM - Authentification disponible
+    console.log('✅ Utilisateur premium - Authentification activée');
+    if (loginBtn) {
+      loginBtn.style.opacity = '1';
+      loginBtn.style.cursor = 'pointer';
+      loginBtn.style.pointerEvents = 'auto';
+      loginBtn.onclick = (e) => {
+        e.stopPropagation();
+        console.log('✅ Connexion autorisée pour utilisateur premium');
+        document.getElementById('loginModal').style.display = 'flex';
+      };
+    }
+    
+    if (signupBtn) {
+      signupBtn.style.opacity = '1';
+      signupBtn.style.cursor = 'pointer';
+      signupBtn.style.pointerEvents = 'auto';
+      signupBtn.onclick = (e) => {
+        e.stopPropagation();
+        console.log('✅ Inscription autorisée pour utilisateur premium');
+        document.getElementById('signupModal').style.display = 'flex';
+      };
+    }
+  } else {
+    // UTILISATEUR NON PREMIUM - Rediriger vers abonnement
+    console.log('❌ Utilisateur non premium - Authentification bloquée');
+    if (loginBtn) {
+      loginBtn.style.opacity = '0.6';
+      loginBtn.style.cursor = 'not-allowed';
+      loginBtn.style.pointerEvents = 'auto';
+      loginBtn.onclick = (e) => {
+        e.stopPropagation();
+        showCleanPremiumMessage('connexion');
+      };
+    }
+    
+    if (signupBtn) {
+      signupBtn.style.opacity = '0.6';
+      signupBtn.style.cursor = 'not-allowed';
+      signupBtn.style.pointerEvents = 'auto';
+      signupBtn.onclick = (e) => {
+        e.stopPropagation();
+        showCleanPremiumMessage('inscription');
+      };
+    }
+  }
+}
+
+function showCleanPremiumMessage(action) {
+  console.log('🔒 Affichage message premium pour:', action);
+  const modal = document.createElement('div');
+  modal.style.cssText = `
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.9); display: flex; align-items: center;
+    justify-content: center; z-index: 10040;
+  `;
+  
+  modal.innerHTML = `
+    <div style="
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 40px; border-radius: 20px; text-align: center;
+      color: white; max-width: 400px; box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+    ">
+      <div style="font-size: 48px; margin-bottom: 20px;">🔒</div>
+      <h3 style="margin-bottom: 15px;">Accès Premium Requis</h3>
+      <p style="margin-bottom: 25px;">
+        La ${action} n'est disponible que pour les membres premium. 
+        Abonnez-vous d'abord pour débloquer cette fonctionnalité.
+      </p>
+      <button onclick="this.closest('div').parentElement.remove(); showSubscriptionMessage();" style="
+        background: #ffd700; color: #333; border: none; padding: 15px 30px;
+        border-radius: 25px; font-weight: bold; cursor: pointer; margin-right: 10px;
+      ">S'abonner maintenant</button>
+      <button onclick="this.closest('div').parentElement.remove();" style="
+        background: transparent; border: 2px solid rgba(255,255,255,0.5);
+        color: white; padding: 15px 30px; border-radius: 25px; cursor: pointer;
+      ">Fermer</button>
+    </div>
+  `;
+  
+  document.body.appendChild(modal);
+}
+
+// Initialiser le système clean au chargement
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(initCleanAuth, 1000); // Attendre que tout soit chargé
+});
+
+// Réinitialiser après changement de statut premium
+setInterval(() => {
+  if (checkPremiumStatus()) {
+    initCleanAuth(); // Réinitialiser si le statut change
+  }
+}, 2000);
+
+console.log('🧹 Système d\'authentification clean chargé');
 
 </script>
 
