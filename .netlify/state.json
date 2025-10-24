@@ -1,0 +1,19 @@
+{
+	"geolocation": {
+		"data": {
+			"city": "Tunis",
+			"country": {
+				"code": "TN",
+				"name": "Tunisia"
+			},
+			"subdivision": {
+				"code": "11",
+				"name": "Tunis Governorate"
+			},
+			"timezone": "Africa/Tunis",
+			"latitude": 36.8178,
+			"longitude": 10.1656
+		},
+		"timestamp": 1761044835762
+	}
+}
