@@ -23,15 +23,41 @@
             justify-content: space-between;
             align-items: center;
             padding: 20px;
-            background: rgba(0,0,0,0.3);
-            backdrop-filter: blur(10px);
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(15px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         }
         
         .logo {
-            font-size: 32px;
+            font-size: 36px;
             font-weight: bold;
-            color: #00ffff;
-            text-shadow: 0 0 20px #00ffff;
+            background: linear-gradient(90deg, #00ffff, #ff00ff, #ffd700);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px rgba(0,255,255,0.5);
+        }
+        
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .lang-selector {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+            backdrop-filter: blur(10px);
+        }
+        
+        .lang-selector:focus {
+            outline: none;
+            box-shadow: 0 0 15px rgba(0,255,255,0.5);
         }
         
         .buttons {
@@ -59,6 +85,16 @@
             box-shadow: 0 8px 25px rgba(255,215,0,0.4);
         }
         
+        .btn-share {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-share:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102,126,234,0.4);
+        }
+        
         .intro {
             text-align: center;
             padding: 40px 20px;
@@ -83,33 +119,42 @@
         }
         
         .game-card {
-            background: rgba(0,0,0,0.3);
-            border-radius: 15px;
+            background: linear-gradient(145deg, rgba(0,0,0,0.4), rgba(255,255,255,0.05));
+            border-radius: 18px;
             padding: 25px;
             text-align: center;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.4s ease;
             position: relative;
-            min-height: 140px;
+            min-height: 150px;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
+            backdrop-filter: blur(10px);
         }
         
         .game-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+            transform: translateY(-10px) rotateY(5deg);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
         }
         
         .game-card.free {
-            border: 3px solid #00ff00;
-            box-shadow: 0 0 20px rgba(0,255,0,0.3);
+            border: 3px solid #00ff88;
+            box-shadow: 0 0 30px rgba(0,255,136,0.4), inset 0 0 15px rgba(0,255,136,0.1);
+        }
+        
+        .game-card.free:hover {
+            box-shadow: 0 0 40px rgba(0,255,136,0.6), 0 20px 50px rgba(0,0,0,0.5), inset 0 0 20px rgba(0,255,136,0.2);
         }
         
         .game-card.premium {
             border: 3px solid #ffd700;
-            box-shadow: 0 0 20px rgba(255,215,0,0.3);
+            box-shadow: 0 0 30px rgba(255,215,0,0.4), inset 0 0 15px rgba(255,215,0,0.1);
+        }
+        
+        .game-card.premium:hover {
+            box-shadow: 0 0 40px rgba(255,215,0,0.6), 0 20px 50px rgba(0,0,0,0.5), inset 0 0 20px rgba(255,215,0,0.2);
         }
         
         .game-card.premium.locked {
@@ -196,26 +241,25 @@
             color: white;
         }
         
-        .debug {
-            position: fixed;
-            bottom: 10px;
-            right: 10px;
-            background: rgba(0,0,0,0.8);
-            padding: 10px;
-            border-radius: 5px;
-            font-size: 12px;
-            font-family: monospace;
-            max-width: 300px;
-            max-height: 200px;
-            overflow-y: auto;
-        }
+
     </style>
 </head>
 <body>
     <div class="header">
         <div class="logo">🧠 BRAINOVA</div>
-        <div class="buttons">
-            <button class="btn btn-premium" onclick="openPremiumModal()">🔑 Accès Premium</button>
+        <div class="header-controls">
+            <select class="lang-selector" id="langSelect" onchange="changeLanguage()">
+                <option value="fr">🇫🇷 Français</option>
+                <option value="en">🇺🇸 English</option>
+                <option value="es">🇪🇸 Español</option>
+                <option value="de">🇩🇪 Deutsch</option>
+                <option value="ar">🇸🇦 العربية</option>
+                <option value="zh">🇨🇳 中文</option>
+            </select>
+            <div class="buttons">
+                <button class="btn btn-premium" onclick="openPremiumModal()">🔑 Accès Premium</button>
+                <button class="btn btn-share" onclick="openShareModal()">📤 Partager</button>
+            </div>
         </div>
     </div>
     
@@ -251,10 +295,7 @@
         </div>
     </div>
     
-    <div class="debug" id="debug">
-        <strong>Debug:</strong><br>
-        Chargement...
-    </div>
+
     
     <script>
         let isPremium = false;
