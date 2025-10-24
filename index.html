@@ -1066,12 +1066,22 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   
   // Initialiser la grille de jeux
+  console.log('🎮 Initialisation de la grille au chargement DOM');
   if (langSelect && langSelect.value) {
     renderGrid(langSelect.value);
   } else {
     // Fallback si langSelect n'est pas encore prêt
     renderGrid('fr');
   }
+  
+  // Force l'affichage si pas encore fait
+  setTimeout(() => {
+    const grid = document.getElementById('gamesGrid');
+    if (grid && grid.children.length === 0) {
+      console.log('🔄 Force renderGrid car grille vide');
+      renderGrid('fr');
+    }
+  }, 500);
   
   // Initialiser le statut des boutons d'authentification
   initializeAuthButtons();
