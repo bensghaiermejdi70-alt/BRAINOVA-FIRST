@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎮 Brainova Premium - Accès Code</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        
+        .premium-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .logo {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #ffd700, #ffb347);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .subtitle {
+            font-size: 1.2em;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+        
+        .code-input-container {
+            margin: 30px 0;
+        }
+        
+        .code-input {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            padding: 15px 20px;
+            font-size: 1.3em;
+            color: white;
+            text-align: center;
+            letter-spacing: 2px;
+            width: 100%;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+        }
+        
+        .code-input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+        
+        .code-input:focus {
+            outline: none;
+            border-color: #ffd700;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+        }
+        
+        .verify-btn {
+            background: linear-gradient(45deg, #ffd700, #ffb347);
+            color: #333;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 25px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        
+        .verify-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.4);
+        }
+        
+        .verify-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .message {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            font-weight: bold;
+        }
+        
+        .message.success {
+            background: rgba(34, 197, 94, 0.2);
+            border: 1px solid rgba(34, 197, 94, 0.4);
+            color: #22c55e;
+        }
+        
+        .message.error {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            color: #ef4444;
+        }
+        
+        .info-box {
+            background: rgba(59, 130, 246, 0.2);
+            border: 1px solid rgba(59, 130, 246, 0.4);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 30px;
+            font-size: 0.9em;
+            line-height: 1.6;
+        }
+        
+        .device-info {
+            font-size: 0.8em;
+            opacity: 0.7;
+            margin-top: 20px;
+        }
+        
+    </style>
+</head>
+<body>
+    <div class="premium-container">
+        <div class="logo">🎮</div>
+        <h1>Brainova Premium</h1>
+        <p class="subtitle">Accès Exclusif Réservé</p>
+        
+        <div class="code-input-container">
+            <input 
+                type="text" 
+                id="premiumCode" 
+                class="code-input" 
+                placeholder="ENTREZ VOTRE CODE PREMIUM"
+                maxlength="20"
+            >
+            <button id="verifyBtn" class="verify-btn">
+                🔓 Vérifier et Accéder
+            </button>
+        </div>
+        
+        <div id="message" class="message" style="display: none;"></div>
+        
+        <div class="info-box">
+            <strong>📧 Votre code premium</strong><br>
+            Vous avez reçu votre code personnel par email après votre achat.<br>
+            <strong>⚠️ Limite :</strong> 1 seul appareil autorisé par code.
+        </div>
+        
+        <div class="device-info" id="deviceInfo">
+            Appareil: <span id="deviceId"></span>
+        </div>
+    </div>
+
+    <script>
+        // Générer un ID d'appareil unique
+        function generateDeviceId() {
+            const stored = localStorage.getItem('brainova_device_id');
+            if (stored) return stored;
+            
+            const deviceId = 'DEVICE-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+            localStorage.setItem('brainova_device_id', deviceId);
+            return deviceId;
+        }
+        
+        const deviceId = generateDeviceId();
+        document.getElementById('deviceId').textContent = deviceId.substr(0, 16) + '...';
+        
+        // Liste des codes premium valides (remplacera par une vraie base de données)
+        const validCodes = {
+            'BRAIN-2024-DEMO1': { deviceId: null, email: 'demo@example.com', activated: false },
+            'BRAIN-2024-DEMO2': { deviceId: null, email: 'test@example.com', activated: false },
+            // Les codes réels seront générés après paiement Stripe
+        };
+        
+        function showMessage(text, type) {
+            const messageEl = document.getElementById('message');
+            messageEl.textContent = text;
+            messageEl.className = `message ${type}`;
+            messageEl.style.display = 'block';
+        }
+        
+        function verifyPremiumCode() {
+            const code = document.getElementById('premiumCode').value.trim().toUpperCase();
+            const verifyBtn = document.getElementById('verifyBtn');
+            
+            if (!code) {
+                showMessage('Veuillez entrer votre code premium', 'error');
+                return;
+            }
+            
+            verifyBtn.disabled = true;
+            verifyBtn.textContent = '🔄 Vérification...';
+            
+            setTimeout(() => {
+                if (!validCodes[code]) {
+                    showMessage('❌ Code invalide. Vérifiez votre email de confirmation.', 'error');
+                    verifyBtn.disabled = false;
+                    verifyBtn.textContent = '🔓 Vérifier et Accéder';
+                    return;
+                }
+                
+                const codeData = validCodes[code];
+                
+                // Vérifier si le code est déjà utilisé sur un autre appareil
+                if (codeData.activated && codeData.deviceId && codeData.deviceId !== deviceId) {
+                    showMessage('❌ Code déjà utilisé sur un autre appareil. 1 seul appareil autorisé.', 'error');
+                    verifyBtn.disabled = false;
+                    verifyBtn.textContent = '🔓 Vérifier et Accéder';
+                    return;
+                }
+                
+                // Activer le code pour cet appareil
+                codeData.activated = true;
+                codeData.deviceId = deviceId;
+                
+                // Sauvegarder l'accès premium
+                localStorage.setItem('brainova_premium', 'true');
+                localStorage.setItem('brainova_premium_code', code);
+                localStorage.setItem('brainova_premium_date', new Date().toISOString());
+                localStorage.setItem('brainova_premium_device', deviceId);
+                
+                showMessage('✅ Code validé ! Redirection vers votre plateforme premium...', 'success');
+                
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 2000);
+                
+            }, 1500);
+        }
+        
+        // Gestionnaires d'événements
+        document.getElementById('verifyBtn').addEventListener('click', verifyPremiumCode);
+        document.getElementById('premiumCode').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                verifyPremiumCode();
+            }
+        });
+        
+        // Vérifier si déjà premium
+        if (localStorage.getItem('brainova_premium') === 'true') {
+            showMessage('✅ Vous avez déjà un accès premium actif !', 'success');
+            setTimeout(() => {
+                window.location.href = '/';
+            }, 2000);
+        }
+        
+        console.log('🎮 Page Premium Code chargée');
+    </script>
+</body>
+</html>

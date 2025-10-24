@@ -984,16 +984,21 @@ if (isPremium) {
 // Fonction pour vérifier le retour de Stripe
 // Vérification du statut premium au chargement de la page
 function checkPremiumStatus() {
-  // 1. Vérifier le localStorage
+  // 1. Vérifier le localStorage pour premium classique
   const savedPremium = localStorage.getItem('brainova_premium') === 'true';
   
-  // 2. Vérifier si l'utilisateur revient de Stripe (toute URL)
+  // 2. Vérifier le code premium + appareil
+  const premiumCode = localStorage.getItem('brainova_premium_code');
+  const premiumDevice = localStorage.getItem('brainova_premium_device');
+  const currentDevice = localStorage.getItem('brainova_device_id');
+  
+  // 3. Vérifier si l'utilisateur revient de Stripe (toute URL)
   const urlParams = new URLSearchParams(window.location.search);
   const hasStripeSuccess = urlParams.get('success') === 'true' || 
                           urlParams.get('premium') === 'activated' ||
                           urlParams.get('payment') === 'completed';
   
-  // 3. Si paiement Stripe détecté, activer premium automatiquement
+  // 4. Si paiement Stripe détecté, activer premium automatiquement
   if (hasStripeSuccess) {
     console.log('✅ Paiement Stripe détecté - Activation premium automatique');
     localStorage.setItem('brainova_premium', 'true');
@@ -1004,18 +1009,21 @@ function checkPremiumStatus() {
     
     // Message de bienvenue
     setTimeout(() => {
-      alert('🎉 Paiement confirmé !\n\n✅ Votre accès Premium est activé\n🎮 Tous les jeux sont débloqués\n🔐 Connexion/inscription disponibles\n\nBienvenue dans Brainova Premium !');
+      alert('🎉 Paiement confirmé !\n\n✅ Votre accès Premium est activé\n🎮 Tous les jeux sont débloqués\n� Vous recevrez un code premium par email\n\nBienvenue dans Brainova Premium !');
     }, 1000);
     
     // Nettoyer l'URL
     window.history.replaceState({}, document.title, window.location.pathname);
   }
   
-  // 4. Appliquer le statut premium
-  if (savedPremium || hasStripeSuccess) {
+  // 5. Vérification premium par code + sécurité appareil
+  const hasValidCode = premiumCode && premiumDevice && currentDevice && premiumDevice === currentDevice;
+  
+  // 6. Appliquer le statut premium
+  if (savedPremium || hasStripeSuccess || hasValidCode) {
     isPremium = true;
     userPremium = true;
-    console.log('🌟 Statut Premium : ACTIF');
+    console.log('🌟 Statut Premium : ACTIF', {savedPremium, hasStripeSuccess, hasValidCode});
   } else {
     isPremium = false;
     userPremium = false;
@@ -1220,8 +1228,8 @@ function initCleanAuth() {
   }
 }
 
-function showCleanPremiumMessage(action) {
-  console.log('🔒 Affichage message premium pour:', action);
+function showCleanPremiumMessage(action, customMessage) {
+  console.log('🔒 Redirection vers page premium pour:', action);
   const modal = document.createElement('div');
   modal.style.cssText = `
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -1235,19 +1243,22 @@ function showCleanPremiumMessage(action) {
       padding: 40px; border-radius: 20px; text-align: center;
       color: white; max-width: 400px; box-shadow: 0 20px 40px rgba(0,0,0,0.5);
     ">
-      <div style="font-size: 48px; margin-bottom: 20px;">🔒</div>
-      <h3 style="margin-bottom: 15px;">Accès Premium Requis</h3>
+      <div style="font-size: 48px; margin-bottom: 20px;">🎮</div>
+      <h3 style="margin-bottom: 15px;">Accès Premium</h3>
       <p style="margin-bottom: 25px;">
-        La ${action} n'est disponible que pour les membres premium. 
-        Abonnez-vous d'abord pour débloquer cette fonctionnalité.
+        ${customMessage || `Pour ${action}, vous devez d'abord obtenir votre accès premium.`}
       </p>
-      <button onclick="this.closest('div').parentElement.remove(); showSubscriptionMessage();" style="
+      <button onclick="window.location.href='/premium.html'" style="
         background: #ffd700; color: #333; border: none; padding: 15px 30px;
         border-radius: 25px; font-weight: bold; cursor: pointer; margin-right: 10px;
-      ">S'abonner maintenant</button>
+      ">🔑 Accès Premium</button>
+      <button onclick="showSubscriptionMessage(); this.closest('div').parentElement.remove();" style="
+        background: transparent; border: 2px solid rgba(255,255,255,0.5);
+        color: white; padding: 12px 25px; border-radius: 25px; cursor: pointer; margin-right: 10px;
+      ">💳 Acheter</button>
       <button onclick="this.closest('div').parentElement.remove();" style="
         background: transparent; border: 2px solid rgba(255,255,255,0.5);
-        color: white; padding: 15px 30px; border-radius: 25px; cursor: pointer;
+        color: white; padding: 12px 25px; border-radius: 25px; cursor: pointer;
       ">Fermer</button>
     </div>
   `;
