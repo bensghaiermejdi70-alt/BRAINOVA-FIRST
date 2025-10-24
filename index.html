@@ -3,1041 +3,109 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>BRAINOVA — Plateforme 36 jeux (multilangue + Auth + Premium)</title>
+<title>BRAINOVA — Plateforme 36 jeux (Version Simple)</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg1:#0f0c29; --bg2:#302b63; --bg3:#24243e;
   --accent1:#00ffff; --accent2:#ff00ff; --neon:#ff568c; --gold:#ffd700;
 }
-html,body{height:100%;margin:0;font-family:'Segoe UI',sans-serif;background:linear-gradient(135deg,var(--bg1),var(--bg2),var(--bg3));color:#fff;overflow-x:hidden;}
-header{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;background:rgba(0,0,0,0.6);backdrop-filter:blur(6px);gap:12px}
-#logoText{font-family:'Orbitron',sans-serif;font-size:34px;font-weight:700;color:var(--accent1);text-shadow:0 0 6px var(--accent1),0 0 16px var(--accent2);display:flex;align-items:center;gap:10px}
-#logoText .emoji{font-size:34px}
-.controls{display:flex;align-items:center;gap:12px}
-#langWrap{position:relative}
-#langSelect{appearance:none;-webkit-appearance:none;padding:8px 12px;border-radius:14px;border:0;font-weight:700;background:linear-gradient(90deg,rgba(255,255,255,0.04),rgba(255,255,255,0.02));color:#fff;cursor:pointer;min-width:140px;box-shadow:0 6px 20px rgba(0,0,0,0.4)}
-#langWrap::after{content:"▾";position:absolute;right:12px;top:50%;transform:translateY(-50%);pointer-events:none;color:#fff}
-#langSelect:focus{outline:none;box-shadow:0 0 24px var(--accent1)}
-#langSelect option{color:#000;background-color:#fff}
-#authContainer{display:flex;gap:8px;align-items:center}
-.authBtn{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);border:none;padding:12px 24px;color:#fff;border-radius:25px;cursor:pointer;font-weight:600;font-size:14px;margin-left:8px;transition:all 0.3s ease;position:relative;overflow:hidden;box-shadow:0 8px 25px rgba(102,126,234,0.3)}
-.authBtn:hover{transform:translateY(-2px);box-shadow:0 12px 35px rgba(102,126,234,0.4);background:linear-gradient(135deg,#764ba2 0%,#667eea 100%)}
-.authBtn:active{transform:translateY(0)}
-.authBtn::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent);transition:left 0.5s}
-.authBtn:hover::before{left:100%}
-.authBtn.premium-only{background:linear-gradient(135deg,#f093fb 0%,#f5576c 100%);box-shadow:0 8px 25px rgba(240,147,251,0.3)}
-.authBtn.premium-only:hover{box-shadow:0 12px 35px rgba(240,147,251,0.4);background:linear-gradient(135deg,#f5576c 0%,#f093fb 100%)}
-
-/* Styles pour les modaux premium */
-.premium-auth-modal{background:linear-gradient(135deg,#1e3c72 0%,#2a5298 100%);border:2px solid rgba(255,255,255,0.1);backdrop-filter:blur(10px);max-width:450px;width:90%}
-.auth-header{text-align:center;margin-bottom:25px}
-.auth-icon-large{font-size:48px;margin-bottom:15px}
-.auth-header h3{color:#ffd700;margin-bottom:8px;font-size:24px}
-.auth-header p{color:#ecf0f1;font-size:14px;opacity:0.8}
-.premium-status-check{margin-bottom:20px;padding:15px;background:rgba(255,255,255,0.05);border-radius:10px;border-left:4px solid #ffd700}
-.status-indicator{display:flex;align-items:center;gap:10px}
-.status-dot{width:8px;height:8px;border-radius:50%;background:#ffd700;animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
-.status-text{color:#ffd700;font-size:12px;font-weight:500}
-.auth-form{display:flex;flex-direction:column;gap:15px}
-.input-group{display:flex;flex-direction:column;gap:5px}
-.input-group label{color:#ecf0f1;font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:1px}
-.input-group input{background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:8px;padding:12px;color:#fff;font-size:14px;transition:all 0.3s ease}
-.input-group input:focus{outline:none;border-color:#ffd700;background:rgba(255,255,255,0.15);box-shadow:0 0 0 3px rgba(255,215,0,0.1)}
-.input-group input::placeholder{color:rgba(255,255,255,0.5)}
-.premium-btn{background:linear-gradient(135deg,#ffd700 0%,#ffb347 100%);color:#1e3c72;font-weight:bold;padding:14px;border-radius:8px;border:none;cursor:pointer;font-size:16px;transition:all 0.3s ease;margin-top:10px}
-.premium-btn:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(255,215,0,0.3)}
-.cancel-btn{background:transparent;color:#ecf0f1;border:2px solid rgba(255,255,255,0.3);padding:12px;border-radius:8px;cursor:pointer;font-size:14px;transition:all 0.3s ease;margin-top:10px}
-.cancel-btn:hover{background:rgba(255,255,255,0.1);border-color:rgba(255,255,255,0.5)}
-
-/* Tooltips pour les boutons */
-.authBtn[data-tooltip]{position:relative}
-.authBtn[data-tooltip]:hover::after{content:attr(data-tooltip);position:absolute;bottom:-35px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.9);color:#fff;padding:8px 12px;border-radius:6px;font-size:12px;white-space:nowrap;z-index:1000;animation:fadeIn 0.3s ease}
-@keyframes fadeIn{from{opacity:0;transform:translateX(-50%) translateY(5px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
-
-/* Icônes dans les boutons */
-.auth-icon{margin-right:6px;font-size:16px}
-.auth-text{font-size:14px}
-.authBtn:hover{transform:translateY(-2px)}
-#shareBtn,#premiumBtn,#emailBtn{padding:8px 14px;border-radius:12px;border:none;font-weight:700;cursor:pointer;color:#001;margin-left:8px;box-shadow:0 6px 18px rgba(0,0,0,0.35)}
-#shareBtn{background:linear-gradient(90deg,#ff6b6b,#ffa500)}
-#emailBtn{background:linear-gradient(90deg,#FF6B35,#F7931E)}
-#premiumBtn{background:linear-gradient(90deg,#00ffea,#0078ff)}
-#shareBtn.locked,#premiumBtn.locked,#emailBtn.locked{opacity:0.3;cursor:not-allowed}
-.intro{max-width:1100px;margin:14px auto;padding:18px;border-radius:12px;background:rgba(0,0,0,0.45);text-align:center}
-.intro h2{margin:6px 0;color:var(--gold);text-shadow:0 0 6px var(--gold)}
-.games-grid{max-width:1200px;margin:16px auto;padding:18px;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px;perspective:1200px;opacity:1;transition:opacity 0.3s ease-in-out}
-.card{background:rgba(0,0,0,0.16);border-radius:14px;padding:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;border:1px solid rgba(255,255,255,0.04);box-shadow:0 6px 22px rgba(0,0,0,0.4);transition:transform .35s,box-shadow .35s;position:relative}
-.card:hover{transform:translateY(-8px) rotateY(6deg);box-shadow:0 12px 40px rgba(0,0,0,0.6)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:linear-gradient(45deg,var(--bg1),var(--bg2),var(--bg3));background-size:400% 400%;animation:gradientShift 15s ease infinite;color:#fff;font-family:'Arial',sans-serif;overflow-x:hidden}
+@keyframes gradientShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+header{position:relative;z-index:100;backdrop-filter:blur(10px);border-bottom:1px solid rgba(255,255,255,0.1)}
+.header-container{max-width:1200px;margin:0 auto;padding:15px 20px;display:flex;justify-content:space-between;align-items:center}
+.logo{font-family:'Orbitron',monospace;font-size:28px;font-weight:700;background:linear-gradient(90deg,var(--accent1),var(--accent2),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 0 30px rgba(0,255,255,0.5);cursor:pointer}
+.header-buttons{display:flex;gap:12px;align-items:center}
+select{background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:25px;padding:8px 16px;color:#fff;font-size:14px;cursor:pointer;backdrop-filter:blur(10px)}
+button{background:linear-gradient(135deg,var(--accent1),var(--accent2));border:none;border-radius:25px;padding:10px 20px;color:#000;font-weight:700;cursor:pointer;transition:all 0.3s ease;font-size:14px;text-transform:uppercase}
+button:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(0,255,255,0.4)}
+#testBtn{background:#00ff88;color:#000;font-weight:bold}
+.games-grid{max-width:1200px;margin:16px auto;padding:18px;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px;perspective:1200px}
+.card{background:linear-gradient(145deg,rgba(15,12,41,0.8),rgba(36,36,62,0.9));border-radius:20px;padding:24px;text-align:center;cursor:pointer;transition:all 0.4s cubic-bezier(0.175,0.885,0.32,1.275);position:relative;min-height:180px;display:flex;flex-direction:column;justify-content:center;align-items:center;border:3px solid transparent;backdrop-filter:blur(15px);overflow:hidden}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(45deg,transparent,rgba(255,255,255,0.1),transparent);transform:translateX(-100%);transition:transform 0.6s ease;pointer-events:none}
+.card:hover::before{transform:translateX(100%)}
+.card:hover{transform:translateY(-10px) rotateY(5deg) scale(1.02);box-shadow:0 25px 50px rgba(0,255,255,0.3)}
+.card.free{border-color:#00ff88;box-shadow:0 0 30px rgba(0,255,136,0.4)}
 .card .num{font-size:22px;font-weight:900;margin-bottom:6px;background:linear-gradient(90deg,var(--accent1),#8a2be2);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.card .title{font-size:16px;text-align:center;color:#fff;text-shadow:0 0 6px rgba(255,215,0,0.06)}
-.card.premium::after{content:"🌐";position:absolute;top:6px;right:10px;font-size:20px;}
-.card.free{border:3px solid #00ffaa;box-shadow:0 0 25px #00ffaa, inset 0 0 10px rgba(0,255,170,0.2);}
-.card.locked{border:3px solid #ffea00;box-shadow:0 0 25px #ffea00, inset 0 0 10px rgba(255,234,0,0.2);}
-.card.locked.premium{border:3px solid #ffea00 !important;box-shadow:0 0 25px #ffea00, inset 0 0 10px rgba(255,234,0,0.2) !important;}
-.card.testqi{border:3px solid #ffea00;box-shadow:0 0 25px #ffea00, inset 0 0 10px rgba(255,234,0,0.2);}
-#gameOverlay{display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.96);align-items:stretch}
-#overlayInner{position:relative;flex:1;display:flex;flex-direction:column}
-#gameFrame{width:100%;height:100%;border:0;display:block}
-.overlayTopLeft{position:absolute;top:16px;left:16px;z-index:10010;display:flex;gap:8px}
-.overlayBtn{background:#ff3860;border:none;color:#fff;padding:10px 14px;border-radius:11px;font-weight:700;cursor:pointer;box-shadow:0 8px 30px rgba(255,56,96,0.12)}
-.overlayBtn.secondary{background:linear-gradient(90deg,var(--accent1),var(--accent2));color:#001}
-.modal{display:none;position:fixed;inset:0;z-index:10020;background:rgba(0,0,0,0.85);align-items:center;justify-content:center}
-.modalCard{width:360px;background:rgba(0,0,0,0.95);padding:18px;border-radius:12px;display:flex;flex-direction:column;gap:10px;color:#fff;box-shadow:0 10px 40px rgba(0,0,0,0.6)}
-.modalCard input, .modalCard textarea, .modalCard select{padding:10px;border-radius:8px;border:0;background:rgba(255,255,255,0.02);color:#fff}
-.modalCard .btn{padding:10px;border-radius:8px;border:0;font-weight:800;cursor:pointer;background:linear-gradient(90deg,var(--accent1),var(--accent2));color:#001}
-@media(max-width:640px){#logoText{font-size:24px}.modalCard{width:90%}#langSelect{min-width:100px}}
+.card .title{font-size:16px;margin-bottom:8px;color:#fff;font-weight:600}
+.card .desc{font-size:12px;color:#ccc;line-height:1.4}
 </style>
 </head>
 <body>
 
 <header>
-  <div id="logoText"><span class="emoji">🧠</span><span>Brainova</span></div>
-  <div class="controls">
-    <div id="langWrap">
-      <select id="langSelect" aria-label="Langue">
-        <option value="fr">Français</option>
-        <option value="en">English</option>
-        <option value="ar">العربية</option>
-        <option value="es">Español</option>
-        <option value="de">Deutsch</option>
-        <option value="zh">中文</option>
+  <div class="header-container">
+    <div class="logo">🧠 BRAINOVA</div>
+    <div class="header-buttons">
+      <select id="langSelect" onchange="changeLanguage()">
+        <option value="fr">🇫🇷 Français</option>
+        <option value="en">🇺🇸 English</option>
       </select>
-    </div>
-    <div id="authContainer">
-      <button class="authBtn premium-only" id="loginBtn" data-tooltip="Connexion premium requise">
-        <span class="auth-icon">🔐</span>
-        <span class="auth-text">Connexion</span>
-      </button>
-      <button class="authBtn premium-only" id="signupBtn" data-tooltip="Inscription premium requise">
-        <span class="auth-icon">✨</span>
-        <span class="auth-text">Inscription</span>
-      </button>
-      <button id="premiumBtn">Premium</button>
-      <button id="testBtn" style="background: #00ff88; color: #000; font-weight: bold;">🧪 Test Codes</button>
-      <button id="shareBtn" onclick="showShareOptions()">Partager</button>
+      <button id="testBtn" onclick="openTestModal()">🧪 Test Codes</button>
+      <button onclick="showShareOptions()">📤 Partager</button>
     </div>
   </div>
 </header>
 
-<section class="intro">
-  <h2 id="introTitle">🎮 Découvrez nos 36 Jeux Intelligents</h2>
-  <p id="introDesc">Entraînez votre cerveau avec notre collection complète de jeux adaptatifs alimentés par l'IA</p>
-</section>
-
 <main class="games-grid" id="gamesGrid" aria-live="polite"></main>
 
-<!-- Overlay -->
-<div id="gameOverlay" role="dialog" aria-modal="true">
-  <div id="overlayInner">
-    <div class="overlayTopLeft">
-      <button id="overlayMenu" class="overlayBtn secondary">🔙 Retour</button>
-    </div>
-    <iframe id="gameFrame" allow="fullscreen; autoplay; camera; microphone; geolocation"></iframe>
-  </div>
-</div>
-
-<!-- Auth Modals -->
-<div id="loginModal" class="modal" aria-hidden="true">
-  <div class="modalCard premium-auth-modal">
-    <div class="auth-header">
-      <div class="auth-icon-large">🔐</div>
-      <h3>Connexion Premium</h3>
-      <p>Accès réservé aux membres abonnés</p>
-    </div>
-    
-    <div class="premium-status-check">
-      <div class="status-indicator" id="premiumStatusIndicator">
-        <span class="status-dot"></span>
-        <span class="status-text">Vérification du statut premium...</span>
-      </div>
-    </div>
-    
-    <form id="loginForm" class="auth-form">
-      <div class="input-group">
-        <label for="loginEmail">Email</label>
-        <input type="email" id="loginEmail" required placeholder="votre@email.com">
-      </div>
-      <div class="input-group">
-        <label for="loginPassword">Mot de passe</label>
-        <input type="password" id="loginPassword" required placeholder="••••••••">
-      </div>
-      <button type="submit" class="btn premium-btn">Se connecter</button>
-    </form>
-    
-    <button class="btn cancel-btn" id="loginCancel">Annuler</button>
-  </div>
-</div>
-
-<div id="signupModal" class="modal" aria-hidden="true">
-  <div class="modalCard premium-auth-modal">
-    <div class="auth-header">
-      <div class="auth-icon-large">✨</div>
-      <h3>Inscription Premium</h3>
-      <p>Créez votre compte membre privilégié</p>
-    </div>
-    
-    <div class="premium-status-check">
-      <div class="status-indicator" id="premiumStatusIndicatorSignup">
-        <span class="status-dot"></span>
-        <span class="status-text">Vérification du statut premium...</span>
-      </div>
-    </div>
-    
-    <form id="signupForm" class="auth-form">
-      <div class="input-group">
-        <label for="signupEmail">Email</label>
-        <input type="email" id="signupEmail" required placeholder="votre@email.com">
-      </div>
-      <div class="input-group">
-        <label for="signupPassword">Mot de passe</label>
-        <input type="password" id="signupPassword" required placeholder="••••••••">
-      </div>
-      <div class="input-group">
-        <label for="signupConfirm">Confirmer le mot de passe</label>
-        <input type="password" id="signupConfirm" required placeholder="••••••••">
-      </div>
-      <button type="submit" class="btn premium-btn">S'inscrire</button>
-    </form>
-    
-    <button class="btn cancel-btn" id="signupCancel">Annuler</button>
-  </div>
-</div>
-
-<!-- Premium Modal -->
-<div id="premiumModal" class="modal" aria-hidden="true">
-  <div class="modalCard">
-    <h3>Abonnement Premium</h3>
-    <p>Débloquez tous les jeux Brainova pour seulement 20 EUR / an.</p>
-    <button class="btn" id="premiumSubscribeBtn">S'abonner</button>
-    <button class="btn" id="premiumCancel" style="background:transparent;color:#fff;border:1px solid rgba(255,255,255,0.08)">Annuler</button>
-  </div>
-</div>
-
-<script src="https://js.stripe.com/v3/"></script>
-<script src="https://www.gstatic.com/firebasejs/12.4.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/12.4.0/firebase-auth-compat.js"></script>
 <script>
-
-// Firebase Config
-const firebaseConfig = {
-  apiKey: "AIzaSyAjnpgNwDdGtb46XRCvT_cU7AAU-25zw1U",
-  authDomain: "brainova-c0295.firebaseapp.com",
-  projectId: "brainova-c0295",
-  storageBucket: "brainova-c0295.firebasestorage.app",
-  messagingSenderId: "437705478313",
-  appId: "1:437705478313:web:8b7a4c97b5d80e6d49d9b8",
-  measurementId: "G-79M4HWKQ35"
-};
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-
-// Gestion de l'état d'authentification
-auth.onAuthStateChanged((user) => {
-  if (user) {
-    // Utilisateur connecté - vérifier son statut premium
-    const savedPremium = localStorage.getItem('brainova_premium') === 'true';
-    userPremium = savedPremium;
-    isPremium = savedPremium;
-    updateUIForAuthenticatedUser(user);
-  } else {
-    // Utilisateur déconnecté
-    userPremium = false;
-    isPremium = false;
-    updateUIForGuestUser();
-  }
-  renderGrid(langSelect.value);
-});
-
-// Fonction pour mettre à jour l'UI utilisateur connecté
-function updateUIForAuthenticatedUser(user) {
-  // Si utilisateur connecté ET premium, remplacer par bouton déconnexion
-  if (userPremium || isPremium) {
-    document.getElementById('loginBtn').style.display = 'none';
-    document.getElementById('signupBtn').style.display = 'none';
-    
-    // Créer un bouton de déconnexion s'il n'existe pas
-    if (!document.getElementById('logoutBtn')) {
-      const logoutBtn = document.createElement('button');
-      logoutBtn.id = 'logoutBtn';
-      logoutBtn.className = 'authBtn';
-      logoutBtn.textContent = 'Déconnexion';
-      logoutBtn.addEventListener('click', () => auth.signOut());
-      document.getElementById('authContainer').appendChild(logoutBtn);
-    }
-  }
-}
-
-// Fonction pour mettre à jour l'UI utilisateur invité
-function updateUIForGuestUser() {
-  // Supprimer le bouton de déconnexion
-  const logoutBtn = document.getElementById('logoutBtn');
-  if (logoutBtn) {
-    logoutBtn.remove();
-  }
-  
-  // IMPORTANT: Réinitialiser le statut premium à la déconnexion
-  userPremium = false;
-  isPremium = false;
-  localStorage.removeItem('brainova_premium');
-  localStorage.removeItem('brainova_premium_status');
-  
-  // Remettre les boutons connexion/inscription à l'affichage
-  const loginBtn = document.getElementById('loginBtn');
-  const signupBtn = document.getElementById('signupBtn');
-  
-  if (loginBtn) {
-    loginBtn.style.display = 'block';
-  }
-  if (signupBtn) {
-    signupBtn.style.display = 'block';
-  }
-  
-  // Recharger la grille pour appliquer les changements de statut
-  renderGrid(langSelect.value);
-}
-
-// ================= GRID & PREMIUM LOGIC
-// ================= TRANSLATIONS (6 langues)
+// SANS FIREBASE - VERSION SIMPLE
 const TRANSLATIONS = {
-  fr: {introTitle:"🎮 Découvrez nos 36 Jeux Intelligents",introDesc:"Entraînez votre cerveau avec notre collection complète de jeux adaptatifs alimentés par l'IA",overlayBack:"🔙 Retour",
-    subscriptionTitle:"🌟 Abonnement Brainova",subscriptionPack:"Pack 36 jeux",subscriptionDesc:"Débloquez tous les jeux premium",subscriptionPrice:"Seulement 20 EUR / an",subscriptionBtn:"S'abonner",subscriptionCancel:"Annuler",
-    shareBtn:"Partager",shareTitle:"🚀 Partager Brainova",shareDesc:"Partagez cette plateforme et aidez vos amis à développer leur intelligence !",shareTip:"💡 Plus vous partagez, plus vos amis découvrent Brainova !",shareClose:"Fermer",shareMode:"📱 Mode de partage",shareEmailSubject:"🧠 Découvrez Brainova - Jeux Intelligents",shareEmailBody:"Bonjour,\n\nJe vous recommande Brainova, une plateforme avec 36 jeux intelligents pour booster votre cerveau !\n\n🎮 36 jeux variés\n🧠 Entraînement cérébral\n✨ Interface moderne\n\nCliquez ici pour découvrir : ",
-    games:["Quantum Tetris 2077","Memory Quantique","Neural Puzzle Master","Quantum Chess","Jeux de Dames","Pac-Man","Simon Says","Speed Challenge","Cyber Checker","Demo Playground","Quantum Monopoly","Neural Poker","Blackjack Quantum","Solitaire Fusion","Mystic Forest Quest","Enigma Hunter","Neural Racing","Cyber Shooter","Quantum Dots","Neural Rhythm","Cyber Pinball","Quantum Pipes","Neural Slots","Cyber Darts","Quantum Bubbles","Neural Dice","Cyber Pool","Quantum Tiles","Neural Trivia","Cyber Asteroids","Quantum Crystals","Neural Infinity","Algorithme Visuel","Physique Quantique","Test QI","Conscience Artificielle"]},
-  en: {introTitle:"🎮 Discover our 36 Smart Games",introDesc:"Train your brain with our full collection of AI-powered adaptive games",overlayBack:"🔙 Back",
-    subscriptionTitle:"🌟 Brainova Subscription",subscriptionPack:"36 Games Pack",subscriptionDesc:"Unlock all premium games",subscriptionPrice:"Only 20 EUR / year",subscriptionBtn:"Subscribe",subscriptionCancel:"Cancel",
-    shareBtn:"Share",shareTitle:"🚀 Share Brainova",shareDesc:"Share this platform and help your friends develop their intelligence!",shareTip:"💡 The more you share, the more your friends discover Brainova!",shareClose:"Close",shareMode:"📱 Share mode",shareEmailSubject:"🧠 Discover Brainova - Smart Games",shareEmailBody:"Hello,\n\nI recommend Brainova, a platform with 36 smart games to boost your brain!\n\n🎮 36 varied games\n🧠 Brain training\n✨ Modern interface\n\nClick here to discover: ",
-    games:["Quantum Tetris 2077","Quantum Memory","Neural Puzzle Master","Quantum Chess","Checkers Game","Pac-Man","Simon Says","Speed Challenge","Cyber Checker","Demo Playground","Quantum Monopoly","Neural Poker","Quantum Blackjack","Fusion Solitaire","Mystic Forest Quest","Enigma Hunter","Neural Racing","Cyber Shooter","Quantum Dots","Neural Rhythm","Cyber Pinball","Quantum Pipes","Neural Slots","Cyber Darts","Quantum Bubbles","Neural Dice","Cyber Pool","Quantum Tiles","Neural Trivia","Cyber Asteroids","Quantum Crystals","Neural Infinity","Visual Algorithm","Quantum Physics","IQ Test","Artificial Consciousness"]},
-  ar: {introTitle:"🎮 اكتشف 36 لعبة ذكية",introDesc:"درّب عقلك مع مجموعتنا الكاملة من الألعاب التفاعلية المدعومة بالذكاء الاصطناعي",overlayBack:"🔙 رجوع",
-    subscriptionTitle:"🌟 اشتراك برينوفا",subscriptionPack:"حزمة 36 لعبة",subscriptionDesc:"افتح جميع الألعاب المميزة",subscriptionPrice:"فقط 20 يورو / سنة",subscriptionBtn:"اشترك",subscriptionCancel:"إلغاء",
-    shareBtn:"مشاركة",shareTitle:"🚀 شارك برينوفا",shareDesc:"شارك هذه المنصة وساعد أصدقائك على تطوير ذكائهم!",shareTip:"💡 كلما شاركت أكثر، كلما اكتشف أصدقاؤك برينوفا أكثر!",shareClose:"إغلاق",shareEmailSubject:"🧠 اكتشف برينوفا - ألعاب ذكية",shareEmailBody:"مرحبا،\n\nأنصحك ببرينوفا، منصة تحتوي على 36 لعبة ذكية لتعزيز دماغك!\n\n🎮 36 لعبة متنوعة\n🧠 تدريب الدماغ\n✨ واجهة عصرية\n\nانقر هنا للاكتشاف: ",
-    games:["تيتريس الكمومي","ذاكرة الكم","سيد الألغاز العصبي","شطرنج الكم","لعبة الداما","باك مان","سيمون يقول","تحدي السرعة","الفاحص السيبراني","ملعب تجريبي","احتكار الكم","بوكر عصبي","بلاك جاك الكمومي","سوليتير الاندماج","مغامرة الغابة الغامضة","صياد الألغاز","سباق عصبي","مطلق النار السيبراني","نقاط الكم","الإيقاع العصبي","دبابيس السيبرانية","أنابيب الكم","آلات الحظ العصبية","سهام سيبرانية","فقاعات الكم","نرد عصبي","بلياردو الكم","بلاط عصبي","اختبار المعرفة","كويكبات سيبرانية","بلورات الكم","اللانهاية العصبية","الخوارزمية البصرية","الفيزياء الكمومية","اختبار الذكاء","الوعي الاصطناعي"]},
-  es: {introTitle:"🎮 Descubre nuestros 36 Juegos Inteligentes",introDesc:"Entrena tu cerebro con nuestra colección completa de juegos adaptativos con IA",overlayBack:"🔙 Volver",
-    subscriptionTitle:"🌟 Suscripción Brainova",subscriptionPack:"Paquete 36 juegos",subscriptionDesc:"Desbloquea todos los juegos premium",subscriptionPrice:"Solo 20 EUR / año",subscriptionBtn:"Suscribirse",subscriptionCancel:"Cancelar",
-    shareBtn:"Compartir",shareTitle:"🚀 Compartir Brainova",shareDesc:"¡Comparte esta plataforma y ayuda a tus amigos a desarrollar su inteligencia!",shareTip:"💡 ¡Cuanto más compartas, más descubrirán tus amigos Brainova!",shareClose:"Cerrar",shareEmailSubject:"🧠 Descubre Brainova - Juegos Inteligentes",shareEmailBody:"Hola,\n\n¡Te recomiendo Brainova, una plataforma con 36 juegos inteligentes para potenciar tu cerebro!\n\n🎮 36 juegos variados\n🧠 Entrenamiento cerebral\n✨ Interfaz moderna\n\nHaz clic aquí para descubrir: ",
-    games:["Tetris Cuántico 2077","Memoria Cuántica","Maestro de Rompecabezas Neural","Ajedrez Cuántico","Juego de Damas","Pac-Man","Simón Dice","Desafío de Velocidad","Verificador Cibernético","Campo de Pruebas","Monopolio Cuántico","Póker Neural","Blackjack Cuántico","Solitario Fusión","Bosque Místico","Cazador de Enigmas","Carrera Neural","Tirador Cibernético","Puntos Cuánticos","Ritmo Neural","Pinball Cibernético","Tuberías Cuánticas","Tragamonedas Neurales","Dardos Cibernéticos","Burbujas Cuánticas","Dados Neurales","Billar Cibernético","Fichas Cuánticas","Trivia Neural","Asteroides Cibernéticos","Cristales Cuánticos","Infinito Neural","Algoritmo Visual","Física Cuántica","Prueba de IQ","Conciencia Artificial"]},
-  de: {introTitle:"🎮 Entdecken Sie unsere 36 intelligenten Spiele",introDesc:"Trainieren Sie Ihr Gehirn mit unserer vollständigen Sammlung KI-gestützter Spiele",overlayBack:"🔙 Zurück",
-    subscriptionTitle:"🌟 Brainova Abonnement",subscriptionPack:"36 Spiele Paket",subscriptionDesc:"Alle Premium-Spiele freischalten",subscriptionPrice:"Nur 20 EUR / Jahr",subscriptionBtn:"Abonnieren",subscriptionCancel:"Abbrechen",
-    shareBtn:"Teilen",shareTitle:"🚀 Brainova teilen",shareDesc:"Teilen Sie diese Plattform und helfen Sie Ihren Freunden, ihre Intelligenz zu entwickeln!",shareTip:"💡 Je mehr Sie teilen, desto mehr entdecken Ihre Freunde Brainova!",shareClose:"Schließen",shareEmailSubject:"🧠 Entdecken Sie Brainova - Intelligente Spiele",shareEmailBody:"Hallo,\n\nIch empfehle Ihnen Brainova, eine Plattform mit 36 intelligenten Spielen zur Stärkung Ihres Gehirns!\n\n🎮 36 verschiedene Spiele\n🧠 Gehirntraining\n✨ Moderne Benutzeroberfläche\n\nKlicken Sie hier zum Entdecken: ",
-    games:["Quantum Tetris 2077","Quantum Memory","Neural Puzzle Master","Quantum Chess","Dame Spiel","Pac-Man","Simon Says","Speed Challenge","Cyber Checker","Demo Playground","Quantum Monopoly","Neural Poker","Quantum Blackjack","Fusion Solitaire","Mystic Forest Quest","Enigma Hunter","Neural Racing","Cyber Shooter","Quantum Dots","Neural Rhythm","Cyber Pinball","Quantum Pipes","Neural Slots","Cyber Darts","Quantum Bubbles","Neural Dice","Cyber Pool","Quantum Tiles","Neural Trivia","Cyber Asteroids","Quantum Crystals","Neural Infinity","Visueller Algorithmus","Quantenphysik","IQ Test","Künstliches Bewusstsein"]},
-  zh: {introTitle:"🎮 探索我们的36款智能游戏",introDesc:"通过我们完整的AI驱动自适应游戏系列训练你的大脑",overlayBack:"🔙 返回",
-    subscriptionTitle:"🌟 Brainova订阅",subscriptionPack:"36款游戏包",subscriptionDesc:"解锁所有高级游戏",subscriptionPrice:"仅需20欧元/年",subscriptionBtn:"订阅",subscriptionCancel:"取消",
-    shareBtn:"分享",shareTitle:"🚀 分享Brainova",shareDesc:"分享这个平台，帮助您的朋友开发他们的智力！",shareTip:"💡 您分享得越多，您的朋友就越能发现Brainova！",shareClose:"关闭",shareEmailSubject:"🧠 发现Brainova - 智能游戏",shareEmailBody:"您好，\n\n我向您推荐Brainova，一个拥有36款智能游戏来增强大脑的平台！\n\n🎮 36款多样化游戏\n🧠 大脑训练\n✨ 现代界面\n\n点击这里发现：",
-    games:["量子俄罗斯方块2077","量子记忆","神经拼图大师","量子国际象棋","跳棋游戏","吃豆人","西蒙说","速度挑战","网络检查","演示游乐场","量子大富翁","神经扑克","量子二十一点","融合接龙","神秘森林探险","谜题猎人","神经赛车","网络射手","量子点","神经节奏","网络弹球","量子管道","神经老虎机","网络飞镖","量子泡泡","神经骰子","网络台球","量子方块","神经问答","网络小行星","量子水晶","神经无限","视觉算法","量子物理","智商测试","人工意识"]}
+  fr: {
+    games:["Quantum Tetris 2077","Mémoire Quantique","Neural Puzzle Master","Échecs Quantiques","Jeu de Dames","Pac-Man","Simon Says","Défi Vitesse","Network Check","Demo Playground","Monopoly Quantique","Neural Poker","Blackjack Quantique","Fusion Solitaire","Aventure Forêt Mystère","Puzzle Hunter","Neural Racing","Cyber Shooter","Quantum Dots","Neural Rhythm","Cyber Pinball","Quantum Pipes","Neural Slots","Cyber Darts","Quantum Bubbles","Neural Dice","Cyber Pool","Quantum Blocks","Neural Quiz","Cyber Asteroids","Quantum Crystals","Neural Infinity","Algorithmes Visuels","Physique Quantique","Test QI","Conscience IA"]
+  },
+  en: {
+    games:["Quantum Tetris 2077","Quantum Memory","Neural Puzzle Master","Quantum Chess","Checkers Game","Pac-Man","Simon Says","Speed Challenge","Network Check","Demo Playground","Quantum Monopoly","Neural Poker","Quantum Blackjack","Fusion Solitaire","Mystery Forest Adventure","Puzzle Hunter","Neural Racing","Cyber Shooter","Quantum Dots","Neural Rhythm","Cyber Pinball","Quantum Pipes","Neural Slots","Cyber Darts","Quantum Bubbles","Neural Dice","Cyber Pool","Quantum Blocks","Neural Quiz","Cyber Asteroids","Quantum Crystals","Neural Infinity","Visual Algorithms","Quantum Physics","IQ Test","AI Consciousness"]
+  }
 };
-const grid=document.getElementById('gamesGrid');
-let userPremium=false;
 
-// Fonction de validation d'email
-function isValidEmail(email) {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return emailRegex.test(email);
+function changeLanguage() {
+  const lang = document.getElementById('langSelect').value;
+  renderGrid(lang);
 }
 
-function renderGrid(lang){
-  console.log('renderGrid called with lang:', lang);
-  
+function renderGrid(lang) {
   const grid = document.getElementById('gamesGrid');
-  console.log('grid element found:', !!grid);
+  const t = TRANSLATIONS[lang] || TRANSLATIONS['fr'];
   
-  if (!grid) {
-    console.error('Grid element not found!');
-    return;
-  }
+  grid.innerHTML = '';
   
-  console.log('TRANSLATIONS available:', !!TRANSLATIONS);
-  
-  grid.innerHTML='';
-  const t=TRANSLATIONS[lang]||TRANSLATIONS['fr'];
-  const userPremium = checkPremiumStatus(); // Utiliser la fonction de vérification du statut premium
-  
-  console.log('User premium status:', userPremium);
-  console.log('Games available:', t.games ? t.games.length : 0);
-  
-  for(let i=1;i<=36;i++){
-    const card=document.createElement('div'); card.className='card';
+  for(let i = 1; i <= 36; i++) {
+    const card = document.createElement('div');
+    card.className = 'card free'; // Tous les jeux gratuits
+    card.innerHTML = `
+      <div class="num">${i.toString().padStart(2,'0')}</div>
+      <div class="title">${t.games[i-1]}</div>
+      <div class="desc">Jeu ${i} - Cliquez pour jouer</div>
+    `;
     
-    // Jeux 11 à 36 verrouillés sauf si premium (y compris le test QI)
-    const isLocked = (i >= 11 && !userPremium);
-    
-    // Appliquer les contours néon selon le groupe de jeux
-    if (i >= 1 && i <= 10) {
-      // Jeux 1-10 : contour vert (gratuits)
-      card.classList.add('free');
-    } else if (i >= 11 && i <= 36) {
-      // Jeux 11-36 : contour jaune (premium)
-      card.classList.add('locked');
-    }
-    
-    if(isLocked) {
-      card.classList.add('premium');
-      // Réduire légèrement l'opacité mais garder les contours visibles
-      card.style.opacity = '0.8';
-      // Ajouter un cadenas
-      const lockIcon = document.createElement('div');
-      lockIcon.innerHTML = '🔒';
-      lockIcon.style.cssText = 'position: absolute; top: 10px; right: 10px; font-size: 20px; z-index: 1; filter: none;';
-      card.appendChild(lockIcon);
-    }
-    
-    if(i===35) card.classList.add('testqi');
-    
-    const num=document.createElement('div'); num.className='num'; num.textContent=i;
-    const title=document.createElement('div'); title.className='title'; title.textContent=t.games[i-1]||`Jeu ${i}`;
-    card.appendChild(num); card.appendChild(title);
-    
-    card.addEventListener('click',()=>{
-      if(isLocked){
-        showSubscriptionMessage();
-        return;
-      }
+    card.addEventListener('click', () => {
       openGame(i);
     });
     
     grid.appendChild(card);
   }
-  
-  // Gestion de la visibilité et activation des boutons selon le statut premium
-  const premiumBtn = document.getElementById('premiumBtn');
-  const shareBtn = document.getElementById('shareBtn');
-  const loginBtn = document.getElementById('loginBtn');
-  const signupBtn = document.getElementById('signupBtn');
-  
-
-  
-  if(userPremium || isPremium) {
-    // Utilisateur premium : masquer le bouton premium (déjà abonné)
-    premiumBtn.style.display = 'none';
-    
-    // Boutons connexion/inscription TOUJOURS actifs pour premium
-    if(loginBtn) {
-      loginBtn.style.opacity = '1';
-      loginBtn.style.pointerEvents = 'auto';
-      loginBtn.title = 'Se connecter';
-      loginBtn.classList.remove('premium-only');
-    }
-    if(signupBtn) {
-      signupBtn.style.opacity = '1';
-      signupBtn.style.pointerEvents = 'auto';
-      signupBtn.title = 'S\'inscrire';
-      signupBtn.classList.remove('premium-only');
-    }
-  } else {
-    // Utilisateur non premium : afficher le bouton premium
-    premiumBtn.style.display = 'inline-block';
-    
-    // Boutons connexion/inscription TOUJOURS actifs (même pour non-premium)
-    if(loginBtn) {
-      loginBtn.style.opacity = '1';
-      loginBtn.style.pointerEvents = 'auto';
-      loginBtn.title = 'Se connecter';
-      loginBtn.classList.remove('premium-only');
-    }
-    if(signupBtn) {
-      signupBtn.style.opacity = '1';
-      signupBtn.style.pointerEvents = 'auto';
-      signupBtn.title = 'S\'inscrire';
-      signupBtn.classList.remove('premium-only');
-    }
-  }
-  
-  // Bouton partager TOUJOURS visible
-  if (shareBtn) {
-    shareBtn.style.display = 'inline-block';
-  }
-  
-  console.log('renderGrid completed - Cards added to grid:', grid.children.length);
 }
 
-// ================= GAME OVERLAY
-const overlay=document.getElementById('gameOverlay');
-const frame=document.getElementById('gameFrame');
-const btnMenu=document.getElementById('overlayMenu');
-let currentGame=null;
-function openGame(n){ frame.src=`jeux${n}.html`; currentGame=n; overlay.style.display='flex'; setTimeout(()=>{ document.documentElement.requestFullscreen?.().catch(()=>{}); },100); }
-function closeGame(){ frame.src='about:blank'; overlay.style.display='none'; currentGame=null; if(document.fullscreenElement){ document.exitFullscreen?.(); } }
-btnMenu.addEventListener('click',closeGame);
-document.addEventListener('keydown',e=>{if(e.key==='Escape' && overlay.style.display==='flex'){closeGame();}});
-
-// ================= LANGUAGE
-const langSelect=document.getElementById('langSelect');
-function applyLanguage(lang){
-  if(!TRANSLATIONS[lang]) lang='fr';
-  localStorage.setItem('brainova_lang',lang);
-  const t=TRANSLATIONS[lang];
-  document.getElementById('introTitle').textContent=t.introTitle;
-  document.getElementById('introDesc').textContent=t.introDesc;
-  document.getElementById('overlayMenu').textContent=t.overlayBack;
-  
-  // Mettre à jour le bouton partager
-  const shareBtn = document.getElementById('shareBtn');
-  if (shareBtn) {
-    shareBtn.textContent = t.shareBtn;
-  }
-  
-  document.documentElement.dir=(lang==='ar')?'rtl':'ltr';
-  renderGrid(lang);
-}
-langSelect.addEventListener('change',()=>applyLanguage(langSelect.value));
-applyLanguage(localStorage.getItem('brainova_lang')||'fr');
-
-// ================= NOUVEAU SYSTÈME D'AUTHENTIFICATION PREMIUM
-const loginModal = document.getElementById('loginModal');
-const signupModal = document.getElementById('signupModal');
-const premiumModal = document.getElementById('premiumModal');
-
-// Fonction pour vérifier le statut premium
-function checkPremiumStatus() {
-  const isPremium = localStorage.getItem('brainova_premium') === 'true';
-  return isPremium;
+function openGame(n) {
+  alert(`Ouverture du jeu ${n} - ${TRANSLATIONS.fr.games[n-1]}`);
 }
 
-// Fonction pour mettre à jour l'indicateur de statut
-function updatePremiumStatusIndicator(elementId, isPremium) {
-  const indicator = document.getElementById(elementId);
-  if (indicator) {
-    const statusText = indicator.querySelector('.status-text');
-    const statusDot = indicator.querySelector('.status-dot');
-    
-    if (isPremium) {
-      statusText.textContent = '✅ Statut premium confirmé - Accès autorisé';
-      statusDot.style.background = '#00ff88';
-      indicator.style.borderColor = '#00ff88';
-    } else {
-      statusText.textContent = '❌ Statut premium requis - Veuillez vous abonner d\'abord';
-      statusDot.style.background = '#ff6b6b';
-      indicator.style.borderColor = '#ff6b6b';
-    }
-  }
-}
-
-// Gestionnaires d'événements pour les boutons
-document.getElementById('loginBtn').addEventListener('click', () => {
-  const isPremium = checkPremiumStatus();
-  updatePremiumStatusIndicator('premiumStatusIndicator', isPremium);
-  
-  if (isPremium) {
-    loginModal.style.display = 'flex';
-  } else {
-    // Afficher un message d'erreur stylé
-    showPremiumRequiredMessage('connexion');
-  }
-});
-
-document.getElementById('signupBtn').addEventListener('click', () => {
-  const isPremium = checkPremiumStatus();
-  updatePremiumStatusIndicator('premiumStatusIndicatorSignup', isPremium);
-  
-  if (isPremium) {
-    signupModal.style.display = 'flex';
-  } else {
-    // Afficher un message d'erreur stylé
-    showPremiumRequiredMessage('inscription');
-  }
-});
-
-// Fonction pour afficher le message premium requis
-function showPremiumRequiredMessage(action) {
+// Fonction pour ouvrir la modal de test
+function openTestModal() {
+  console.log('Test modal opening...');
   const modal = document.createElement('div');
   modal.style.cssText = `
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.9); display: flex; align-items: center;
-    justify-content: center; z-index: 10040;
-  `;
-  
-  const card = document.createElement('div');
-  card.style.cssText = `
-    background: linear-gradient(135deg, #ff6b6b, #ffa500);
-    padding: 40px; border-radius: 20px; text-align: center;
-    color: white; max-width: 400px; box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-    border: 2px solid rgba(255,255,255,0.2);
-  `;
-  
-  card.innerHTML = `
-    <div style="font-size: 48px; margin-bottom: 20px;">🔒</div>
-    <h3 style="margin-bottom: 15px; color: #fff;">Accès Premium Requis</h3>
-    <p style="margin-bottom: 25px; font-size: 16px;">
-      La ${action} n'est disponible que pour les membres premium. 
-      Abonnez-vous d'abord pour débloquer cette fonctionnalité.
-    </p>
-    <button id="goToPremium" style="
-      background: linear-gradient(90deg, #ffd700, #ffb347);
-      color: #333; border: none; padding: 15px 30px;
-      border-radius: 25px; font-weight: bold; cursor: pointer;
-      margin-right: 10px; font-size: 16px;
-    ">S'abonner maintenant</button>
-    <button id="closePremiumMessage" style="
-      background: transparent; border: 2px solid rgba(255,255,255,0.5);
-      color: white; padding: 15px 30px; border-radius: 25px;
-      cursor: pointer; font-size: 16px;
-    ">Fermer</button>
-  `;
-  
-  modal.appendChild(card);
-  document.body.appendChild(modal);
-  
-  // Événements
-  document.getElementById('goToPremium').addEventListener('click', () => {
-    document.body.removeChild(modal);
-    showSubscriptionMessage();
-  });
-  
-  document.getElementById('closePremiumMessage').addEventListener('click', () => {
-    document.body.removeChild(modal);
-  });
-  
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) {
-      document.body.removeChild(modal);
-    }
-  });
-}
-
-// Événements de fermeture des modaux
-document.getElementById('loginCancel').addEventListener('click', () => loginModal.style.display = 'none');
-document.getElementById('signupCancel').addEventListener('click', () => signupModal.style.display = 'none');
-
-// Gestionnaire de soumission du formulaire de connexion premium
-document.getElementById('loginForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  
-  // Vérifier à nouveau le statut premium
-  if (!checkPremiumStatus()) {
-    showPremiumRequiredMessage('connexion');
-    return;
-  }
-  
-  const email = document.getElementById('loginEmail').value.trim();
-  const password = document.getElementById('loginPassword').value;
-  
-  if (!email || !password) {
-    showAuthError('Veuillez remplir tous les champs');
-    return;
-  }
-  
-  try {
-    // Animation de chargement
-    const submitBtn = e.target.querySelector('.premium-btn');
-    const originalText = submitBtn.textContent;
-    submitBtn.textContent = 'Connexion...';
-    submitBtn.disabled = true;
-    
-    // Connexion Firebase
-    const userCredential = await auth.signInWithEmailAndPassword(email, password);
-    console.log('Connexion réussie:', userCredential.user);
-    
-    // Fermer le modal et mettre à jour l'interface
-    loginModal.style.display = 'none';
-    showAuthSuccess('Connexion réussie ! Bienvenue sur Brainova Premium.');
-    
-    // Réinitialiser le formulaire
-    document.getElementById('loginForm').reset();
-    
-  } catch (error) {
-    console.error('Erreur de connexion:', error);
-    let message = 'Erreur de connexion. Veuillez vérifier vos identifiants.';
-    
-    switch (error.code) {
-      case 'auth/user-not-found':
-        message = 'Aucun compte trouvé avec cet email.';
-        break;
-      case 'auth/wrong-password':
-        message = 'Mot de passe incorrect.';
-        break;
-      case 'auth/invalid-email':
-        message = 'Format d\'email invalide.';
-        break;
-      case 'auth/too-many-requests':
-        message = 'Trop de tentatives. Réessayez plus tard.';
-        break;
-    }
-    
-    showAuthError(message);
-  } finally {
-    // Restaurer le bouton
-    const submitBtn = e.target.querySelector('.premium-btn');
-    submitBtn.textContent = originalText;
-    submitBtn.disabled = false;
-  }
-});
-
-// Gestionnaire de soumission du formulaire d'inscription premium
-document.getElementById('signupForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  
-  // Vérifier à nouveau le statut premium
-  if (!checkPremiumStatus()) {
-    showPremiumRequiredMessage('inscription');
-    return;
-  }
-  
-  const email = document.getElementById('signupEmail').value.trim();
-  const password = document.getElementById('signupPassword').value;
-  const confirmPassword = document.getElementById('signupConfirm').value;
-  
-  if (!email || !password || !confirmPassword) {
-    showAuthError('Veuillez remplir tous les champs');
-    return;
-  }
-  
-  if (password !== confirmPassword) {
-    showAuthError('Les mots de passe ne correspondent pas');
-    return;
-  }
-  
-  if (password.length < 6) {
-    showAuthError('Le mot de passe doit contenir au moins 6 caractères');
-    return;
-  }
-  
-  try {
-    // Animation de chargement
-    const submitBtn = e.target.querySelector('.premium-btn');
-    const originalText = submitBtn.textContent;
-    submitBtn.textContent = 'Inscription...';
-    submitBtn.disabled = true;
-    
-    // Inscription Firebase
-    const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-    console.log('Inscription réussie:', userCredential.user);
-    
-    // Envoyer email de vérification
-    await userCredential.user.sendEmailVerification();
-    
-    // Fermer le modal et afficher le succès
-    signupModal.style.display = 'none';
-    showAuthSuccess('Inscription réussie ! Un email de vérification a été envoyé. Bienvenue sur Brainova Premium !');
-    
-    // Réinitialiser le formulaire
-    document.getElementById('signupForm').reset();
-    
-  } catch (error) {
-    console.error('Erreur d\'inscription:', error);
-    let message = 'Erreur lors de l\'inscription.';
-    
-    switch (error.code) {
-      case 'auth/email-already-in-use':
-        message = 'Cet email est déjà utilisé.';
-        break;
-      case 'auth/invalid-email':
-        message = 'Format d\'email invalide.';
-        break;
-      case 'auth/weak-password':
-        message = 'Le mot de passe est trop faible.';
-        break;
-    }
-    
-    showAuthError(message);
-  } finally {
-    // Restaurer le bouton
-    const submitBtn = e.target.querySelector('.premium-btn');
-    submitBtn.textContent = originalText;
-    submitBtn.disabled = false;
-  }
-});
-
-// Fonctions d'affichage des messages
-function showAuthError(message) {
-  const toast = createToast(message, 'error');
-  document.body.appendChild(toast);
-}
-
-function showAuthSuccess(message) {
-  const toast = createToast(message, 'success');
-  document.body.appendChild(toast);
-}
-
-function createToast(message, type) {
-  const toast = document.createElement('div');
-  const bgColor = type === 'error' ? '#ff6b6b' : '#00ff88';
-  
-  toast.style.cssText = `
-    position: fixed; top: 20px; right: 20px; z-index: 10050;
-    background: ${bgColor}; color: white; padding: 15px 20px;
-    border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-    max-width: 300px; font-size: 14px; font-weight: 500;
-    animation: slideIn 0.3s ease;
-  `;
-  
-  toast.textContent = message;
-  
-  // Animation CSS
-  const style = document.createElement('style');
-  style.textContent = `
-    @keyframes slideIn {
-      from { transform: translateX(100%); opacity: 0; }
-      to { transform: translateX(0); opacity: 1; }
-    }
-  `;
-  document.head.appendChild(style);
-  
-  // Auto-suppression après 4 secondes
-  setTimeout(() => {
-    if (toast.parentNode) {
-      toast.style.animation = 'slideIn 0.3s ease reverse';
-      setTimeout(() => {
-        if (toast.parentNode) document.body.removeChild(toast);
-      }, 300);
-    }
-  }, 4000);
-  
-  return toast;
-}
-
-// ================= PREMIUM & STRIPE
-// Vérifier l'état premium dans localStorage
-let isPremium = localStorage.getItem('brainova_premium') === 'true';
-
-// Fonction pour débloquer le premium
-function unlockPremium() {
-  isPremium = true;
-  localStorage.setItem('brainova_premium', 'true');
-  userPremium = true;
-  renderGrid(langSelect.value);
-  initializeAuthButtons(); // Mettre à jour les boutons d'authentification
-  alert('Félicitations ! Tous les jeux sont maintenant débloqués !');
-}
-
-
-
-// Message d'abonnement personnalisé
-function showSubscriptionMessage() {
-  // Récupérer la langue actuelle
-  const currentLang = langSelect.value || 'fr';
-  const t = TRANSLATIONS[currentLang] || TRANSLATIONS['fr'];
-  
-  const customModal = document.createElement('div');
-  customModal.style.cssText = `
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.9); display: flex; align-items: center;
-    justify-content: center; z-index: 10030;
-  `;
-  
-  const messageCard = document.createElement('div');
-  messageCard.style.cssText = `
-    background: linear-gradient(135deg, #1e3c72, #2a5298);
-    padding: 40px; border-radius: 20px; text-align: center;
-    color: white; max-width: 400px; box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-  `;
-  
-  messageCard.innerHTML = `
-    <h2 style="color: #ffd700; margin-bottom: 20px;">${t.subscriptionTitle}</h2>
-    <h3 style="color: #00ffff; margin-bottom: 15px;">${t.subscriptionPack}</h3>
-    <p style="font-size: 18px; margin-bottom: 25px;">${t.subscriptionDesc}</p>
-    <div style="font-size: 32px; font-weight: bold; color: #ff6b6b; margin-bottom: 25px;">
-      ${t.subscriptionPrice}
-    </div>
-    <button id="subscribeNowBtn" style="
-      background: linear-gradient(90deg, #ff6b6b, #ffa500);
-      border: none; padding: 15px 30px; border-radius: 25px;
-      color: white; font-size: 18px; font-weight: bold;
-      cursor: pointer; margin-right: 10px;
-      box-shadow: 0 5px 15px rgba(255,107,107,0.4);
-    ">${t.subscriptionBtn}</button>
-    <button id="cancelSubscribeBtn" style="
-      background: transparent; border: 2px solid rgba(255,255,255,0.3);
-      padding: 15px 30px; border-radius: 25px; color: white;
-      font-size: 16px; cursor: pointer;
-    ">${t.subscriptionCancel}</button>
-  `;
-  
-  customModal.appendChild(messageCard);
-  document.body.appendChild(customModal);
-  
-  // Gestion des boutons
-  document.getElementById('subscribeNowBtn').addEventListener('click', () => {
-    // Redirection directe vers Stripe
-    window.location.href = 'https://buy.stripe.com/cNi8wR7IC77o54icy49EI01';
-  });
-  
-  document.getElementById('cancelSubscribeBtn').addEventListener('click', () => {
-    document.body.removeChild(customModal);
-  });
-}
-
-// Gestion du clic sur Premium et Partager (gérée maintenant dans DOMContentLoaded)
-
-// Gestion du clic sur les jeux verrouillés
-function handleLockedGameClick() {
-  showSubscriptionMessage();
-}
-
-// NOUVEAU SYSTÈME DE PARTAGE - Optimisé pour jeux verrouillés
-function showShareOptions() {
-  // Récupérer la langue actuelle et les traductions
-  const currentLang = langSelect.value || 'fr';
-  const t = TRANSLATIONS[currentLang] || TRANSLATIONS['fr'];
-  
-  // Créer le modal de partage
-  const shareModal = document.createElement('div');
-  shareModal.style.cssText = `
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.85); display: flex; align-items: center;
-    justify-content: center; z-index: 10030; backdrop-filter: blur(5px);
-  `;
-  
-  const shareContainer = document.createElement('div');
-  shareContainer.style.cssText = `
-    background: linear-gradient(145deg, #2c3e50, #3498db);
-    padding: 35px; border-radius: 20px; text-align: center;
-    color: white; max-width: 500px; width: 90%;
-    box-shadow: 0 25px 50px rgba(0,0,0,0.3);
-    border: 2px solid rgba(255,255,255,0.1);
-  `;
-  
-  // URL en ligne pour le partage (GitHub Pages)
-  const currentUrl = "https://bensghaiermejdi70-alt.github.io/BRAINOVA-FIRST/";
-  const shareText = "🧠 Découvrez Brainova - 36 jeux pour booster votre intelligence ! Défiez votre cerveau maintenant ✨";
-  
-  shareContainer.innerHTML = `
-    <div style="margin-bottom: 25px;">
-      🚀
-      <h2 style="color: #ffd700; margin: 15px 0; font-size: 24px;">${t.shareTitle}</h2>
-      <p style="color: #ecf0f1; font-size: 16px; line-height: 1.5;">
-        ${t.shareDesc}
-      </p>
-    </div>
-    
-    <!-- Boutons de partage social améliorés -->
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px;">
-      
-      <button id="shareFacebookBtn" style="
-        background: linear-gradient(135deg, #4267B2, #365899);
-        border: none; padding: 15px 20px; border-radius: 15px;
-        color: white; font-weight: bold; cursor: pointer;
-        display: flex; align-items: center; justify-content: center;
-        gap: 8px; transition: transform 0.2s;
-      " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
-        ${t.shareMode}
-      </button>
-      
-      <button id="shareWhatsAppBtn" style="
-        background: linear-gradient(135deg, #25D366, #128C7E);
-        border: none; padding: 15px 20px; border-radius: 15px;
-        color: white; font-weight: bold; cursor: pointer;
-        display: flex; align-items: center; justify-content: center;
-        gap: 8px; transition: transform 0.2s;
-      " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
-        � WhatsApp
-      </button>
-      
-      <button id="copyLinkBtn" style="
-        background: linear-gradient(135deg, #e74c3c, #c0392b);
-        border: none; padding: 15px 20px; border-radius: 15px;
-        color: white; font-weight: bold; cursor: pointer;
-        display: flex; align-items: center; justify-content: center;
-        gap: 8px; transition: transform 0.2s;
-      " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
-        🔗 Copier lien
-      </button>
-      
-    </div>
-    
-    <!-- Information de partage -->
-    <div style="background: rgba(52,152,219,0.1); padding: 12px; border-radius: 10px; margin-bottom: 15px; border-left: 4px solid #3498db;">
-      <p style="margin: 0; color: #3498db; font-size: 12px; text-align: center;">
-        🌐 <strong>Partage optimisé :</strong> Utilise l'URL GitHub Pages pour des liens cliquables partout !
-      </p>
-    </div>
-    
-    <!-- Message motivationnel -->
-    <div style="background: rgba(255,215,0,0.1); padding: 15px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #ffd700;">
-      <p style="margin: 0; color: #ffd700; font-size: 14px;">
-        ${t.shareTip}
-      </p>
-    </div>
-    
-    <button id="closeShareModal" style="
-      background: transparent; border: 2px solid rgba(255,255,255,0.3);
-      padding: 12px 30px; border-radius: 25px; color: white;
-      cursor: pointer; transition: all 0.3s;
-    " onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='transparent'">
-      ${t.shareClose}
-    </button>
-  `;
-  
-  shareModal.appendChild(shareContainer);
-  document.body.appendChild(shareModal);
-  
-  // Gestion des événements de partage améliorés
-  
-  // Facebook - Méthode améliorée avec fallback
-  document.getElementById('shareFacebookBtn').addEventListener('click', () => {
-    const url = currentUrl;
-    
-    // Essayer l'API native si disponible
-    if (navigator.share) {
-      navigator.share({
-        title: 'Brainova - Jeux Intelligents',
-        text: shareText,
-        url: url
-      }).catch(() => {
-        // Fallback vers Facebook
-        window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank', 'width=600,height=500');
-      });
-    } else {
-      // Méthode Facebook directe
-      window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank', 'width=600,height=500');
-    }
-  });
-  
-  // WhatsApp - Message complet optimisé
-  document.getElementById('shareWhatsAppBtn').addEventListener('click', () => {
-    const message = encodeURIComponent(`🧠 *Brainova - Jeux Intelligents*\n\nDécouvrez 36 jeux pour booster votre intelligence !\n\n✨ Cliquez ici: ${currentUrl}`);
-    window.open(`https://wa.me/?text=${message}`, '_blank');
-  });
-  
-  // Copier le lien avec conseils
-  document.getElementById('copyLinkBtn').addEventListener('click', () => {
-    navigator.clipboard.writeText(currentUrl).then(() => {
-      const btn = document.getElementById('copyLinkBtn');
-      const originalText = btn.innerHTML;
-      btn.innerHTML = '✅ Copié !';
-      btn.style.background = 'linear-gradient(135deg, #27ae60, #2ecc71)';
-      
-      // Confirmation de copie
-      setTimeout(() => {
-        alert('📎 Lien GitHub Pages copié !\n\n✅ Ce lien est cliquable partout :\n• Par email\n• Sur les réseaux sociaux\n• Dans les messages\n\n🚀 Prêt à partager !');
-      }, 500);
-      
-      setTimeout(() => {
-        btn.innerHTML = originalText;
-        btn.style.background = 'linear-gradient(135deg, #e74c3c, #c0392b)';
-      }, 3000);
-    }).catch(() => {
-      alert('Erreur lors de la copie. Voici le lien : ' + currentUrl);
-    });
-  });
-  
-  // Fermer le modal
-  document.getElementById('closeShareModal').addEventListener('click', () => {
-    document.body.removeChild(shareModal);
-  });
-  
-  // Fermer en cliquant en dehors
-  shareModal.addEventListener('click', (e) => {
-    if (e.target === shareModal) {
-      document.body.removeChild(shareModal);
-    }
-  });
-}
-
-document.getElementById('premiumCancel').addEventListener('click',()=>premiumModal.style.display='none');
-
-// Gestionnaire pour le bouton test
-document.getElementById('testBtn').addEventListener('click', () => {
-  // Créer une modal de test
-  const testModal = document.createElement('div');
-  testModal.style.cssText = `
     position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
     background: rgba(0,0,0,0.8); z-index: 10000; display: flex; 
     align-items: center; justify-content: center;
   `;
   
-  testModal.innerHTML = `
-    <div style="background: white; padding: 30px; border-radius: 15px; text-align: center; max-width: 500px; margin: 20px;">
-      <h2 style="color: #333; margin-bottom: 20px;">🧪 Test des Codes Premium</h2>
+  modal.innerHTML = `
+    <div style="background: white; padding: 30px; border-radius: 15px; text-align: center; max-width: 500px; margin: 20px; color: #333;">
+      <h2 style="margin-bottom: 20px;">🧪 Test des Codes Premium</h2>
       <p style="margin-bottom: 15px;">Codes disponibles pour test :</p>
       <div style="background: #f0f0f0; padding: 15px; border-radius: 8px; margin: 15px 0;">
         <strong>BRAIN-2024-DEMO1</strong><br>
@@ -1058,128 +126,24 @@ document.getElementById('testBtn').addEventListener('click', () => {
     </div>
   `;
   
-  document.body.appendChild(testModal);
+  document.body.appendChild(modal);
   
-  // Fermer en cliquant sur l'arrière-plan
-  testModal.addEventListener('click', (e) => {
-    if (e.target === testModal) {
-      document.body.removeChild(testModal);
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      document.body.removeChild(modal);
     }
   });
-});
-
-// Vérifier le statut premium au chargement
-if (isPremium) {
-  userPremium = true;
 }
 
-// Fonction pour vérifier le retour de Stripe
-function checkStripeReturn() {
-  const urlParams = new URLSearchParams(window.location.search);
-  
-  // Si l'utilisateur revient de Stripe avec succès
-  if (urlParams.get('success') === 'true' || urlParams.get('payment_intent_status') === 'succeeded') {
-    unlockPremium();
-    // Nettoyer l'URL
-    window.history.replaceState({}, document.title, window.location.pathname);
-  }
-  
-  // Si l'utilisateur annule le paiement
-  if (urlParams.get('canceled') === 'true') {
-    alert('Paiement annulé. Vous pouvez réessayer à tout moment.');
-    window.history.replaceState({}, document.title, window.location.pathname);
-  }
+function showShareOptions() {
+  alert('Fonctionnalité de partage - Version simple');
 }
 
-// Vérifier au chargement de la page
+// Initialiser la grille au chargement
 document.addEventListener('DOMContentLoaded', () => {
-  console.log('=== DOMContentLoaded START ===');
-  checkStripeReturn();
-  
-  // Attacher les événements après le chargement du DOM
-  const premiumBtn = document.getElementById('premiumBtn');
-  const shareBtn = document.getElementById('shareBtn');
-  
-  console.log('DOM loaded. Premium button:', premiumBtn, 'Share button:', shareBtn);
-  
-  if (premiumBtn) {
-    premiumBtn.addEventListener('click', showSubscriptionMessage);
-    console.log('Premium button event attached');
-  }
-  
-  if (shareBtn) {
-    shareBtn.addEventListener('click', function(e) {
-      e.preventDefault();
-      e.stopPropagation();
-      showShareOptions();
-    });
-    console.log('Share button event attached');
-  }
-  
-  // Initialiser la grille de jeux
-  console.log('=== INITIALIZING GAMES GRID ===');
-  const langSelect = document.getElementById('langSelect');
-  console.log('langSelect element:', langSelect);
-  
-  if (langSelect && langSelect.value) {
-    console.log('Calling renderGrid with:', langSelect.value);
-    renderGrid(langSelect.value);
-    console.log('Games grid initialized with language:', langSelect.value);
-  } else {
-    // Fallback si langSelect n'est pas encore prêt
-    console.log('Calling renderGrid with fallback: fr');
-    renderGrid('fr');
-    console.log('Games grid initialized with default language: fr');
-  }
-  
-  // Initialiser le statut des boutons d'authentification
-  initializeAuthButtons();
-  console.log('Auth buttons initialized');
+  renderGrid('fr');
 });
-
-// Fonction pour initialiser les boutons d'authentification
-function initializeAuthButtons() {
-  const isPremium = checkPremiumStatus();
-  const loginBtn = document.getElementById('loginBtn');
-  const signupBtn = document.getElementById('signupBtn');
-  const premiumBtn = document.getElementById('premiumBtn');
-  
-  // Boutons connexion/inscription TOUJOURS actifs
-  if (loginBtn) {
-    loginBtn.style.opacity = '1';
-    loginBtn.style.pointerEvents = 'auto';
-    loginBtn.title = 'Se connecter';
-    loginBtn.classList.remove('premium-only');
-  }
-  if (signupBtn) {
-    signupBtn.style.opacity = '1';
-    signupBtn.style.pointerEvents = 'auto';
-    signupBtn.title = "S'inscrire";
-    signupBtn.classList.remove('premium-only');
-  }
-  
-  // Bouton Premium : masquer si déjà premium
-  if (premiumBtn) {
-    if (isPremium) {
-      premiumBtn.style.display = 'none';
-    } else {
-      premiumBtn.style.display = 'inline-block';
-    }
-  }
-}
-
-// Vérification finale pour le bouton partager
-document.addEventListener('click', function(e) {
-  if (e.target && e.target.id === 'shareBtn') {
-    e.preventDefault();
-    e.stopPropagation();
-    showShareOptions();
-  }
-});
-
-// Production ready - Système de paiement Stripe intégré
 
 </script>
-
 </body>
 </html>
