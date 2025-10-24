@@ -1,0 +1,7 @@
+# Redirections Netlify pour Brainova
+
+# Redirection pour la page premium
+/premium /premium.html 200
+
+# Redirection par défaut pour les erreurs 404
+/* /index.html 404
