@@ -3,2046 +3,1609 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quantum Monopoly - Jeu de Plateau Futuriste</title>
+    <title>🧠 Brainova Crash - Match-3 Game</title>
     <style>
-        body {
-            box-sizing: border-box;
+        * {
             margin: 0;
             padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
-            color: #ffffff;
-            min-height: 100vh;
-            overflow-x: auto;
+            box-sizing: border-box;
         }
 
-        .quantum-bg {
+        body {
+            font-family: 'Arial', sans-serif;
+            background: radial-gradient(circle at 30% 50%, #1a0033, #000011, #330066);
+            background-size: 400% 400%;
+            animation: gradientShift 8s ease-in-out infinite;
+            color: white;
+            overflow-x: hidden;
+            min-height: 100vh;
+            padding: 10px;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(255, 0, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(0, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(255, 215, 0, 0.05) 0%, transparent 50%);
+            pointer-events: none;
             z-index: -1;
-            background: radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
-                        radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
-                        radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.2) 0%, transparent 50%);
+            animation: sparkle 6s ease-in-out infinite;
         }
 
-        .quantum-particle {
-            position: absolute;
-            width: 2px;
-            height: 2px;
-            background: #00ffff;
-            border-radius: 50%;
-            animation: float 6s ease-in-out infinite;
-            box-shadow: 0 0 6px #00ffff;
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
         }
 
-        @keyframes float {
-            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.7; }
-            50% { transform: translateY(-20px) rotate(180deg); opacity: 1; }
+        @keyframes sparkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.8; }
         }
 
-        .game-header {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            margin: 10px auto;
-            max-width: 800px;
-            align-items: center;
-        }
-
-        .header-top {
-            background: linear-gradient(135deg, rgba(15, 15, 35, 0.95) 0%, rgba(30, 30, 60, 0.95) 100%);
-            border: 2px solid rgba(0, 255, 255, 0.5);
-            border-radius: 12px;
-            padding: 8px 20px;
-            backdrop-filter: blur(15px);
-            box-shadow: 0 8px 32px rgba(0, 255, 255, 0.2);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            width: 100%;
-            min-height: 50px;
-        }
-
-        .header-center {
-            background: linear-gradient(135deg, rgba(15, 15, 35, 0.95) 0%, rgba(30, 30, 60, 0.95) 100%);
-            border: 2px solid rgba(0, 255, 255, 0.5);
-            border-radius: 12px;
-            padding: 8px 20px;
-            backdrop-filter: blur(15px);
-            box-shadow: 0 8px 32px rgba(0, 255, 255, 0.2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            flex-wrap: wrap;
-            width: 100%;
-            min-height: 50px;
-        }
-
-        .header-bottom {
-            background: linear-gradient(135deg, rgba(15, 15, 35, 0.95) 0%, rgba(30, 30, 60, 0.95) 100%);
-            border: 2px solid rgba(0, 255, 255, 0.5);
-            border-radius: 12px;
-            padding: 8px 20px;
-            backdrop-filter: blur(15px);
-            box-shadow: 0 8px 32px rgba(0, 255, 255, 0.2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            min-height: 40px;
-        }
-
-        .game-title {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .game-title h1 {
-            font-size: 18px;
-            font-weight: bold;
-            background: linear-gradient(135deg, #00ffff, #ff00ff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin: 0;
-            text-shadow: 0 0 30px rgba(0, 255, 255, 0.5);
-            letter-spacing: 1px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            justify-content: center;
-        }
-
-        .ai-quantum-btn {
-            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 50%, #f39c12 100%);
-            border: 2px solid rgba(255, 215, 0, 0.8);
-            border-radius: 20px;
-            padding: 8px 16px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
-            backdrop-filter: blur(10px);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .ai-quantum-btn:hover {
-            transform: translateY(-2px) scale(1.05);
-            box-shadow: 0 6px 25px rgba(255, 215, 0, 0.6);
-            border-color: rgba(255, 215, 0, 1);
-        }
-
-        .ai-quantum-btn:active {
-            transform: translateY(0) scale(0.98);
-        }
-
-        .ai-quantum-btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-            transition: left 0.5s ease;
-        }
-
-        .ai-quantum-btn:hover::before {
-            left: 100%;
-        }
-
-        .ai-quantum-btn span {
-            font-size: 11px;
-            font-weight: bold;
-            color: #1a1a2e;
-            text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.3);
-            letter-spacing: 0.5px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .game-logo {
-            font-size: 24px;
-            filter: drop-shadow(0 0 20px #00ffff);
-            animation: pulse 3s ease-in-out infinite;
-            flex-shrink: 0;
-        }
-
-        .subtitle {
-            font-size: 10px;
-            color: #00ffff;
-            text-align: center;
-            margin-top: 2px;
-            font-weight: bold;
-            letter-spacing: 1px;
-        }
-
-        .header-controls {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-
-        .main-container {
+        .game-layout {
+            display: grid;
+            grid-template-columns: 1fr 2fr 1fr;
+            gap: 20px;
             max-width: 1400px;
             margin: 0 auto;
-            position: relative;
-            background: linear-gradient(135deg, rgba(15, 15, 35, 0.95) 0%, rgba(30, 30, 60, 0.95) 100%);
-            border: 3px solid rgba(0, 255, 255, 0.4);
-            border-radius: 25px;
-            backdrop-filter: blur(20px);
-            box-shadow: 
-                0 0 50px rgba(0, 255, 255, 0.3),
-                inset 0 0 50px rgba(0, 255, 255, 0.1);
-            padding: 20px;
-            margin: 20px auto;
-            position: relative;
-            overflow: hidden;
+            align-items: start;
         }
 
-        .main-container::before {
-            content: '';
-            position: absolute;
-            top: -2px;
-            left: -2px;
-            right: -2px;
-            bottom: -2px;
-            background: linear-gradient(45deg, #00ffff, #ff00ff, #ffff00, #00ffff);
-            border-radius: 25px;
-            z-index: -1;
-            animation: borderGlow 3s linear infinite;
-        }
-
-        @keyframes borderGlow {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        .game-container {
-            display: grid;
-            grid-template-columns: 200px 1fr 200px;
-            gap: 20px;
-            padding: 0 20px 20px 20px;
-            min-height: calc(100vh - 200px);
-            position: relative;
-            z-index: 1;
-            margin-top: 10px;
-        }
-
-        .sidebar {
-            background: linear-gradient(135deg, rgba(15, 15, 35, 0.95) 0%, rgba(30, 30, 60, 0.95) 100%);
-            border: 3px solid rgba(0, 255, 255, 0.4);
+        .left-panel {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
             border-radius: 20px;
             padding: 20px;
-            backdrop-filter: blur(15px);
+            border: 3px solid #00ffff;
             box-shadow: 
-                0 10px 40px rgba(0, 255, 255, 0.2),
-                inset 0 0 30px rgba(0, 255, 255, 0.05);
-            margin-top: 0px;
-            height: fit-content;
+                0 0 30px rgba(0, 255, 255, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
             position: relative;
             overflow: hidden;
         }
 
-        .sidebar::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, #00ffff, #ff00ff, #00ffff, transparent);
-            animation: scanLine 2s linear infinite;
-        }
-
-        .sidebar::after {
+        .left-panel::before {
             content: '';
             position: absolute;
             top: -50%;
             left: -50%;
             width: 200%;
             height: 200%;
-            background: radial-gradient(circle, rgba(0, 255, 255, 0.1) 0%, transparent 70%);
-            animation: rotate 10s linear infinite;
+            background: linear-gradient(45deg, transparent, rgba(0, 255, 255, 0.1), transparent);
+            animation: shimmerLeft 4s linear infinite;
             pointer-events: none;
         }
 
-        @keyframes scanLine {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(100%); }
-        }
-
-        @keyframes rotate {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .main-board {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .board-container {
-            width: 800px;
-            height: 800px;
-            position: relative;
-            background: linear-gradient(135deg, rgba(15, 15, 35, 0.98) 0%, rgba(30, 30, 60, 0.98) 100%);
-            border: 4px solid rgba(0, 255, 255, 0.6);
-            border-radius: 25px;
-            box-shadow: 
-                0 0 60px rgba(0, 255, 255, 0.4),
-                inset 0 0 40px rgba(0, 255, 255, 0.1);
-            backdrop-filter: blur(20px);
-            position: relative;
-            overflow: hidden;
-        }
-
-
-
-        .board-surface {
-            width: 100%;
-            height: 100%;
-            display: grid;
-            grid-template-columns: repeat(11, 1fr);
-            grid-template-rows: repeat(11, 1fr);
-            gap: 1px;
-            padding: 10px;
-            box-sizing: border-box;
-        }
-
-        .board-cell {
-            background: rgba(30, 30, 60, 0.8);
-            border: 1px solid rgba(0, 255, 255, 0.2);
-            border-radius: 10px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            font-size: 11px;
-            text-align: center;
-            overflow: hidden;
-            transition: all 0.3s ease;
-            min-height: 70px;
-        }
-
-        .board-cell:hover {
-            background: rgba(0, 255, 255, 0.1);
-            border-color: rgba(0, 255, 255, 0.5);
-            transform: scale(1.05);
-        }
-
-        .cell-corner {
-            background: linear-gradient(135deg, #ff6b6b, #ee5a24) !important;
-            font-weight: bold;
-            font-size: 9px;
-        }
-
-        .cell-property {
-            background: linear-gradient(135deg, #4834d4, #686de0) !important;
-        }
-
-        .cell-railroad {
-            background: linear-gradient(135deg, #2c2c54, #40407a) !important;
-        }
-
-        .cell-utility {
-            background: linear-gradient(135deg, #ff9ff3, #f368e0) !important;
-        }
-
-        .cell-chance {
-            background: linear-gradient(135deg, #ff9500, #ff6348) !important;
-        }
-
-        .cell-communityChest {
-            background: linear-gradient(135deg, #0abde3, #006ba6) !important;
-        }
-
-        .cell-tax {
-            background: linear-gradient(135deg, #c44569, #f8b500) !important;
-        }
-
-        .player-token {
-            position: absolute;
-            width: 22px;
-            height: 22px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 900;
-            font-size: 12px;
-            color: white;
-            text-shadow: 2px 2px 4px rgba(0,0,0,1), 0 0 8px rgba(0,0,0,0.8);
-            border: 3px solid rgba(255,255,255,1);
-            z-index: 10;
-            animation: pulse 2s ease-in-out infinite;
-            box-shadow: 0 0 15px rgba(0,0,0,0.5), inset 0 0 10px rgba(255,255,255,0.2);
-        }
-
-        .player-1 { background: linear-gradient(135deg, #ff4757, #ff3742); border: 3px solid #ffffff; font-weight: 900; }
-        .player-2 { background: linear-gradient(135deg, #2ed573, #1dd1a1); border: 3px solid #ffffff; font-weight: 900; }
-        .player-3 { background: linear-gradient(135deg, #3742fa, #2f3542); border: 3px solid #ffffff; font-weight: 900; }
-        .player-4 { background: linear-gradient(135deg, #ff6348, #ff4757); border: 3px solid #ffffff; font-weight: 900; }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-        }
-
-        .controls {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-            justify-content: center;
-            margin-top: 20px;
-        }
-
-        .quantum-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
-            color: white;
-            padding: 6px 12px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 11px;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .quantum-btn:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
-            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
-        }
-
-        .quantum-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .quantum-dice {
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(135deg, #00ffff, #ff00ff);
-            border: 3px solid rgba(255,255,255,0.8);
-            border-radius: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 28px;
-            font-weight: bold;
-            color: white;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 0 20px rgba(0,255,255,0.6);
-        }
-
-        .quantum-dice:hover {
-            transform: scale(1.1) rotate(5deg);
-            box-shadow: 0 0 30px rgba(0,255,255,0.8);
-        }
-
-        .quantum-dice.rolling {
-            animation: roll 1s ease-in-out;
-        }
-
-        @keyframes roll {
-            0% { transform: rotate(0deg); }
-            25% { transform: rotate(90deg) scale(1.2); }
-            50% { transform: rotate(180deg) scale(0.8); }
-            75% { transform: rotate(270deg) scale(1.2); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .player-info {
-            background: rgba(30, 30, 60, 0.8);
-            border: 1px solid rgba(0, 255, 255, 0.3);
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 15px;
-            backdrop-filter: blur(5px);
-            transition: all 0.3s ease;
-            position: relative;
-            z-index: 10;
-        }
-
-        .player-info:hover {
-            border-color: rgba(0, 255, 255, 0.6);
-            background: rgba(30, 30, 60, 0.9);
-        }
-
-        .player-info.current-player {
-            border-color: #00ffff;
-            background: rgba(0, 255, 255, 0.1);
-            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
-        }
-
-        .player-name {
-            font-size: 16px;
-            font-weight: bold;
-            color: #00ffff;
-            margin-bottom: 8px;
-        }
-
-        .player-stats {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            font-size: 12px;
-        }
-
-        .stat-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .stat-value {
-            font-weight: bold;
-            color: #ffffff;
-        }
-
-        .section-title {
-            font-size: 18px;
-            font-weight: bold;
-            color: #00ffff;
-            margin-bottom: 15px;
-            text-align: center;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            position: relative;
-            z-index: 10;
-        }
-
-        .game-message {
-            background: rgba(15, 15, 35, 0.9);
-            border: 2px solid rgba(0, 255, 255, 0.5);
-            border-radius: 15px;
-            padding: 20px;
-            text-align: center;
-            font-size: 16px;
-            font-weight: bold;
-            color: #00ffff;
-            box-shadow: 0 0 30px rgba(0, 255, 255, 0.2);
+        .right-panel {
+            background: rgba(0, 0, 0, 0.4);
             backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 20px;
+            border: 3px solid #ff00ff;
+            box-shadow: 
+                0 0 30px rgba(255, 0, 255, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .right-panel::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 0, 255, 0.1), transparent);
+            animation: shimmerRight 3s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes shimmerLeft {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+
+        @keyframes shimmerRight {
+            0% { transform: translateX(100%) translateY(-100%) rotate(-45deg); }
+            100% { transform: translateX(-100%) translateY(100%) rotate(-45deg); }
+        }
+
+        .center-panel {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .game-header {
+            text-align: center;
             margin-bottom: 20px;
         }
 
-        .language-selector {
-            position: relative;
-            display: inline-block;
+        .game-title {
+            font-size: 36px;
+            font-weight: bold;
+            background: linear-gradient(45deg, #00ffff, #ff00ff, #ffff00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+            margin-bottom: 10px;
         }
 
-        .language-dropdown {
-            background: linear-gradient(135deg, rgba(15, 15, 35, 0.95) 0%, rgba(30, 30, 60, 0.95) 100%);
-            border: 2px solid rgba(0, 255, 255, 0.5);
-            border-radius: 12px;
-            color: #00ffff;
-            padding: 6px 12px;
-            font-size: 11px;
-            cursor: pointer;
-            transition: all 0.3s ease;
+        .score-board {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .score-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 15px;
+            border: 2px solid #00ffff;
             backdrop-filter: blur(10px);
-            box-shadow: 0 4px 15px rgba(0, 255, 255, 0.2);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-weight: bold;
-            min-width: 120px;
-            justify-content: space-between;
-        }
-
-        .language-dropdown:hover {
-            border-color: rgba(0, 255, 255, 0.8);
-            background: linear-gradient(135deg, rgba(0, 255, 255, 0.1) 0%, rgba(255, 0, 255, 0.1) 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 255, 255, 0.3);
-        }
-
-        .language-options {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
-            background: linear-gradient(135deg, rgba(15, 15, 35, 0.98) 0%, rgba(30, 30, 60, 0.98) 100%);
-            border: 2px solid rgba(0, 255, 255, 0.5);
-            border-radius: 15px;
-            backdrop-filter: blur(15px);
-            box-shadow: 0 8px 32px rgba(0, 255, 255, 0.3);
-            z-index: 999999;
-            margin-top: 5px;
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(-10px);
-            transition: all 0.3s ease;
-        }
-
-        .language-options.show {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
-        }
-
-        .language-option {
-            padding: 12px 20px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            color: #ffffff;
-            font-weight: bold;
-            border-bottom: 1px solid rgba(0, 255, 255, 0.1);
-        }
-
-        .language-option:last-child {
-            border-bottom: none;
-            border-radius: 0 0 13px 13px;
-        }
-
-        .language-option:first-child {
-            border-radius: 13px 13px 0 0;
-        }
-
-        .language-option:hover {
-            background: linear-gradient(135deg, rgba(0, 255, 255, 0.2) 0%, rgba(255, 0, 255, 0.2) 100%);
-            color: #00ffff;
-            transform: translateX(5px);
-        }
-
-        .language-option.active {
-            background: linear-gradient(135deg, rgba(0, 255, 255, 0.3) 0%, rgba(255, 0, 255, 0.3) 100%);
-            color: #00ffff;
-        }
-
-        @media (max-width: 1200px) {
-            .game-container {
-                grid-template-columns: 1fr;
-                gap: 15px;
-            }
-            
-            .board-container {
-                width: 500px;
-                height: 500px;
-            }
-            
-            .sidebar {
-                order: 2;
-            }
-        }
-
-        .player-count-selector {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            margin-bottom: 15px;
-        }
-
-        .count-btn {
-            background: rgba(30, 30, 60, 0.8);
-            border: 2px solid rgba(0, 255, 255, 0.3);
-            color: #ffffff;
-            padding: 8px 16px;
-            border-radius: 15px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s ease;
-            min-width: 40px;
-        }
-
-        .count-btn:hover {
-            border-color: rgba(0, 255, 255, 0.6);
-            background: rgba(0, 255, 255, 0.1);
-        }
-
-        .count-btn.active {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-color: #00ffff;
-            box-shadow: 0 0 15px rgba(0, 255, 255, 0.4);
-        }
-
-        .quick-actions {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-        }
-
-        .action-btn {
-            background: rgba(30, 30, 60, 0.8);
-            border: 2px solid rgba(0, 255, 255, 0.3);
-            color: #ffffff;
-            padding: 8px 12px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 12px;
-            transition: all 0.3s ease;
             text-align: center;
         }
 
-        .action-btn:hover:not(:disabled) {
-            border-color: rgba(0, 255, 255, 0.6);
-            background: rgba(0, 255, 255, 0.1);
-            transform: translateY(-1px);
+        .level-display {
+            background: rgba(255, 215, 0, 0.2);
+            border: 2px solid #ffd700;
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            text-align: center;
         }
 
-        .action-btn:disabled {
+        .level-title {
+            font-size: 18px;
+            color: #ffd700;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .language-selector {
+            margin-bottom: 20px;
+        }
+
+        .language-selector select {
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: 2px solid #00ffff;
+            border-radius: 10px;
+            padding: 10px 15px;
+            font-size: 14px;
+            width: 100%;
+        }
+
+        .instructions {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 15px;
+            border: 2px solid #ff00ff;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .instructions p {
+            margin: 8px 0;
+        }
+
+        .score-label {
+            font-size: 12px;
+            color: #00ffff;
+            text-transform: uppercase;
+        }
+
+        .score-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ffff00;
+        }
+
+        .game-container {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 20px;
+            padding: 20px;
+            border: 3px solid #00ffff;
+            box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(8, 60px);
+            grid-template-rows: repeat(8, 60px);
+            gap: 3px;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(15px);
+            padding: 15px;
+            border-radius: 20px;
+            border: 4px solid transparent;
+            background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), 
+                              linear-gradient(45deg, #ff00ff, #00ffff, #ffff00, #ff00ff);
+            background-origin: border-box;
+            background-clip: content-box, border-box;
+            box-shadow: 
+                0 0 50px rgba(255, 0, 255, 0.3),
+                0 0 100px rgba(0, 255, 255, 0.2),
+                inset 0 0 50px rgba(255, 255, 255, 0.1);
+            position: relative;
+            animation: boardGlow 4s ease-in-out infinite;
+        }
+
+        @keyframes boardGlow {
+            0%, 100% { 
+                box-shadow: 
+                    0 0 50px rgba(255, 0, 255, 0.3),
+                    0 0 100px rgba(0, 255, 255, 0.2),
+                    inset 0 0 50px rgba(255, 255, 255, 0.1);
+            }
+            50% { 
+                box-shadow: 
+                    0 0 80px rgba(255, 0, 255, 0.5),
+                    0 0 150px rgba(0, 255, 255, 0.4),
+                    inset 0 0 80px rgba(255, 255, 255, 0.2);
+            }
+        }
+
+        .cell {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.05));
+            backdrop-filter: blur(10px);
+            box-shadow: 
+                0 4px 15px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3),
+                0 0 20px rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cell::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transform: translateX(-100%) translateY(-100%) rotate(45deg);
+            transition: transform 0.6s;
+        }
+
+        .cell:hover::before {
+            transform: translateX(100%) translateY(100%) rotate(45deg);
+        }
+
+        .cell:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 
+                0 8px 25px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4),
+                0 0 30px rgba(255, 255, 255, 0.3),
+                0 0 60px rgba(255, 0, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.6);
+        }
+
+        .cell.selected {
+            transform: scale(1.1);
+            box-shadow: 
+                0 0 30px rgba(255, 215, 0, 0.8),
+                inset 0 0 20px rgba(255, 215, 0, 0.3),
+                0 8px 25px rgba(0, 0, 0, 0.4);
+            border-color: #ffd700;
+            animation: selectedPulse 1s ease-in-out infinite;
+        }
+
+        @keyframes selectedPulse {
+            0%, 100% { box-shadow: 0 0 30px rgba(255, 215, 0, 0.8), inset 0 0 20px rgba(255, 215, 0, 0.3), 0 8px 25px rgba(0, 0, 0, 0.4); }
+            50% { box-shadow: 0 0 50px rgba(255, 215, 0, 1), inset 0 0 30px rgba(255, 215, 0, 0.5), 0 8px 25px rgba(0, 0, 0, 0.4); }
+        }
+
+        .cell:hover {
+            border-color: #ffff00;
+            transform: scale(1.1);
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .cell.selected {
+            border-color: #00ffff;
+            background: rgba(0, 255, 255, 0.3);
+            transform: scale(1.15);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.8);
+        }
+
+        .cell.matching {
+            animation: pulse 0.5s ease-in-out;
+            background: rgba(255, 0, 255, 0.5);
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        .cell.falling {
+            animation: fall 0.5s ease-in;
+        }
+
+        @keyframes fall {
+            from { transform: translateY(-100px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .controls {
+            margin-top: 20px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #00ffff, #ff00ff);
+            border: none;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 255, 255, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 255, 255, 0.5);
+        }
+
+        /* Nouveaux styles pour les règles et contrôles à droite */
+        .rules-toggle-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #ff6b6b, #4ecdc4);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .rules-toggle-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .rules-content {
+            animation: slideDown 0.3s ease-in-out;
+        }
+
+        .rules-content p {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 12px;
+            margin: 5px 0;
+            border-radius: 8px;
+            border-left: 4px solid #ff00ff;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                max-height: 0;
+            }
+            to {
+                opacity: 1;
+                max-height: 300px;
+            }
+        }
+
+        /* Ajustement des contrôles dans le panel droit */
+        .right-panel .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-top: 20px;
+        }
+
+        .right-panel .controls .btn {
+            padding: 10px 6px;
+            font-size: 11px;
+        }
+
+        .power-ups {
+            margin-top: 15px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .power-up {
+            background: rgba(255, 215, 0, 0.2);
+            border: 2px solid #ffd700;
+            color: #ffd700;
+            padding: 8px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 12px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .power-up:hover {
+            background: rgba(255, 215, 0, 0.4);
+            transform: scale(1.05);
+        }
+
+        .power-up.disabled {
             opacity: 0.5;
             cursor: not-allowed;
         }
 
-        @media (max-width: 1200px) {
-            .game-container {
+        .game-info {
+            margin-top: 20px;
+            text-align: center;
+            max-width: 600px;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 15px;
+            border: 2px solid #ff00ff;
+        }
+
+        .level-info {
+            margin-bottom: 15px;
+            font-size: 18px;
+            color: #00ffff;
+        }
+
+        .objective {
+            color: #ffff00;
+            font-weight: bold;
+        }
+
+        .combo-display {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 48px;
+            font-weight: bold;
+            color: #ffff00;
+            text-shadow: 0 0 20px rgba(255, 255, 0, 0.8);
+            z-index: 1000;
+            pointer-events: none;
+            animation: comboAnimation 2s ease-out forwards;
+        }
+
+        @keyframes comboAnimation {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
+        }
+
+        @media (max-width: 768px) {
+            .game-layout {
                 grid-template-columns: 1fr;
                 gap: 15px;
             }
             
-            .board-container {
-                width: 600px;
-                height: 600px;
+            .game-board {
+                grid-template-columns: repeat(8, 45px);
+                grid-template-rows: repeat(8, 45px);
             }
             
-            .sidebar {
-                order: 2;
-            }
-
-            .game-header {
-                flex-direction: column;
-                gap: 10px;
-            }
-
-            .header-left, .header-center, .header-right {
-                min-width: auto;
-            }
-
-            .game-title h1 {
-                font-size: 22px;
-            }
-        }
-
-        @media (max-width: 600px) {
-            .board-container {
-                width: 450px;
-                height: 450px;
-            }
-            
-            .quantum-dice {
-                width: 40px;
-                height: 40px;
-                font-size: 20px;
-            }
-            
-            .header-bottom {
-                gap: 8px;
-            }
-            
-            .quantum-btn {
-                padding: 8px 16px;
-                font-size: 12px;
-            }
-
-            .game-title h1 {
+            .cell {
+                width: 45px;
+                height: 45px;
                 font-size: 24px;
             }
-
-            .game-header {
-                margin: 10px;
+            
+            .game-title {
+                font-size: 28px;
             }
-
-            .header-left, .header-center, .header-right {
-                padding: 15px;
+            
+            .controls {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .power-ups {
+                grid-template-columns: 1fr;
             }
         }
     </style>
 </head>
 <body>
-<button id='backToMenuBtn' class='header-btn' style='position:absolute; top:10px; left:10px; z-index:1000;'>?? Menu</button>
-    <div class="quantum-bg"></div>
-    
-    <div class="main-container">
-    <!-- En-tête du jeu -->
     <div class="game-header">
-        <div class="header-top">
-            <div class="game-title">
-                <h1><span id="gameTitle">QUANTUM MONOPOLY</span></h1>
-            </div>
-            <div class="ai-quantum-btn" onclick="showAIInfo()">
-                <span id="aiQuantumBtnText">🤖 IA QUANTIQUE</span>
-            </div>
-        </div>
-        <div class="header-center">
-            <button class="quantum-btn" id="startBtn" onclick="startGame()">🚀 <span id="startBtnText">Démarrer</span></button>
-            <button class="quantum-btn" id="endTurnBtn" onclick="endTurn()" disabled>⏭️ <span id="endTurnBtnText">Fin Tour</span></button>
-            <button class="quantum-btn" onclick="resetGame()">🔄 <span id="newGameBtnText">Nouvelle Partie</span></button>
-            <button class="quantum-btn" onclick="showRules()">📋 <span id="rulesBtnText">Règles Quantiques</span></button>
-        </div>
-
+        <h1 class="game-title">🧠 BRAINOVA CRASH</h1>
+        <p>Match 3+ éléments cérébraux pour booster votre intelligence !</p>
     </div>
 
-    <div class="game-container">
-        <!-- Sidebar gauche - Joueurs -->
-        <div class="sidebar">
-            <div class="section-title" id="playersTitle">🎮 Joueurs Quantiques</div>
-            <div id="playersContainer"></div>
-            
-            <div class="section-title" id="statsTitle" style="margin-top: 30px;">📊 Statistiques</div>
-            <div class="player-info">
-                <div class="player-stats">
-                    <div class="stat-item">
-                        <span id="turnLabel">Tour:</span>
-                        <span class="stat-value" id="turnValue">1</span>
+    <div class="game-layout">
+        <!-- Panel de gauche : Score et infos -->
+        <div class="left-panel">
+            <div class="language-selector">
+                <label style="color: #00ffff; font-weight: bold; display: block; margin-bottom: 8px;">🌍 Langue:</label>
+                <select id="languageSelect" onchange="changeLanguage()">
+                    <option value="fr">Français 🇫🇷</option>
+                    <option value="en">English 🇬🇧</option>
+                    <option value="ar">العربية 🇸🇦</option>
+                    <option value="es">Español 🇪🇸</option>
+                    <option value="de">Deutsch 🇩🇪</option>
+                    <option value="zh">中文 🇨🇳</option>
+                </select>
+            </div>
+
+            <div class="level-display">
+                <div class="level-title" id="levelTitle">Niveau 1 - Collectez 100 points cérébraux !</div>
+            </div>
+
+            <div class="score-board">
+                <div class="score-item">
+                    <div class="score-label" id="scoreLabel">Score</div>
+                    <div class="score-value" id="score">0</div>
+                </div>
+                <div class="score-item">
+                    <div class="score-label" id="levelLabel">Niveau</div>
+                    <div class="score-value" id="level">1</div>
+                </div>
+                <div class="score-item">
+                    <div class="score-label" id="movesLabel">Mouvements</div>
+                    <div class="score-value" id="moves">30</div>
+                </div>
+                <div class="score-item">
+                    <div class="score-label" id="iqLabel">Points QI</div>
+                    <div class="score-value" id="iqPoints">0</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel central : Jeu -->
+        <div class="center-panel">
+            <div class="game-container">
+                <div class="game-board" id="gameBoard"></div>
+                
+                <div class="power-ups">
+                    <div class="power-up" onclick="usePowerUp('bomb')" id="bombPower">
+                        💣 <span id="bombText">Bombe Neuronale</span> (x<span id="bombCount">3</span>)
                     </div>
-                    <div class="stat-item">
-                        <span id="roundLabel">Manche:</span>
-                        <span class="stat-value" id="roundValue">1</span>
+                    <div class="power-up" onclick="usePowerUp('lightning')" id="lightningPower">
+                        ⚡ <span id="lightningText">Éclair Mental</span> (x<span id="lightningCount">2</span>)
                     </div>
-                    <div class="stat-item">
-                        <span id="timeLabel">Temps:</span>
-                        <span class="stat-value" id="timeValue">00:00</span>
-                    </div>
-                    <div class="stat-item">
-                        <span id="bankLabel">Banque:</span>
-                        <span class="stat-value">∞</span>
+                    <div class="power-up" onclick="usePowerUp('rainbow')" id="rainbowPower">
+                        🌈 <span id="rainbowText">Arc-en-ciel IQ</span> (x<span id="rainbowCount">1</span>)
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Plateau principal -->
-        <div class="main-board">
-            <div class="game-message" id="gameMessage">
-                <span>Bienvenue dans Quantum Monopoly! Cliquez sur "Démarrer" pour commencer.</span>
-            </div>
-
-            <div class="board-container">
-                <div class="board-surface" id="boardSurface"></div>
-            </div>
-        </div>
-
-        <!-- Sidebar droite - Propriétés et Actions -->
-        <div class="sidebar">
-            <div class="language-selector" style="margin-bottom: 20px;">
-                <div class="language-dropdown" onclick="toggleLanguageDropdown()">
-                    <span id="currentLanguage">🇫🇷 Français</span>
-                    <span style="font-size: 10px;">▼</span>
-                </div>
-                <div class="language-options" id="languageOptions">
-                    <div class="language-option active" onclick="selectLanguage('fr', '🇫🇷 Français')">🇫🇷 Français</div>
-                    <div class="language-option" onclick="selectLanguage('en', '🇬🇧 English')">🇬🇧 English</div>
-                    <div class="language-option" onclick="selectLanguage('es', '🇪🇸 Español')">🇪🇸 Español</div>
-                    <div class="language-option" onclick="selectLanguage('ar', '🇸🇦 العربية')">🇸🇦 العربية</div>
-                    <div class="language-option" onclick="selectLanguage('de', '🇩🇪 Deutsch')">🇩🇪 Deutsch</div>
-                    <div class="language-option" onclick="selectLanguage('zh', '🇨🇳 中文')">🇨🇳 中文</div>
+        <!-- Panel de droite : Instructions et Contrôles -->
+        <div class="right-panel">
+            <div class="instructions">
+                <button id="rulesBtn" onclick="toggleRules()" class="rules-toggle-btn">📋 Règles du Jeu</button>
+                <div id="rulesContent" class="rules-content" style="display: none;">
+                    <p id="instruction1">🧠 Alignez 3+ éléments identiques pour les faire exploser !</p>
+                    <p id="instruction2">💫 Plus vous alignez d'éléments, plus vous gagnez de points QI !</p>
+                    <p id="instruction3">🎯 Utilisez les power-ups pour des combos spectaculaires !</p>
+                    <p id="instruction4">🔄 Échangez deux éléments adjacents pour créer des alignements.</p>
+                    <p id="instruction5">⭐ Atteignez l'objectif avant la fin des mouvements !</p>
                 </div>
             </div>
             
-            <div class="section-title" id="propertiesTitle">🏢 Propriétés Galactiques</div>
-            <div id="propertiesContainer">
-                <div style="color: #a1a1aa; text-align: center; padding: 20px;" id="noPropertiesText">Aucune propriété</div>
-            </div>
-            
-            <div class="section-title" id="aiTitle" style="margin-top: 30px;">🤖 IA Quantique</div>
-            <div class="player-info">
-                <div style="color: #00ffff; font-size: 12px; text-align: center; line-height: 1.4;" id="aiStatusText">
-                    Système IA initialisé<br>
-                    Analyse des stratégies en cours...
-                </div>
-            </div>
-            
-            <div class="section-title" id="playerCountTitle" style="margin-top: 30px;">👥 Nombre de Joueurs</div>
-            <div class="player-count-selector">
-                <button class="count-btn" onclick="setPlayerCount(2)">2</button>
-                <button class="count-btn" onclick="setPlayerCount(3)">3</button>
-                <button class="count-btn active" onclick="setPlayerCount(4)">4</button>
-            </div>
-            
-            <div class="section-title" id="diceTitle" style="margin-top: 30px;">🎲 Dés Quantiques</div>
-            <div style="display: flex; justify-content: center; gap: 15px; margin-bottom: 20px;">
-                <div class="quantum-dice" id="sidebarDice1" onclick="rollDice()" style="width: 50px; height: 50px; font-size: 24px;">1</div>
-                <div class="quantum-dice" id="sidebarDice2" onclick="rollDice()" style="width: 50px; height: 50px; font-size: 24px;">1</div>
-            </div>
-            
-            <div class="section-title" id="actionsTitle" style="margin-top: 30px;">⚡ Actions Rapides</div>
-            <div class="quick-actions">
-                <button class="action-btn" id="buyBtn" onclick="buyProperty()" disabled>💰 <span id="buyBtnText">Acheter</span></button>
-                <button class="action-btn" onclick="buildHouse()">🏗️ <span id="buildBtnText">Construire</span></button>
-                <button class="action-btn" onclick="tradeProperty()">🔄 <span id="tradeBtnText">Échanger</span></button>
-                <button class="action-btn" onclick="mortgage()">🏦 <span id="mortgageBtnText">Hypothèque</span></button>
+            <div class="controls">
+                <button class="btn" onclick="resetGame()" id="newGameBtn">🔄 Nouveau Jeu</button>
+                <button class="btn" onclick="shuffleBoard()" id="shuffleBtn">🔀 Mélanger</button>
+                <button class="btn" onclick="pauseGame()" id="pauseBtn">⏸️ Pause</button>
+                <button class="btn" onclick="showHint()" id="hintBtn">💡 Indice</button>
+                <button class="btn" onclick="saveGame()" id="saveBtn">💾 Sauver</button>
+                <button class="btn" onclick="loadGame()" id="loadBtn">📂 Charger</button>
+                <button class="btn" onclick="showStats()" id="statsBtn">📊 Stats</button>
             </div>
         </div>
     </div>
-    </div>
 
-    <style>
-        .global-close-btn { position: fixed; top: 14px; right: 14px; z-index: 99999; background: #ff3b3b; color: #fff; border: none; width:52px; height:52px; border-radius:50%; font-size:22px; cursor:pointer; box-shadow:0 6px 18px rgba(255,59,59,0.3);} 
-        .global-close-btn:hover{ transform: scale(1.05); }
-    </style>
-    <button class="global-close-btn" title="Fermer" aria-label="Fermer" onclick="closePlatform()">✕</button>
     <script>
-        function closePlatform(){
-            try{ console.debug('jeux11: closePlatform called'); }catch(e){}
-            try{
-                if(window.parent && window.parent !== window){
-                    window.parent.postMessage({ action: 'close', reason: 'user-initiated', source: 'jeux11' }, '*');
-                    return;
-                }
-            }catch(e){}
-            try{
-                if(window.opener && !window.opener.closed){
-                    try{ window.opener.postMessage({ action: 'child-closed', source: 'jeux11' }, '*'); }catch(e){}
-                    try{ window.close(); }catch(e){}
-                    return;
-                }
-            }catch(e){}
-            try{ window.location.href = '/brainova.html'; }catch(e){}
-        }
-    </script>
-    <script>
-        // État du jeu
-        let gameState = {
-            isPlaying: false,
-            currentPlayer: 0,
-            playerCount: 4,
-            players: [],
-            turn: 1,
-            round: 1,
-            dice1: 1,
-            dice2: 1,
-            lastRoll: 2,
-            canRoll: true,
-            startTime: 0,
-            elapsedTime: 0,
-            gameTimer: null,
-            currentLanguage: 'fr'
-        };
-
-        // Traductions
-        const translations = {
+        // Traductions multilingues
+        const TRANSLATIONS = {
             fr: {
-                gameTitle: 'QUANTUM MONOPOLY',
-                playersTitle: '🎮 Joueurs Quantiques',
-                propertiesTitle: '🏢 Propriétés Galactiques',
-                statsTitle: '📊 Statistiques',
-                aiTitle: '🤖 IA Quantique',
-                playerCountTitle: '👥 Nombre de Joueurs',
-                diceTitle: '🎲 Dés Quantiques',
-                actionsTitle: '⚡ Actions Rapides',
-                welcomeMessage: 'Bienvenue dans Quantum Monopoly! Cliquez sur "Démarrer" pour commencer.',
-                gameStarted: 'Jeu commencé! Tour de',
-                playerTurn: 'Tour de',
-                diceRolled: 'a lancé',
-                propertyBought: 'a acheté',
-                rentPaid: 'paie un loyer de',
-                aiThinking: 'IA réfléchit...',
-                moneyLabel: 'Argent',
-                propertiesLabel: 'Propriétés',
-                positionLabel: 'Position',
-                statusLabel: 'Statut',
-                turnLabel: 'Tour',
-                roundLabel: 'Manche',
-                timeLabel: 'Temps',
-                priceLabel: 'Prix',
-                typeLabel: 'Type',
-                noPropertiesText: 'Aucune propriété',
-                rulesText: 'Règles Quantiques',
-                startBtn: 'Démarrer',
-                endTurnBtn: 'Fin Tour',
-                newGameBtn: 'Nouvelle Partie',
-                rulesBtn: 'Règles Quantiques',
-                buyBtn: 'Acheter',
-                buildBtn: 'Construire',
-                tradeBtn: 'Échanger',
-                mortgageBtn: 'Hypothèque',
-                aiStatus: 'Système IA initialisé\nAnalyse des stratégies en cours...',
-                bankLabel: 'Banque',
-                properties: {
-                    go: 'DÉPART',
-                    jail: 'PRISON',
-                    freeParking: 'PARC GRATUIT',
-                    goToJail: 'ALLEZ EN PRISON',
-                    chance: 'CHANCE',
-                    communityChest: 'CAISSE COMM.'
-                }
+                gameTitle: "🧠 BRAINOVA CRASH",
+                subtitle: "Match 3+ éléments cérébraux pour booster votre intelligence !",
+                levelTitle: "Niveau {level} - Collectez {points} points cérébraux !",
+                scoreLabel: "Score",
+                levelLabel: "Niveau", 
+                movesLabel: "Mouvements",
+                iqLabel: "Points QI",
+                instructionsTitle: "🎮 Comment Jouer",
+                instruction1: "🧠 Alignez 3+ éléments identiques pour les faire exploser !",
+                instruction2: "💫 Plus vous alignez d'éléments, plus vous gagnez de points QI !",
+                instruction3: "🎯 Utilisez les power-ups pour des combos spectaculaires !",
+                instruction4: "🔄 Échangez deux éléments adjacents pour créer des alignements.",
+                instruction5: "⭐ Atteignez l'objectif avant la fin des mouvements !",
+                bombText: "Bombe Neuronale",
+                lightningText: "Éclair Mental", 
+                rainbowText: "Arc-en-ciel IQ",
+                newGameBtn: "🔄 Nouveau Jeu",
+                shuffleBtn: "🔀 Mélanger",
+                pauseBtn: "⏸️ Pause",
+                hintBtn: "💡 Indice",
+                saveBtn: "💾 Sauver",
+                loadBtn: "📂 Charger",
+                statsBtn: "📊 Stats",
+                showRules: "Règles du Jeu",
+                hideRules: "Masquer Règles",
+                // Messages du jeu
+                gameWon: "🎉 Félicitations ! Niveau terminé !",
+                gameOver: "💥 Partie terminée ! Score final: {score} points QI: {iq}",
+                levelUp: "🎉 Niveau {level} atteint ! Objectif: {points} points",
+                powerUpUsed: "⚡ Power-up utilisé !",
+                noMatches: "❌ Aucun alignement trouvé !",
+                saved: "💾 Partie sauvegardée !",
+                loaded: "📂 Partie chargée !",
+                noSave: "❌ Aucune sauvegarde trouvée !",
+                paused: "⏸️ Jeu en pause ! Cliquez OK pour continuer.",
+                hint: "💡 Astuce: Cherchez des alignements de 3 symboles identiques ou plus !",
+                noMoves: "❌ Plus de mouvements disponibles !",
+                stats: "📊 Statistiques:\n\n🎮 Parties jouées: {games}\n🏆 Meilleur score: {score}\n🎯 Niveau max: {level}\n🧠 Points QI total: {iq}",
+                // Messages de combos
+                superCombo: "🎆 SUPER COMBO! 🎆",
+                combo: "💫 COMBO! 💫",
+                goodMatch: "✨ BON COUP! ✨"
             },
             en: {
-                gameTitle: 'QUANTUM MONOPOLY',
-                playersTitle: '🎮 Quantum Players',
-                propertiesTitle: '🏢 Galactic Properties',
-                statsTitle: '📊 Statistics',
-                aiTitle: '🤖 Quantum AI',
-                playerCountTitle: '👥 Player Count',
-                diceTitle: '🎲 Quantum Dice',
-                actionsTitle: '⚡ Quick Actions',
-                welcomeMessage: 'Welcome to Quantum Monopoly! Click "Start" to begin.',
-                gameStarted: 'Game started! Turn of',
-                playerTurn: 'Turn of',
-                diceRolled: 'rolled',
-                propertyBought: 'bought',
-                rentPaid: 'pays rent of',
-                aiThinking: 'AI thinking...',
-                moneyLabel: 'Money',
-                propertiesLabel: 'Properties',
-                positionLabel: 'Position',
-                statusLabel: 'Status',
-                turnLabel: 'Turn',
-                roundLabel: 'Round',
-                timeLabel: 'Time',
-                priceLabel: 'Price',
-                typeLabel: 'Type',
-                noPropertiesText: 'No properties',
-                rulesText: 'Quantum Rules',
-                startBtn: 'Start',
-                endTurnBtn: 'End Turn',
-                newGameBtn: 'New Game',
-                rulesBtn: 'Quantum Rules',
-                buyBtn: 'Buy',
-                buildBtn: 'Build',
-                tradeBtn: 'Trade',
-                mortgageBtn: 'Mortgage',
-                aiStatus: 'AI System initialized\nStrategy analysis in progress...',
-                bankLabel: 'Bank',
-                properties: {
-                    go: 'GO',
-                    jail: 'JAIL',
-                    freeParking: 'FREE PARKING',
-                    goToJail: 'GO TO JAIL',
-                    chance: 'CHANCE',
-                    communityChest: 'COMMUNITY CHEST'
-                }
-            },
-            es: {
-                gameTitle: 'QUANTUM MONOPOLY',
-                playersTitle: '🎮 Jugadores Cuánticos',
-                propertiesTitle: '🏢 Propiedades Galácticas',
-                statsTitle: '📊 Estadísticas',
-                aiTitle: '🤖 IA Cuántica',
-                playerCountTitle: '👥 Número de Jugadores',
-                diceTitle: '🎲 Dados Cuánticos',
-                actionsTitle: '⚡ Acciones Rápidas',
-                welcomeMessage: '¡Bienvenido a Quantum Monopoly! Haz clic en "Empezar" para comenzar.',
-                gameStarted: '¡Juego iniciado! Turno de',
-                playerTurn: 'Turno de',
-                diceRolled: 'lanzó',
-                propertyBought: 'compró',
-                rentPaid: 'paga alquiler de',
-                aiThinking: 'IA pensando...',
-                moneyLabel: 'Dinero',
-                propertiesLabel: 'Propiedades',
-                positionLabel: 'Posición',
-                statusLabel: 'Estado',
-                turnLabel: 'Turno',
-                roundLabel: 'Ronda',
-                timeLabel: 'Tiempo',
-                priceLabel: 'Precio',
-                typeLabel: 'Tipo',
-                noPropertiesText: 'Sin propiedades',
-                rulesText: 'Reglas Cuánticas',
-                startBtn: 'Empezar',
-                endTurnBtn: 'Fin Turno',
-                newGameBtn: 'Nueva Partida',
-                rulesBtn: 'Reglas Cuánticas',
-                buyBtn: 'Comprar',
-                buildBtn: 'Construir',
-                tradeBtn: 'Intercambiar',
-                mortgageBtn: 'Hipoteca',
-                aiStatus: 'Sistema IA inicializado\nAnálisis de estrategias en curso...',
-                bankLabel: 'Banco',
-                properties: {
-                    go: 'SALIDA',
-                    jail: 'CÁRCEL',
-                    freeParking: 'PARKING GRATIS',
-                    goToJail: 'VE A LA CÁRCEL',
-                    chance: 'SUERTE',
-                    communityChest: 'CAJA COMÚN'
-                }
+                gameTitle: "🧠 BRAINOVA CRASH",
+                subtitle: "Match 3+ brain elements to boost your intelligence!",
+                levelTitle: "Level {level} - Collect {points} brain points!",
+                scoreLabel: "Score",
+                levelLabel: "Level",
+                movesLabel: "Moves", 
+                iqLabel: "IQ Points",
+                instructionsTitle: "🎮 How to Play",
+                instruction1: "🧠 Align 3+ identical elements to make them explode!",
+                instruction2: "💫 The more elements you align, the more IQ points you earn!",
+                instruction3: "🎯 Use power-ups for spectacular combos!",
+                instruction4: "🔄 Swap two adjacent elements to create alignments.",
+                instruction5: "⭐ Reach the objective before running out of moves!",
+                bombText: "Neural Bomb",
+                lightningText: "Mental Lightning",
+                rainbowText: "IQ Rainbow", 
+                newGameBtn: "🔄 New Game",
+                shuffleBtn: "🔀 Shuffle",
+                pauseBtn: "⏸️ Pause",
+                hintBtn: "💡 Hint",
+                saveBtn: "💾 Save",
+                loadBtn: "📂 Load",
+                statsBtn: "📊 Stats",
+                showRules: "Game Rules",
+                hideRules: "Hide Rules",
+                // Game messages
+                gameWon: "🎉 Congratulations! Level completed!",
+                gameOver: "💥 Game Over! Final score: {score} points IQ: {iq}",
+                levelUp: "🎉 Level {level} reached! Target: {points} points",
+                powerUpUsed: "⚡ Power-up used!",
+                noMatches: "❌ No matches found!",
+                saved: "💾 Game saved!",
+                loaded: "📂 Game loaded!",
+                noSave: "❌ No save found!",
+                paused: "⏸️ Game paused! Click OK to continue.",
+                hint: "💡 Tip: Look for alignments of 3+ identical symbols!",
+                noMoves: "❌ No more moves available!",
+                stats: "📊 Statistics:\n\n🎮 Games played: {games}\n🏆 High score: {score}\n🎯 Max level: {level}\n🧠 Total IQ points: {iq}",
+                // Combo messages
+                superCombo: "🎆 SUPER COMBO! 🎆",
+                combo: "💫 COMBO! 💫",
+                goodMatch: "✨ GREAT MOVE! ✨"
             },
             ar: {
-                gameTitle: 'مونوبولي كمومي',
-                playersTitle: '🎮 اللاعبون الكموميون',
-                propertiesTitle: '🏢 الممتلكات المجرية',
-                statsTitle: '📊 الإحصائيات',
-                aiTitle: '🤖 الذكاء الكمومي',
-                playerCountTitle: '👥 عدد اللاعبين',
-                diceTitle: '🎲 النرد الكمومي',
-                actionsTitle: '⚡ الإجراءات السريعة',
-                welcomeMessage: 'مرحباً بك في مونوبولي الكمومي! اضغط على "ابدأ" للبدء.',
-                gameStarted: 'بدأت اللعبة! دور',
-                playerTurn: 'دور',
-                diceRolled: 'رمى',
-                propertyBought: 'اشترى',
-                rentPaid: 'يدفع إيجار',
-                aiThinking: 'الذكاء الاصطناعي يفكر...',
-                moneyLabel: 'المال',
-                propertiesLabel: 'الممتلكات',
-                positionLabel: 'الموقع',
-                statusLabel: 'الحالة',
-                turnLabel: 'الدور',
-                roundLabel: 'الجولة',
-                timeLabel: 'الوقت',
-                priceLabel: 'السعر',
-                typeLabel: 'النوع',
-                noPropertiesText: 'لا توجد ممتلكات',
-                rulesText: 'القواعد الكمومية',
-                startBtn: 'ابدأ',
-                endTurnBtn: 'إنهاء الدور',
-                newGameBtn: 'لعبة جديدة',
-                rulesBtn: 'القواعد الكمومية',
-                buyBtn: 'شراء',
-                buildBtn: 'بناء',
-                tradeBtn: 'تبادل',
-                mortgageBtn: 'رهن',
-                aiStatus: 'تم تهيئة نظام الذكاء الاصطناعي\nتحليل الاستراتيجيات جاري...',
-                bankLabel: 'البنك',
-                properties: {
-                    go: 'البداية',
-                    jail: 'السجن',
-                    freeParking: 'موقف مجاني',
-                    goToJail: 'اذهب للسجن',
-                    chance: 'فرصة',
-                    communityChest: 'صندوق المجتمع'
-                }
+                gameTitle: "🧠 برينوفا كراش",
+                subtitle: "اجمع 3+ عناصر دماغية لتعزز ذكائك!",
+                levelTitle: "المستوى {level} - اجمع {points} نقطة دماغية!",
+                scoreLabel: "النتيجة",
+                levelLabel: "المستوى",
+                movesLabel: "الحركات",
+                iqLabel: "نقاط الذكاء",
+                instructionsTitle: "🎮 كيفية اللعب",
+                instruction1: "🧠 اصطف 3+ عناصر متطابقة لتفجيرها!",
+                instruction2: "💫 كلما اصطففت عناصر أكثر، كلما كسبت نقاط ذكاء أكثر!",
+                instruction3: "🎯 استخدم القوى الخاصة لكومبوهات مذهلة!",
+                instruction4: "🔄 بدل عنصرين متجاورين لإنشاء اصطفافات.",
+                instruction5: "⭐ اوصل للهدف قبل انتهاء الحركات!",
+                bombText: "قنبلة عصبية",
+                lightningText: "برق ذهني",
+                rainbowText: "قوس قزح الذكاء",
+                newGameBtn: "🔄 لعبة جديدة",
+                shuffleBtn: "🔀 خلط",
+                pauseBtn: "⏸️ توقف",
+                hintBtn: "💡 تلميح",
+                saveBtn: "💾 حفظ",
+                loadBtn: "📂 تحميل",
+                statsBtn: "📊 إحصائيات",
+                showRules: "قواعد اللعبة",
+                hideRules: "إخفاء القواعد",
+                // رسائل اللعبة
+                gameWon: "🎉 تهانينا! تم إكمال المستوى!",
+                gameOver: "💥 انتهت اللعبة! النتيجة النهائية: {score} نقطة ذكاء: {iq}",
+                levelUp: "🎉 تم الوصول للمستوى {level}! الهدف: {points} نقطة",
+                powerUpUsed: "⚡ تم استخدام القوة الخاصة!",
+                noMatches: "❌ لم يتم العثور على تطابقات!",
+                saved: "💾 تم حفظ اللعبة!",
+                loaded: "📂 تم تحميل اللعبة!",
+                noSave: "❌ لم يتم العثور على حفظ!",
+                paused: "⏸️ اللعبة متوقفة! انقر موافق للمتابعة.",
+                hint: "💡 نصيحة: ابحث عن محاذاة 3+ رموز متطابقة!",
+                noMoves: "❌ لا توجد حركات متاحة أخرى!",
+                stats: "📊 الإحصائيات:\n\n🎮 الألعاب الملعوبة: {games}\n🏆 أعلى نتيجة: {score}\n🎯 أقصى مستوى: {level}\n🧠 إجمالي نقاط الذكاء: {iq}",
+                // رسائل الكومبو
+                superCombo: "🎆 سوبر كومبو! 🎆",
+                combo: "💫 كومبو! 💫",
+                goodMatch: "✨ حركة رائعة! ✨"
+            },
+            es: {
+                gameTitle: "🧠 BRAINOVA CRASH",
+                subtitle: "¡Combina 3+ elementos cerebrales para potenciar tu inteligencia!",
+                levelTitle: "Nivel {level} - ¡Recolecta {points} puntos cerebrales!",
+                scoreLabel: "Puntuación",
+                levelLabel: "Nivel",
+                movesLabel: "Movimientos",
+                iqLabel: "Puntos CI",
+                instructionsTitle: "🎮 Cómo Jugar",
+                instruction1: "🧠 ¡Alinea 3+ elementos idénticos para hacerlos explotar!",
+                instruction2: "💫 ¡Cuantos más elementos alinees, más puntos CI ganas!",
+                instruction3: "🎯 ¡Usa power-ups para combos espectaculares!",
+                instruction4: "🔄 Intercambia dos elementos adyacentes para crear alineaciones.",
+                instruction5: "⭐ ¡Alcanza el objetivo antes de quedarte sin movimientos!",
+                bombText: "Bomba Neural",
+                lightningText: "Rayo Mental",
+                rainbowText: "Arcoíris CI",
+                newGameBtn: "🔄 Nuevo Juego",
+                shuffleBtn: "🔀 Mezclar",
+                pauseBtn: "⏸️ Pausa",
+                hintBtn: "💡 Pista",
+                saveBtn: "💾 Guardar",
+                loadBtn: "📂 Cargar",
+                statsBtn: "📊 Estadísticas",
+                showRules: "Reglas del Juego",
+                hideRules: "Ocultar Reglas",
+                // Mensajes del juego
+                gameWon: "🎉 ¡Felicidades! ¡Nivel completado!",
+                gameOver: "💥 ¡Game Over! Puntuación final: {score} puntos CI: {iq}",
+                levelUp: "🎉 ¡Nivel {level} alcanzado! Objetivo: {points} puntos",
+                powerUpUsed: "⚡ ¡Power-up usado!",
+                noMatches: "❌ ¡No se encontraron coincidencias!",
+                saved: "💾 ¡Juego guardado!",
+                loaded: "📂 ¡Juego cargado!",
+                noSave: "❌ ¡No se encontró guardado!",
+                paused: "⏸️ ¡Juego pausado! Haz clic en OK para continuar.",
+                hint: "💡 Consejo: ¡Busca alineaciones de 3+ símbolos idénticos!",
+                noMoves: "❌ ¡No hay más movimientos disponibles!",
+                stats: "📊 Estadísticas:\n\n🎮 Partidas jugadas: {games}\n🏆 Puntuación máxima: {score}\n🎯 Nivel máximo: {level}\n🧠 Puntos CI totales: {iq}",
+                // Mensajes de combos
+                superCombo: "🎆 ¡SUPER COMBO! 🎆",
+                combo: "💫 ¡COMBO! 💫",
+                goodMatch: "✨ ¡GRAN JUGADA! ✨"
             },
             de: {
-                gameTitle: 'QUANTUM MONOPOLY',
-                playersTitle: '🎮 Quantenspieler',
-                propertiesTitle: '🏢 Galaktische Eigenschaften',
-                statsTitle: '📊 Statistiken',
-                aiTitle: '🤖 Quanten-KI',
-                playerCountTitle: '👥 Spieleranzahl',
-                diceTitle: '🎲 Quantenwürfel',
-                actionsTitle: '⚡ Schnellaktionen',
-                welcomeMessage: 'Willkommen bei Quantum Monopoly! Klicken Sie auf "Start" um zu beginnen.',
-                gameStarted: 'Spiel gestartet! Zug von',
-                playerTurn: 'Zug von',
-                diceRolled: 'würfelte',
-                propertyBought: 'kaufte',
-                rentPaid: 'zahlt Miete von',
-                aiThinking: 'KI denkt nach...',
-                moneyLabel: 'Geld',
-                propertiesLabel: 'Eigenschaften',
-                positionLabel: 'Position',
-                statusLabel: 'Status',
-                turnLabel: 'Zug',
-                roundLabel: 'Runde',
-                timeLabel: 'Zeit',
-                priceLabel: 'Preis',
-                typeLabel: 'Typ',
-                noPropertiesText: 'Keine Eigenschaften',
-                rulesText: 'Quantenregeln',
-                startBtn: 'Start',
-                endTurnBtn: 'Zug beenden',
-                newGameBtn: 'Neues Spiel',
-                rulesBtn: 'Quantenregeln',
-                buyBtn: 'Kaufen',
-                buildBtn: 'Bauen',
-                tradeBtn: 'Handeln',
-                mortgageBtn: 'Hypothek',
-                aiStatus: 'KI-System initialisiert\nStrategieanalyse läuft...',
-                bankLabel: 'Bank',
-                properties: {
-                    go: 'START',
-                    jail: 'GEFÄNGNIS',
-                    freeParking: 'FREIES PARKEN',
-                    goToJail: 'GEHE INS GEFÄNGNIS',
-                    chance: 'EREIGNIS',
-                    communityChest: 'GEMEINSCHAFTSKASSE'
-                }
+                gameTitle: "🧠 BRAINOVA CRASH",
+                subtitle: "Kombiniere 3+ Gehirnelemente um deine Intelligenz zu steigern!",
+                levelTitle: "Level {level} - Sammle {points} Gehirnpunkte!",
+                scoreLabel: "Punkte",
+                levelLabel: "Level",
+                movesLabel: "Züge",
+                iqLabel: "IQ Punkte",
+                instructionsTitle: "🎮 Spielanleitung",
+                instruction1: "🧠 Richte 3+ identische Elemente aus um sie explodieren zu lassen!",
+                instruction2: "💫 Je mehr Elemente du ausrichtest, desto mehr IQ Punkte erhältst du!",
+                instruction3: "🎯 Nutze Power-ups für spektakuläre Kombos!",
+                instruction4: "🔄 Tausche zwei benachbarte Elemente um Ausrichtungen zu erstellen.",
+                instruction5: "⭐ Erreiche das Ziel bevor dir die Züge ausgehen!",
+                bombText: "Neurale Bombe",
+                lightningText: "Mentaler Blitz",
+                rainbowText: "IQ Regenbogen",
+                newGameBtn: "🔄 Neues Spiel",
+                shuffleBtn: "🔀 Mischen",
+                pauseBtn: "⏸️ Pause",
+                hintBtn: "💡 Hinweis",
+                saveBtn: "💾 Speichern",
+                loadBtn: "📂 Laden",
+                statsBtn: "📊 Statistiken",
+                showRules: "Spielregeln",
+                hideRules: "Regeln Ausblenden",
+                // Spielnachrichten
+                gameWon: "🎉 Glückwunsch! Level abgeschlossen!",
+                gameOver: "💥 Game Over! Endpunktzahl: {score} Punkte IQ: {iq}",
+                levelUp: "🎉 Level {level} erreicht! Ziel: {points} Punkte",
+                powerUpUsed: "⚡ Power-up verwendet!",
+                noMatches: "❌ Keine Übereinstimmungen gefunden!",
+                saved: "💾 Spiel gespeichert!",
+                loaded: "📂 Spiel geladen!",
+                noSave: "❌ Kein Speicherstand gefunden!",
+                paused: "⏸️ Spiel pausiert! Klick OK zum Fortfahren.",
+                hint: "💡 Tipp: Suche nach Ausrichtungen von 3+ identischen Symbolen!",
+                noMoves: "❌ Keine weiteren Züge verfügbar!",
+                stats: "📊 Statistiken:\n\n🎮 Gespielte Spiele: {games}\n🏆 Höchste Punktzahl: {score}\n🎯 Maximales Level: {level}\n🧠 Gesamt-IQ-Punkte: {iq}",
+                // Combo-Nachrichten
+                superCombo: "🎆 SUPER COMBO! 🎆",
+                combo: "💫 COMBO! 💫",
+                goodMatch: "✨ GROSSARTIGER ZUG! ✨"
             },
             zh: {
-                gameTitle: '量子大富翁',
-                playersTitle: '🎮 量子玩家',
-                propertiesTitle: '🏢 银河属性',
-                statsTitle: '📊 统计数据',
-                aiTitle: '🤖 量子AI',
-                playerCountTitle: '👥 玩家数量',
-                diceTitle: '🎲 量子骰子',
-                actionsTitle: '⚡ 快速操作',
-                welcomeMessage: '欢迎来到量子大富翁！点击"开始"开始游戏。',
-                gameStarted: '游戏开始！轮到',
-                playerTurn: '轮到',
-                diceRolled: '掷出',
-                propertyBought: '购买了',
-                rentPaid: '支付租金',
-                aiThinking: 'AI思考中...',
-                moneyLabel: '金钱',
-                propertiesLabel: '属性',
-                positionLabel: '位置',
-                statusLabel: '状态',
-                turnLabel: '回合',
-                roundLabel: '轮次',
-                timeLabel: '时间',
-                priceLabel: '价格',
-                typeLabel: '类型',
-                noPropertiesText: '无属性',
-                rulesText: '量子规则',
-                startBtn: '开始',
-                endTurnBtn: '结束回合',
-                newGameBtn: '新游戏',
-                rulesBtn: '量子规则',
-                buyBtn: '购买',
-                buildBtn: '建造',
-                tradeBtn: '交易',
-                mortgageBtn: '抵押',
-                aiStatus: 'AI系统已初始化\n策略分析进行中...',
-                bankLabel: '银行',
-                properties: {
-                    go: '起点',
-                    jail: '监狱',
-                    freeParking: '免费停车',
-                    goToJail: '进监狱',
-                    chance: '机会',
-                    communityChest: '公共基金'
-                }
+                gameTitle: "🧠 智脑消消乐",
+                subtitle: "连接3+个大脑元素来提升你的智力！",
+                levelTitle: "第{level}关 - 收集{points}个大脑点数！",
+                scoreLabel: "分数",
+                levelLabel: "关卡",
+                movesLabel: "移动次数",
+                iqLabel: "智商点数",
+                instructionsTitle: "🎮 游戏说明",
+                instruction1: "🧠 对齐3+个相同元素使其爆炸！",
+                instruction2: "💫 对齐的元素越多，获得的智商点数越多！",
+                instruction3: "🎯 使用道具创造惊人的连击！",
+                instruction4: "🔄 交换两个相邻元素来创建对齐。",
+                instruction5: "⭐ 在移动次数用完前达成目标！",
+                bombText: "神经炸弹",
+                lightningText: "思维闪电",
+                rainbowText: "智商彩虹",
+                newGameBtn: "🔄 新游戏",
+                shuffleBtn: "🔀 洗牌",
+                pauseBtn: "⏸️ 暂停",
+                hintBtn: "💡 提示",
+                saveBtn: "💾 保存",
+                loadBtn: "� 载入",
+                statsBtn: "� 统计"
             }
         };
 
-        // Propriétés du plateau
-        let boardProperties = [];
+        // Éléments du jeu (emojis cerveau/intelligence)
+        const BRAIN_ELEMENTS = ['🧠', '🤯', '💡', '🎓', '📚', '🔬', '⚡', '🌟'];
+        
+        // Variables du jeu
+        let currentLanguage = 'fr';
+        let gameBoard = [];
+        let selectedCell = null;
+        let score = 0;
+        let level = 1;
+        let moves = 30;
+        let iqPoints = 0;
+        let powerUps = {
+            bomb: 3,
+            lightning: 2,
+            rainbow: 1
+        };
+        let gameState = 'playing';
+        let currentObjective = 100;
 
-        function getTranslatedProperties() {
-            const t = translations[gameState.currentLanguage];
-            return [
-                // Case 0 - Départ
-                { name: t.properties.go, type: 'corner', price: 0, color: '#ff6b6b' },
-                
-                // Cases 1-9 (côté bas)
-                { name: 'Rue de la Paix', type: 'property', price: 60, color: '#8B4513', rent: 6 },
-                { name: 'Caisse Communauté', type: 'communityChest', price: 0, color: '#0088ff' },
-                { name: 'Rue Lecourbe', type: 'property', price: 60, color: '#8B4513', rent: 6 },
-                { name: 'Impôt sur le Revenu', type: 'tax', price: 200, color: '#ff4444' },
-                { name: 'Gare Montparnasse', type: 'railroad', price: 200, color: '#2c2c54' },
-                { name: 'Rue de Vaugirard', type: 'property', price: 100, color: '#87CEEB', rent: 8 },
-                { name: 'Chance', type: 'chance', price: 0, color: '#ff9500' },
-                { name: 'Rue de Courcelles', type: 'property', price: 100, color: '#87CEEB', rent: 8 },
-                { name: 'Avenue de la République', type: 'property', price: 120, color: '#87CEEB', rent: 10 },
-                
-                // Case 10 - Prison
-                { name: t.properties.jail, type: 'corner', price: 0, color: '#ff6b6b' },
-                
-                // Cases 11-19 (côté gauche)
-                { name: 'Boulevard de Belleville', type: 'property', price: 140, color: '#FF69B4', rent: 12 },
-                { name: 'Compagnie Électrique', type: 'utility', price: 150, color: '#ff9ff3' },
-                { name: 'Rue Oberkampf', type: 'property', price: 140, color: '#FF69B4', rent: 12 },
-                { name: 'Rue Ménilmontant', type: 'property', price: 160, color: '#FF69B4', rent: 14 },
-                { name: 'Gare du Nord', type: 'railroad', price: 200, color: '#2c2c54' },
-                { name: 'Avenue de Neuilly', type: 'property', price: 180, color: '#FFA500', rent: 16 },
-                { name: 'Caisse Communauté', type: 'communityChest', price: 0, color: '#0088ff' },
-                { name: 'Avenue Henri-Martin', type: 'property', price: 180, color: '#FFA500', rent: 16 },
-                { name: 'Place Pigalle', type: 'property', price: 200, color: '#FFA500', rent: 18 },
-                
-                // Case 20 - Parc Gratuit
-                { name: t.properties.freeParking, type: 'corner', price: 0, color: '#ff6b6b' },
-                
-                // Cases 21-29 (côté haut)
-                { name: 'Avenue Matignon', type: 'property', price: 220, color: '#FF0000', rent: 20 },
-                { name: 'Chance', type: 'chance', price: 0, color: '#ff9500' },
-                { name: 'Boulevard Malesherbes', type: 'property', price: 220, color: '#FF0000', rent: 20 },
-                { name: 'Avenue des Champs-Élysées', type: 'property', price: 240, color: '#FF0000', rent: 22 },
-                { name: 'Gare de Lyon', type: 'railroad', price: 200, color: '#2c2c54' },
-                { name: 'Avenue de Breteuil', type: 'property', price: 260, color: '#FFFF00', rent: 24 },
-                { name: 'Avenue Foch', type: 'property', price: 260, color: '#FFFF00', rent: 24 },
-                { name: 'Compagnie des Eaux', type: 'utility', price: 150, color: '#ff9ff3' },
-                { name: 'Boulevard des Capucines', type: 'property', price: 280, color: '#FFFF00', rent: 26 },
-                
-                // Case 30 - Allez en Prison
-                { name: t.properties.goToJail, type: 'corner', price: 0, color: '#ff6b6b' },
-                
-                // Cases 31-39 (côté droit)
-                { name: 'Avenue des Champs-Élysées', type: 'property', price: 300, color: '#00FF00', rent: 28 },
-                { name: 'Place de la Concorde', type: 'property', price: 300, color: '#00FF00', rent: 28 },
-                { name: 'Caisse Communauté', type: 'communityChest', price: 0, color: '#0088ff' },
-                { name: 'Avenue de la Grande-Armée', type: 'property', price: 320, color: '#00FF00', rent: 30 },
-                { name: 'Gare Saint-Lazare', type: 'railroad', price: 200, color: '#2c2c54' },
-                { name: 'Chance', type: 'chance', price: 0, color: '#ff9500' },
-                { name: 'Rue de la Paix', type: 'property', price: 350, color: '#0000FF', rent: 35 },
-                { name: 'Taxe de Luxe', type: 'tax', price: 100, color: '#ff4444' },
-                { name: 'Place Vendôme', type: 'property', price: 400, color: '#0000FF', rent: 40 }
-            ];
+        // Initialisation du jeu
+        function initGame() {
+            // Traduire l'interface au démarrage
+            updateLanguage();
+            
+            // Créer le plateau et initialiser le jeu
+            createBoard();
+            updateDisplay();
+            checkForMatches();
+            
+            // S'assurer que le sélecteur de langue est sur la bonne valeur
+            document.getElementById('languageSelect').value = currentLanguage;
         }
 
-        // Basculer le dropdown de langue
-        function toggleLanguageDropdown() {
-            const options = document.getElementById('languageOptions');
-            options.classList.toggle('show');
-            
-            // Fermer le dropdown si on clique ailleurs
-            document.addEventListener('click', function closeDropdown(e) {
-                if (!e.target.closest('.language-selector')) {
-                    options.classList.remove('show');
-                    document.removeEventListener('click', closeDropdown);
-                }
-            });
-        }
-
-        // Sélectionner une langue
-        function selectLanguage(langCode, langText) {
-            gameState.currentLanguage = langCode;
-            
-            // Mettre à jour l'affichage du sélecteur
-            document.getElementById('currentLanguage').textContent = langText;
-            
-            // Mettre à jour les classes actives
-            document.querySelectorAll('.language-option').forEach(option => {
-                option.classList.remove('active');
-            });
-            event.target.classList.add('active');
-            
-            // Fermer le dropdown
-            document.getElementById('languageOptions').classList.remove('show');
-            
-            // Mettre à jour les propriétés traduites
-            boardProperties = getTranslatedProperties();
-            
-            // Mettre à jour l'interface
-            updateLanguageInterface();
-            
-            // Réinitialiser le plateau avec les nouvelles traductions
-            if (gameState.isPlaying) {
-                initializeBoard();
-                updatePlayersDisplay();
-                updatePropertiesDisplay();
-            }
+        // Changer de langue
+        function changeLanguage() {
+            currentLanguage = document.getElementById('languageSelect').value;
+            updateLanguage();
         }
 
         // Mettre à jour l'interface selon la langue
-        function updateLanguageInterface() {
-            const t = translations[gameState.currentLanguage];
+        function updateLanguage() {
+            const t = TRANSLATIONS[currentLanguage];
             
-            // Mettre à jour le titre du jeu
-            document.getElementById('gameTitle').textContent = t.gameTitle;
-            document.getElementById('aiQuantumBtnText').textContent = '🤖 ' + t.aiTitle.replace('🤖 ', '');
+            // Mettre à jour le titre et sous-titre
+            const gameTitle = document.querySelector('.game-title');
+            const gameSubtitle = document.querySelector('.game-header p');
+            if (gameTitle) gameTitle.textContent = t.gameTitle || '🧠 BRAINOVA CRASH';
+            if (gameSubtitle) gameSubtitle.textContent = t.subtitle || 'Match 3+ éléments cérébraux pour booster votre intelligence !';
             
-            // Mettre à jour les titres des sections
-            document.getElementById('playersTitle').textContent = t.playersTitle;
-            document.getElementById('statsTitle').textContent = t.statsTitle;
-            document.getElementById('propertiesTitle').textContent = t.propertiesTitle;
-            document.getElementById('aiTitle').textContent = t.aiTitle;
-            document.getElementById('playerCountTitle').textContent = t.playerCountTitle;
-            document.getElementById('diceTitle').textContent = t.diceTitle;
-            document.getElementById('actionsTitle').textContent = t.actionsTitle;
+            // Mettre à jour les labels du panel gauche
+            const scoreLabel = document.getElementById('scoreLabel');
+            const levelLabel = document.getElementById('levelLabel');
+            const movesLabel = document.getElementById('movesLabel');
+            const iqLabel = document.getElementById('iqLabel');
             
-            // Mettre à jour les boutons
-            document.getElementById('startBtnText').textContent = t.startBtn;
-            document.getElementById('endTurnBtnText').textContent = t.endTurnBtn;
-            document.getElementById('newGameBtnText').textContent = t.newGameBtn;
-            document.getElementById('rulesBtnText').textContent = t.rulesBtn;
+            if (scoreLabel) scoreLabel.textContent = t.scoreLabel || 'Score';
+            if (levelLabel) levelLabel.textContent = t.levelLabel || 'Niveau';
+            if (movesLabel) movesLabel.textContent = t.movesLabel || 'Mouvements';
+            if (iqLabel) iqLabel.textContent = t.iqLabel || 'Points QI';
             
-            // Mettre à jour les boutons d'action
-            document.getElementById('buyBtnText').textContent = t.buyBtn;
-            document.getElementById('buildBtnText').textContent = t.buildBtn;
-            document.getElementById('tradeBtnText').textContent = t.tradeBtn;
-            document.getElementById('mortgageBtnText').textContent = t.mortgageBtn;
+            // Mettre à jour les power-ups du panel gauche
+            const bombText = document.getElementById('bombText');
+            const lightningText = document.getElementById('lightningText');
+            const rainbowText = document.getElementById('rainbowText');
             
-            // Mettre à jour les labels
-            document.getElementById('turnLabel').textContent = t.turnLabel + ':';
-            document.getElementById('roundLabel').textContent = t.roundLabel + ':';
-            document.getElementById('timeLabel').textContent = t.timeLabel + ':';
-            document.getElementById('bankLabel').textContent = t.bankLabel + ':';
+            if (bombText) bombText.textContent = t.bombText || 'Bombe Neuronale';
+            if (lightningText) lightningText.textContent = t.lightningText || 'Éclair Mental';
+            if (rainbowText) rainbowText.textContent = t.rainbowText || 'Arc-en-ciel QI';
             
-            // Mettre à jour le statut IA
-            document.getElementById('aiStatusText').innerHTML = t.aiStatus.replace('\n', '<br>');
+            // Mettre à jour les instructions du panel droit
+            const instruction1 = document.getElementById('instruction1');
+            const instruction2 = document.getElementById('instruction2');
+            const instruction3 = document.getElementById('instruction3');
+            const instruction4 = document.getElementById('instruction4');
+            const instruction5 = document.getElementById('instruction5');
             
-            // Mettre à jour le texte "aucune propriété"
-            document.getElementById('noPropertiesText').textContent = t.noPropertiesText;
+            if (instruction1) instruction1.textContent = t.instruction1 || '🧠 Alignez 3+ éléments identiques pour les faire exploser !';
+            if (instruction2) instruction2.textContent = t.instruction2 || '💫 Plus vous alignez d\'éléments, plus vous gagnez de points QI !';
+            if (instruction3) instruction3.textContent = t.instruction3 || '🎯 Utilisez les power-ups pour des combos spectaculaires !';
+            if (instruction4) instruction4.textContent = t.instruction4 || '🔄 Échangez deux éléments adjacents pour créer des alignements.';
+            if (instruction5) instruction5.textContent = t.instruction5 || '⭐ Atteignez l\'objectif avant la fin des mouvements !';
             
-            if (!gameState.isPlaying) {
-                document.getElementById('gameMessage').innerHTML = `<span>${t.welcomeMessage}</span>`;
+            // Mettre à jour tous les boutons de contrôle du panel droit
+            const newGameBtn = document.getElementById('newGameBtn');
+            const shuffleBtn = document.getElementById('shuffleBtn');
+            const pauseBtn = document.getElementById('pauseBtn');
+            const hintBtn = document.getElementById('hintBtn');
+            const saveBtn = document.getElementById('saveBtn');
+            const loadBtn = document.getElementById('loadBtn');
+            const statsBtn = document.getElementById('statsBtn');
+            
+            if (newGameBtn) newGameBtn.textContent = t.newGameBtn || '🔄 Nouveau Jeu';
+            if (shuffleBtn) shuffleBtn.textContent = t.shuffleBtn || '🔀 Mélanger';
+            if (pauseBtn) pauseBtn.textContent = t.pauseBtn || '⏸️ Pause';
+            if (hintBtn) hintBtn.textContent = t.hintBtn || '💡 Indice';
+            if (saveBtn) saveBtn.textContent = t.saveBtn || '💾 Sauver';
+            if (loadBtn) loadBtn.textContent = t.loadBtn || '📂 Charger';
+            if (statsBtn) statsBtn.textContent = t.statsBtn || '📊 Stats';
+            
+            // Mettre à jour le bouton règles du panel droit
+            const rulesBtn = document.getElementById('rulesBtn');
+            const rulesContent = document.getElementById('rulesContent');
+            if (rulesBtn) {
+                if (rulesContent && rulesContent.style.display === 'none') {
+                    rulesBtn.textContent = '📋 ' + (t.showRules || 'Règles du Jeu');
+                } else {
+                    rulesBtn.textContent = '🔼 ' + (t.hideRules || 'Masquer Règles');
+                }
             }
+            
+            // Mettre à jour le titre de niveau
+            updateLevelTitle();
         }
 
-        // Créer les particules quantiques
-        function createQuantumParticles() {
-            const bg = document.querySelector('.quantum-bg');
-            for (let i = 0; i < 50; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'quantum-particle';
-                particle.style.left = Math.random() * 100 + '%';
-                particle.style.top = Math.random() * 100 + '%';
-                particle.style.animationDelay = Math.random() * 6 + 's';
-                particle.style.animationDuration = (Math.random() * 4 + 4) + 's';
-                bg.appendChild(particle);
-            }
+        // Mettre à jour le titre de niveau
+        function updateLevelTitle() {
+            const t = TRANSLATIONS[currentLanguage];
+            const levelTitle = t.levelTitle.replace('{level}', level).replace('{points}', Math.floor(currentObjective));
+            document.getElementById('levelTitle').textContent = levelTitle;
         }
 
-        // Initialiser les joueurs
-        function initializePlayers() {
-            const playerNames = [
-                { name: 'Commandant Alpha', icon: '👤', isAI: false },
-                { name: 'Capitaine Beta', icon: '🤖', isAI: false },
-                { name: 'Major Gamma', icon: '🤖', isAI: true },
-                { name: 'Colonel Delta', icon: '🤖', isAI: true }
-            ];
-
-            gameState.players = [];
-            for (let i = 0; i < gameState.playerCount; i++) {
-                gameState.players.push({
-                    id: i,
-                    name: playerNames[i].name,
-                    icon: playerNames[i].icon,
-                    money: 1500,
-                    properties: [],
-                    position: 0,
-                    isAI: playerNames[i].isAI,
-                    isBankrupt: false,
-                    inJail: false,
-                    jailTurns: 0
-                });
-            }
+        // Nouvelles fonctions
+        function saveGame() {
+            const gameState = {
+                gameBoard: gameBoard,
+                score: score,
+                level: level,
+                moves: moves,
+                iqPoints: iqPoints,
+                powerUps: powerUps,
+                currentObjective: currentObjective,
+                currentLanguage: currentLanguage
+            };
+            localStorage.setItem('brainovaCrashSave', JSON.stringify(gameState));
+            const t = TRANSLATIONS[currentLanguage];
+            alert(t.saved || '💾 Partie sauvegardée !');
         }
 
-        // Mettre à jour l'affichage des joueurs
-        function updatePlayersDisplay() {
-            const container = document.getElementById('playersContainer');
-            container.innerHTML = '';
-            
-            const t = translations[gameState.currentLanguage];
-            
-            gameState.players.forEach((player, index) => {
-                const playerDiv = document.createElement('div');
-                playerDiv.className = `player-info ${index === gameState.currentPlayer ? 'current-player' : ''}`;
+        function loadGame() {
+            const savedGame = localStorage.getItem('brainovaCrashSave');
+            const t = TRANSLATIONS[currentLanguage];
+            if (savedGame) {
+                const gameState = JSON.parse(savedGame);
+                gameBoard = gameState.gameBoard;
+                score = gameState.score;
+                level = gameState.level;
+                moves = gameState.moves;
+                iqPoints = gameState.iqPoints;
+                powerUps = gameState.powerUps;
+                currentObjective = gameState.currentObjective;
+                currentLanguage = gameState.currentLanguage || 'fr';
                 
-                playerDiv.innerHTML = `
-                    <div class="player-name">${index + 1}${player.name} ${player.icon}</div>
-                    <div class="player-stats">
-                        <div class="stat-item">
-                            <span>${t.moneyLabel || 'Argent'}:</span>
-                            <span class="stat-value">₹${player.money}</span>
-                        </div>
-                        <div class="stat-item">
-                            <span>${t.propertiesLabel || 'Propriétés'}:</span>
-                            <span class="stat-value">${player.properties.length}</span>
-                        </div>
-                        <div class="stat-item">
-                            <span>${t.positionLabel || 'Position'}:</span>
-                            <span class="stat-value">${player.position}</span>
-                        </div>
-                        <div class="stat-item">
-                            <span>${t.statusLabel || 'Statut'}:</span>
-                            <span class="stat-value">${player.isBankrupt ? '💸' : player.inJail ? '🔒' : '✅'}</span>
-                        </div>
-                    </div>
-                `;
-                container.appendChild(playerDiv);
-            });
+                document.getElementById('languageSelect').value = currentLanguage;
+                updateBoardDisplay();
+                updateDisplay();
+                updateLanguage();
+                alert(t.loaded || '📂 Partie chargée !');
+            } else {
+                alert(t.noSave || '❌ Aucune sauvegarde trouvée !');
+            }
         }
 
-        // Initialiser le plateau
-        function initializeBoard() {
-            const boardSurface = document.getElementById('boardSurface');
-            boardSurface.innerHTML = '';
+        function showStats() {
+            const totalGames = localStorage.getItem('brainovaTotalGames') || 0;
+            const highScore = localStorage.getItem('brainovaHighScore') || 0;
+            const maxLevel = localStorage.getItem('brainovaMaxLevel') || 1;
             
-            // Créer les 40 cases du plateau en disposition Monopoly
-            const positions = [
-                // Bas (0-10)
-                [10, 10], [9, 10], [8, 10], [7, 10], [6, 10], [5, 10], [4, 10], [3, 10], [2, 10], [1, 10], [0, 10],
-                // Gauche (11-19)
-                [0, 9], [0, 8], [0, 7], [0, 6], [0, 5], [0, 4], [0, 3], [0, 2], [0, 1],
-                // Haut (20-30)
-                [0, 0], [1, 0], [2, 0], [3, 0], [4, 0], [5, 0], [6, 0], [7, 0], [8, 0], [9, 0], [10, 0],
-                // Droite (31-39)
-                [10, 1], [10, 2], [10, 3], [10, 4], [10, 5], [10, 6], [10, 7], [10, 8], [10, 9]
-            ];
+            const t = TRANSLATIONS[currentLanguage];
+            const message = (t.stats || "📊 Statistiques:\n\n🎮 Parties jouées: {games}\n🏆 Meilleur score: {score}\n🎯 Niveau max: {level}\n🧠 Points QI total: {iq}")
+                .replace('{games}', totalGames)
+                .replace('{score}', highScore)
+                .replace('{level}', maxLevel)
+                .replace('{iq}', iqPoints);
+            alert(message);
+        }
+
+        // Fonctions de contrôle supplémentaires
+        function resetGame() {
+            score = 0;
+            level = 1;
+            moves = 20;
+            iqPoints = 100;
+            currentObjective = 1000;
+            gameBoard = [];
+            selectedTile = null;
+            createBoard();
+            updateDisplay();
+            updateLanguage();
+        }
+
+        function pauseGame() {
+            const t = TRANSLATIONS[currentLanguage];
+            if (gameBoard.length > 0) {
+                alert(t.paused || '⏸️ Jeu en pause ! Cliquez OK pour continuer.');
+            }
+        }
+
+        function showHint() {
+            const t = TRANSLATIONS[currentLanguage];
+            if (moves > 0) {
+                moves -= 1;
+                score += 50;
+                iqPoints += 2;
+                alert(t.hint || '💡 Astuce: Cherchez des alignements de 3 symboles identiques ou plus !');
+                updateDisplay();
+            } else {
+                alert(t.noMoves || '❌ Plus de mouvements disponibles !');
+            }
+        }
+
+        function shuffleBoard() {
+            const t = TRANSLATIONS[currentLanguage];
+            if (moves > 0) {
+                moves -= 1;
+                
+                // Mélanger le plateau
+                for (let i = BOARD_SIZE - 1; i > 0; i--) {
+                    for (let j = BOARD_SIZE - 1; j > 0; j--) {
+                        const randomI = Math.floor(Math.random() * (i + 1));
+                        const randomJ = Math.floor(Math.random() * (j + 1));
+                        
+                        // Échanger les positions
+                        const temp = gameBoard[i][j];
+                        gameBoard[i][j] = gameBoard[randomI][randomJ];
+                        gameBoard[randomI][randomJ] = temp;
+                    }
+                }
+                
+                updateBoardDisplay();
+                updateDisplay();
+                setTimeout(() => {
+                    checkForMatches();
+                }, 500);
+            } else {
+                alert(t.noMoves || '❌ Plus de mouvements disponibles !');
+            }
+        }
+
+        // Alias pour compatibilité
+        function startNewGame() {
+            resetGame();
+        }
+
+        // Fonction pour afficher/masquer les règles
+        function toggleRules() {
+            const rulesContent = document.getElementById('rulesContent');
+            const rulesBtn = document.getElementById('rulesBtn');
+            const t = TRANSLATIONS[currentLanguage];
             
-            // Créer toutes les cellules de la grille 11x11
-            for(let row = 0; row < 11; row++) {
-                for(let col = 0; col < 11; col++) {
+            if (rulesContent.style.display === 'none') {
+                rulesContent.style.display = 'block';
+                rulesBtn.textContent = '🔼 ' + (t.hideRules || 'Masquer Règles');
+            } else {
+                rulesContent.style.display = 'none';
+                rulesBtn.textContent = '📋 ' + (t.showRules || 'Règles du Jeu');
+            }
+        }
+
+        // Créer le plateau de jeu
+        function createBoard() {
+            const board = document.getElementById('gameBoard');
+            board.innerHTML = '';
+            gameBoard = [];
+
+            for (let row = 0; row < 8; row++) {
+                gameBoard[row] = [];
+                for (let col = 0; col < 8; col++) {
                     const cell = document.createElement('div');
-                    cell.className = 'board-cell';
+                    cell.className = 'cell';
+                    cell.dataset.row = row;
+                    cell.dataset.col = col;
                     
-                    // Vérifier si cette position correspond à une case du plateau
-                    const propertyIndex = positions.findIndex(pos => pos[0] === col && pos[1] === row);
+                    const element = getRandomElement();
+                    gameBoard[row][col] = element;
+                    cell.textContent = element;
                     
-                    if (propertyIndex !== -1) {
-                        const property = boardProperties[propertyIndex];
-                        cell.classList.add(`cell-${property.type}`);
-                        cell.dataset.propertyId = propertyIndex;
-                        
-                        // Affichage selon le type de case
-                        let cellContent = '';
-                        if (property.type === 'corner') {
-                            cellContent = `<div style="font-size: 13px; font-weight: bold; text-align: center; padding: 6px; line-height: 1.2; color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; height: 100%; word-break: break-word; hyphens: auto;">${property.name}</div>`;
-                        } else if (property.type === 'property') {
-                            cellContent = `
-                                <div style="background: ${property.color}; height: 26px; width: 100%; border-radius: 8px; border: 1px solid rgba(255,255,255,0.7); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; color: #00ff00; text-shadow: 1px 1px 2px rgba(0,0,0,0.9);">₹${property.price}</div>
-                                <div style="font-size: 13px; text-align: center; line-height: 1.1; color: white; font-weight: bold; text-shadow: 1px 1px 3px rgba(0,0,0,1); padding: 5px; flex-grow: 1; display: flex; align-items: center; justify-content: center; word-break: break-word; hyphens: auto;">${property.name}</div>
-                            `;
-                        } else if (property.type === 'railroad') {
-                            cellContent = `
-                                <div style="font-size: 22px; text-align: center; flex-shrink: 0;">🚂</div>
-                                <div style="font-size: 12px; text-align: center; line-height: 1.1; color: white; font-weight: bold; text-shadow: 1px 1px 3px rgba(0,0,0,1); padding: 4px; flex-grow: 1; display: flex; align-items: center; justify-content: center; word-break: break-word; hyphens: auto;">${property.name}</div>
-                                <div style="font-size: 13px; text-align: center; color: #00ff00; font-weight: bold; background: rgba(0,0,0,0.8); padding: 4px 8px; border-radius: 10px; text-shadow: 1px 1px 2px rgba(0,0,0,1); border: 1px solid rgba(0,255,0,0.3); flex-shrink: 0;">₹${property.price}</div>
-                            `;
-                        } else if (property.type === 'utility') {
-                            cellContent = `
-                                <div style="font-size: 22px; text-align: center; flex-shrink: 0;">⚡</div>
-                                <div style="font-size: 12px; text-align: center; line-height: 1.1; color: white; font-weight: bold; text-shadow: 1px 1px 3px rgba(0,0,0,1); padding: 4px; flex-grow: 1; display: flex; align-items: center; justify-content: center; word-break: break-word; hyphens: auto;">${property.name}</div>
-                                <div style="font-size: 13px; text-align: center; color: #00ff00; font-weight: bold; background: rgba(0,0,0,0.8); padding: 4px 8px; border-radius: 10px; text-shadow: 1px 1px 2px rgba(0,0,0,1); border: 1px solid rgba(0,255,0,0.3); flex-shrink: 0;">₹${property.price}</div>
-                            `;
-                        } else if (property.type === 'chance') {
-                            const t = translations[gameState.currentLanguage];
-                            cellContent = `
-                                <div style="font-size: 22px; text-align: center; flex-shrink: 0;">🎲</div>
-                                <div style="font-size: 12px; text-align: center; font-weight: bold; color: #ff8800; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); flex-grow: 1; display: flex; align-items: center; justify-content: center;">${t.properties.chance}</div>
-                            `;
-                        } else if (property.type === 'communityChest') {
-                            const t = translations[gameState.currentLanguage];
-                            cellContent = `
-                                <div style="font-size: 22px; text-align: center; flex-shrink: 0;">📦</div>
-                                <div style="font-size: 11px; text-align: center; font-weight: bold; color: #0088ff; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); flex-grow: 1; display: flex; align-items: center; justify-content: center; line-height: 1.1;">${t.properties.communityChest}</div>
-                            `;
-                        } else if (property.type === 'tax') {
-                            cellContent = `
-                                <div style="font-size: 22px; text-align: center; flex-shrink: 0;">💰</div>
-                                <div style="font-size: 12px; text-align: center; line-height: 1.1; color: white; font-weight: bold; text-shadow: 1px 1px 3px rgba(0,0,0,1); padding: 4px; flex-grow: 1; display: flex; align-items: center; justify-content: center; word-break: break-word; hyphens: auto;">${property.name}</div>
-                                <div style="font-size: 13px; text-align: center; color: #ffff00; font-weight: bold; background: rgba(0,0,0,0.8); padding: 4px 8px; border-radius: 10px; text-shadow: 1px 1px 2px rgba(0,0,0,1); border: 1px solid rgba(255,255,0,0.3); flex-shrink: 0;">₹${property.price}</div>
-                            `;
-                        }
-                        
-                        cell.innerHTML = cellContent;
-                        
-                        // Ajouter les pions des joueurs sur la case départ
-                        if (propertyIndex === 0) {
-                            gameState.players.forEach((player, index) => {
-                                if (player.position === 0) {
-                                    const token = document.createElement('div');
-                                    token.className = `player-token player-${index + 1}`;
-                                    token.textContent = index + 1;
-                                    token.style.top = `${(index % 2) * 25}px`;
-                                    token.style.left = `${Math.floor(index / 2) * 25}px`;
-                                    cell.appendChild(token);
-                                }
-                            });
-                        }
-                    } else {
-                        // Cellule du centre (vide)
-                        cell.style.background = 'transparent';
-                        cell.style.border = 'none';
-                        if (row === 5 && col === 5) {
-                            cell.innerHTML = `
-                                <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 6px; height: 100%; justify-content: center;">
-                                    <div style="font-size: 48px; filter: drop-shadow(0 0 15px #00ffff); animation: pulse 2s ease-in-out infinite;">🌌</div>
-                                </div>
-                            `;
-                        }
-                    }
-                    
-                    boardSurface.appendChild(cell);
+                    cell.addEventListener('click', () => handleCellClick(row, col));
+                    board.appendChild(cell);
                 }
             }
         }
 
-        // Lancer les dés
-        function rollDice() {
-            if (!gameState.isPlaying || !gameState.canRoll) return;
-            
-            const dice1 = document.getElementById('sidebarDice1');
-            const dice2 = document.getElementById('sidebarDice2');
-            
-            // Animation de lancement
-            dice1.classList.add('rolling');
-            dice2.classList.add('rolling');
-            
-            setTimeout(() => {
-                gameState.dice1 = Math.floor(Math.random() * 6) + 1;
-                gameState.dice2 = Math.floor(Math.random() * 6) + 1;
-                gameState.lastRoll = gameState.dice1 + gameState.dice2;
-                
-                dice1.textContent = gameState.dice1;
-                dice2.textContent = gameState.dice2;
-                
-                dice1.classList.remove('rolling');
-                dice2.classList.remove('rolling');
-                
-                gameState.canRoll = false;
-                document.getElementById('endTurnBtn').disabled = false;
-                
-                // Déplacer le joueur
-                movePlayer(gameState.currentPlayer, gameState.lastRoll);
-                
-                const t = translations[gameState.currentLanguage];
-                const currentPlayer = gameState.players[gameState.currentPlayer];
-                showMessage(`${currentPlayer.name} ${t.diceRolled} ${gameState.lastRoll}`);
-                
-            }, 1000);
+        // Obtenir un élément aléatoire
+        function getRandomElement() {
+            return BRAIN_ELEMENTS[Math.floor(Math.random() * BRAIN_ELEMENTS.length)];
         }
 
-        // Déplacer un joueur
-        function movePlayer(playerIndex, steps) {
-            const player = gameState.players[playerIndex];
-            const oldPosition = player.position;
+        // Gérer le clic sur une cellule
+        function handleCellClick(row, col) {
+            if (gameState !== 'playing') return;
+
+            const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
             
-            player.position = (player.position + steps) % 40;
-            
-            // Vérifier si le joueur passe par la case départ
-            if (player.position < oldPosition) {
-                player.money += 200;
-                const t = translations[gameState.currentLanguage];
-                showMessage(`${player.name} passe par ${t.properties.go} et reçoit ₹200!`);
+            if (selectedCell === null) {
+                // Première sélection
+                selectedCell = { row, col };
+                cell.classList.add('selected');
+            } else {
+                // Deuxième sélection
+                const prevCell = document.querySelector(`[data-row="${selectedCell.row}"][data-col="${selectedCell.col}"]`);
+                prevCell.classList.remove('selected');
+                
+                if (selectedCell.row === row && selectedCell.col === col) {
+                    // Désélectionner la même cellule
+                    selectedCell = null;
+                } else if (isAdjacent(selectedCell.row, selectedCell.col, row, col)) {
+                    // Échanger les éléments adjacents
+                    swapElements(selectedCell.row, selectedCell.col, row, col);
+                    selectedCell = null;
+                } else {
+                    // Nouvelle sélection
+                    selectedCell = { row, col };
+                    cell.classList.add('selected');
+                }
             }
-            
-            updatePlayersDisplay();
+        }
+
+        // Vérifier si deux cellules sont adjacentes
+        function isAdjacent(row1, col1, row2, col2) {
+            const rowDiff = Math.abs(row1 - row2);
+            const colDiff = Math.abs(col1 - col2);
+            return (rowDiff === 1 && colDiff === 0) || (rowDiff === 0 && colDiff === 1);
+        }
+
+        // Échanger deux éléments
+        function swapElements(row1, col1, row2, col2) {
+            const temp = gameBoard[row1][col1];
+            gameBoard[row1][col1] = gameBoard[row2][col2];
+            gameBoard[row2][col2] = temp;
+
             updateBoardDisplay();
-            
-            // Traiter l'action de la case
-            handlePropertyAction(playerIndex, player.position);
-        }
 
-        // Gérer l'action d'une propriété
-        function handlePropertyAction(playerIndex, position) {
-            const player = gameState.players[playerIndex];
-            const property = boardProperties[position];
-            const t = translations[gameState.currentLanguage];
-            
-            if (property.type === 'property' || property.type === 'railroad' || property.type === 'utility') {
-                // Vérifier si la propriété appartient à quelqu'un
-                const owner = gameState.players.find(p => p.properties.includes(position));
-                
-                if (!owner) {
-                    // Propriété libre - proposer l'achat
-                    if (player.money >= property.price) {
-                        if (player.isAI) {
-                            // IA décide d'acheter (logique simple)
-                            if (Math.random() > 0.3) {
-                                buyPropertyForPlayer(playerIndex, position);
-                            }
-                        } else {
-                            // Proposer l'achat au joueur humain
-                            document.getElementById('buyBtn').disabled = false;
-                            showMessage(`Voulez-vous acheter ${property.name} pour ₹${property.price}?`);
-                        }
-                    }
-                } else if (owner.id !== playerIndex) {
-                    // Payer un loyer
-                    const rent = calculateRent(property, owner);
-                    player.money -= rent;
-                    owner.money += rent;
-                    showMessage(`${player.name} ${t.rentPaid} ₹${rent} à ${owner.name} pour ${property.name}`);
-                    updatePlayersDisplay();
-                }
-            } else if (property.type === 'tax') {
-                // Payer une taxe
-                player.money -= property.price;
-                showMessage(`${player.name} paie ${property.name}: ₹${property.price}`);
-                updatePlayersDisplay();
-            } else if (property.type === 'chance') {
-                // Carte Chance
-                handleChanceCard(playerIndex);
-            } else if (property.type === 'communityChest') {
-                // Carte Caisse de Communauté
-                handleCommunityChestCard(playerIndex);
-            } else if (property.type === 'corner') {
-                if (position === 30) { // Allez en Prison
-                    player.position = 10;
-                    player.inJail = true;
-                    player.jailTurns = 0;
-                    showMessage(`${player.name} va en prison!`);
-                    updateBoardDisplay();
-                } else if (position === 0) { // Départ
-                    showMessage(`${player.name} est sur la case Départ!`);
-                } else if (position === 10) { // Prison (visite)
-                    showMessage(`${player.name} visite la prison`);
-                } else if (position === 20) { // Parc Gratuit
-                    showMessage(`${player.name} se repose au Parc Gratuit`);
-                }
+            // Vérifier si l'échange crée des matches
+            const matches = findMatches();
+            if (matches.length > 0) {
+                moves--;
+                processMatches(matches);
+                updateDisplay();
+            } else {
+                // Annuler l'échange si pas de match
+                gameBoard[row1][col1] = gameBoard[row2][col2];
+                gameBoard[row2][col2] = temp;
+                updateBoardDisplay();
             }
-        }
 
-        // Gérer les cartes Chance
-        function handleChanceCard(playerIndex) {
-            const player = gameState.players[playerIndex];
-            const chanceCards = [
-                { text: "Avancez jusqu'à la case Départ", action: () => { player.position = 0; player.money += 200; } },
-                { text: "Allez en prison", action: () => { player.position = 10; player.inJail = true; player.jailTurns = 0; } },
-                { text: "Recevez ₹200", action: () => { player.money += 200; } },
-                { text: "Payez ₹50", action: () => { player.money -= 50; } },
-                { text: "Avancez de 3 cases", action: () => { movePlayer(playerIndex, 3); } }
-            ];
-            
-            const card = chanceCards[Math.floor(Math.random() * chanceCards.length)];
-            card.action();
-            showMessage(`${player.name} - Chance: ${card.text}`);
-            updatePlayersDisplay();
-            updateBoardDisplay();
-        }
-
-        // Gérer les cartes Caisse de Communauté
-        function handleCommunityChestCard(playerIndex) {
-            const player = gameState.players[playerIndex];
-            const communityCards = [
-                { text: "Recevez ₹100", action: () => { player.money += 100; } },
-                { text: "Payez ₹100", action: () => { player.money -= 100; } },
-                { text: "Recevez ₹50 de chaque joueur", action: () => { 
-                    gameState.players.forEach(p => {
-                        if (p.id !== player.id) {
-                            p.money -= 50;
-                            player.money += 50;
-                        }
-                    });
-                }},
-                { text: "Allez en prison", action: () => { player.position = 10; player.inJail = true; player.jailTurns = 0; } },
-                { text: "Sortez de prison gratuitement", action: () => { /* Carte à garder */ } }
-            ];
-            
-            const card = communityCards[Math.floor(Math.random() * communityCards.length)];
-            card.action();
-            showMessage(`${player.name} - Caisse: ${card.text}`);
-            updatePlayersDisplay();
-            updateBoardDisplay();
-        }
-
-        // Calculer le loyer
-        function calculateRent(property, owner) {
-            let baseRent = property.rent || Math.floor(property.price * 0.1);
-            
-            if (property.type === 'railroad') {
-                const railroadCount = owner.properties.filter(p => boardProperties[p].type === 'railroad').length;
-                baseRent = 25 * Math.pow(2, railroadCount - 1);
-            } else if (property.type === 'utility') {
-                const utilityCount = owner.properties.filter(p => boardProperties[p].type === 'utility').length;
-                baseRent = utilityCount === 1 ? gameState.lastRoll * 4 : gameState.lastRoll * 10;
-            } else if (property.type === 'property') {
-                // Vérifier si le joueur possède toutes les propriétés de cette couleur
-                const sameColorProperties = boardProperties.filter(p => p.color === property.color && p.type === 'property');
-                const ownedSameColor = owner.properties.filter(p => {
-                    const prop = boardProperties[p];
-                    return prop.color === property.color && prop.type === 'property';
-                });
-                
-                if (ownedSameColor.length === sameColorProperties.length) {
-                    baseRent *= 2; // Double le loyer si monopole
-                }
-            }
-            
-            return baseRent;
-        }
-
-        // Acheter une propriété pour un joueur
-        function buyPropertyForPlayer(playerIndex, propertyIndex) {
-            const player = gameState.players[playerIndex];
-            const property = boardProperties[propertyIndex];
-            const t = translations[gameState.currentLanguage];
-            
-            if (player.money >= property.price) {
-                player.money -= property.price;
-                player.properties.push(propertyIndex);
-                
-                showMessage(`${player.name} ${t.propertyBought} ${property.name} pour ₹${property.price}`);
-                updatePlayersDisplay();
-                updatePropertiesDisplay();
-                
-                document.getElementById('buyBtn').disabled = true;
-            }
-        }
-
-        // Acheter une propriété (bouton)
-        function buyProperty() {
-            const currentPlayer = gameState.players[gameState.currentPlayer];
-            buyPropertyForPlayer(gameState.currentPlayer, currentPlayer.position);
+            checkGameEnd();
         }
 
         // Mettre à jour l'affichage du plateau
         function updateBoardDisplay() {
-            // Supprimer tous les pions existants
-            document.querySelectorAll('.player-token').forEach(token => token.remove());
-            
-            // Replacer les pions selon les positions actuelles
-            gameState.players.forEach((player, index) => {
-                if (!player.isBankrupt) {
-                    const cell = document.querySelector(`[data-property-id="${player.position}"]`);
-                    if (cell) {
-                        const token = document.createElement('div');
-                        token.className = `player-token player-${index + 1}`;
-                        token.textContent = index + 1;
-                        
-                        // Positionner les pions pour éviter les chevauchements
-                        const playersOnSameCell = gameState.players.filter(p => p.position === player.position && !p.isBankrupt);
-                        const tokenIndex = playersOnSameCell.findIndex(p => p.id === player.id);
-                        
-                        token.style.top = `${(tokenIndex % 2) * 25}px`;
-                        token.style.left = `${Math.floor(tokenIndex / 2) * 25}px`;
-                        
-                        cell.appendChild(token);
-                    }
+            for (let row = 0; row < 8; row++) {
+                for (let col = 0; col < 8; col++) {
+                    const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+                    cell.textContent = gameBoard[row][col];
                 }
-            });
-        }
-
-        // Mettre à jour l'affichage des propriétés
-        function updatePropertiesDisplay() {
-            const container = document.getElementById('propertiesContainer');
-            container.innerHTML = '';
-            
-            const currentPlayer = gameState.players[gameState.currentPlayer];
-            
-            const t = translations[gameState.currentLanguage];
-            if (currentPlayer.properties.length === 0) {
-                container.innerHTML = `<div style="color: #a1a1aa; text-align: center; padding: 20px;">${t.noPropertiesText || 'Aucune propriété'}</div>`;
-                return;
             }
-            
-            currentPlayer.properties.forEach(propertyIndex => {
-                const property = boardProperties[propertyIndex];
-                const propertyDiv = document.createElement('div');
-                propertyDiv.className = 'player-info';
-                propertyDiv.style.marginBottom = '8px';
-                propertyDiv.innerHTML = `
-                    <div style="font-weight: bold; color: #00ffff; font-size: 12px;">
-                        ${property.name} #${propertyIndex}
-                    </div>
-                    <div style="font-size: 10px; color: #a1a1aa;">
-                        ${t.priceLabel || 'Prix'}: ₹${property.price} | ${t.typeLabel || 'Type'}: ${property.type}
-                    </div>
-                `;
-                container.appendChild(propertyDiv);
-            });
         }
 
-        // Finir le tour
-        function endTurn() {
-            if (!gameState.isPlaying) return;
-            
-            gameState.canRoll = true;
-            document.getElementById('endTurnBtn').disabled = true;
-            document.getElementById('buyBtn').disabled = true;
-            
-            // Passer au joueur suivant
-            do {
-                gameState.currentPlayer = (gameState.currentPlayer + 1) % gameState.playerCount;
-                if (gameState.currentPlayer === 0) {
-                    gameState.turn++;
-                    if (gameState.turn % gameState.playerCount === 1) {
-                        gameState.round++;
+        // Trouver les matches (3+ éléments alignés)
+        function findMatches() {
+            const matches = [];
+
+            // Matches horizontaux
+            for (let row = 0; row < 8; row++) {
+                let count = 1;
+                let currentElement = gameBoard[row][0];
+                for (let col = 1; col < 8; col++) {
+                    if (gameBoard[row][col] === currentElement) {
+                        count++;
+                    } else {
+                        if (count >= 3) {
+                            for (let i = col - count; i < col; i++) {
+                                matches.push({ row, col: i });
+                            }
+                        }
+                        count = 1;
+                        currentElement = gameBoard[row][col];
                     }
                 }
-            } while (gameState.players[gameState.currentPlayer].isBankrupt);
-            
-            updatePlayersDisplay();
-            updatePropertiesDisplay();
-            updateStats();
-            
-            const t = translations[gameState.currentLanguage];
-            const currentPlayer = gameState.players[gameState.currentPlayer];
-            showMessage(`${t.playerTurn} ${currentPlayer.name}`);
-            
-            // Si c'est un joueur IA, jouer automatiquement
-            if (currentPlayer.isAI) {
+                if (count >= 3) {
+                    for (let i = 8 - count; i < 8; i++) {
+                        matches.push({ row, col: i });
+                    }
+                }
+            }
+
+            // Matches verticaux
+            for (let col = 0; col < 8; col++) {
+                let count = 1;
+                let currentElement = gameBoard[0][col];
+                for (let row = 1; row < 8; row++) {
+                    if (gameBoard[row][col] === currentElement) {
+                        count++;
+                    } else {
+                        if (count >= 3) {
+                            for (let i = row - count; i < row; i++) {
+                                matches.push({ row: i, col });
+                            }
+                        }
+                        count = 1;
+                        currentElement = gameBoard[row][col];
+                    }
+                }
+                if (count >= 3) {
+                    for (let i = 8 - count; i < 8; i++) {
+                        matches.push({ row: i, col });
+                    }
+                }
+            }
+
+            return matches;
+        }
+
+        // Traiter les matches trouvés
+        function processMatches(matches) {
+            // Marquer les cellules pour l'animation
+            matches.forEach(match => {
+                const cell = document.querySelector(`[data-row="${match.row}"][data-col="${match.col}"]`);
+                cell.classList.add('matching');
+            });
+
+            setTimeout(() => {
+                // Calculer les points
+                const points = calculatePoints(matches.length);
+                score += points;
+                iqPoints += Math.floor(points / 10);
+
+                // Afficher combo si gros match
+                if (matches.length >= 5) {
+                    showCombo(matches.length);
+                }
+
+                // Supprimer les éléments matchés
+                matches.forEach(match => {
+                    gameBoard[match.row][match.col] = null;
+                });
+
+                // Faire tomber les éléments
+                dropElements();
+                
+                // Remplir les espaces vides
+                fillEmptySpaces();
+                
+                // Vérifier de nouveaux matches
                 setTimeout(() => {
-                    playAITurn();
-                }, 2000);
-            }
+                    const newMatches = findMatches();
+                    if (newMatches.length > 0) {
+                        processMatches(newMatches);
+                    }
+                }, 500);
+
+            }, 500);
         }
 
-        // Jouer le tour de l'IA
-        function playAITurn() {
-            const t = translations[gameState.currentLanguage];
-            showMessage(`${t.aiThinking}`);
+        // Calculer les points selon le nombre d'éléments matchés
+        function calculatePoints(matchCount) {
+            const basePoints = 10;
+            if (matchCount >= 3 && matchCount <= 4) return basePoints * matchCount;
+            if (matchCount >= 5 && matchCount <= 6) return basePoints * matchCount * 2;
+            return basePoints * matchCount * 3; // 7+ éléments
+        }
+
+        // Afficher animation combo
+        function showCombo(matchCount) {
+            const comboDiv = document.createElement('div');
+            comboDiv.className = 'combo-display';
+            
+            const t = TRANSLATIONS[currentLanguage];
+            if (matchCount >= 7) comboDiv.textContent = t.superCombo || '🎆 SUPER COMBO! 🎆';
+            else if (matchCount >= 5) comboDiv.textContent = t.combo || '💫 COMBO! 💫';
+            else comboDiv.textContent = t.goodMatch || '✨ BON COUP! ✨';
+            
+            document.body.appendChild(comboDiv);
             
             setTimeout(() => {
-                rollDice();
-                
+                document.body.removeChild(comboDiv);
+            }, 2000);
+        }
+
+        // Faire tomber les éléments
+        function dropElements() {
+            for (let col = 0; col < 8; col++) {
+                for (let row = 7; row >= 0; row--) {
+                    if (gameBoard[row][col] === null) {
+                        for (let upperRow = row - 1; upperRow >= 0; upperRow--) {
+                            if (gameBoard[upperRow][col] !== null) {
+                                gameBoard[row][col] = gameBoard[upperRow][col];
+                                gameBoard[upperRow][col] = null;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            updateBoardDisplay();
+        }
+
+        // Remplir les espaces vides
+        function fillEmptySpaces() {
+            for (let col = 0; col < 8; col++) {
+                for (let row = 0; row < 8; row++) {
+                    if (gameBoard[row][col] === null) {
+                        gameBoard[row][col] = getRandomElement();
+                        const cell = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+                        cell.classList.add('falling');
+                        setTimeout(() => cell.classList.remove('falling'), 500);
+                    }
+                }
+            }
+            updateBoardDisplay();
+        }
+
+        // Vérifier les matches au démarrage
+        function checkForMatches() {
+            const matches = findMatches();
+            if (matches.length > 0) {
                 setTimeout(() => {
-                    endTurn();
-                }, 3000);
-            }, 1500);
+                    processMatches(matches);
+                }, 1000);
+            }
+        }
+
+        // Utiliser un power-up
+        function usePowerUp(type) {
+            if (powerUps[type] <= 0 || gameState !== 'playing') return;
+
+            powerUps[type]--;
+            updateDisplay();
+
+            switch (type) {
+                case 'bomb':
+                    // Détruire une zone 3x3
+                    clearArea(3, 3);
+                    break;
+                case 'lightning':
+                    // Détruire une ligne et une colonne
+                    clearLineAndColumn();
+                    break;
+                case 'rainbow':
+                    // Détruire tous les éléments d'un type
+                    clearAllOfType();
+                    break;
+            }
+        }
+
+        // Fonctions power-ups
+        function clearArea(width, height) {
+            const centerRow = Math.floor(Math.random() * 8);
+            const centerCol = Math.floor(Math.random() * 8);
+            
+            for (let r = Math.max(0, centerRow - 1); r <= Math.min(7, centerRow + 1); r++) {
+                for (let c = Math.max(0, centerCol - 1); c <= Math.min(7, centerCol + 1); c++) {
+                    gameBoard[r][c] = null;
+                }
+            }
+            score += 50;
+            dropElements();
+            fillEmptySpaces();
+        }
+
+        function clearLineAndColumn() {
+            const row = Math.floor(Math.random() * 8);
+            const col = Math.floor(Math.random() * 8);
+            
+            // Nettoyer la ligne
+            for (let c = 0; c < 8; c++) {
+                gameBoard[row][c] = null;
+            }
+            
+            // Nettoyer la colonne
+            for (let r = 0; r < 8; r++) {
+                gameBoard[r][col] = null;
+            }
+            
+            score += 75;
+            dropElements();
+            fillEmptySpaces();
+        }
+
+        function clearAllOfType() {
+            const targetElement = BRAIN_ELEMENTS[Math.floor(Math.random() * BRAIN_ELEMENTS.length)];
+            let count = 0;
+            
+            for (let row = 0; row < 8; row++) {
+                for (let col = 0; col < 8; col++) {
+                    if (gameBoard[row][col] === targetElement) {
+                        gameBoard[row][col] = null;
+                        count++;
+                    }
+                }
+            }
+            
+            score += count * 15;
+            dropElements();
+            fillEmptySpaces();
+        }
+
+        // Fonctions utilitaires
+        function resetGame() {
+            score = 0;
+            level = 1;
+            moves = 30;
+            iqPoints = 0;
+            powerUps = { bomb: 3, lightning: 2, rainbow: 1 };
+            gameState = 'playing';
+            currentObjective = 100;
+            initGame();
+        }
+
+        function shuffleBoard() {
+            if (moves <= 0) return;
+            
+            for (let row = 0; row < 8; row++) {
+                for (let col = 0; col < 8; col++) {
+                    gameBoard[row][col] = getRandomElement();
+                }
+            }
+            updateBoardDisplay();
+            moves--;
+            updateDisplay();
+        }
+
+        function pauseGame() {
+            gameState = gameState === 'playing' ? 'paused' : 'playing';
+            const btn = event.target;
+            btn.textContent = gameState === 'paused' ? '▶️ Reprendre' : '⏸️ Pause';
+        }
+
+        function showHint() {
+            // Trouver un mouvement possible
+            for (let row = 0; row < 8; row++) {
+                for (let col = 0; col < 7; col++) {
+                    // Test échange horizontal
+                    const temp = gameBoard[row][col];
+                    gameBoard[row][col] = gameBoard[row][col + 1];
+                    gameBoard[row][col + 1] = temp;
+                    
+                    if (findMatches().length > 0) {
+                        // Annuler l'échange
+                        gameBoard[row][col + 1] = gameBoard[row][col];
+                        gameBoard[row][col] = temp;
+                        
+                        // Mettre en évidence les cellules
+                        const cell1 = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
+                        const cell2 = document.querySelector(`[data-row="${row}"][data-col="${col + 1}"]`);
+                        
+                        cell1.style.border = '3px solid #ffff00';
+                        cell2.style.border = '3px solid #ffff00';
+                        
+                        setTimeout(() => {
+                            cell1.style.border = '2px solid transparent';
+                            cell2.style.border = '2px solid transparent';
+                        }, 2000);
+                        
+                        return;
+                    }
+                    
+                    // Annuler l'échange
+                    gameBoard[row][col + 1] = gameBoard[row][col];
+                    gameBoard[row][col] = temp;
+                }
+            }
+        }
+
+        function checkGameEnd() {
+            if (moves <= 0) {
+                if (score >= currentObjective) {
+                    // Niveau suivant
+                    level++;
+                    moves = 30;
+                    currentObjective *= 1.5;
+                    powerUps.bomb++;
+                    powerUps.lightning++;
+                    if (level % 3 === 0) powerUps.rainbow++;
+                    
+                    const t = TRANSLATIONS[currentLanguage];
+                    const levelUpMsg = (t.levelUp || "🚀 Niveau {level} atteint ! Objectif: {points} points")
+                        .replace('{level}', level)
+                        .replace('{points}', Math.floor(currentObjective));
+                    alert(levelUpMsg);
+                } else {
+                    gameState = 'gameOver';
+                    const t = TRANSLATIONS[currentLanguage];
+                    const gameOverMsg = (t.gameOver || "💥 Partie terminée ! Score final: {score} points QI: {iq}")
+                        .replace('{score}', score)
+                        .replace('{iq}', iqPoints);
+                    alert(gameOverMsg);
+                }
+            }
+        }
+
+        function updateDisplay() {
+            const t = TRANSLATIONS[currentLanguage];
+            
+            document.getElementById('score').textContent = score;
+            document.getElementById('level').textContent = level;
+            document.getElementById('moves').textContent = moves;
+            document.getElementById('iqPoints').textContent = iqPoints;
+            document.getElementById('currentLevel').textContent = level;
+            
+            // Traduction de l'objectif avec template
+            const objectiveText = (t.levelTitle || "Niveau {level} - Collectez {points} points cérébraux !")
+                .replace('{level}', level)
+                .replace('{points}', Math.floor(currentObjective));
+            document.getElementById('objective').textContent = objectiveText;
+            
+            document.getElementById('bombCount').textContent = powerUps.bomb;
+            document.getElementById('lightningCount').textContent = powerUps.lightning;
+            document.getElementById('rainbowCount').textContent = powerUps.rainbow;
+            
+            // Désactiver les power-ups épuisés
+            Object.keys(powerUps).forEach(type => {
+                const element = document.getElementById(type + 'Power');
+                if (powerUps[type] <= 0) {
+                    element.classList.add('disabled');
+                } else {
+                    element.classList.remove('disabled');
+                }
+            });
         }
 
         // Démarrer le jeu
-        function startGame() {
-            gameState.isPlaying = true;
-            gameState.currentPlayer = 0;
-            gameState.turn = 1;
-            gameState.round = 1;
-            gameState.startTime = Date.now();
-            gameState.canRoll = true;
-            
-            initializePlayers();
-            initializeBoard();
-            updatePlayersDisplay();
-            updatePropertiesDisplay();
-            startGameTimer();
-            
-            document.getElementById('startBtn').disabled = true;
-            document.getElementById('endTurnBtn').disabled = true;
-            
-            const t = translations[gameState.currentLanguage];
-            const currentPlayer = gameState.players[gameState.currentPlayer];
-            showMessage(`${t.gameStarted} ${currentPlayer.name}!`);
-        }
-
-        // Réinitialiser le jeu
-        function resetGame() {
-            gameState.isPlaying = false;
-            gameState.currentPlayer = 0;
-            gameState.turn = 1;
-            gameState.round = 1;
-            gameState.elapsedTime = 0;
-            gameState.canRoll = true;
-            
-            if (gameState.gameTimer) {
-                clearInterval(gameState.gameTimer);
-            }
-            
-            document.getElementById('startBtn').disabled = false;
-            document.getElementById('endTurnBtn').disabled = true;
-            document.getElementById('buyBtn').disabled = true;
-            
-            initializePlayers();
-            initializeBoard();
-            updatePlayersDisplay();
-            updatePropertiesDisplay();
-            updateStats();
-            
-            const t = translations[gameState.currentLanguage];
-            showMessage(t.welcomeMessage);
-        }
-
-        // Démarrer le timer du jeu
-        function startGameTimer() {
-            gameState.gameTimer = setInterval(() => {
-                gameState.elapsedTime = Date.now() - gameState.startTime;
-                updateTimeDisplay();
-            }, 1000);
-        }
-
-        // Mettre à jour l'affichage du temps
-        function updateTimeDisplay() {
-            const seconds = Math.floor(gameState.elapsedTime / 1000);
-            const minutes = Math.floor(seconds / 60);
-            const displaySeconds = seconds % 60;
-            
-            const timeString = `${minutes.toString().padStart(2, '0')}:${displaySeconds.toString().padStart(2, '0')}`;
-            document.getElementById('timeValue').textContent = timeString;
-        }
-
-        // Mettre à jour les statistiques
-        function updateStats() {
-            document.getElementById('turnValue').textContent = gameState.turn;
-            document.getElementById('roundValue').textContent = gameState.round;
-        }
-
-        // Afficher un message
-        function showMessage(message, duration = 0) {
-            const messageElement = document.getElementById('gameMessage');
-            messageElement.innerHTML = `<span>${message}</span>`;
-            
-            if (duration > 0) {
-                setTimeout(() => {
-                    const t = translations[gameState.currentLanguage];
-                    messageElement.innerHTML = `<span>${t.welcomeMessage}</span>`;
-                }, duration);
-            }
-        }
-
-        // Afficher les règles
-        function showRules() {
-            const t = translations[gameState.currentLanguage];
-            try{ parent.postMessage({ action: 'dialog', dialogType: 'alert', text: `${t.rulesText}:\n\n1. Lancez les dés pour vous déplacer\n2. Achetez des propriétés\n3. Collectez des loyers\n4. Construisez des maisons et hôtels\n5. Le dernier joueur non-ruiné gagne!` }, '*'); }catch(e){}
-        }
-
-        // Fonctions pour les autres actions (simplifiées)
-        function buildHouse() {
-            showMessage("Fonction de construction en développement...");
-        }
-
-        function tradeProperty() {
-            showMessage("Fonction d'échange en développement...");
-        }
-
-        function mortgage() {
-            showMessage("Fonction d'hypothèque en développement...");
-        }
-
-        // Changer le nombre de joueurs
-        function setPlayerCount(count) {
-            if (gameState.isPlaying) return; // Ne pas changer pendant le jeu
-            
-            gameState.playerCount = count;
-            
-            // Mettre à jour les boutons
-            document.querySelectorAll('.count-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.target.classList.add('active');
-            
-            // Réinitialiser les joueurs
-            initializePlayers();
-            updatePlayersDisplay();
-        }
-
-        // Afficher les informations de l'IA
-        function showAIInfo() {
-            const t = translations[gameState.currentLanguage];
-            try{ parent.postMessage({ action: 'dialog', dialogType: 'alert', text: `🤖 IA QUANTIQUE\n\nSystème d'intelligence artificielle avancé intégré au jeu.\n\n• Analyse des stratégies en temps réel\n• Prise de décision automatique\n• Adaptation au style de jeu\n• Calculs probabilistes quantiques\n\nStatut: ${gameState.isPlaying ? 'ACTIF' : 'EN ATTENTE'}` }, '*'); }catch(e){}
-        }
-
-        // Initialisation
-        document.addEventListener('DOMContentLoaded', function() {
-            // Initialiser les propriétés traduites
-            boardProperties = getTranslatedProperties();
-            
-            createQuantumParticles();
-            initializePlayers();
-            initializeBoard();
-            updatePlayersDisplay();
-            updatePropertiesDisplay();
-            updateStats();
-        });
+        window.addEventListener('load', initGame);
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'985aaedea1985014',t:'MTc1ODk3Mjc3NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
-<script>
-function addBackToMenuButton() {
-    if(document.getElementById('backToMenuBtn')) return;
-
-    const btn = document.createElement('button');
-    btn.id = 'backToMenuBtn';
-    btn.className = 'header-btn';
-    btn.style.position = 'absolute';
-    btn.style.top = '10px';
-    btn.style.left = '10px';
-    btn.style.zIndex = '1000';
-    btn.innerHTML = '?? Menu';
-
-    btn.addEventListener('click', function() {
-        if(window.parent && window.parent !== window){
-            window.parent.postMessage({action:'close', reason:'menu-button', source:document.title}, '*');
-        } else {
-            window.location.href='index.html';
-        }
-    });
-
-    document.body.appendChild(btn);
-}
-
-// Appeler au chargement et toutes les 500ms pour persister
-window.addEventListener('load', addBackToMenuButton);
-setInterval(addBackToMenuButton, 500);
-</script>
-<script>
-/* closeToMenuInjected */
-const closeBtn = document.querySelector('.global-close-btn, .close-btn');
-if (closeBtn) {
-    closeBtn.addEventListener('click', function() {
-        if(window.parent && window.parent !== window){
-            window.parent.postMessage({action:'close', reason:'menu-button', source:document.title}, '*');
-        } else {
-            window.location.href='index.html';
-        }
-    });
-}
-</script>
 </body>
 </html>
-
-
-
