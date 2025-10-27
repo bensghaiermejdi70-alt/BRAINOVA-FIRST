@@ -23,8 +23,8 @@
 <meta name="twitter:image" content="https://brainova-app.netlify.app/assets/brainova-preview.jpg">
 
 <!-- FAVICON -->
-<link rel="icon" type="image/x-icon" href="/favicon.ico">
-<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="icon" type="image/x-icon" href="./favicon.ico">
+<link rel="apple-touch-icon" href="./apple-touch-icon.png">
 
 <!-- FONTS -->
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&amp;display=swap" rel="stylesheet">
@@ -1646,7 +1646,7 @@ const frame = document.getElementById('gameFrame');
 const btnMenu = document.getElementById('overlayMenu');
 
 function openGame(n) {
-  frame.src = `jeux${n}.html`;
+  frame.src = `./jeux${n}.html`;
   overlay.style.display = 'flex';
   showToast(`Lancement du jeu ${n}`, 'success');
   
