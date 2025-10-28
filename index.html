@@ -4,50 +4,276 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>BRAINOVA — 36 Jeux Intelligents Premium | Plateforme IA</title>
+<meta name="description" content="Développez votre intelligence avec BRAINOVA ! 36 jeux adaptatifs alimentés par l'IA. Abonnement premium 20€/an. Entraînement cérébral professionnel.">
+<meta name="keywords" content="jeux intelligence, entraînement cérébral, IA, premium, brainova, développement cognitif">
+<meta name="author" content="Brainova Team">
+<meta name="robots" content="index, follow">
+<link rel="icon" type="image/x-icon" href="./favicon.ico">
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://js.stripe.com/v3/"></script>
+
 <style>
 :root{
   --bg1:#0f0c29; --bg2:#302b63; --bg3:#24243e;
   --accent1:#00ffff; --accent2:#ff00ff; --neon:#ff568c; --gold:#ffd700;
   --success:#00ff88; --error:#ff6b6b; --warning:#ffaa00;
 }
-html,body{height:100%;margin:0;font-family:'Segoe UI',sans-serif;background:linear-gradient(135deg,var(--bg1),var(--bg2),var(--bg3));color:#fff;overflow-x:hidden;zoom:0.98;}
-header{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;background:rgba(0,0,0,0.8);backdrop-filter:blur(10px);gap:12px;border-bottom:1px solid rgba(0,255,255,0.08);position:relative;overflow:hidden}
-#logoText{font-family:'Orbitron',sans-serif;font-size:34px;font-weight:900;color:var(--accent1);text-shadow:0 0 10px var(--accent1),0 0 20px var(--accent2);display:flex;align-items:center;gap:10px;position:relative;z-index:2}
-.controls{display:flex;align-items:center;gap:12px;position:relative;z-index:2}
-#langWrap{position:relative}
-#langSelect{appearance:none;padding:8px 12px;border-radius:14px;border:2px solid var(--accent1);font-weight:700;background:linear-gradient(135deg,rgba(0,255,255,0.12),rgba(255,0,255,0.08));color:#fff;cursor:pointer;min-width:160px;box-shadow:0 8px 25px rgba(0,255,255,0.2);backdrop-filter:blur(6px)}
-#langWrap::after{content:"▾";position:absolute;right:12px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--accent1)}
-#authContainer{display:flex;gap:10px;align-items:center}
-.authBtn{background:linear-gradient(135deg,#667eea,#764ba2);border:none;padding:10px 18px;color:#fff;border-radius:18px;cursor:pointer;font-weight:700}
-#shareBtn,#premiumBtn{padding:8px 14px;border-radius:12px;border:none;font-weight:700;cursor:pointer;color:#001;margin-left:8px;box-shadow:0 6px 18px rgba(0,0,0,0.35)}
+
+html,body{
+  height:100%;
+  margin:0;
+  font-family:'Segoe UI',sans-serif;
+  background:linear-gradient(135deg,var(--bg1),var(--bg2),var(--bg3));
+  color:#fff;
+  overflow-x:hidden;
+  zoom:0.98;
+}
+
+/* Header */
+header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:14px 20px;
+  background:rgba(0,0,0,0.8);
+  backdrop-filter:blur(10px);
+  gap:12px;
+  border-bottom:1px solid rgba(0,255,255,0.1);
+  position:relative;
+}
+#logoText{
+  font-family:'Orbitron',sans-serif;
+  font-size:34px;
+  font-weight:900;
+  color:var(--accent1);
+  text-shadow:0 0 10px var(--accent1),0 0 20px var(--accent2);
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+#logoText .emoji{font-size:34px;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+
+.controls{display:flex;align-items:center;gap:12px;}
+#langSelect{
+  appearance:none;
+  padding:10px 14px;
+  border-radius:14px;
+  border:2px solid var(--accent1);
+  font-weight:700;
+  background:linear-gradient(135deg,rgba(0,255,255,0.12),rgba(255,0,255,0.08));
+  color:#fff;
+  cursor:pointer;
+  min-width:160px;
+  box-shadow:0 8px 25px rgba(0,255,255,0.2);
+  backdrop-filter:blur(6px);
+}
+.authBtn{
+  background:linear-gradient(135deg,#667eea,#764ba2);
+  border:none;
+  padding:10px 18px;
+  color:#fff;
+  border-radius:18px;
+  cursor:pointer;
+  font-weight:700;
+}
+#shareBtn,#premiumBtn{
+  padding:8px 14px;
+  border-radius:12px;
+  border:none;
+  font-weight:700;
+  cursor:pointer;
+  color:#001;
+  margin-left:8px;
+  box-shadow:0 6px 18px rgba(0,0,0,0.35);
+}
 #shareBtn{background:linear-gradient(90deg,#ffec00,#ff7800)}
 #premiumBtn{background:linear-gradient(90deg,#00ffea,#0078ff)}
-.intro{max-width:1100px;margin:20px auto;padding:18px;border-radius:12px;background:rgba(0,0,0,0.45);text-align:center}
-.intro h2{margin:6px 0;color:var(--gold);text-shadow:0 0 6px var(--gold)}
-.games-grid{max-width:1200px;margin:16px auto;padding:18px;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px;perspective:1200px}
-.card{background:rgba(255,255,255,0.03);border-radius:14px;padding:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;border:1px solid rgba(255,255,255,0.04);box-shadow:0 6px 22px rgba(0,0,0,0.4);transition:transform .35s,box-shadow .35s;position:relative;min-height:110px}
-.card:hover{transform:translateY(-6px)}
-.card .num{font-size:22px;font-weight:900;margin-bottom:6px;background:linear-gradient(90deg,var(--accent1),#8a2be2);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
-.card .title{font-size:16px;text-align:center;color:#fff}
-.card.locked{opacity:0.9;filter:grayscale(0.15)}
-.card.locked::after{content:"🔒";position:absolute;top:12px;right:12px;font-size:20px}
-#gameOverlay{display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.96);align-items:stretch}
-#overlayInner{position:relative;flex:1;display:flex;flex-direction:column}
-#gameFrame{width:100%;height:100%;border:0;display:block}
-.overlayTopLeft{position:absolute;top:16px;left:16px;z-index:10010;display:flex;gap:8px}
-.overlayBtn{background:#ff3860;border:none;color:#fff;padding:10px 14px;border-radius:11px;font-weight:700;cursor:pointer}
-.modal{display:none;position:fixed;inset:0;z-index:10020;background:rgba(0,0,0,0.85);align-items:center;justify-content:center}
-.modalCard{width:420px;background:linear-gradient(180deg,#fff,#f3f6ff);padding:18px;border-radius:12px;display:flex;flex-direction:column;gap:10px;color:#001;box-shadow:0 10px 40px rgba(0,0,0,0.25)}
-.modalCard input{padding:10px;border-radius:8px;border:1px solid rgba(0,0,0,0.08);background:#fff}
-.modalCard .btn{padding:10px;border-radius:8px;border:0;font-weight:800;cursor:pointer;background:linear-gradient(90deg,var(--accent1),var(--accent2));color:#001}
-.premium-modal .modalCard{background:linear-gradient(135deg,#1e3c72,#2a5298);color:#fff}
-.toast{position:fixed;top:24px;right:24px;padding:12px 16px;border-radius:8px;color:#fff;z-index:10100}
+/* Intro */
+.intro{
+  max-width:1200px;
+  margin:20px auto;
+  padding:25px;
+  border-radius:20px;
+  background:linear-gradient(135deg,rgba(0,0,0,0.7),rgba(0,20,40,0.8));
+  text-align:center;
+  border:2px solid rgba(0,255,255,0.2);
+  box-shadow:0 20px 50px rgba(0,0,0,0.5);
+}
+.intro h2{
+  margin:8px 0;
+  color:var(--gold);
+  text-shadow:0 0 15px var(--gold);
+  font-size:34px;
+  font-family:'Orbitron',sans-serif;
+  font-weight:900;
+}
+.intro p{
+  font-size:16px;
+  color:#ecf0f1;
+  margin-bottom:6px;
+  line-height:1.5;
+}
+
+/* Games grid */
+.games-grid{
+  max-width:1300px;
+  margin:25px auto;
+  padding:25px;
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:18px;
+  perspective:1200px;
+}
+.card{
+  background:linear-gradient(135deg,rgba(0,0,0,0.3),rgba(0,20,40,0.4));
+  border-radius:18px;
+  padding:22px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  border:2px solid rgba(255,255,255,0.06);
+  box-shadow:0 10px 30px rgba(0,0,0,0.5);
+  transition:all .35s;
+  position:relative;
+  min-height:110px;
+}
+.card:hover{
+  transform:translateY(-8px) rotateY(6deg);
+  box-shadow:0 20px 60px rgba(0,0,0,0.7);
+}
+.card .num{
+  font-size:26px;
+  font-weight:900;
+  margin-bottom:8px;
+  background:linear-gradient(90deg,var(--accent1),#8a2be2);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+.card .title{
+  font-size:15px;
+  text-align:center;
+  color:#fff;
+  font-weight:700;
+}
+.card.free{
+  border:3px solid var(--success);
+  box-shadow:0 0 30px var(--success), inset 0 0 15px rgba(0,255,170,0.08);
+}
+.card.locked{
+  border:3px solid var(--warning);
+  filter:grayscale(0.12);
+  opacity:0.9;
+}
+.card.premium::after{
+  content:"🌟";
+  position:absolute;
+  top:12px;
+  right:15px;
+  font-size:22px;
+}
+
+/* Overlay */
+#gameOverlay{
+  display:none;
+  position:fixed;
+  inset:0;
+  z-index:9999;
+  background:rgba(0,0,0,0.98);
+  align-items:stretch;
+}
+#overlayInner{position:relative;flex:1;display:flex;flex-direction:column;}
+#gameFrame{width:100%;height:100%;border:0;display:block;border-radius:8px;}
+.overlayTopLeft{
+  position:absolute;
+  top:18px;
+  left:18px;
+  z-index:10010;
+  display:flex;
+  gap:8px;
+}
+.overlayBtn{
+  background:linear-gradient(135deg,#ff3860,#ff1744);
+  border:none;
+  color:#fff;
+  padding:10px 14px;
+  border-radius:12px;
+  font-weight:700;
+  cursor:pointer;
+}
+/* Modals */
+.modal{
+  display:none;
+  position:fixed;
+  inset:0;
+  z-index:10020;
+  background:rgba(0,0,0,0.9);
+  align-items:center;
+  justify-content:center;
+  backdrop-filter:blur(5px);
+}
+.modalCard{
+  width:420px;
+  max-width:90vw;
+  background:linear-gradient(135deg,#1e3c72,#2a5298);
+  padding:20px;
+  border-radius:16px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  color:#fff;
+  box-shadow:0 25px 60px rgba(0,0,0,0.7);
+}
+.modalCard input{
+  padding:12px;
+  border-radius:10px;
+  border:1px solid rgba(255,255,255,0.08);
+  background:rgba(255,255,255,0.03);
+  color:#fff;
+}
+.modalCard .btn{
+  padding:12px;
+  border-radius:10px;
+  border:none;
+  font-weight:800;
+  cursor:pointer;
+  background:linear-gradient(90deg,var(--accent1),var(--accent2));
+  color:#001;
+}
+.premium-btn{
+  background:linear-gradient(135deg,var(--gold),#ffb347);
+  color:#1e3c72;
+  font-weight:bold;
+  padding:12px;
+  border-radius:12px;
+  border:none;
+  cursor:pointer;
+  font-size:16px;
+}
+
+/* Toasts */
+.toast{
+  position:fixed;
+  top:24px;
+  right:24px;
+  padding:12px 16px;
+  border-radius:8px;
+  color:#fff;
+  z-index:10100;
+}
 .toast.success{background:linear-gradient(90deg,var(--success),#00cc66)}
 .toast.error{background:linear-gradient(90deg,var(--error),#ff4757)}
-.toast.info{background:linear-gradient(90deg,#3498db,#9b59b6)}
-.hidden{display:none !important}
-@media(max-width:640px){#logoText{font-size:24px}.modalCard{width:92%}}
+
+/* Responsive */
+@media(max-width:768px){
+  #logoText{font-size:26px}
+  .games-grid{grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
+  .modalCard{width:92%}
+}
 </style>
 </head>
 <body>
@@ -55,34 +281,28 @@ header{display:flex;justify-content:space-between;align-items:center;padding:14p
 <header>
   <div id="logoText"><span class="emoji">🧠</span><span>Brainova</span></div>
   <div class="controls">
-    <div id="langWrap">
-      <select id="langSelect" aria-label="Langue">
-        <option value="fr">Français</option>
-        <option value="en">English</option>
-        <option value="ar">العربية</option>
-        <option value="es">Español</option>
-        <option value="de">Deutsch</option>
-        <option value="zh">中文</option>
-      </select>
-    </div>
-    <div id="authContainer">
-      <button class="authBtn hidden" id="loginBtn">Connexion</button>
-      <button class="authBtn hidden" id="signupBtn">Inscription</button>
-      <button id="premiumBtn">Premium</button>
-      <button id="shareBtn">Partager</button>
-    </div>
+    <select id="langSelect">
+      <option value="fr">🇫🇷 Français</option>
+      <option value="en">🇬🇧 English</option>
+      <option value="ar">🇸🇦 العربية</option>
+      <option value="es">🇪🇸 Español</option>
+      <option value="de">🇩🇪 Deutsch</option>
+      <option value="zh">🇨🇳 中文</option>
+    </select>
+    <button id="premiumBtn">Premium</button>
+    <button id="shareBtn">Partager</button>
   </div>
 </header>
 
 <section class="intro">
-  <h2 id="introTitle">🎮 Découvrez nos 36 Jeux Intelligents</h2>
-  <p id="introDesc">Entraînez votre cerveau avec 10 jeux gratuits et 26 premium verrouillés.</p>
+  <h2>🎮 Découvrez nos 36 Jeux Intelligents Premium</h2>
+  <p>Entraînez votre cerveau avec notre collection de jeux adaptatifs alimentés par l'IA. 10 gratuits + 26 Premium.</p>
 </section>
 
-<main class="games-grid" id="gamesGrid" aria-live="polite"></main>
+<main class="games-grid" id="gamesGrid"></main>
 
 <!-- Overlay -->
-<div id="gameOverlay" role="dialog" aria-modal="true">
+<div id="gameOverlay">
   <div id="overlayInner">
     <div class="overlayTopLeft">
       <button id="overlayMenu" class="overlayBtn">🔙 Retour</button>
@@ -91,79 +311,95 @@ header{display:flex;justify-content:space-between;align-items:center;padding:14p
   </div>
 </div>
 
-<!-- Modals (login, signup, premium) same as previous -->
-<!-- Login Modal -->
-<div id="loginModal" class="modal" aria-hidden="true">
-  <div class="modalCard">
-    <h3>Connexion</h3>
-    <input id="loginEmail" type="email" placeholder="Email">
-    <input id="loginPassword" type="password" placeholder="Mot de passe">
-    <button class="btn" id="loginSubmit">Se connecter</button>
-    <button class="btn" id="loginCancel" style="background:transparent;color:#001;border:1px solid rgba(0,0,0,0.08)">Annuler</button>
-  </div>
-</div>
-
-<div id="signupModal" class="modal" aria-hidden="true">
-  <div class="modalCard">
-    <h3>Inscription</h3>
-    <input id="signupName" type="text" placeholder="Nom complet">
-    <input id="signupEmail" type="email" placeholder="Email">
-    <input id="signupPassword" type="password" placeholder="Mot de passe">
-    <button class="btn" id="signupSubmit">S'inscrire</button>
-    <button class="btn" id="signupCancel" style="background:transparent;color:#001;border:1px solid rgba(0,0,0,0.08)">Annuler</button>
-  </div>
-</div>
-
-<div id="premiumModal" class="modal premium-modal" aria-hidden="true">
+<!-- Premium Modal -->
+<div id="premiumModal" class="modal">
   <div class="modalCard">
     <h3>Abonnement Premium</h3>
-    <p>Débloquez les 26 jeux premium pour seulement 20 EUR / an.</p>
-    <div style="display:flex;gap:8px;justify-content:center;margin-top:6px">
-      <button id="buyPremium" class="btn">Souscrire maintenant</button>
-      <button id="premiumCancel" class="btn" style="background:transparent;color:#fff;border:1px solid rgba(255,255,255,0.12)">Annuler</button>
-    </div>
+    <p>Débloquez les 26 jeux Premium pour 20€/an via Stripe.</p>
+    <button id="premiumSubscribeBtn" class="premium-btn">💳 Souscrire</button>
+    <button id="premiumCancel" class="btn" style="background:transparent;color:#fff;border:1px solid #fff">Annuler</button>
   </div>
 </div>
 
 <div id="toastArea"></div>
-
-<script src="https://js.stripe.com/v3/"></script>
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
-const firebaseConfig={apiKey:"AIzaSyAjnpgNwDdGtb46XRCvT_cU7AAU-25zw1U",authDomain:"brainova-c0295.firebaseapp.com",projectId:"brainova-c0295",storageBucket:"brainova-c0295.firebasestorage.app",messagingSenderId:"437705478313",appId:"1:437705478313:web:8b7a4c97b5d80e6d49d9b8"};
-const app=initializeApp(firebaseConfig);
-const auth=getAuth(app);
+const firebaseConfig={
+  apiKey:"AIzaSyAjnpgNwDdGtb46XRCvT_cU7AAU-25zw1U",
+  authDomain:"brainova-c0295.firebaseapp.com",
+  projectId:"brainova-c0295",
+  storageBucket:"brainova-c0295.firebasestorage.app",
+  messagingSenderId:"437705478313",
+  appId:"1:437705478313:web:8b7a4c97b5d80e6d49d9b8"
+};
+const app=firebase.initializeApp(firebaseConfig);
+const auth=firebase.auth();
 
 const GRID=document.getElementById('gamesGrid');
-function renderGrid(){GRID.innerHTML='';for(let i=1;i<=36;i++){const c=document.createElement('div');c.className='card';if(i>10)c.classList.add('locked');c.innerHTML=`<div class="num">${i}</div><div class="title">Jeu ${i}</div>`;c.addEventListener('click',()=>onGameClick(i));GRID.appendChild(c);}}
-function openGame(n){document.getElementById('gameFrame').src=`jeux${n}.html`;document.getElementById('gameOverlay').style.display='flex';}
-function closeOverlay(){document.getElementById('gameOverlay').style.display='none';document.getElementById('gameFrame').src='about:blank';}
-document.getElementById('overlayMenu').addEventListener('click',closeOverlay);
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeOverlay();});
+const TITLES=[
+  'Quantum Tetris 2077','Memory Quantique','Neural Puzzle Master','Quantum Chess','Jeux de Dames',
+  'Pac-Man','Simon Says','Speed Challenge','Cyber Checker','Demo Playground',
+  'Quantum Monopoly','Neural Poker','Blackjack Quantum','Solitaire Fusion','Mystic Forest Quest',
+  'Enigma Hunter','Neural Racing','Cyber Shooter','Quantum Dots','Neural Rhythm',
+  'Cyber Pinball','Quantum Pipes','Neural Slots','Cyber Darts','Quantum Bubbles',
+  'Neural Dice','Cyber Pool','Quantum Tiles','Neural Trivia','Cyber Asteroids',
+  'Quantum Crystals','Neural Infinity','Algorithme Visuel','Physique Quantique','Test QI',
+  'Conscience Artificielle'
+];
+
+function renderGrid(){
+  GRID.innerHTML='';
+  for(let i=1;i<=36;i++){
+    const c=document.createElement('div');
+    c.className='card';
+    if(i<=10)c.classList.add('free'); else c.classList.add('locked');
+    c.innerHTML=`<div class="num">${i}</div><div class="title">${TITLES[i-1]}</div>`;
+    c.onclick=()=>onGameClick(i);
+    GRID.appendChild(c);
+  }
+}
+function openGame(n){
+  document.getElementById('gameFrame').src=`jeux${n}.html`;
+  document.getElementById('gameOverlay').style.display='flex';
+}
+function closeOverlay(){
+  document.getElementById('gameOverlay').style.display='none';
+  document.getElementById('gameFrame').src='about:blank';
+}
+document.getElementById('overlayMenu').onclick=closeOverlay;
 
 function isPremium(){return localStorage.getItem('brainova_premium')==='true';}
 function setPremium(v){localStorage.setItem('brainova_premium',v?'true':'false');updateUI();}
-function updateUI(){const p=isPremium();document.querySelectorAll('.card').forEach((c,i)=>{if(i>=10)c.classList.toggle('locked',!p);});document.getElementById('loginBtn').classList.toggle('hidden',!p);document.getElementById('signupBtn').classList.toggle('hidden',!p);document.getElementById('shareBtn').classList.toggle('hidden',p);}
-function onGameClick(n){if(n>10&&!isPremium()){document.getElementById('premiumModal').style.display='flex';return;}openGame(n);}
-renderGrid();updateUI();
+function updateUI(){
+  const p=isPremium();
+  document.querySelectorAll('.card').forEach((c,i)=>{if(i>=10)c.classList.toggle('locked',!p);});
+}
+function onGameClick(n){
+  if(n>10&&!isPremium()){
+    document.getElementById('premiumModal').style.display='flex';
+    return;
+  }
+  openGame(n);
+}
+renderGrid();
+updateUI();
 
-// premium buttons
 document.getElementById('premiumBtn').onclick=()=>document.getElementById('premiumModal').style.display='flex';
 document.getElementById('premiumCancel').onclick=()=>document.getElementById('premiumModal').style.display='none';
-document.getElementById('buyPremium').onclick=()=>{window.open("https://buy.stripe.com/cNi8wR7IC77o54icy49EI01","_blank");setPremium(true);document.getElementById('premiumModal').style.display='none';};
+document.getElementById('premiumSubscribeBtn').onclick=()=>{
+  window.open("https://buy.stripe.com/cNi8wR7IC77o54icy49EI01","_blank");
+  setPremium(true);
+  document.getElementById('premiumModal').style.display='none';
+  alert('✅ Premium activé localement !');
+};
 
-// share
-document.getElementById('shareBtn').onclick=()=>{if(navigator.share){navigator.share({title:'Brainova',text:'Découvrez Brainova et ses 36 jeux intelligents!',url:window.location.href});}else{navigator.clipboard.writeText(window.location.href);alert('Lien copié');}};
-
-// auth modals
-const loginM=document.getElementById('loginModal'),signupM=document.getElementById('signupModal');
-document.getElementById('loginBtn').onclick=()=>loginM.style.display='flex';
-document.getElementById('signupBtn').onclick=()=>signupM.style.display='flex';
-document.getElementById('loginCancel').onclick=()=>loginM.style.display='none';
-document.getElementById('signupCancel').onclick=()=>signupM.style.display='none';
-document.getElementById('loginSubmit').onclick=async()=>{const e=document.getElementById('loginEmail').value,p=document.getElementById('loginPassword').value;try{await signInWithEmailAndPassword(auth,e,p);loginM.style.display='none';alert('Connexion réussie');}catch(err){alert('Erreur: '+err.message);}}
-document.getElementById('signupSubmit').onclick=async()=>{const n=document.getElementById('signupName').value,e=document.getElementById('signupEmail').value,p=document.getElementById('signupPassword').value;try{const uc=await createUserWithEmailAndPassword(auth,e,p);await updateProfile(uc.user,{displayName:n});signupM.style.display='none';alert('Inscription réussie');}catch(err){alert('Erreur: '+err.message);}}
+document.getElementById('shareBtn').onclick=()=>{
+  if(navigator.share){
+    navigator.share({title:'Brainova',text:'Découvrez Brainova et ses 36 jeux intelligents !',url:window.location.href});
+  }else{
+    navigator.clipboard.writeText(window.location.href);
+    alert('Lien copié dans le presse-papier');
+  }
+};
 </script>
 </body>
 </html>
