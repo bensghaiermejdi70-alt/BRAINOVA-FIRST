@@ -1,32 +1,52 @@
-[build]
-  publish = "."
-  functions = "netlify/functions"
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>BRAINOVA — Plateforme 36 jeux</title>
+  <style>
+    #gameOverlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(0,0,0,0.8);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    #gameFrame {
+      width: 80vw;
+      height: 80vh;
+      border: none;
+      background: #fff;
+    }
+    #closeBtn {
+      position: absolute;
+      top: 20px; right: 20px;
+      z-index: 1100;
+      font-size: 1.2em;
+    }
+  </style>
+</head>
+<body>
+  <h1>Bienvenue sur Brainova</h1>
+  <button onclick="openGame(1)">Ouvrir Jeu 1</button>
+  <button onclick="openGame(2)">Ouvrir Jeu 2</button>
+  <!-- Ajoute d'autres boutons si besoin -->
 
-[build.environment]
-  NODE_VERSION = "18"
+  <div id="gameOverlay">
+    <button id="closeBtn" onclick="closeGame()">Fermer</button>
+    <iframe id="gameFrame" allow="fullscreen; autoplay"></iframe>
+  </div>
 
-[[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/:splat"
-  status = 200
-
-[[headers]]
-  for = "/*"
-  [headers.values]
-    X-Frame-Options = "DENY"
-    X-XSS-Protection = "1; mode=block"
-    X-Content-Type-Options = "nosniff"
-    Referrer-Policy = "strict-origin-when-cross-origin"
-    Content-Security-Policy = "default-src 'self' 'unsafe-inline' 'unsafe-eval' *.stripe.com *.googleapis.com *.firebase.com *.firebaseapp.com data: blob:; img-src 'self' data: blob: *; media-src 'self' data: blob: *;"
-
-[functions]
-  directory = "netlify/functions"
-  node_bundler = "esbuild"
-
-[[edge_functions]]
-  function = "stripe-webhook"
-  path = "/api/stripe-webhook"
-
-[dev]
-  framework = "#static"
-  targetPort = 8888
+  <script>
+    function openGame(n) {
+      document.getElementById('gameFrame').src = `jeux${n}.html`;
+      document.getElementById('gameOverlay').style.display = 'flex';
+    }
+    function closeGame() {
+      document.getElementById('gameFrame').src = 'about:blank';
+      document.getElementById('gameOverlay').style.display = 'none';
+    }
+  </script>
+</body>
+</html>
