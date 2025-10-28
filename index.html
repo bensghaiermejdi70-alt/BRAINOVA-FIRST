@@ -76,7 +76,7 @@ header{display:flex;justify-content:space-between;align-items:center;padding:14p
 
 <section class="intro">
   <h2 id="introTitle">🎮 Découvrez nos 36 Jeux Intelligents</h2>
-  <p id="introDesc">Entraînez votre cerveau avec notre sélection : 10 jeux gratuits et 26 jeux premium verrouillés.</p>
+  <p id="introDesc">Entraînez votre cerveau avec 10 jeux gratuits et 26 premium verrouillés.</p>
 </section>
 
 <main class="games-grid" id="gamesGrid" aria-live="polite"></main>
@@ -91,7 +91,8 @@ header{display:flex;justify-content:space-between;align-items:center;padding:14p
   </div>
 </div>
 
-<!-- Login Modal (only usable after premium) -->
+<!-- Modals (login, signup, premium) same as previous -->
+<!-- Login Modal -->
 <div id="loginModal" class="modal" aria-hidden="true">
   <div class="modalCard">
     <h3>Connexion</h3>
@@ -102,7 +103,6 @@ header{display:flex;justify-content:space-between;align-items:center;padding:14p
   </div>
 </div>
 
-<!-- Signup Modal (only usable after premium) -->
 <div id="signupModal" class="modal" aria-hidden="true">
   <div class="modalCard">
     <h3>Inscription</h3>
@@ -114,11 +114,10 @@ header{display:flex;justify-content:space-between;align-items:center;padding:14p
   </div>
 </div>
 
-<!-- Premium Modal -->
 <div id="premiumModal" class="modal premium-modal" aria-hidden="true">
   <div class="modalCard">
     <h3>Abonnement Premium</h3>
-    <p>Débloquez les 26 jeux premium — 20 EUR / an.</p>
+    <p>Débloquez les 26 jeux premium pour seulement 20 EUR / an.</p>
     <div style="display:flex;gap:8px;justify-content:center;margin-top:6px">
       <button id="buyPremium" class="btn">Souscrire maintenant</button>
       <button id="premiumCancel" class="btn" style="background:transparent;color:#fff;border:1px solid rgba(255,255,255,0.12)">Annuler</button>
@@ -128,251 +127,43 @@ header{display:flex;justify-content:space-between;align-items:center;padding:14p
 
 <div id="toastArea"></div>
 
-<!-- Stripe JS -->
 <script src="https://js.stripe.com/v3/"></script>
-
 <script type="module">
-// ---- TRANSLATIONS ----
-const TRANSLATIONS = {
-  fr:{introTitle:"🎮 Découvrez nos 36 Jeux Intelligents",introDesc:"10 jeux gratuits et 26 jeux premium verrouillés",overlayBack:"🔙 Retour",
-      games:["Quantum Tetris 2077","Memory Quantique","Neural Puzzle Master","Quantum Chess","Jeux de Dames","Pac-Man","Simon Says","Speed Challenge","Cyber Checker","Demo Playground","Quantum Monopoly","Neural Poker","Blackjack Quantum","Solitaire Fusion","Mystic Forest Quest","Enigma Hunter","Neural Racing","Cyber Shooter","Quantum Dots","Neural Rhythm","Cyber Pinball","Quantum Pipes","Neural Slots","Cyber Darts","Quantum Bubbles","Neural Dice","Cyber Pool","Quantum Tiles","Neural Trivia","Cyber Asteroids","Quantum Crystals","Neural Infinity","Algorithme Visuel","Physique Quantique","Test QI","Conscience Artificielle"]},
-  en:{introTitle:"🎮 Discover our 36 Smart Games",introDesc:"10 free games and 26 premium locked games",overlayBack:"🔙 Back",
-      games:["Quantum Tetris 2077","Quantum Memory","Neural Puzzle Master","Quantum Chess","Checkers Game","Pac-Man","Simon Says","Speed Challenge","Cyber Checker","Demo Playground","Quantum Monopoly","Neural Poker","Quantum Blackjack","Fusion Solitaire","Mystic Forest Quest","Enigma Hunter","Neural Racing","Cyber Shooter","Quantum Dots","Neural Rhythm","Cyber Pinball","Quantum Pipes","Neural Slots","Cyber Darts","Quantum Bubbles","Neural Dice","Cyber Pool","Quantum Tiles","Neural Trivia","Cyber Asteroids","Quantum Crystals","Neural Infinity","Visual Algorithm","Quantum Physics","IQ Test","Artificial Consciousness"]},
-  ar:{introTitle:"🎮 اكتشف 36 لعبة ذكية",introDesc:"10 ألعاب مجانية و26 لعبة مميزة مقفلة",overlayBack:"🔙 رجوع",games:[]},
-  es:{introTitle:"🎮 Descubre nuestros 36 Juegos Inteligentes",introDesc:"10 juegos gratis y 26 premium bloqueados",overlayBack:"🔙 Volver",games:[]},
-  de:{introTitle:"🎮 Entdecken Sie unsere 36 intelligenten Spiele",introDesc:"10 kostenlose Spiele und 26 Premium-Spiele gesperrt",overlayBack:"🔙 Zurück",games:[]},
-  zh:{introTitle:"🎮 探索我们的36款智能游戏",introDesc:"10个免费游戏和26个付费锁定游戏",overlayBack:"🔙 返回",games:[]}
-};
-
-// ---- UI Helpers ----
-function showToast(msg,type='info'){
-  const area=document.getElementById('toastArea');
-  const t=document.createElement('div');
-  t.className=`toast ${type}`;
-  t.textContent=msg;
-  area.appendChild(t);
-  setTimeout(()=> t.remove(),4000);
-}
-
-// ---- Game Grid ----
-const GRID = document.getElementById('gamesGrid');
-function renderGrid(lang='fr'){
-  GRID.innerHTML='';
-  const t = TRANSLATIONS[lang] || TRANSLATIONS['fr'];
-  for(let i=1;i<=36;i++){
-    const card = document.createElement('div');
-    card.className = 'card';
-    const titleText = t.games[i-1] || `Jeu ${i}`;
-    card.innerHTML = `<div class="num">${i}</div><div class="title">${titleText}</div>`;
-    // first 10 free
-    if(i>10){
-      card.classList.add('locked');
-    }
-    card.addEventListener('click', ()=>{
-      onGameClick(i);
-    });
-    GRID.appendChild(card);
-  }
-}
-
-// Try possible paths for iframe src
-function resolveGamePath(n){
-  const candidates = [
-    `./jeux/jeux${n}.html`,
-    `./jeux${n}.html`,
-    `./games/jeux${n}.html`,
-    `./jeux/Jeux${n}.html`,
-    `./jeux/Jeux${n}.html`
-  ];
-  return candidates;
-}
-
-const overlay = document.getElementById('gameOverlay');
-const frame = document.getElementById('gameFrame');
-const overlayMenu = document.getElementById('overlayMenu');
-
-function openGamePath(n){
-  const paths = resolveGamePath(n);
-  let loaded = false;
-  // try sequentially by setting src and listening for load/error
-  // We'll set first candidate; Netlify will serve 404 in iframe if missing, so fallback not perfect.
-  frame.src = paths[0];
-  overlay.style.display='flex';
-  setTimeout(()=> {
-    const el = document.documentElement;
-    if(el.requestFullscreen) el.requestFullscreen().catch(()=>{});
-    else if(el.webkitRequestFullscreen) el.webkitRequestFullscreen();
-  }, 120);
-}
-
-function closeOverlay(){
-  frame.src='about:blank';
-  overlay.style.display='none';
-  try{ if(document.exitFullscreen) document.exitFullscreen(); }catch(e){}
-}
-
-overlayMenu && overlayMenu.addEventListener('click', closeOverlay);
-document.addEventListener('keydown',(e)=>{ if(e.key==='Escape' && overlay.style.display==='flex') closeOverlay(); });
-
-// ---- Language ----
-const langSelect = document.getElementById('langSelect');
-langSelect.addEventListener('change', ()=> {
-  applyLang(langSelect.value);
-});
-function applyLang(lang){
-  const t = TRANSLATIONS[lang] || TRANSLATIONS['fr'];
-  document.getElementById('introTitle').textContent = t.introTitle;
-  document.getElementById('introDesc').textContent = t.introDesc;
-  renderGrid(lang);
-}
-(function initLang(){
-  const saved = localStorage.getItem('brainova_lang');
-  const browser = (navigator.language||navigator.userLanguage||'fr').slice(0,2);
-  const start = saved || (['fr','en','ar','es','de','zh'].includes(browser)?browser:'fr');
-  langSelect.value = start;
-  applyLang(start);
-})();
-
-// ---- Firebase (v12 modular) ----
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
-const firebaseConfig = { apiKey:"AIzaSyAjnpgNwDdGtb46XRCvT_cU7AAU-25zw1U", authDomain:"brainova-c0295.firebaseapp.com", projectId:"brainova-c0295", storageBucket:"brainova-c0295.firebasestorage.app", messagingSenderId:"437705478313", appId:"1:437705478313:web:8b7a4c97b5d80e6d49d9b8", measurementId:"G-79M4HWKQ35" };
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+const firebaseConfig={apiKey:"AIzaSyAjnpgNwDdGtb46XRCvT_cU7AAU-25zw1U",authDomain:"brainova-c0295.firebaseapp.com",projectId:"brainova-c0295",storageBucket:"brainova-c0295.firebasestorage.app",messagingSenderId:"437705478313",appId:"1:437705478313:web:8b7a4c97b5d80e6d49d9b8"};
+const app=initializeApp(firebaseConfig);
+const auth=getAuth(app);
 
-// ---- UI elements ----
-const loginBtn = document.getElementById('loginBtn');
-const signupBtn = document.getElementById('signupBtn');
-const shareBtn = document.getElementById('shareBtn');
-const premiumBtn = document.getElementById('premiumBtn');
-const premiumModal = document.getElementById('premiumModal');
-const buyPremiumBtn = document.getElementById('buyPremium');
-const premiumCancel = document.getElementById('premiumCancel');
-const loginModal = document.getElementById('loginModal');
-const signupModal = document.getElementById('signupModal');
-const loginCancel = document.getElementById('loginCancel');
-const signupCancel = document.getElementById('signupCancel');
-const loginSubmit = document.getElementById('loginSubmit');
-const signupSubmit = document.getElementById('signupSubmit');
+const GRID=document.getElementById('gamesGrid');
+function renderGrid(){GRID.innerHTML='';for(let i=1;i<=36;i++){const c=document.createElement('div');c.className='card';if(i>10)c.classList.add('locked');c.innerHTML=`<div class="num">${i}</div><div class="title">Jeu ${i}</div>`;c.addEventListener('click',()=>onGameClick(i));GRID.appendChild(c);}}
+function openGame(n){document.getElementById('gameFrame').src=`jeux${n}.html`;document.getElementById('gameOverlay').style.display='flex';}
+function closeOverlay(){document.getElementById('gameOverlay').style.display='none';document.getElementById('gameFrame').src='about:blank';}
+document.getElementById('overlayMenu').addEventListener('click',closeOverlay);
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeOverlay();});
 
-// ---- PREMIUM state management ----
-function isPremiumActive(){
-  return localStorage.getItem('brainova_premium') === 'true';
-}
-function setPremiumActive(val){
-  localStorage.setItem('brainova_premium', val ? 'true' : 'false');
-  updateUIForPremium();
-}
-function updateUIForPremium(){
-  const premium = isPremiumActive();
-  // show/hide auth buttons
-  if(premium){
-    loginBtn.classList.remove('hidden');
-    signupBtn.classList.remove('hidden');
-    shareBtn.classList.add('hidden'); // hide share when premium
-    // unlock all games visually and functionally
-    document.querySelectorAll('.card').forEach((c, idx)=>{
-      if(c.classList.contains('locked')) c.classList.remove('locked');
-    });
-  }else{
-    loginBtn.classList.add('hidden');
-    signupBtn.classList.add('hidden');
-    shareBtn.classList.remove('hidden');
-    // lock premium games
-    document.querySelectorAll('.card').forEach((c, idx)=>{
-      const i = idx+1;
-      if(i>10 && !c.classList.contains('locked')) c.classList.add('locked');
-    });
-  }
-}
+function isPremium(){return localStorage.getItem('brainova_premium')==='true';}
+function setPremium(v){localStorage.setItem('brainova_premium',v?'true':'false');updateUI();}
+function updateUI(){const p=isPremium();document.querySelectorAll('.card').forEach((c,i)=>{if(i>=10)c.classList.toggle('locked',!p);});document.getElementById('loginBtn').classList.toggle('hidden',!p);document.getElementById('signupBtn').classList.toggle('hidden',!p);document.getElementById('shareBtn').classList.toggle('hidden',p);}
+function onGameClick(n){if(n>10&&!isPremium()){document.getElementById('premiumModal').style.display='flex';return;}openGame(n);}
+renderGrid();updateUI();
 
-// initial UI state
-document.addEventListener('DOMContentLoaded', ()=>{
-  renderGrid(localStorage.getItem('brainova_lang')||'fr');
-  updateUIForPremium();
-});
+// premium buttons
+document.getElementById('premiumBtn').onclick=()=>document.getElementById('premiumModal').style.display='flex';
+document.getElementById('premiumCancel').onclick=()=>document.getElementById('premiumModal').style.display='none';
+document.getElementById('buyPremium').onclick=()=>{window.open("https://buy.stripe.com/cNi8wR7IC77o54icy49EI01","_blank");setPremium(true);document.getElementById('premiumModal').style.display='none';};
 
-// ---- Game click behavior ----
-function onGameClick(n){
-  if(n>10 && !isPremiumActive()){
-    // show premium modal to subscribe
-    premiumModal.style.display='flex';
-    return;
-  }
-  // open game
-  openGamePath(n);
-}
+// share
+document.getElementById('shareBtn').onclick=()=>{if(navigator.share){navigator.share({title:'Brainova',text:'Découvrez Brainova et ses 36 jeux intelligents!',url:window.location.href});}else{navigator.clipboard.writeText(window.location.href);alert('Lien copié');}};
 
-// ---- Premium modal controls ----
-premiumBtn.addEventListener('click', ()=> premiumModal.style.display='flex');
-premiumCancel.addEventListener('click', ()=> premiumModal.style.display='none');
-buyPremiumBtn.addEventListener('click', ()=> {
-  // open Stripe link (as requested keep the current link)
-  window.open("https://buy.stripe.com/cNi8wR7IC77o54icy49EI01","_blank");
-  // set premium locally — in production you'd verify webhook from Stripe
-  setTimeout(()=> {
-    setPremiumActive(true);
-    showToast('Abonnement détecté — accès Premium activé', 'success');
-    premiumModal.style.display='none';
-    // Optionally send an email via your backend or EmailJS (not configured here)
-  }, 800);
-});
-
-// ---- Share button ----
-shareBtn.addEventListener('click', ()=>{
-  if(navigator.share){
-    navigator.share({title:'Brainova',text:'Découvrez Brainova et ses 36 jeux intelligents!',url:window.location.href});
-  }else{
-    // fallback copy url
-    navigator.clipboard?.writeText(window.location.href).then(()=> showToast('URL copiée dans le presse-papiers','info'), ()=> showToast('Partage non supporté','error'));
-  }
-});
-
-// ---- Auth modals (only available when premium) ----
-loginBtn.addEventListener('click', ()=> { if(isPremiumActive()) loginModal.style.display='flex'; else showToast('Abonnement requis pour se connecter','info'); });
-signupBtn.addEventListener('click', ()=> { if(isPremiumActive()) signupModal.style.display='flex'; else showToast('Abonnement requis pour s\'inscrire','info'); });
-
-loginCancel.addEventListener('click', ()=> loginModal.style.display='none');
-signupCancel.addEventListener('click', ()=> signupModal.style.display='none');
-
-loginSubmit.addEventListener('click', async ()=>{
-  const email = document.getElementById('loginEmail').value.trim();
-  const pass = document.getElementById('loginPassword').value;
-  if(!email||!pass){ showToast('Remplissez email et mot de passe','error'); return; }
-  try{
-    await signInWithEmailAndPassword(auth,email,pass);
-    loginModal.style.display='none';
-    showToast('Connexion réussie','success');
-  }catch(err){
-    console.error(err);
-    showToast('Erreur connexion: '+(err.message||err.code),'error');
-  }
-});
-
-signupSubmit.addEventListener('click', async ()=>{
-  const name = document.getElementById('signupName').value.trim();
-  const email = document.getElementById('signupEmail').value.trim();
-  const pass = document.getElementById('signupPassword').value;
-  if(!name||!email||!pass){ showToast('Remplissez tous les champs','error'); return; }
-  try{
-    const userCred = await createUserWithEmailAndPassword(auth,email,pass);
-    await updateProfile(userCred.user, { displayName: name });
-    signupModal.style.display='none';
-    showToast('Inscription réussie','success');
-  }catch(err){
-    console.error(err);
-    showToast('Erreur inscription: '+(err.message||err.code),'error');
-  }
-});
-
-// Accessibility: close modals on Escape
-document.addEventListener('keydown',(e)=>{
-  if(e.key==='Escape'){
-    document.querySelectorAll('.modal').forEach(m=> m.style.display='none');
-    closeOverlay();
-  }
-});
+// auth modals
+const loginM=document.getElementById('loginModal'),signupM=document.getElementById('signupModal');
+document.getElementById('loginBtn').onclick=()=>loginM.style.display='flex';
+document.getElementById('signupBtn').onclick=()=>signupM.style.display='flex';
+document.getElementById('loginCancel').onclick=()=>loginM.style.display='none';
+document.getElementById('signupCancel').onclick=()=>signupM.style.display='none';
+document.getElementById('loginSubmit').onclick=async()=>{const e=document.getElementById('loginEmail').value,p=document.getElementById('loginPassword').value;try{await signInWithEmailAndPassword(auth,e,p);loginM.style.display='none';alert('Connexion réussie');}catch(err){alert('Erreur: '+err.message);}}
+document.getElementById('signupSubmit').onclick=async()=>{const n=document.getElementById('signupName').value,e=document.getElementById('signupEmail').value,p=document.getElementById('signupPassword').value;try{const uc=await createUserWithEmailAndPassword(auth,e,p);await updateProfile(uc.user,{displayName:n});signupM.style.display='none';alert('Inscription réussie');}catch(err){alert('Erreur: '+err.message);}}
 </script>
-
 </body>
 </html>
