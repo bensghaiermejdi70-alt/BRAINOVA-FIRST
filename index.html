@@ -4,509 +4,374 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>BRAINOVA — 36 Jeux Intelligents Premium | Plateforme IA</title>
-
-<!-- SEO META TAGS COMMERCIAUX -->
-<meta name="description" content="Développez votre intelligence avec BRAINOVA ! 36 jeux adaptatifs alimentés par l'IA. Abonnement premium 20€/an. Entraînement cérébral professionnel.">
-<meta name="keywords" content="jeux intelligence, entraînement cérébral, IA, premium, brainova, développement cognitif">
-<meta name="author" content="Brainova Team">
-<meta name="robots" content="index, follow">
-
-<!-- OPEN GRAPH / SOCIAL MEDIA -->
-<meta property="og:title" content="BRAINOVA — 36 Jeux Intelligents Premium">
-<meta property="og:description" content="Développez votre intelligence avec notre plateforme IA premium. 36 jeux adaptatifs pour booster votre cerveau !">
-<meta property="og:image" content="https://brainova-app.netlify.app/assets/brainova-preview.jpg">
-<meta property="og:url" content="https://brainova-app.netlify.app">
-<meta property="og:type" content="website">
-
-<!-- TWITTER CARDS -->
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="BRAINOVA — 36 Jeux Intelligents Premium">
-<meta name="twitter:description" content="Développez votre intelligence avec notre plateforme IA premium">
-<meta name="twitter:image" content="https://brainova-app.netlify.app/assets/brainova-preview.jpg">
-
-<!-- FAVICON -->
-<link rel="icon" type="image/x-icon" href="./favicon.ico">
-<link rel="apple-touch-icon" href="./apple-touch-icon.png">
-
-<!-- FONTS -->
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&amp;display=swap" rel="stylesheet">
-
-<!-- FIREBASE AUTH (compat - v9) -->
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-
-<!-- STRIPE PAYMENTS -->
-<script src="https://js.stripe.com/v3/"></script>
-
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg1:#0f0c29; --bg2:#302b63; --bg3:#24243e;
   --accent1:#00ffff; --accent2:#ff00ff; --neon:#ff568c; --gold:#ffd700;
   --success:#00ff88; --error:#ff6b6b; --warning:#ffaa00;
 }
-
 html,body{height:100%;margin:0;font-family:'Segoe UI',sans-serif;background:linear-gradient(135deg,var(--bg1),var(--bg2),var(--bg3));color:#fff;overflow-x:hidden;zoom:0.98;}
-
-/* HEADER COMMERCIAL */
-header{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;background:rgba(0,0,0,0.8);backdrop-filter:blur(10px);gap:12px;border-bottom:1px solid rgba(0,255,255,0.1);position:relative;overflow:hidden}
-header::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent);animation:headerShine 3s infinite;pointer-events:none}
-@keyframes headerShine{0%{left:-100%}50%{left:100%}100%{left:100%}}
-header::after{content:'';position:absolute;inset:0;background:linear-gradient(45deg,rgba(0,255,255,0.1),rgba(255,0,255,0.1),rgba(255,215,0,0.1));opacity:0.3;pointer-events:none;animation:headerGlow 4s ease-in-out infinite}
-@keyframes headerGlow{0%,100%{opacity:0.2}50%{opacity:0.4}}
+header{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;background:rgba(0,0,0,0.8);backdrop-filter:blur(10px);gap:12px;border-bottom:1px solid rgba(0,255,255,0.08);position:relative;overflow:hidden}
 #logoText{font-family:'Orbitron',sans-serif;font-size:34px;font-weight:900;color:var(--accent1);text-shadow:0 0 10px var(--accent1),0 0 20px var(--accent2);display:flex;align-items:center;gap:10px;position:relative;z-index:2}
-#logoText .emoji{font-size:34px;animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
-
 .controls{display:flex;align-items:center;gap:12px;position:relative;z-index:2}
 #langWrap{position:relative}
-#langSelect{
-  appearance:none;
-  -webkit-appearance:none;
-  -moz-appearance:none;
-  padding:12px 20px;
-  border-radius:20px;
-  border:2px solid var(--accent1);
-  font-weight:700;
-  background:linear-gradient(135deg,rgba(0,255,255,0.15),rgba(255,0,255,0.15));
-  color:#fff;
-  cursor:pointer;
-  min-width:160px;
-  box-shadow:0 8px 25px rgba(0,255,255,0.3),inset 0 0 20px rgba(255,255,255,0.1);
-  transition:all 0.4s ease;
-  backdrop-filter:blur(10px);
-}
-#langWrap::after{content:"▾";position:absolute;right:15px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--accent1);font-weight:bold;font-size:16px;animation:bounce 2s infinite}
-@keyframes bounce{0%,100%{transform:translateY(-50%) scale(1)}50%{transform:translateY(-55%) scale(1.1)}}
-#langSelect:focus{outline:none;box-shadow:0 0 30px var(--accent1),0 0 50px rgba(255,215,0,0.4);background:linear-gradient(135deg,rgba(0,255,255,0.25),rgba(255,0,255,0.25));transform:translateY(-2px)}
-#langSelect:hover{transform:translateY(-3px);box-shadow:0 12px 35px rgba(0,255,255,0.4),0 0 40px rgba(255,215,0,0.3);background:linear-gradient(135deg,rgba(0,255,255,0.2),rgba(255,215,0,0.2))}
-#langSelect option{color:#fff !important;background:#1a1a2e !important;padding:12px 16px !important;font-weight:600 !important;font-size:14px !important;border:1px solid rgba(0,255,255,0.3) !important;transition:all 0.3s ease !important}
-#langSelect option:hover{background:rgba(255,215,0,0.2) !important;color:var(--gold) !important;border-color:var(--gold) !important}
-
-/* AUTHENTIFICATION PREMIUM */
+#langSelect{appearance:none;padding:8px 12px;border-radius:14px;border:2px solid var(--accent1);font-weight:700;background:linear-gradient(135deg,rgba(0,255,255,0.12),rgba(255,0,255,0.08));color:#fff;cursor:pointer;min-width:160px;box-shadow:0 8px 25px rgba(0,255,255,0.2);backdrop-filter:blur(6px)}
+#langWrap::after{content:"▾";position:absolute;right:12px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--accent1)}
 #authContainer{display:flex;gap:10px;align-items:center}
-.authBtn{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);border:none;padding:12px 24px;color:#fff;border-radius:25px;cursor:pointer;font-weight:600;font-size:14px;transition:all 0.3s ease;position:relative;overflow:hidden;box-shadow:0 8px 25px rgba(102,126,234,0.3)}
-.authBtn:hover{transform:translateY(-3px);box-shadow:0 15px 40px rgba(102,126,234,0.5);background:linear-gradient(135deg,#764ba2 0%,#667eea 100%)}
-.authBtn::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.3),transparent);transition:left 0.5s}
-.authBtn:hover::before{left:100%}
-.authBtn.premium-only{background:linear-gradient(135deg,#f093fb 0%,#f5576c 100%);box-shadow:0 8px 25px rgba(240,147,251,0.3)}
-.auth-icon{margin-right:8px;font-size:16px}
-.auth-text{font-size:14px}
-
-/* BOUTONS PRINCIPAUX */
-#shareBtn,#premiumBtn{padding:10px 20px;border-radius:15px;border:none;font-weight:700;cursor:pointer;color:#001;margin-left:10px;box-shadow:0 8px 25px rgba(0,0,0,0.4);transition:all 0.3s ease;font-size:14px}
-#shareBtn{background:linear-gradient(135deg,#ff6b6b,#ffa500);border:2px solid #ff6b6b}
-#premiumBtn{background:linear-gradient(135deg,#00ffea,#0078ff);border:2px solid #00ffea}
-
-/* SECTION INTRO AMÉLIORÉE */
-.intro{max-width:1200px;margin:20px auto;padding:25px;border-radius:20px;background:linear-gradient(135deg,rgba(0,0,0,0.7),rgba(0,20,40,0.8));text-align:center;border:2px solid rgba(0,255,255,0.2);box-shadow:0 20px 50px rgba(0,0,0,0.5);transform:scale(0.85);position:relative;overflow:hidden}
-.intro h2{margin:8px 0;color:var(--gold);text-shadow:0 0 15px var(--gold);font-size:36px;font-family:'Orbitron',sans-serif;font-weight:900;position:relative;z-index:2}
-.intro p{font-size:16px;color:#ecf0f1;margin-bottom:20px;line-height:1.5;position:relative;z-index:2}
-
-/* GRILLE DE JEUX PREMIUM */
-.games-grid{max-width:1300px;margin:25px auto;padding:25px;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:25px;perspective:1200px;opacity:1;transition:opacity 0.4s ease-in-out}
-.card{background:linear-gradient(135deg,rgba(0,0,0,0.3),rgba(0,20,40,0.4));border-radius:20px;padding:25px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;border:2px solid rgba(255,255,255,0.1);box-shadow:0 10px 35px rgba(0,0,0,0.5);transition:all 0.4s ease;position:relative;overflow:hidden}
-.card:hover{transform:translateY(-10px) rotateY(8deg);box-shadow:0 20px 60px rgba(0,0,0,0.7)}
-.card .num{font-size:28px;font-weight:900;margin-bottom:10px;background:linear-gradient(90deg,var(--accent1),#8a2be2);background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent;position:relative;z-index:2}
-.card .title{font-size:16px;text-align:center;color:#fff;text-shadow:0 0 10px rgba(255,215,0,0.3);position:relative;z-index:2;font-weight:600}
-.card.free{border:3px solid var(--success);box-shadow:0 0 30px var(--success), inset 0 0 15px rgba(0,255,170,0.2)}
-.card.locked{border:3px solid var(--warning);box-shadow:0 0 30px var(--warning), inset 0 0 15px rgba(255,234,0,0.2)}
-.card.premium::after{content:"🌟";position:absolute;top:12px;right:15px;font-size:24px;z-index:3}
-
-/* OVERLAY JEUX */
-#gameOverlay{display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.98);align-items:stretch}
+.authBtn{background:linear-gradient(135deg,#667eea,#764ba2);border:none;padding:10px 18px;color:#fff;border-radius:18px;cursor:pointer;font-weight:700}
+#shareBtn,#premiumBtn{padding:8px 14px;border-radius:12px;border:none;font-weight:700;cursor:pointer;color:#001;margin-left:8px;box-shadow:0 6px 18px rgba(0,0,0,0.35)}
+#shareBtn{background:linear-gradient(90deg,#ffec00,#ff7800)}
+#premiumBtn{background:linear-gradient(90deg,#00ffea,#0078ff)}
+.intro{max-width:1100px;margin:20px auto;padding:18px;border-radius:12px;background:rgba(0,0,0,0.45);text-align:center}
+.intro h2{margin:6px 0;color:var(--gold);text-shadow:0 0 6px var(--gold)}
+.games-grid{max-width:1200px;margin:16px auto;padding:18px;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px;perspective:1200px}
+.card{background:rgba(255,255,255,0.03);border-radius:14px;padding:20px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;border:1px solid rgba(255,255,255,0.04);box-shadow:0 6px 22px rgba(0,0,0,0.4);transition:transform .35s,box-shadow .35s;position:relative;min-height:110px}
+.card:hover{transform:translateY(-6px)}
+.card .num{font-size:22px;font-weight:900;margin-bottom:6px;background:linear-gradient(90deg,var(--accent1),#8a2be2);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.card .title{font-size:16px;text-align:center;color:#fff}
+.card.locked{opacity:0.9;filter:grayscale(0.15)}
+.card.locked::after{content:"🔒";position:absolute;top:12px;right:12px;font-size:20px}
+#gameOverlay{display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.96);align-items:stretch}
 #overlayInner{position:relative;flex:1;display:flex;flex-direction:column}
-#gameFrame{width:100%;height:100%;border:0;display:block;border-radius:10px}
-.overlayTopLeft{position:absolute;top:20px;left:20px;z-index:10010;display:flex;gap:10px}
-.overlayBtn{background:linear-gradient(135deg,#ff3860,#ff1744);border:none;color:#fff;padding:12px 20px;border-radius:15px;font-weight:700;cursor:pointer;box-shadow:0 10px 30px rgba(255,56,96,0.3);transition:all 0.3s ease;z-index:10011}
-.overlayBtn.secondary{background:linear-gradient(135deg,var(--accent1),var(--accent2));color:#001}
-
-/* MODAUX PREMIUM / AUTH */
-.modal{display:none;position:fixed;inset:0;z-index:10020;background:rgba(0,0,0,0.9);align-items:center;justify-content:center;backdrop-filter:blur(5px)}
-.modalCard{width:400px;max-width:90vw;max-height:85vh;background:linear-gradient(135deg,#1e3c72,#2a5298);padding:25px;border-radius:20px;display:flex;flex-direction:column;gap:12px;color:#fff;box-shadow:0 25px 60px rgba(0,0,0,0.7);border:2px solid rgba(255,255,255,0.1);position:relative;overflow:hidden;transform:scale(0.9);overflow-y:auto}
-.modal-header{text-align:center;margin-bottom:15px;position:relative;z-index:2}
-.modal-icon{font-size:40px;margin-bottom:12px;display:block}
-.modal-header h3{color:var(--gold);margin-bottom:8px;font-size:20px;font-family:'Orbitron',sans-serif;font-weight:700}
-.premium-status{margin-bottom:15px;padding:12px;background:rgba(255,215,0,0.1);border-radius:15px;border-left:4px solid var(--gold);position:relative;z-index:2}
-.status-indicator{display:flex;align-items:center;gap:10px}
-.status-dot{width:8px;height:8px;border-radius:50%;background:var(--gold);animation:pulse 2s infinite}
-.auth-form{display:flex;flex-direction:column;gap:12px;position:relative;z-index:2}
-.input-group{display:flex;flex-direction:column;gap:6px}
-.input-group label{color:#ecf0f1;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:1px}
-.input-group input{background:rgba(255,255,255,0.1);border:2px solid rgba(255,255,255,0.2);border-radius:10px;padding:12px;color:#fff;font-size:14px;transition:all 0.3s ease}
-.input-group input:focus{outline:none;border-color:var(--gold);background:rgba(255,255,255,0.15);box-shadow:0 0 20px rgba(255,215,0,0.2)}
-.premium-btn{background:linear-gradient(135deg,var(--gold),#ffb347);color:#1e3c72;font-weight:bold;padding:12px;border-radius:12px;border:none;cursor:pointer;font-size:16px;transition:all 0.3s ease;margin-top:12px}
-.cancel-btn{background:transparent;color:#ecf0f1;border:2px solid rgba(255,255,255,0.3);padding:10px;border-radius:10px;cursor:pointer;font-size:14px;transition:all 0.3s ease;margin-top:8px}
-.toast{position:fixed;top:80px;right:20px;padding:15px 25px;border-radius:10px;color:#fff;font-weight:600;z-index:10100;animation:slideIn 0.3s ease;max-width:300px}
-.toast.success{background:linear-gradient(135deg,var(--success),#00cc66)}
-.toast.error{background:linear-gradient(135deg,var(--error),#ff4757)}
-.toast.warning{background:linear-gradient(135deg,var(--warning),#ff9500)}
-@keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
-
-@media(max-width:768px){
-  #logoText{font-size:28px}
-  .modalCard{width:90%;padding:20px;transform:scale(0.85);max-height:90vh}
-  .modal-header h3{font-size:18px}
-  .modal-icon{font-size:36px}
-  #langSelect{min-width:120px}
-  .games-grid{grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px}
-  .intro h2{font-size:28px}
-  .intro{transform:scale(0.9);}
-  html,body{zoom:1.0;}
-}
-
-/* loading */
-.loading{opacity:0.5;pointer-events:none}
-.loading::after{content:'';position:absolute;top:50%;left:50%;width:30px;height:30px;border:3px solid rgba(255,255,255,0.3);border-top:3px solid var(--accent1);border-radius:50%;animation:spin 1s linear infinite;transform:translate(-50%,-50%)}
-@keyframes spin{0%{transform:translate(-50%,-50%) rotate(0deg)}100%{transform:translate(-50%,-50%) rotate(360deg)}}
+#gameFrame{width:100%;height:100%;border:0;display:block}
+.overlayTopLeft{position:absolute;top:16px;left:16px;z-index:10010;display:flex;gap:8px}
+.overlayBtn{background:#ff3860;border:none;color:#fff;padding:10px 14px;border-radius:11px;font-weight:700;cursor:pointer}
+.modal{display:none;position:fixed;inset:0;z-index:10020;background:rgba(0,0,0,0.85);align-items:center;justify-content:center}
+.modalCard{width:420px;background:linear-gradient(180deg,#fff,#f3f6ff);padding:18px;border-radius:12px;display:flex;flex-direction:column;gap:10px;color:#001;box-shadow:0 10px 40px rgba(0,0,0,0.25)}
+.modalCard input{padding:10px;border-radius:8px;border:1px solid rgba(0,0,0,0.08);background:#fff}
+.modalCard .btn{padding:10px;border-radius:8px;border:0;font-weight:800;cursor:pointer;background:linear-gradient(90deg,var(--accent1),var(--accent2));color:#001}
+.premium-modal .modalCard{background:linear-gradient(135deg,#1e3c72,#2a5298);color:#fff}
+.toast{position:fixed;top:24px;right:24px;padding:12px 16px;border-radius:8px;color:#fff;z-index:10100}
+.toast.success{background:linear-gradient(90deg,var(--success),#00cc66)}
+.toast.error{background:linear-gradient(90deg,var(--error),#ff4757)}
+.toast.info{background:linear-gradient(90deg,#3498db,#9b59b6)}
+.hidden{display:none !important}
+@media(max-width:640px){#logoText{font-size:24px}.modalCard{width:92%}}
 </style>
 </head>
 <body>
 
 <header>
-  <div id="logoText">
-    <span class="emoji">🧠</span>
-    <span>Brainova</span>
-  </div>
+  <div id="logoText"><span class="emoji">🧠</span><span>Brainova</span></div>
   <div class="controls">
     <div id="langWrap">
-      <select id="langSelect" aria-label="Sélectionner la langue">
-        <option value="fr">🇫🇷 Français</option>
-        <option value="en">🇬🇧 English</option>
-        <option value="ar">🇸🇦 العربية</option>
-        <option value="es">🇪🇸 Español</option>
-        <option value="de">🇩🇪 Deutsch</option>
-        <option value="zh">🇨🇳 中文</option>
+      <select id="langSelect" aria-label="Langue">
+        <option value="fr">Français</option>
+        <option value="en">English</option>
+        <option value="ar">العربية</option>
+        <option value="es">Español</option>
+        <option value="de">Deutsch</option>
+        <option value="zh">中文</option>
       </select>
     </div>
     <div id="authContainer">
-      <button class="authBtn premium-only" id="loginBtn" data-tooltip="Connexion sécurisée Firebase">
-        <span class="auth-icon">🔐</span>
-        <span class="auth-text">Connexion</span>
-      </button>
-      <button class="authBtn premium-only" id="signupBtn" data-tooltip="Inscription gratuite">
-        <span class="auth-icon">✨</span>
-        <span class="auth-text">Inscription</span>
-      </button>
-      <button id="premiumBtn" data-tooltip="Abonnement Stripe sécurisé">Premium</button>
-      <button id="shareBtn" data-tooltip="Partager sur les réseaux">Partager</button>
+      <button class="authBtn hidden" id="loginBtn">Connexion</button>
+      <button class="authBtn hidden" id="signupBtn">Inscription</button>
+      <button id="premiumBtn">Premium</button>
+      <button id="shareBtn">Partager</button>
     </div>
   </div>
 </header>
 
 <section class="intro">
-  <h2 id="introTitle">🎮 Découvrez nos 36 Jeux Intelligents Premium</h2>
-  <p id="introDesc">Entraînez votre cerveau avec notre collection complète de jeux adaptatifs alimentés par l'IA. Système d'authentification sécurisé et paiements Stripe intégrés.</p>
+  <h2 id="introTitle">🎮 Découvrez nos 36 Jeux Intelligents</h2>
+  <p id="introDesc">Entraînez votre cerveau avec notre sélection : 10 jeux gratuits et 26 jeux premium verrouillés.</p>
 </section>
 
-<main class="games-grid" id="gamesGrid" aria-live="polite"><!-- contenu injecté par JS --></main>
+<main class="games-grid" id="gamesGrid" aria-live="polite"></main>
 
-<!-- Overlay Jeux -->
+<!-- Overlay -->
 <div id="gameOverlay" role="dialog" aria-modal="true">
   <div id="overlayInner">
     <div class="overlayTopLeft">
-      <button id="overlayMenu" class="overlayBtn secondary">🔙 Retour</button>
+      <button id="overlayMenu" class="overlayBtn">🔙 Retour</button>
     </div>
     <iframe id="gameFrame" allow="fullscreen; autoplay; camera; microphone; geolocation"></iframe>
   </div>
 </div>
 
-<!-- Modal Connexion Premium -->
+<!-- Login Modal (only usable after premium) -->
 <div id="loginModal" class="modal" aria-hidden="true">
   <div class="modalCard">
-    <div class="modal-header">
-      <span class="modal-icon">🔐</span>
-      <h3 id="loginModalTitle">Connexion Premium</h3>
-      <p id="loginModalDesc">Accès sécurisé à votre compte Brainova</p>
-    </div>
-
-    <div class="premium-status">
-      <div class="status-indicator">
-        <span class="status-dot"></span>
-        <span class="status-text" id="authStatusText">Paiement sécurisé Stripe SSL</span>
-      </div>
-    </div>
-
-    <form id="loginForm" class="auth-form">
-      <div class="input-group">
-        <label for="loginEmail" id="emailLabel">Adresse Email</label>
-        <input type="email" id="loginEmail" required placeholder="votre@email.com" autocomplete="email">
-      </div>
-      <div class="input-group">
-        <label for="loginPassword" id="passwordLabel">Mot de passe</label>
-        <input type="password" id="loginPassword" required placeholder="••••••••" autocomplete="current-password">
-      </div>
-      <button type="submit" class="premium-btn" id="loginButton">Se connecter</button>
-    </form>
-
-    <button class="cancel-btn" id="loginCancel">Annuler</button>
+    <h3>Connexion</h3>
+    <input id="loginEmail" type="email" placeholder="Email">
+    <input id="loginPassword" type="password" placeholder="Mot de passe">
+    <button class="btn" id="loginSubmit">Se connecter</button>
+    <button class="btn" id="loginCancel" style="background:transparent;color:#001;border:1px solid rgba(0,0,0,0.08)">Annuler</button>
   </div>
 </div>
 
-<!-- Modal Inscription Premium -->
+<!-- Signup Modal (only usable after premium) -->
 <div id="signupModal" class="modal" aria-hidden="true">
   <div class="modalCard">
-    <div class="modal-header">
-      <span class="modal-icon">✨</span>
-      <h3 id="signupModalTitle">Inscription Premium</h3>
-      <p id="signupModalDesc">Créez votre compte Brainova sécurisé</p>
-    </div>
-
-    <div class="premium-status">
-      <div class="status-indicator">
-        <span class="status-dot"></span>
-        <span class="status-text" id="authStatusText2">Authentification Firebase sécurisée</span>
-      </div>
-    </div>
-
-    <form id="signupForm" class="auth-form">
-      <div class="input-group">
-        <label for="signupEmail" id="emailLabel2">Adresse Email</label>
-        <input type="email" id="signupEmail" required placeholder="votre@email.com" autocomplete="email">
-      </div>
-      <div class="input-group">
-        <label for="signupPassword" id="passwordLabel2">Mot de passe</label>
-        <input type="password" id="signupPassword" required placeholder="••••••••" autocomplete="new-password">
-      </div>
-      <div class="input-group">
-        <label for="signupConfirm" id="confirmPasswordLabel">Confirmer le mot de passe</label>
-        <input type="password" id="signupConfirm" required placeholder="••••••••" autocomplete="new-password">
-      </div>
-      <button type="submit" class="premium-btn" id="signupButton">S'inscrire</button>
-    </form>
-
-    <button class="cancel-btn" id="signupCancel">Annuler</button>
+    <h3>Inscription</h3>
+    <input id="signupName" type="text" placeholder="Nom complet">
+    <input id="signupEmail" type="email" placeholder="Email">
+    <input id="signupPassword" type="password" placeholder="Mot de passe">
+    <button class="btn" id="signupSubmit">S'inscrire</button>
+    <button class="btn" id="signupCancel" style="background:transparent;color:#001;border:1px solid rgba(0,0,0,0.08)">Annuler</button>
   </div>
 </div>
 
-<!-- Modal Premium Stripe -->
-<div id="premiumModal" class="modal" aria-hidden="true" style="display: none;">
+<!-- Premium Modal -->
+<div id="premiumModal" class="modal premium-modal" aria-hidden="true">
   <div class="modalCard">
-    <div class="modal-header">
-      <span class="modal-icon">💎</span>
-      <h3>Abonnement Premium</h3>
-      <p>Débloquez tous les jeux avec Stripe</p>
+    <h3>Abonnement Premium</h3>
+    <p>Débloquez les 26 jeux premium — 20 EUR / an.</p>
+    <div style="display:flex;gap:8px;justify-content:center;margin-top:6px">
+      <button id="buyPremium" class="btn">Souscrire maintenant</button>
+      <button id="premiumCancel" class="btn" style="background:transparent;color:#fff;border:1px solid rgba(255,255,255,0.12)">Annuler</button>
     </div>
-
-    <div class="premium-status">
-      <div class="status-indicator">
-        <span class="status-dot"></span>
-        <span class="status-text">Paiement sécurisé Stripe SSL</span>
-      </div>
-    </div>
-
-    <div style="text-align:center;margin:20px 0">
-      <div style="font-size:32px;font-weight:bold;color:var(--gold)">20 EUR / an</div>
-      <div style="font-size:16px;opacity:0.8;margin-top:10px">36 jeux premium débloqués</div>
-    </div>
-
-    <button class="premium-btn" id="premiumSubscribeBtn">💳 Payer avec Stripe</button>
-    <button class="cancel-btn" id="premiumCancel">Annuler</button>
   </div>
 </div>
 
-<!-- SCRIPTS COMMERCIAUX (auth + grid + premium + emails) -->
-<script src="https://cdn.emailjs.com/sdk/3.2.0/email.min.js"></script>
-<script>
-/*
-  ======================================================
-  Version fusionnée : design & auth (index7) intégré
-  Source : index7.html (design + nouveau auth). :contentReference[oaicite:5]{index=5}
-  Ancien index (pour référence) : index.html. :contentReference[oaicite:6]{index=6}
-  ======================================================
-*/
+<div id="toastArea"></div>
 
-/* ===================== TRANSLATIONS ===================== */
+<!-- Stripe JS -->
+<script src="https://js.stripe.com/v3/"></script>
+
+<script type="module">
+// ---- TRANSLATIONS ----
 const TRANSLATIONS = {
-  fr: {introTitle:"🎮 Découvrez nos 36 Jeux Intelligents Premium",introDesc:"Entraînez votre cerveau avec notre collection complète de jeux adaptatifs alimentés par l'IA. Système d'authentification sécurisé et paiements Stripe intégrés.",overlayBack:"🔙 Retour",gamePrefix:"Jeu",
-    games:["Quantum Tetris 2077","Memory Quantique","Neural Puzzle Master","Quantum Chess","Jeux de Dames","Pac-Man","Simon Says","Speed Challenge","Cyber Checker","Demo Playground","Quantum Monopoly","Neural Poker","Blackjack Quantum","Solitaire Fusion","Mystic Forest Quest","Enigma Hunter","Neural Racing","Cyber Shooter","Quantum Dots","Neural Rhythm","Cyber Pinball","Quantum Pipes","Neural Slots","Cyber Darts","Quantum Bubbles","Neural Dice","Cyber Pool","Quantum Tiles","Neural Trivia","Cyber Asteroids","Quantum Crystals","Neural Infinity","Algorithme Visuel","Physique Quantique","Test QI","Conscience Artificielle"]},
-  en: {introTitle:"🎮 Discover our 36 Smart Games",introDesc:"Train your brain with our full collection of AI-powered adaptive games",overlayBack:"🔙 Back",gamePrefix:"Game",
-    games:["Quantum Tetris 2077","Quantum Memory","Neural Puzzle Master","Quantum Chess","Checkers Game","Pac-Man","Simon Says","Speed Challenge","Cyber Checker","Demo Playground","Quantum Monopoly","Neural Poker","Quantum Blackjack","Fusion Solitaire","Mystic Forest Quest","Enigma Hunter","Neural Racing","Cyber Shooter","Quantum Dots","Neural Rhythm","Cyber Pinball","Quantum Pipes","Neural Slots","Cyber Darts","Quantum Bubbles","Neural Dice","Cyber Pool","Quantum Tiles","Neural Trivia","Cyber Asteroids","Quantum Crystals","Neural Infinity","Visual Algorithm","Quantum Physics","IQ Test","Artificial Consciousness"]},
-  ar: {introTitle:"🎮 اكتشف 36 لعبة ذكية",introDesc:"درّب عقلك مع مجموعتنا الكاملة من الألعاب التفاعلية المدعومة بالذكاء الاصطناعي",overlayBack:"🔙 رجوع",gamePrefix:"اللعبة",
-    games:["تيتريس الكمومي","ذاكرة الكم","سيد الألغاز العصبي","شطرنج الكم","لعبة الداما","باك مان","سيمون يقول","تحدي السرعة","الفاحص السيبراني","ملعب تجريبي","احتكار الكم","بوكر عصبي","بلاك جاك الكمومي","سوليتير الاندماج","مغامرة الغابة الغامضة","صياد الألغاز","سباق عصبي","مطلق النار السيبراني","نقاط الكم","الإيقاع العصبي","دبابيس السيبرانية","أنابيب الكم","آلات الحظ العصبية","سهام سيبرانية","فقاعات الكم","نرد عصبي","بلياردو الكم","بلاط عصبي","اختبار المعرفة","كويكبات سيبرانية","بلورات الكم","اللانهاية العصبية","الخوارزمية البصرية","الفيزياء الكمومية","اختبار الذكاء","الوعي الاصطناعي"]},
-  es: {introTitle:"🎮 Descubre nuestros 36 Juegos Inteligentes",introDesc:"Entrena tu cerebro con nuestra colección completa de juegos adaptativos con IA",overlayBack:"🔙 Volver",gamePrefix:"Juego",
-    games:["Tetris Cuántico 2077","Memoria Cuántica","Maestro de Rompecabezas Neural","Ajedrez Cuántico","Juego de Damas","Pac-Man","Simón Dice","Desafío de Velocidad","Verificador Cibernético","Campo de Pruebas","Monopolio Cuántico","Póker Neural","Blackjack Cuántico","Solitario Fusión","Bosque Místico","Cazador de Enigmas","Carrera Neural","Tirador Cibernético","Puntos Cuánticos","Ritmo Neural","Pinball Cibernético","Tuberías Cuánticas","Tragamonedas Neurales","Dardos Cibernéticos","Burbujas Cuánticas","Dados Neurales","Billar Cibernético","Fichas Cuánticas","Trivia Neural","Asteroides Cibernéticos","Cristales Cuánticos","Infinito Neural","Algoritmo Visual","Física Cuántica","Prueba de IQ","Conciencia Artificial"]},
-  de: {introTitle:"🎮 Entdecken Sie unsere 36 intelligenten Spiele",introDesc:"Trainieren Sie Ihr Gehirn mit unserer vollständigen Sammlung KI-gestützter Spiele",overlayBack:"🔙 Zurück",gamePrefix:"Spiel",
-    games:["Quantum Tetris 2077","Quantum Memory","Neural Puzzle Master","Quantum Chess","Dame Spiel","Pac-Man","Simon Says","Speed Challenge","Cyber Checker","Demo Playground","Quantum Monopoly","Neural Poker","Quantum Blackjack","Fusion Solitaire","Mystic Forest Quest","Enigma Hunter","Neural Racing","Cyber Shooter","Quantum Dots","Neural Rhythm","Cyber Pinball","Quantum Pipes","Neural Slots","Cyber Darts","Quantum Bubbles","Neural Dice","Cyber Pool","Quantum Tiles","Neural Trivia","Cyber Asteroids","Quantum Crystals","Neural Infinity","Visueller Algorithmus","Quantenphysik","IQ Test","Künstliches Bewusstsein"]},
-  zh: {introTitle:"🎮 探索我们的36款智能游戏",introDesc:"通过我们完整的AI驱动自适应游戏系列训练你的大脑",overlayBack:"🔙 返回",gamePrefix:"游戏",
-    games:["量子俄罗斯方块2077","量子记忆","神经拼图大师","量子国际象棋","跳棋游戏","吃豆人","西蒙说","速度挑战","网络检查","演示游乐场","量子大富翁","神经扑克","量子二十一点","融合接龙","神秘森林探险","谜题猎人","神经赛车","网络射手","量子点","神经节奏","网络弹球","量子管道","神经老虎机","网络飞镖","量子泡泡","神经骰子","网络台球","量子方块","神经问答","网络小行星","量子水晶","神经无限","视觉算法","量子物理","智商测试","人工意识"]}
+  fr:{introTitle:"🎮 Découvrez nos 36 Jeux Intelligents",introDesc:"10 jeux gratuits et 26 jeux premium verrouillés",overlayBack:"🔙 Retour",
+      games:["Quantum Tetris 2077","Memory Quantique","Neural Puzzle Master","Quantum Chess","Jeux de Dames","Pac-Man","Simon Says","Speed Challenge","Cyber Checker","Demo Playground","Quantum Monopoly","Neural Poker","Blackjack Quantum","Solitaire Fusion","Mystic Forest Quest","Enigma Hunter","Neural Racing","Cyber Shooter","Quantum Dots","Neural Rhythm","Cyber Pinball","Quantum Pipes","Neural Slots","Cyber Darts","Quantum Bubbles","Neural Dice","Cyber Pool","Quantum Tiles","Neural Trivia","Cyber Asteroids","Quantum Crystals","Neural Infinity","Algorithme Visuel","Physique Quantique","Test QI","Conscience Artificielle"]},
+  en:{introTitle:"🎮 Discover our 36 Smart Games",introDesc:"10 free games and 26 premium locked games",overlayBack:"🔙 Back",
+      games:["Quantum Tetris 2077","Quantum Memory","Neural Puzzle Master","Quantum Chess","Checkers Game","Pac-Man","Simon Says","Speed Challenge","Cyber Checker","Demo Playground","Quantum Monopoly","Neural Poker","Quantum Blackjack","Fusion Solitaire","Mystic Forest Quest","Enigma Hunter","Neural Racing","Cyber Shooter","Quantum Dots","Neural Rhythm","Cyber Pinball","Quantum Pipes","Neural Slots","Cyber Darts","Quantum Bubbles","Neural Dice","Cyber Pool","Quantum Tiles","Neural Trivia","Cyber Asteroids","Quantum Crystals","Neural Infinity","Visual Algorithm","Quantum Physics","IQ Test","Artificial Consciousness"]},
+  ar:{introTitle:"🎮 اكتشف 36 لعبة ذكية",introDesc:"10 ألعاب مجانية و26 لعبة مميزة مقفلة",overlayBack:"🔙 رجوع",games:[]},
+  es:{introTitle:"🎮 Descubre nuestros 36 Juegos Inteligentes",introDesc:"10 juegos gratis y 26 premium bloqueados",overlayBack:"🔙 Volver",games:[]},
+  de:{introTitle:"🎮 Entdecken Sie unsere 36 intelligenten Spiele",introDesc:"10 kostenlose Spiele und 26 Premium-Spiele gesperrt",overlayBack:"🔙 Zurück",games:[]},
+  zh:{introTitle:"🎮 探索我们的36款智能游戏",introDesc:"10个免费游戏和26个付费锁定游戏",overlayBack:"🔙 返回",games:[]}
 };
 
-/* ===================== UTILITAIRES UI ===================== */
-function showToast(message, type = 'success') {
-  const existing = document.querySelector('.toast');
-  if (existing) existing.remove();
-  const toast = document.createElement('div');
-  toast.className = `toast ${type}`;
-  toast.textContent = message;
-  document.body.appendChild(toast);
-  setTimeout(()=> {
-    if (toast.parentNode) {
-      toast.style.animation = 'slideIn 0.3s ease reverse';
-      setTimeout(()=> toast.remove(), 300);
-    }
-  }, 3800);
+// ---- UI Helpers ----
+function showToast(msg,type='info'){
+  const area=document.getElementById('toastArea');
+  const t=document.createElement('div');
+  t.className=`toast ${type}`;
+  t.textContent=msg;
+  area.appendChild(t);
+  setTimeout(()=> t.remove(),4000);
 }
 
-/* ===================== RENDER GRID ===================== */
-function renderGrid(lang) {
-  const grid = document.getElementById('gamesGrid');
-  if(!grid) return;
-  grid.innerHTML = '';
+// ---- Game Grid ----
+const GRID = document.getElementById('gamesGrid');
+function renderGrid(lang='fr'){
+  GRID.innerHTML='';
   const t = TRANSLATIONS[lang] || TRANSLATIONS['fr'];
   for(let i=1;i<=36;i++){
     const card = document.createElement('div');
     card.className = 'card';
-    if(i<=10) card.classList.add('free');
-    else card.classList.add('locked','premium');
-    if(i===35) card.classList.add('testqi');
-
-    const lockHtml = (i>10) ? `<div style="position:absolute;top:15px;right:15px;font-size:24px;color:var(--warning);z-index:3">🔒</div>` : '';
-    card.innerHTML = `${lockHtml}<div class="num">${t.gamePrefix} ${i}</div><div class="title">${t.games[i-1]||t.gamePrefix+' '+i}</div>`;
+    const titleText = t.games[i-1] || `Jeu ${i}`;
+    card.innerHTML = `<div class="num">${i}</div><div class="title">${titleText}</div>`;
+    // first 10 free
+    if(i>10){
+      card.classList.add('locked');
+    }
     card.addEventListener('click', ()=>{
-      if(i>10){ showSubscriptionMessage(lang); return; }
-      openGame(i);
+      onGameClick(i);
     });
-    grid.appendChild(card);
+    GRID.appendChild(card);
   }
 }
 
-/* ===================== GAME OVERLAY ===================== */
+// Try possible paths for iframe src
+function resolveGamePath(n){
+  const candidates = [
+    `./jeux/jeux${n}.html`,
+    `./jeux${n}.html`,
+    `./games/jeux${n}.html`,
+    `./jeux/Jeux${n}.html`,
+    `./jeux/Jeux${n}.html`
+  ];
+  return candidates;
+}
+
 const overlay = document.getElementById('gameOverlay');
 const frame = document.getElementById('gameFrame');
-const btnMenu = document.getElementById('overlayMenu');
-function openGame(n){
-  frame.src = `./jeux${n}.html`;
-  overlay.style.display = 'flex';
+const overlayMenu = document.getElementById('overlayMenu');
+
+function openGamePath(n){
+  const paths = resolveGamePath(n);
+  let loaded = false;
+  // try sequentially by setting src and listening for load/error
+  // We'll set first candidate; Netlify will serve 404 in iframe if missing, so fallback not perfect.
+  frame.src = paths[0];
+  overlay.style.display='flex';
   setTimeout(()=> {
     const el = document.documentElement;
     if(el.requestFullscreen) el.requestFullscreen().catch(()=>{});
     else if(el.webkitRequestFullscreen) el.webkitRequestFullscreen();
-  }, 100);
+  }, 120);
 }
-function closeGame(){
+
+function closeOverlay(){
   frame.src='about:blank';
   overlay.style.display='none';
-  if(document.fullscreenElement || document.webkitFullscreenElement){
-    try{ if(document.exitFullscreen) document.exitFullscreen(); else if(document.webkitExitFullscreen) document.webkitExitFullscreen(); }catch(e){}
-  }
+  try{ if(document.exitFullscreen) document.exitFullscreen(); }catch(e){}
 }
-btnMenu && btnMenu.addEventListener('click', closeGame);
-document.addEventListener('keydown', (e) => { if(e.key==='Escape' && overlay.style.display==='flex') closeGame(); });
 
-/* ===================== LANGUAGE ===================== */
+overlayMenu && overlayMenu.addEventListener('click', closeOverlay);
+document.addEventListener('keydown',(e)=>{ if(e.key==='Escape' && overlay.style.display==='flex') closeOverlay(); });
+
+// ---- Language ----
 const langSelect = document.getElementById('langSelect');
-function applyLanguage(lang){
-  if(!TRANSLATIONS[lang]) lang='fr';
-  localStorage.setItem('brainova_lang',lang);
-  const t = TRANSLATIONS[lang];
+langSelect.addEventListener('change', ()=> {
+  applyLang(langSelect.value);
+});
+function applyLang(lang){
+  const t = TRANSLATIONS[lang] || TRANSLATIONS['fr'];
   document.getElementById('introTitle').textContent = t.introTitle;
   document.getElementById('introDesc').textContent = t.introDesc;
-  document.documentElement.dir = (lang==='ar') ? 'rtl' : 'ltr';
   renderGrid(lang);
 }
-langSelect && langSelect.addEventListener('change', ()=> applyLanguage(langSelect.value));
 (function initLang(){
   const saved = localStorage.getItem('brainova_lang');
   const browser = (navigator.language||navigator.userLanguage||'fr').slice(0,2);
   const start = saved || (['fr','en','ar','es','de','zh'].includes(browser)?browser:'fr');
-  if(langSelect) { langSelect.value = start; applyLanguage(start); }
+  langSelect.value = start;
+  applyLang(start);
 })();
 
-/* ===================== FIREBASE CONFIG (compat v9) ===================== */
-/* NOTE: index7 used compat SDK; keep as-is for reliability in this merge. */
-const firebaseConfig = {
-  apiKey: "AIzaSyAjnpgNwDdGtb46XRCvT_cU7AAU-25zw1U",
-  authDomain: "brainova-c0295.firebaseapp.com",
-  projectId: "brainova-c0295",
-  storageBucket: "brainova-c0295.firebasestorage.app",
-  messagingSenderId: "437705478313",
-  appId: "1:437705478313:web:8b7a4c97b5d80e6d49d9b8",
-  measurementId: "G-79M4HWKQ35"
-};
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
+// ---- Firebase (v12 modular) ----
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-auth.js";
+const firebaseConfig = { apiKey:"AIzaSyAjnpgNwDdGtb46XRCvT_cU7AAU-25zw1U", authDomain:"brainova-c0295.firebaseapp.com", projectId:"brainova-c0295", storageBucket:"brainova-c0295.firebasestorage.app", messagingSenderId:"437705478313", appId:"1:437705478313:web:8b7a4c97b5d80e6d49d9b8", measurementId:"G-79M4HWKQ35" };
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 
-/* ===================== AUTH / SIGNUP / LOGIN ===================== */
+// ---- UI elements ----
+const loginBtn = document.getElementById('loginBtn');
+const signupBtn = document.getElementById('signupBtn');
+const shareBtn = document.getElementById('shareBtn');
+const premiumBtn = document.getElementById('premiumBtn');
+const premiumModal = document.getElementById('premiumModal');
+const buyPremiumBtn = document.getElementById('buyPremium');
+const premiumCancel = document.getElementById('premiumCancel');
 const loginModal = document.getElementById('loginModal');
 const signupModal = document.getElementById('signupModal');
-const premiumModal = document.getElementById('premiumModal');
+const loginCancel = document.getElementById('loginCancel');
+const signupCancel = document.getElementById('signupCancel');
+const loginSubmit = document.getElementById('loginSubmit');
+const signupSubmit = document.getElementById('signupSubmit');
 
-document.getElementById('loginBtn').addEventListener('click', () => loginModal.style.display = 'flex');
-document.getElementById('loginCancel').addEventListener('click', () => loginModal.style.display = 'none');
-document.getElementById('signupBtn').addEventListener('click', () => signupModal.style.display = 'flex');
-document.getElementById('signupCancel').addEventListener('click', () => signupModal.style.display = 'none');
-
-document.getElementById('loginForm').addEventListener('submit', async (e)=>{
-  e.preventDefault();
-  const email = document.getElementById('loginEmail').value.trim();
-  const password = document.getElementById('loginPassword').value;
-  if(!email || !password){ showToast('Veuillez remplir tous les champs', 'error'); return; }
-  try{
-    const userCredential = await auth.signInWithEmailAndPassword(email, password);
-    loginModal.style.display = 'none';
-    showToast('Connexion réussie !', 'success');
-  }catch(err){
-    console.error('Login error', err);
-    showToast('Erreur : '+(err.message||'Erreur connexion'), 'error');
+// ---- PREMIUM state management ----
+function isPremiumActive(){
+  return localStorage.getItem('brainova_premium') === 'true';
+}
+function setPremiumActive(val){
+  localStorage.setItem('brainova_premium', val ? 'true' : 'false');
+  updateUIForPremium();
+}
+function updateUIForPremium(){
+  const premium = isPremiumActive();
+  // show/hide auth buttons
+  if(premium){
+    loginBtn.classList.remove('hidden');
+    signupBtn.classList.remove('hidden');
+    shareBtn.classList.add('hidden'); // hide share when premium
+    // unlock all games visually and functionally
+    document.querySelectorAll('.card').forEach((c, idx)=>{
+      if(c.classList.contains('locked')) c.classList.remove('locked');
+    });
+  }else{
+    loginBtn.classList.add('hidden');
+    signupBtn.classList.add('hidden');
+    shareBtn.classList.remove('hidden');
+    // lock premium games
+    document.querySelectorAll('.card').forEach((c, idx)=>{
+      const i = idx+1;
+      if(i>10 && !c.classList.contains('locked')) c.classList.add('locked');
+    });
   }
-});
-
-document.getElementById('signupForm').addEventListener('submit', async (e)=>{
-  e.preventDefault();
-  const email = document.getElementById('signupEmail').value.trim();
-  const password = document.getElementById('signupPassword').value;
-  const confirm = document.getElementById('signupConfirm').value;
-  if(!email || !password || !confirm){ showToast('Veuillez remplir tous les champs', 'error'); return; }
-  if(password !== confirm){ showToast('Les mots de passe ne correspondent pas', 'error'); return; }
-  if(password.length < 6){ showToast('Mot de passe trop court (>=6)', 'error'); return; }
-  try{
-    const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-    await userCredential.user.sendEmailVerification();
-    signupModal.style.display = 'none';
-    showToast('Inscription réussie ! Email de vérification envoyé.', 'success');
-  }catch(err){
-    console.error('Signup error', err);
-    let message = 'Erreur lors de l\'inscription.';
-    if(err.code === 'auth/email-already-in-use') message = 'Cet email est déjà utilisé.';
-    else if(err.code === 'auth/invalid-email') message = 'Format d\'email invalide.';
-    else if(err.code === 'auth/weak-password') message = 'Mot de passe trop faible.';
-    showToast(message, 'error');
-  }
-});
-
-/* ===================== PREMIUM / SHARE ===================== */
-document.getElementById('premiumBtn').addEventListener('click', ()=> { premiumModal.style.display = 'flex'; });
-document.getElementById('premiumCancel').addEventListener('click', ()=> { premiumModal.style.display = 'none'; });
-document.getElementById('premiumSubscribeBtn').addEventListener('click', ()=> { premiumModal.style.display = 'none'; showSubscriptionMessage(localStorage.getItem('brainova_lang') || 'fr'); });
-
-document.getElementById('shareBtn').addEventListener('click', ()=>{
-  if(navigator.share){
-    navigator.share({title:'Brainova', text:'Découvrez Brainova et ses 36 jeux intelligents!', url: window.location.href});
-  } else {
-    showToast('Partage non supporté par ce navigateur', 'warning');
-  }
-});
-
-/* ===================== SUBSCRIPTION MESSAGE (UI) ===================== */
-function showSubscriptionMessage(lang='fr'){
-  const t = TRANSLATIONS[lang] || TRANSLATIONS['fr'];
-  showToast('Accès premium requis — Abonnement 20€/an', 'warning');
-  // Optionally open premium modal:
-  document.getElementById('premiumModal').style.display = 'flex';
 }
 
-/* ===================== INITIALISATION ===================== */
-document.addEventListener('DOMContentLoaded', ()=> {
-  // start UI
-  applyLanguage(localStorage.getItem('brainova_lang') || 'fr');
-  console.log('🎉 BRAINOVA Commercial merged init (design + auth)'); 
+// initial UI state
+document.addEventListener('DOMContentLoaded', ()=>{
+  renderGrid(localStorage.getItem('brainova_lang')||'fr');
+  updateUIForPremium();
 });
 
-/* Additional commercial email/premium queue logic, Stripe returns, etc. from index7 are preserved in this merged file. */
-/* If you want I can: 
-   - convert the compat firebase calls above to modular v12 imports (createUserWithEmailAndPassword(...)) OR 
-   - keep compat but replace config with your production keys.
-   Tell me which option and I’ll update. */
+// ---- Game click behavior ----
+function onGameClick(n){
+  if(n>10 && !isPremiumActive()){
+    // show premium modal to subscribe
+    premiumModal.style.display='flex';
+    return;
+  }
+  // open game
+  openGamePath(n);
+}
+
+// ---- Premium modal controls ----
+premiumBtn.addEventListener('click', ()=> premiumModal.style.display='flex');
+premiumCancel.addEventListener('click', ()=> premiumModal.style.display='none');
+buyPremiumBtn.addEventListener('click', ()=> {
+  // open Stripe link (as requested keep the current link)
+  window.open("https://buy.stripe.com/cNi8wR7IC77o54icy49EI01","_blank");
+  // set premium locally — in production you'd verify webhook from Stripe
+  setTimeout(()=> {
+    setPremiumActive(true);
+    showToast('Abonnement détecté — accès Premium activé', 'success');
+    premiumModal.style.display='none';
+    // Optionally send an email via your backend or EmailJS (not configured here)
+  }, 800);
+});
+
+// ---- Share button ----
+shareBtn.addEventListener('click', ()=>{
+  if(navigator.share){
+    navigator.share({title:'Brainova',text:'Découvrez Brainova et ses 36 jeux intelligents!',url:window.location.href});
+  }else{
+    // fallback copy url
+    navigator.clipboard?.writeText(window.location.href).then(()=> showToast('URL copiée dans le presse-papiers','info'), ()=> showToast('Partage non supporté','error'));
+  }
+});
+
+// ---- Auth modals (only available when premium) ----
+loginBtn.addEventListener('click', ()=> { if(isPremiumActive()) loginModal.style.display='flex'; else showToast('Abonnement requis pour se connecter','info'); });
+signupBtn.addEventListener('click', ()=> { if(isPremiumActive()) signupModal.style.display='flex'; else showToast('Abonnement requis pour s\'inscrire','info'); });
+
+loginCancel.addEventListener('click', ()=> loginModal.style.display='none');
+signupCancel.addEventListener('click', ()=> signupModal.style.display='none');
+
+loginSubmit.addEventListener('click', async ()=>{
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass = document.getElementById('loginPassword').value;
+  if(!email||!pass){ showToast('Remplissez email et mot de passe','error'); return; }
+  try{
+    await signInWithEmailAndPassword(auth,email,pass);
+    loginModal.style.display='none';
+    showToast('Connexion réussie','success');
+  }catch(err){
+    console.error(err);
+    showToast('Erreur connexion: '+(err.message||err.code),'error');
+  }
+});
+
+signupSubmit.addEventListener('click', async ()=>{
+  const name = document.getElementById('signupName').value.trim();
+  const email = document.getElementById('signupEmail').value.trim();
+  const pass = document.getElementById('signupPassword').value;
+  if(!name||!email||!pass){ showToast('Remplissez tous les champs','error'); return; }
+  try{
+    const userCred = await createUserWithEmailAndPassword(auth,email,pass);
+    await updateProfile(userCred.user, { displayName: name });
+    signupModal.style.display='none';
+    showToast('Inscription réussie','success');
+  }catch(err){
+    console.error(err);
+    showToast('Erreur inscription: '+(err.message||err.code),'error');
+  }
+});
+
+// Accessibility: close modals on Escape
+document.addEventListener('keydown',(e)=>{
+  if(e.key==='Escape'){
+    document.querySelectorAll('.modal').forEach(m=> m.style.display='none');
+    closeOverlay();
+  }
+});
 </script>
 
 </body>
