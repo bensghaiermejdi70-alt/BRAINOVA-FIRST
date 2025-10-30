@@ -94,7 +94,6 @@ header{display:flex;justify-content:space-between;align-items:center;padding:14p
 <meta content="jeux intelligents, Brainova, IA, entraînement cérébral, premium, jeux éducatifs, puzzle, quiz" name="keywords"/>
 <meta content="Brainova Team" name="author"/>
 <link href="favicon.png" rel="icon" type="image/png"/>
-
 <style>
 /* Mobile optimization - aggressive minimization */
 body.mobile, @media only screen and (max-width: 768px) {
@@ -199,6 +198,61 @@ html, body { max-width: 100%; overflow-x: hidden; }
   } catch(e) { console.error('mobile detect', e); }
 })();
 </script>
+
+<style>
+/* Full-screen play optimization for mobile */
+@media only screen and (max-width: 768px) {
+  .game-play-area {
+    position: fixed !important;
+    top: 45px !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 35px !important;
+    width: 100vw !important;
+    height: calc(100vh - 80px) !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    background: #000 !important;
+    overflow: hidden !important;
+    z-index: 100 !important;
+  }
+  .game-play-area iframe, .game-play-area canvas {
+    width: 98vw !important;
+    height: 95vh !important;
+    max-height: calc(100vh - 90px) !important;
+    object-fit: contain !important;
+  }
+  header, footer {
+    height: auto !important;
+    min-height: 40px !important;
+    padding: 4px 6px !important;
+  }
+  footer p {
+    font-size: 0.7rem !important;
+  }
+  #mobileNotice {
+    position: fixed;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,0.85);
+    color: #fff;
+    font-size: 0.9rem;
+    padding: 8px 16px;
+    border-radius: 10px;
+    text-align: center;
+    z-index: 9999;
+    animation: fadeInOut 8s ease-in-out forwards;
+  }
+  @keyframes fadeInOut {
+    0% { opacity: 0; bottom: 0; }
+    10% { opacity: 1; bottom: 10px; }
+    80% { opacity: 1; }
+    100% { opacity: 0; bottom: -20px; }
+  }
+}
+</style>
 </head>
 <body>
 <header>
@@ -240,7 +294,6 @@ html, body { max-width: 100%; overflow-x: hidden; }
 <span data-ar="" style="display:none">🖥️ الألعاب مصممة لأجهزة الكمبيوتر (نسخة الكمبيوتر)</span>
 <span data-zh="" style="display:none">🖥️ 专为电脑设计的游戏（PC 版）</span>
 </p>
-
 <main aria-live="polite" class="games-grid" id="gamesGrid"></main>
 <!-- Overlay -->
 <div aria-modal="true" id="gameOverlay" role="dialog">
@@ -1357,7 +1410,6 @@ window.unlockPremium=async function(userEmail){try{localStorage.setItem('brainov
 function checkStripeReturn(){try{const urlParams=new URLSearchParams(window.location.search);const success=urlParams.get('success');const status=urlParams.get('payment_intent_status');if(success==='true'||status==='succeeded'){const custEmail=urlParams.get('customer_email')||null;if(custEmail)localStorage.setItem('user_email',custEmail);window.unlockPremium(custEmail);if(history&&history.replaceState)history.replaceState({},document.title,window.location.pathname)}}catch(e){console.error('checkStripeReturn error',e)}}
 document.addEventListener('DOMContentLoaded',function(){updateShareButtonState();checkStripeReturn();const exp=getExpiryDateFromStorage();if(exp){const now=new Date();if(now>exp){localStorage.removeItem('brainova_premium');updateShareButtonState()}}});
 </script>
-
 <script>
 document.addEventListener('DOMContentLoaded', function() {
   function setNoteLang(lang) {
@@ -1372,6 +1424,20 @@ document.addEventListener('DOMContentLoaded', function() {
     langSelect.addEventListener('change', function(){ setNoteLang(this.value || 'fr'); });
   } else {
     setNoteLang('fr');
+  }
+});
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  if (/Android|webOS|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+    setTimeout(() => {
+      const notice = document.createElement('div');
+      notice.id = 'mobileNotice';
+      notice.innerHTML = '🧠 Pour une meilleure expérience, utilisez un ordinateur (version PC complète)';
+      document.body.appendChild(notice);
+      setTimeout(() => notice.remove(), 9000);
+    }, 2000);
   }
 });
 </script>
