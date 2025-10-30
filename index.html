@@ -1,10 +1,11 @@
 <!DOCTYPE html>
+
 <html lang="fr">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
 <title>BRAINOVA — Plateforme 36 jeux (multilangue + Auth + Premium)</title>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&amp;display=swap" rel="stylesheet"/>
 <style>
 :root{
   --bg1:#0f0c29; --bg2:#302b63; --bg3:#24243e;
@@ -89,132 +90,235 @@ header{display:flex;justify-content:space-between;align-items:center;padding:14p
 .modalCard .btn{padding:10px;border-radius:8px;border:0;font-weight:800;cursor:pointer;background:linear-gradient(90deg,var(--accent1),var(--accent2));color:#001}
 @media(max-width:640px){#logoText{font-size:24px}.modalCard{width:90%}#langSelect{min-width:100px}}
 </style>
+<meta content="BRAINOVA - 36 jeux intelligents pour stimuler votre cerveau. Plateforme multilingue, IA, premium, et entraînement mental." name="description"/>
+<meta content="jeux intelligents, Brainova, IA, entraînement cérébral, premium, jeux éducatifs, puzzle, quiz" name="keywords"/>
+<meta content="Brainova Team" name="author"/>
+<link href="favicon.png" rel="icon" type="image/png"/>
+
+<style>
+/* Mobile optimization - aggressive minimization */
+body.mobile, @media only screen and (max-width: 768px) {
+  font-size: 13px !important;
+  line-height: 1.1 !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Reduce header spacing */
+body.mobile header, @media only screen and (max-width: 768px) header {
+  padding: 8px 10px !important;
+}
+
+/* Game grid adjustments: 2 columns in portrait, 3 in landscape max */
+body.mobile .game-grid, @media only screen and (max-width: 768px) .game-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: 8px !important;
+  padding: 6px !important;
+}
+
+/* Card compact */
+body.mobile .game-card, @media only screen and (max-width: 768px) .game-card {
+  width: 100% !important;
+  margin: 0 auto !important;
+  padding: 8px !important;
+  border-radius: 8px !important;
+  box-shadow: none !important;
+  font-size: 0.85rem !important;
+}
+
+/* Title short */
+body.mobile .game-card-title, @media only screen and (max-width: 768px) .game-card-title {
+  font-size: 0.9rem !important;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Reduce images and icons */
+body.mobile img, @media only screen and (max-width: 768px) img {
+  max-width: 100% !important;
+  height: auto !important;
+}
+
+/* Buttons adapt */
+body.mobile .btn, @media only screen and (max-width: 768px) .btn, body.mobile button, @media only screen and (max-width: 768px) button {
+  padding: 8px 12px !important;
+  font-size: 0.95rem !important;
+  border-radius: 8px !important;
+}
+
+/* Hide heavy decorative elements */
+body.mobile .decorative, @media only screen and (max-width: 768px) .decorative {
+  display: none !important;
+}
+
+/* Share button full width */
+body.mobile .share-btn, @media only screen and (max-width: 768px) .share-btn {
+  display: block !important;
+  width: calc(100% - 20px) !important;
+  margin: 8px auto !important;
+}
+
+/* Reduce modal padding */
+body.mobile .modal, @media only screen and (max-width: 768px) .modal {
+  padding: 12px !important;
+  max-width: 92% !important;
+}
+
+/* Ensure header buttons wrap */
+body.mobile .header-buttons, @media only screen and (max-width: 768px) .header-buttons {
+  display: flex !important;
+  gap: 6px !important;
+  flex-wrap: wrap !important;
+  justify-content: center !important;
+}
+
+/* Make overlays fullscreen friendly */
+body.mobile .overlay, @media only screen and (max-width: 768px) .overlay {
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  padding: 10px !important;
+}
+
+/* Specific: reduce font size for headers */
+body.mobile h1, @media only screen and (max-width: 768px) h1 {
+  font-size: 1.2rem !important;
+}
+
+/* Prevent horizontal overflow */
+html, body { max-width: 100%; overflow-x: hidden; }
+</style>
+<script>
+(function(){
+  try {
+    var isMobile = /Android|webOS|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    if (isMobile) document.body.classList.add('mobile'); else document.body.classList.add('desktop');
+  } catch(e) { console.error('mobile detect', e); }
+})();
+</script>
 </head>
 <body>
-
 <header>
-  <div id="logoText"><span class="emoji">🧠</span><span>Brainova</span></div>
-  <div class="controls">
-    <div id="langWrap">
-      <select id="langSelect" aria-label="Langue">
-        <option value="fr">Français</option>
-        <option value="en">English</option>
-        <option value="ar">العربية</option>
-        <option value="es">Español</option>
-        <option value="de">Deutsch</option>
-        <option value="zh">中文</option>
-      </select>
-    </div>
-    <div id="authContainer">
-      <button class="authBtn premium-only" id="loginBtn" data-tooltip="Connexion premium requise">
-        <span class="auth-icon">🔐</span>
-        <span class="auth-text">Connexion</span>
-      </button>
-      <button class="authBtn premium-only" id="signupBtn" data-tooltip="Inscription premium requise">
-        <span class="auth-icon">✨</span>
-        <span class="auth-text">Inscription</span>
-      </button>
-      <button id="premiumBtn" onclick="showSubscriptionMessage()">Premium</button>
-      
-      <button id="shareBtn" onclick="showShareOptions()">Partager</button>
-    </div>
-  </div>
+<div id="logoText"><span class="emoji">🧠</span><span>Brainova</span></div>
+<div class="controls">
+<div id="langWrap">
+<select aria-label="Langue" id="langSelect">
+<option value="fr">Français</option>
+<option value="en">English</option>
+<option value="ar">العربية</option>
+<option value="es">Español</option>
+<option value="de">Deutsch</option>
+<option value="zh">中文</option>
+</select>
+</div>
+<div id="authContainer">
+<button class="authBtn premium-only" data-tooltip="Connexion premium requise" id="loginBtn">
+<span class="auth-icon">🔐</span>
+<span class="auth-text">Connexion</span>
+</button>
+<button class="authBtn premium-only" data-tooltip="Inscription premium requise" id="signupBtn">
+<span class="auth-icon">✨</span>
+<span class="auth-text">Inscription</span>
+</button>
+<button id="premiumBtn" onclick="showSubscriptionMessage()">Premium</button>
+<button id="shareBtn" onclick="showShareOptions()">Partager</button>
+</div>
+</div>
 </header>
-
 <section class="intro">
-  <h2 id="introTitle">🎮 Découvrez nos 36 Jeux Intelligents</h2>
-  <p id="introDesc">Entraînez votre cerveau avec notre collection complète de jeux adaptatifs alimentés par l'IA</p>
+<h2 id="introTitle">🎮 Découvrez nos 36 Jeux Intelligents</h2>
+<p id="introDesc">Entraînez votre cerveau avec notre collection complète de jeux adaptatifs alimentés par l'IA</p>
 </section>
+<p class="pc-note" style="font-size:0.95rem; margin-top:6px; color: #cfd8dc;">
+<span data-fr="">🖥️ Jeux conçus pour ordinateur (version PC)</span>
+<span data-en="" style="display:none">🖥️ Games designed for computer (PC version)</span>
+<span data-es="" style="display:none">🖥️ Juegos diseñados para ordenador (versión PC)</span>
+<span data-de="" style="display:none">🖥️ Spiele für Computer entwickelt (PC-Version)</span>
+<span data-ar="" style="display:none">🖥️ الألعاب مصممة لأجهزة الكمبيوتر (نسخة الكمبيوتر)</span>
+<span data-zh="" style="display:none">🖥️ 专为电脑设计的游戏（PC 版）</span>
+</p>
 
-<main class="games-grid" id="gamesGrid" aria-live="polite"></main>
-
+<main aria-live="polite" class="games-grid" id="gamesGrid"></main>
 <!-- Overlay -->
-<div id="gameOverlay" role="dialog" aria-modal="true">
-  <div id="overlayInner">
-    <div class="overlayTopLeft">
-      <button id="overlayMenu" class="overlayBtn secondary">🔙 Retour</button>
-    </div>
-    <iframe id="gameFrame" allow="fullscreen; autoplay; camera; microphone; geolocation"></iframe>
-  </div>
+<div aria-modal="true" id="gameOverlay" role="dialog">
+<div id="overlayInner">
+<div class="overlayTopLeft">
+<button class="overlayBtn secondary" id="overlayMenu">🔙 Retour</button>
 </div>
-
+<iframe allow="fullscreen; autoplay; camera; microphone; geolocation" id="gameFrame"></iframe>
+</div>
+</div>
 <!-- Auth Modals -->
-<div id="loginModal" class="modal" aria-hidden="true">
-  <div class="modalCard premium-auth-modal">
-    <div class="auth-header">
-      <div class="auth-icon-large">🔐</div>
-      <h3>Connexion Premium</h3>
-      <p>Accès réservé aux membres abonnés</p>
-    </div>
-    
-    <div class="premium-status-check">
-      <div class="status-indicator" id="premiumStatusIndicator">
-        <span class="status-dot"></span>
-        <span class="status-text">Vérification du statut premium...</span>
-      </div>
-    </div>
-    
-    <form id="loginForm" class="auth-form">
-      <div class="input-group">
-        <label for="loginEmail">Email</label>
-        <input type="email" id="loginEmail" required placeholder="votre@email.com">
-      </div>
-      <div class="input-group">
-        <label for="loginPassword">Mot de passe</label>
-        <input type="password" id="loginPassword" required placeholder="••••••••">
-      </div>
-      <button type="submit" class="btn premium-btn">Se connecter</button>
-    </form>
-    
-    <button class="btn cancel-btn" id="loginCancel">Annuler</button>
-  </div>
+<div aria-hidden="true" class="modal" id="loginModal">
+<div class="modalCard premium-auth-modal">
+<div class="auth-header">
+<div class="auth-icon-large">🔐</div>
+<h3>Connexion Premium</h3>
+<p>Accès réservé aux membres abonnés</p>
 </div>
-
-<div id="signupModal" class="modal" aria-hidden="true">
-  <div class="modalCard premium-auth-modal">
-    <div class="auth-header">
-      <div class="auth-icon-large">✨</div>
-      <h3>Inscription Premium</h3>
-      <p>Créez votre compte membre privilégié</p>
-    </div>
-    
-    <div class="premium-status-check">
-      <div class="status-indicator" id="premiumStatusIndicatorSignup">
-        <span class="status-dot"></span>
-        <span class="status-text">Vérification du statut premium...</span>
-      </div>
-    </div>
-    
-    <form id="signupForm" class="auth-form">
-      <div class="input-group">
-        <label for="signupEmail">Email</label>
-        <input type="email" id="signupEmail" required placeholder="votre@email.com">
-      </div>
-      <div class="input-group">
-        <label for="signupPassword">Mot de passe</label>
-        <input type="password" id="signupPassword" required placeholder="••••••••">
-      </div>
-      <div class="input-group">
-        <label for="signupConfirm">Confirmer le mot de passe</label>
-        <input type="password" id="signupConfirm" required placeholder="••••••••">
-      </div>
-      <button type="submit" class="btn premium-btn">S'inscrire</button>
-    </form>
-    
-    <button class="btn cancel-btn" id="signupCancel">Annuler</button>
-  </div>
+<div class="premium-status-check">
+<div class="status-indicator" id="premiumStatusIndicator">
+<span class="status-dot"></span>
+<span class="status-text">Vérification du statut premium...</span>
 </div>
-
+</div>
+<form class="auth-form" id="loginForm">
+<div class="input-group">
+<label for="loginEmail">Email</label>
+<input id="loginEmail" placeholder="votre@email.com" required="" type="email"/>
+</div>
+<div class="input-group">
+<label for="loginPassword">Mot de passe</label>
+<input id="loginPassword" placeholder="••••••••" required="" type="password"/>
+</div>
+<button class="btn premium-btn" type="submit">Se connecter</button>
+</form>
+<button class="btn cancel-btn" id="loginCancel">Annuler</button>
+</div>
+</div>
+<div aria-hidden="true" class="modal" id="signupModal">
+<div class="modalCard premium-auth-modal">
+<div class="auth-header">
+<div class="auth-icon-large">✨</div>
+<h3>Inscription Premium</h3>
+<p>Créez votre compte membre privilégié</p>
+</div>
+<div class="premium-status-check">
+<div class="status-indicator" id="premiumStatusIndicatorSignup">
+<span class="status-dot"></span>
+<span class="status-text">Vérification du statut premium...</span>
+</div>
+</div>
+<form class="auth-form" id="signupForm">
+<div class="input-group">
+<label for="signupEmail">Email</label>
+<input id="signupEmail" placeholder="votre@email.com" required="" type="email"/>
+</div>
+<div class="input-group">
+<label for="signupPassword">Mot de passe</label>
+<input id="signupPassword" placeholder="••••••••" required="" type="password"/>
+</div>
+<div class="input-group">
+<label for="signupConfirm">Confirmer le mot de passe</label>
+<input id="signupConfirm" placeholder="••••••••" required="" type="password"/>
+</div>
+<button class="btn premium-btn" type="submit">S'inscrire</button>
+</form>
+<button class="btn cancel-btn" id="signupCancel">Annuler</button>
+</div>
+</div>
 <!-- Premium Modal -->
-<div id="premiumModal" class="modal" aria-hidden="true">
-  <div class="modalCard">
-    <h3>Abonnement Premium</h3>
-    <p>Débloquez tous les jeux Brainova pour seulement 20 EUR / an.</p>
-    <button class="btn" id="premiumSubscribeBtn">S'abonner</button>
-    <button class="btn" id="premiumCancel" style="background:transparent;color:#fff;border:1px solid rgba(255,255,255,0.08)">Annuler</button>
-  </div>
+<div aria-hidden="true" class="modal" id="premiumModal">
+<div class="modalCard">
+<h3>Abonnement Premium</h3>
+<p>Débloquez tous les jeux Brainova pour seulement 20 EUR / an.</p>
+<button class="btn" id="premiumSubscribeBtn">S'abonner</button>
+<button class="btn" id="premiumCancel" style="background:transparent;color:#fff;border:1px solid rgba(255,255,255,0.08)">Annuler</button>
 </div>
-
+</div>
 <script src="https://js.stripe.com/v3/"></script>
 <script src="https://www.gstatic.com/firebasejs/12.4.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/12.4.0/firebase-auth-compat.js"></script>
@@ -1223,6 +1327,53 @@ document.addEventListener('click', function(e) {
 // Production ready - Système de paiement Stripe intégré
 
 </script>
+<div id="cookie-banner" style="position:fixed;bottom:0;left:0;width:100%;background:rgba(0,0,0,0.9);color:white;padding:15px;text-align:center;z-index:99999;font-size:14px;">
+Ce site utilise des cookies pour améliorer votre expérience. 
+<button id="acceptCookies" style="margin-left:10px;padding:8px 16px;border:none;border-radius:6px;background:#00ff88;color:#000;cursor:pointer;font-weight:bold;">Accepter</button>
+</div>
+<script>
+document.getElementById('acceptCookies').addEventListener('click',()=>{
+  localStorage.setItem('cookiesAccepted','true');
+  document.getElementById('cookie-banner').style.display='none';
+});
+if(localStorage.getItem('cookiesAccepted')==='true'){
+  document.getElementById('cookie-banner').style.display='none';
+}
+</script>
+<footer style="text-align:center;padding:20px;background:rgba(0,0,0,0.7);color:white;font-size:13px;">
+<a href="politique-confidentialite.html" style="color:#00ffff;margin:0 10px;">Politique de Confidentialité</a> |
+  <a href="conditions-utilisation.html" style="color:#00ffff;margin:0 10px;">Conditions Générales</a> |
+  <a href="cookies.html" style="color:#00ffff;margin:0 10px;">Cookies</a>
+<p style="margin-top:8px;">© 2025 Brainova - Tous droits réservés</p>
+</footer>
+<script async="" defer="" src="https://www.google.com/recaptcha/api.js"></script>
+<script>
+function getExpiryDateFromStorage(){const v=localStorage.getItem('brainova_expiry');return v?new Date(v):null}
+function setExpiryDays(days){const d=new Date();d.setDate(d.getDate()+days);localStorage.setItem('brainova_expiry',d.toISOString())}
+function isPremiumActive(){const p=localStorage.getItem('brainova_premium')==='true';const exp=getExpiryDateFromStorage();if(!p||!exp)return false;const now=new Date();if(now>exp){localStorage.removeItem('brainova_premium');return false}return true}
+function updateShareButtonState(){const btn=document.getElementById('shareBtn');if(!btn)return;if(isPremiumActive()){btn.disabled=true;btn.style.opacity='0.5';btn.style.cursor='not-allowed'}else{btn.disabled=false;btn.style.opacity='';btn.style.cursor=''}};
+async function notifyServerSubscription(email,expiryISO){try{await fetch('/.netlify/functions/notify-subscription',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email,expiry:expiryISO})})}catch(err){console.error('Erreur notify server subscription:',err)}}
+window.unlockPremium=async function(userEmail){try{localStorage.setItem('brainova_premium','true');setExpiryDays(365);try{if(typeof renderGrid==='function')renderGrid(document.getElementById('langSelect')?.value||'fr')}catch(e){}try{if(typeof initializeAuthButtons==='function')initializeAuthButtons()}catch(e){}updateShareButtonState();const email=userEmail||localStorage.getItem('user_email')||null;const expiry=localStorage.getItem('brainova_expiry')||null;if(email)await notifyServerSubscription(email,expiry);alert('🎉 Abonnement activé ! Tous les jeux sont débloqués.')}catch(err){console.error('unlockPremium error',err)}};
+function checkStripeReturn(){try{const urlParams=new URLSearchParams(window.location.search);const success=urlParams.get('success');const status=urlParams.get('payment_intent_status');if(success==='true'||status==='succeeded'){const custEmail=urlParams.get('customer_email')||null;if(custEmail)localStorage.setItem('user_email',custEmail);window.unlockPremium(custEmail);if(history&&history.replaceState)history.replaceState({},document.title,window.location.pathname)}}catch(e){console.error('checkStripeReturn error',e)}}
+document.addEventListener('DOMContentLoaded',function(){updateShareButtonState();checkStripeReturn();const exp=getExpiryDateFromStorage();if(exp){const now=new Date();if(now>exp){localStorage.removeItem('brainova_premium');updateShareButtonState()}}});
+</script>
 
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  function setNoteLang(lang) {
+    var notes = document.querySelectorAll('.pc-note [data-fr], .pc-note [data-en], .pc-note [data-es], .pc-note [data-de], .pc-note [data-ar], .pc-note [data-zh]');
+    notes.forEach(function(n){ n.style.display = 'none'; });
+    var sel = document.querySelector('.pc-note [data-' + lang + ']');
+    if (sel) sel.style.display = '';
+  }
+  var langSelect = document.getElementById('langSelect');
+  if (langSelect) {
+    setNoteLang(langSelect.value || 'fr');
+    langSelect.addEventListener('change', function(){ setNoteLang(this.value || 'fr'); });
+  } else {
+    setNoteLang('fr');
+  }
+});
+</script>
 </body>
 </html>
