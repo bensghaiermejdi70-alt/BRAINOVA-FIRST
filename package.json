@@ -1,30 +1,32 @@
 {
-  "name": "brainova-netlify-functions",
+  "name": "brainova-platform",
   "version": "1.0.0",
-  "description": "Netlify Functions for Brainova Gaming Platform",
-  "main": "index.js",
+  "description": "Brainova - Plateforme de jeux intelligents multilingue avec Stripe, AWS SES et Firebase",
+  "main": "index.html",
   "scripts": {
-    "dev": "netlify dev",
-    "build": "echo 'No build step required'",
-    "deploy": "netlify deploy --prod",
-    "deploy:functions": "netlify deploy --prod --functions=netlify/functions",
-    "test:functions": "netlify functions:serve",
-    "setup": "npm install && netlify login && netlify init",
-    "health": "curl https://your-site.netlify.app/.netlify/functions/health-check"
+    "start": "netlify dev",
+    "build": "netlify build",
+    "test": "echo \"No test specified\" && exit 0"
   },
   "dependencies": {
-    "stripe": "^14.0.0"
+    "stripe": "^13.0.0",
+    "aws-sdk": "^2.1520.0",
+    "firebase-admin": "^11.11.0",
+    "node-fetch": "^2.6.9"
   },
-  "devDependencies": {
-    "netlify-cli": "^17.0.0"
+  "engines": {
+    "node": ">=18.0.0"
   },
-  "keywords": [
-    "netlify",
-    "functions",
-    "stripe",
-    "gaming",
-    "brainova"
-  ],
-  "author": "Brainova Team",
-  "license": "MIT"
+  "license": "MIT",
+  "author": "Mejdi Ben Sghaier - Brainova Online",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bensghaiermejdi70-alt/BRAINOVA-FIRST.git"
+  },
+  "netlify": {
+    "functions": {
+      "node_bundler": "esbuild",
+      "external_node_modules": ["aws-sdk", "firebase-admin"]
+    }
+  }
 }
