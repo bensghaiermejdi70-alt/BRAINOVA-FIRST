@@ -1,0 +1,15 @@
+{
+  "name": "brainova-platform",
+  "version": "1.0.0",
+  "description": "Brainova - Plateforme de jeux intelligents multilingue avec Stripe et AWS SES",
+  "main": "index.html",
+  "scripts": {
+    "start": "netlify dev",
+    "build": "netlify build"
+  },
+  "dependencies": {
+    "stripe": "^13.0.0",
+    "aws-sdk": "^2.1487.0",
+    "node-fetch": "^2.6.9"
+  }
+}
