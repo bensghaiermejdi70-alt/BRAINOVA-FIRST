@@ -1,6 +1,6 @@
 [build]
   publish = "."
-  functions = "netlify/functions"
+  functions = "functions"
 
 [build.environment]
   NODE_VERSION = "18"
@@ -19,7 +19,7 @@
     Content-Security-Policy = "default-src 'self' data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval' *.stripe.com *.googleapis.com *.firebase.com *.firebaseapp.com *.auth0.com cdn.auth0.com js.stripe.com www.gstatic.com cdn.emailjs.com; style-src 'self' 'unsafe-inline' fonts.googleapis.com; font-src 'self' fonts.gstatic.com; img-src 'self' data: blob: *; media-src 'self' data: blob: *; connect-src 'self' *.auth0.com *.firebase.com *.firebaseapp.com *.googleapis.com js.stripe.com cdn.emailjs.com; frame-src 'self' *.auth0.com js.stripe.com; child-src 'self' *.auth0.com js.stripe.com;"
 
 [functions]
-  directory = "netlify/functions"
+  directory = "functions"
   node_bundler = "esbuild"
 
 [[edge_functions]]
