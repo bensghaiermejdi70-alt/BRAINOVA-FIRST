@@ -5,7 +5,7 @@ export async function handler(event) {
     const { to, subject, message } = JSON.parse(event.body);
 
     const transporter = nodemailer.createTransport({
-      host: process.env.BNV_SMTP_HOST,
+      host: process.env.BNV_SMTP_HOST,  // ✅ renommé pour Netlify
       port: process.env.BNV_SMTP_PORT,
       auth: {
         user: process.env.BNV_SENDER,
