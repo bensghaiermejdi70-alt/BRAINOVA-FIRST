@@ -5,16 +5,16 @@ export async function handler(event) {
     const { to, subject, message } = JSON.parse(event.body);
 
     const transporter = nodemailer.createTransport({
-      host: process.env.BREVO_SMTP_HOST,
-      port: process.env.BREVO_SMTP_PORT,
+      host: process.env.BNV_SMTP_HOST,
+      port: process.env.BNV_SMTP_PORT,
       auth: {
-        user: process.env.BREVO_SENDER,
-        pass: process.env.BREVO_API_KEY
+        user: process.env.BNV_SENDER,
+        pass: process.env.BNV_API_KEY
       }
     });
 
     await transporter.sendMail({
-      from: `Brainova <${process.env.BREVO_SENDER}>`,
+      from: `Brainova <${process.env.BNV_SENDER}>`,
       to,
       subject,
       text: message
