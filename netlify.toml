@@ -5,15 +5,16 @@
 [build.environment]
   NODE_VERSION = "18"
 
-# ✅ Redirections pour accéder à tes fonctions via /api/* et /.netlify/functions/*
+# ✅ Redirection standard pour les fonctions Netlify (via /api/*)
 [[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/:splat"
   status = 200
 
+# ✅ Redirection directe pour accéder à /sendEmail
 [[redirects]]
-  from = "/.netlify/functions/*"
-  to = "/.netlify/functions/:splat"
+  from = "/sendEmail"
+  to = "/.netlify/functions/sendEmail"
   status = 200
 
 [[headers]]
@@ -23,7 +24,6 @@
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
 
-    # ✅ Politique de sécurité complète (avec reCAPTCHA + Firebase + Stripe)
     Content-Security-Policy = """
       default-src 'self' data: blob:;
       script-src 'self' 'unsafe-inline' 'unsafe-eval'
