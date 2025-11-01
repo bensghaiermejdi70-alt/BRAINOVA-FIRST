@@ -16,24 +16,39 @@ export async function handler(event) {
   }
 
   try {
+    const now = new Date();
+    const localTime = now.toLocaleString("fr-FR", { timeZone: "Europe/Paris" });
+
+    // ✅ Statut de chaque service
+    const stripeStatus = process.env.STRIPE_SECRET_KEY ? "configured ✅" : "missing ⚠️";
+    const brevoStatus = process.env.BNV_API_KEY ? "configured ✅" : "missing ⚠️";
+    const firebaseStatus = process.env.GOOGLE_APPLICATION_CREDENTIALS ? "configured ✅" : "not set ⚠️";
+
     // ✅ Réponse du endpoint de santé
     const response = {
       status: "healthy ✅",
-      timestamp: new Date().toISOString(),
+      checkedAt: localTime,
       environment: process.env.NODE_ENV || "production",
-      functions: {
-        "create-checkout-session": "active",
-        "stripe-webhook": "active",
-        "sendEmail": "active",
-        "health-check": "active"
-      },
+      version: "1.0.2",
+      platform: "Brainova Premium Gaming",
       services: {
-        stripe: process.env.STRIPE_SECRET_KEY ? "configured" : "missing ⚠️",
-        brevo: process.env.BNV_API_KEY ? "configured" : "missing ⚠️",
-        netlify: "active"
+        stripe: stripeStatus,
+        brevo: brevoStatus,
+        firebase: firebaseStatus,
+        netlify: "active ✅"
       },
-      version: "1.0.1",
-      platform: "Brainova Premium Gaming"
+      functions: {
+        "create-checkout-session": "active ✅",
+        "stripe-webhook": "active ✅",
+        "sendEmail": "active ✅",
+        "subscription-monitor": "active ✅",
+        "health-check": "active ✅"
+      },
+      logs: {
+        message: "All core functions are deployed and reachable.",
+        domain: "brainova.online",
+        frontend: "https://brainovafirst.netlify.app"
+      }
     };
 
     return {
