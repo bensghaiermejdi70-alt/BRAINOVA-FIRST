@@ -26,12 +26,13 @@ export async function handler(event) {
 
     try {
       stripeEvent = stripe.webhooks.constructEvent(event.body, sig, endpointSecret);
+      console.log(`✅ Stripe event received: ${stripeEvent.type}`);
     } catch (err) {
       console.error("❌ Invalid Stripe signature:", err.message);
       return { statusCode: 400, headers, body: JSON.stringify({ error: err.message }) };
     }
 
-    // ✉️ Transport Brevo SMTP
+    // ✉️ Configuration Brevo SMTP
     const transporter = nodemailer.createTransport({
       host: process.env.BNV_SMTP_HOST,
       port: process.env.BNV_SMTP_PORT,
@@ -41,15 +42,19 @@ export async function handler(event) {
       }
     });
 
-    // 📬 Fonction générique d'envoi d'email
+    // 📬 Fonction sécurisée d’envoi d’e-mail
     const sendEmail = async (to, subject, html) => {
-      await transporter.sendMail({
-        from: `Brainova <${process.env.BNV_SENDER}>`,
-        to,
-        subject,
-        html
-      });
-      console.log(`📧 Email envoyé à ${to} : ${subject}`);
+      try {
+        await transporter.sendMail({
+          from: `Brainova <${process.env.BNV_SENDER}>`,
+          to,
+          subject,
+          html
+        });
+        console.log(`📧 Email envoyé à ${to} : ${subject}`);
+      } catch (err) {
+        console.error(`❌ Échec de l’envoi d’email à ${to}:`, err.message);
+      }
     };
 
     // 🔔 Gestion des événements Stripe
