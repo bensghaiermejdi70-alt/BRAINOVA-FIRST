@@ -1,7 +1,7 @@
 {
   "name": "brainova-netlify-functions",
-  "version": "1.0.4",
-  "description": "Netlify Functions for Brainova (Stripe + Email + Cloud Services)",
+  "version": "1.0.5",
+  "description": "Netlify Functions for Brainova (Stripe + Email + Firebase + Monitoring)",
   "main": "index.js",
   "type": "module",
   "scripts": {
@@ -23,9 +23,10 @@
     "netlify",
     "functions",
     "stripe",
+    "firebase",
+    "brevo",
     "email",
-    "cloud",
-    "platform"
+    "brainova"
   ],
   "author": "Mejdi Ben Sghaier",
   "license": "MIT"
