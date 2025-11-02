@@ -14,7 +14,7 @@
   "dependencies": {
     "nodemailer": "^6.9.0",
     "stripe": "^14.0.0",
-    "firebase-admin": "^12.0.0"   // ✅ ajout essentiel pour subscription-monitor.js
+    "firebase-admin": "^12.0.0"
   },
   "devDependencies": {
     "netlify-cli": "^17.0.0"
@@ -28,5 +28,6 @@
     "brainova"
   ],
   "author": "Mejdi Ben Sghaier",
-  "license": "MIT"
+  "license": "MIT",
+  "_comment": "ajout de firebase-admin pour Netlify Functions"
 }
