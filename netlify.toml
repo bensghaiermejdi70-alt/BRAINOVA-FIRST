@@ -1,20 +1,18 @@
 [build]
   publish = "."
-  functions = "functions"
+  functions = "netlify/functions" # ou "functions" selon ton dossier
 
 [build.environment]
   NODE_VERSION = "18"
 
-# ✅ Redirection standard pour les fonctions Netlify (via /api/*)
 [[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/:splat"
   status = 200
 
-# ✅ Redirection directe pour accéder à /sendEmail
 [[redirects]]
   from = "/sendEmail"
-  to = "/.netlify/functions/sendEmail"
+  to = "/.netlify/functions/sendemail"
   status = 200
 
 [[headers]]
@@ -47,6 +45,8 @@
         *.firebase.com
         *.firebaseapp.com
         *.googleapis.com
+        firebaseinstallations.googleapis.com
+        www.gstatic.com
         js.stripe.com
         cdn.emailjs.com;
       frame-src 'self'
@@ -62,7 +62,7 @@
     """
 
 [functions]
-  directory = "functions"
+  directory = "netlify/functions"
   node_bundler = "esbuild"
 
 [[edge_functions]]
