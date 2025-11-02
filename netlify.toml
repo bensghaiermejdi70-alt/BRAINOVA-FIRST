@@ -1,9 +1,19 @@
+######################################
+# 🧠 Brainova - Configuration Netlify
+######################################
+
 [build]
   publish = "."
-  functions = "netlify/functions" # ou "functions" selon ton dossier
+  functions = "netlify/functions"
 
 [build.environment]
   NODE_VERSION = "18"
+  # ✅ Empêche Netlify d’afficher des warnings sur les clés Firebase
+  FIREBASE_HIDE_ENV_KEYS = "true"
+
+######################################
+# 🔄 Redirections des endpoints API
+######################################
 
 [[redirects]]
   from = "/api/*"
@@ -14,6 +24,10 @@
   from = "/sendEmail"
   to = "/.netlify/functions/sendemail"
   status = 200
+
+######################################
+# 🧱 Headers de sécurité HTTP
+######################################
 
 [[headers]]
   for = "/*"
@@ -61,6 +75,10 @@
         www.recaptcha.net;
     """
 
+######################################
+# ⚙️ Functions Netlify
+######################################
+
 [functions]
   directory = "netlify/functions"
   node_bundler = "esbuild"
@@ -68,6 +86,10 @@
 [[edge_functions]]
   function = "stripe-webhook"
   path = "/api/stripe-webhook"
+
+######################################
+# 🧪 Dev local
+######################################
 
 [dev]
   framework = "#static"
