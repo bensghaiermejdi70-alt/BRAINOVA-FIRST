@@ -1,6 +1,6 @@
 {
   "name": "brainova-netlify-functions",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Netlify Functions for Brainova Platform (Stripe + Brevo + Firebase)",
   "main": "index.js",
   "type": "module",
@@ -29,5 +29,5 @@
   ],
   "author": "Mejdi Ben Sghaier",
   "license": "MIT",
-  "_comment": "ajout de firebase-admin pour Netlify Functions"
+  "_comment": "✅ firebase-admin ajouté pour le support des fonctions Netlify sécurisées"
 }
