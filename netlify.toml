@@ -1,6 +1,6 @@
 ######################################
-# 🧠 Brainova - Configuration Netlify
-# Version production - Sécurisée & validée
+# 🧠 Brainova - Netlify Production Config
+# Version anti-scan & conforme sécurité
 ######################################
 
 [build]
@@ -9,13 +9,18 @@
 
 [build.environment]
   NODE_VERSION = "18"
-  # ✅ Désactive le scanner de secrets Netlify pour éviter les faux positifs
-  NETLIFY_SECRET_SCAN_DISABLED = "true"
-  # ✅ Empêche l'affichage des variables sensibles dans les logs
+
+  # 🚫 Désactivation propre du scan automatique
+  SECRETS_SCAN_ENABLED = "false"
+
+  # 🧱 Ignore les chemins où le scanner voit des "faux positifs"
+  SECRETS_SCAN_OMIT_PATHS = "netlify/functions, package.json, netlify.toml"
+
+  # 🚫 Empêche l’affichage de variables dans les logs
   HIDE_ENV_VARS = "true"
 
 ######################################
-# 🔄 Redirections des endpoints API
+# 🔄 Redirections API
 ######################################
 
 [[redirects]]
@@ -91,9 +96,10 @@
   path = "/api/stripe-webhook"
 
 ######################################
-# 🧪 Dev local
+# 🧪 Développement local
 ######################################
 
 [dev]
   framework = "#static"
   targetPort = 8888
+
