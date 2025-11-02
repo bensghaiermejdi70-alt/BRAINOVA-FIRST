@@ -1,5 +1,6 @@
 ######################################
 # 🧠 Brainova - Configuration Netlify
+# Version sécurisée sans secrets
 ######################################
 
 [build]
@@ -8,11 +9,11 @@
 
 [build.environment]
   NODE_VERSION = "18"
-  # ✅ Empêche Netlify d’afficher des warnings sur les clés Firebase
-  FIREBASE_HIDE_ENV_KEYS = "true"
+  # Empêche l'affichage de variables sensibles dans les logs
+  HIDE_ENV_VARS = "true"
 
 ######################################
-# 🔄 Redirections des endpoints API
+# 🔄 Redirections API
 ######################################
 
 [[redirects]]
@@ -26,7 +27,7 @@
   status = 200
 
 ######################################
-# 🧱 Headers de sécurité HTTP
+# 🧱 Headers de sécurité
 ######################################
 
 [[headers]]
