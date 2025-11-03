@@ -2,45 +2,43 @@ import nodemailer from "nodemailer";
 
 export const handler = async (event) => {
   try {
-    const { to, subject, message } = JSON.parse(event.body || "{}");
+    const { to, subject, message } = JSON.parse(event.body);
 
+    // ✅ Vérification des champs obligatoires
     if (!to || !subject || !message) {
       return {
         statusCode: 400,
-        body: JSON.stringify({
-          success: false,
-          error: "Champs requis manquants (to, subject, message).",
-        }),
+        body: JSON.stringify({ success: false, error: "Champs requis manquants" }),
       };
     }
 
-    console.log("📨 Tentative d’envoi via Brevo à :", to);
+    console.log("📤 Tentative d’envoi d’email via Brevo TLS à :", to);
 
-    // ✅ Transporteur SMTP — Port 465 / TLS direct
+    // ✅ Transport SMTP sécurisé (TLS)
     const transporter = nodemailer.createTransport({
-      host: process.env.BNV_SMTP_HOST || "smtp-relay.brevo.com",
-      port: 465, // ✅ TLS complet
-      secure: true, // obligatoire pour port 465
+      host: process.env.BNV_SMTP_HOST,
+      port: parseInt(process.env.BNV_SMTP_PORT || "465", 10),
+      secure: true, // ⚠️ Indispensable pour TLS (port 465)
       auth: {
-        user: process.env.BNV_SENDER, // noreply@brainova.online
-        pass: process.env.BNV_API_KEY, // clé SMTP Brevo xsmtpsib-...
+        user: process.env.BNV_SENDER,
+        pass: process.env.BNV_API_KEY,
       },
       tls: {
-        // Empêche Netlify de rejeter le certificat
-        rejectUnauthorized: false,
+        rejectUnauthorized: false, // Permet d’éviter certaines erreurs SSL sur Netlify
       },
     });
 
+    // ✅ Envoi du message
     const info = await transporter.sendMail({
       from: `Brainova <${process.env.BNV_SENDER}>`,
       to,
       subject,
       html: `
-        <div style="font-family: Arial, sans-serif; color: #333; padding: 20px;">
-          <h2 style="color:#0077ff;">${subject}</h2>
+        <div style="font-family: Arial, sans-serif; color: #333;">
+          <h2>${subject}</h2>
           <p>${message}</p>
-          <hr style="border:0;border-top:1px solid #eee;margin:20px 0;">
-          <small style="color:#666;">© ${new Date().getFullYear()} Brainova – Netlify Secure Mail</small>
+          <br>
+          <small>✅ Envoi effectué depuis Netlify (TLS 465) - Brainova</small>
         </div>
       `,
     });
@@ -49,19 +47,13 @@ export const handler = async (event) => {
 
     return {
       statusCode: 200,
-      body: JSON.stringify({
-        success: true,
-        message: "Email envoyé avec succès via Brevo (TLS) ✅",
-      }),
+      body: JSON.stringify({ success: true, message: "Email envoyé avec succès via TLS ✅" }),
     };
   } catch (error) {
     console.error("❌ Erreur sendemail.js :", error);
     return {
       statusCode: 500,
-      body: JSON.stringify({
-        success: false,
-        error: error.message || "Erreur interne du serveur",
-      }),
+      body: JSON.stringify({ success: false, error: error.message }),
     };
   }
 };
