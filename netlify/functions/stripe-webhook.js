@@ -1,14 +1,21 @@
 // ✅ Stripe Webhook - Brainova (via API Brevo, sans SMTP)
-// Version finale sécurisée et compatible Netlify Production
+// ✅ Version finale sécurisée et compatible Netlify Production
+// ✅ Corrige l’erreur : “Signature Stripe invalide” (corps brut nécessaire)
 
 import Stripe from "stripe";
 import fetch from "node-fetch";
+import getRawBody from "raw-body";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 const BREVO_API_KEY = process.env.BNV_API_KEY; // xkeysib-xxxx
 const BREVO_SENDER = process.env.BNV_SENDER || "noreply@brainova.online";
 
-export async function handler(event) {
+// ⛔️ Important : dire à Netlify de NE PAS parser le JSON (pour Stripe)
+export const config = {
+  bodyParser: false,
+};
+
+export async function handler(event, context) {
   const headers = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Headers": "Content-Type, Stripe-Signature",
@@ -29,62 +36,63 @@ export async function handler(event) {
     };
   }
 
+  // ⚙️ Lire le corps brut (obligatoire pour vérifier la signature)
+  let stripeEvent;
   try {
+    const rawBody = await getRawBody(event.body ? event : { ...event, body: Buffer.from(event.body || "") });
     const sig = event.headers["stripe-signature"];
     const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
-    let stripeEvent;
 
-    // ✅ Vérification de la signature Stripe
-    try {
-      stripeEvent = stripe.webhooks.constructEvent(event.body, sig, endpointSecret);
-      console.log(`✅ Stripe event reçu : ${stripeEvent.type}`);
-    } catch (err) {
-      console.error("❌ Signature Stripe invalide :", err.message);
-      return {
-        statusCode: 400,
-        headers,
-        body: JSON.stringify({ error: err.message }),
-      };
-    }
-
-    // 📬 Fonction d’envoi via API Brevo
-    const sendEmail = async (to, subject, html) => {
-      try {
-        const response = await fetch("https://api.brevo.com/v3/smtp/email", {
-          method: "POST",
-          headers: {
-            accept: "application/json",
-            "api-key": BREVO_API_KEY,
-            "content-type": "application/json",
-          },
-          body: JSON.stringify({
-            sender: { email: BREVO_SENDER, name: "Brainova" },
-            to: [{ email: to }],
-            subject,
-            htmlContent: html,
-          }),
-        });
-
-        const result = await response.json();
-        if (response.ok) {
-          console.log(`📧 Email envoyé à ${to} via Brevo : ${subject}`);
-        } else {
-          console.error("❌ Erreur API Brevo :", result);
-        }
-      } catch (err) {
-        console.error("❌ Erreur réseau API Brevo :", err.message);
-      }
+    stripeEvent = stripe.webhooks.constructEvent(rawBody, sig, endpointSecret);
+    console.log(`✅ Événement Stripe reçu : ${stripeEvent.type}`);
+  } catch (err) {
+    console.error("❌ Signature Stripe invalide :", err.message);
+    return {
+      statusCode: 400,
+      headers,
+      body: JSON.stringify({ error: err.message }),
     };
+  }
 
-    // 🔔 Gestion des événements Stripe
+  // 📬 Fonction d’envoi d’email via Brevo API
+  const sendEmail = async (to, subject, html) => {
+    try {
+      const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+        method: "POST",
+        headers: {
+          accept: "application/json",
+          "api-key": BREVO_API_KEY,
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          sender: { email: BREVO_SENDER, name: "Brainova" },
+          to: [{ email: to }],
+          subject,
+          htmlContent: html,
+        }),
+      });
+
+      if (response.ok) {
+        console.log(`📧 Email envoyé à ${to} via Brevo : ${subject}`);
+      } else {
+        const errorData = await response.text();
+        console.error("❌ Erreur API Brevo :", errorData);
+      }
+    } catch (err) {
+      console.error("❌ Erreur réseau API Brevo :", err.message);
+    }
+  };
+
+  // 🔔 Gestion des événements Stripe
+  try {
     switch (stripeEvent.type) {
       // ✅ Paiement réussi (session ou facture)
       case "checkout.session.completed":
       case "invoice.payment_succeeded":
-      case "invoice_payment.paid": { // ✅ ajouté pour ton cas réel
+      case "invoice_payment.paid": {
         const session = stripeEvent.data.object;
-        const customerEmail =
-          session.customer_email || session.customer_details?.email;
+        const customerEmail = session.customer_email || session.customer_details?.email;
+
         if (customerEmail) {
           await sendEmail(
             customerEmail,
@@ -99,7 +107,7 @@ export async function handler(event) {
                    Accéder à Brainova
                 </a>
                 <br><br>
-                <small>Votre abonnement est actif pour 1 an. Vous recevrez un rappel avant expiration.</small>
+                <small>Votre abonnement est actif. Vous recevrez un rappel avant expiration.</small>
               </div>
             `
           );
@@ -107,11 +115,10 @@ export async function handler(event) {
         break;
       }
 
-      // ⚠️ Rappel d’expiration
+      // ⚠️ Avertissement expiration abonnement
       case "invoice.upcoming": {
         const invoice = stripeEvent.data.object;
-        const customerEmail =
-          invoice.customer_email || invoice.customer_details?.email;
+        const customerEmail = invoice.customer_email || invoice.customer_details?.email;
         if (customerEmail) {
           await sendEmail(
             customerEmail,
@@ -129,8 +136,7 @@ export async function handler(event) {
       // ❌ Paiement échoué
       case "invoice.payment_failed": {
         const failed = stripeEvent.data.object;
-        const customerEmail =
-          failed.customer_email || failed.customer_details?.email;
+        const customerEmail = failed.customer_email || failed.customer_details?.email;
         if (customerEmail) {
           await sendEmail(
             customerEmail,
@@ -159,7 +165,7 @@ export async function handler(event) {
       body: JSON.stringify({ success: true, event: stripeEvent.type }),
     };
   } catch (error) {
-    console.error("❌ Erreur Webhook Stripe :", error);
+    console.error("❌ Erreur traitement webhook :", error);
     return {
       statusCode: 500,
       headers,
