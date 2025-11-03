@@ -14,7 +14,8 @@
   "dependencies": {
     "nodemailer": "^6.9.0",
     "stripe": "^14.0.0",
-    "firebase-admin": "^12.0.0"
+    "firebase-admin": "^12.0.0",
+    "raw-body": "^2.5.2"        // ✅ ajouté pour Stripe webhook
   },
   "devDependencies": {
     "netlify-cli": "^17.0.0"
@@ -31,5 +32,3 @@
   "author": "Mejdi Ben Sghaier",
   "license": "MIT"
 }
-
- 
