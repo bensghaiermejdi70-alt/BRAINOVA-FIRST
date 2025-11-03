@@ -47,7 +47,7 @@ export async function handler(event) {
       };
     }
 
-    // 📬 Fonction générique d’envoi d’e-mail via Brevo API
+    // 📬 Fonction d’envoi via API Brevo
     const sendEmail = async (to, subject, html) => {
       try {
         const response = await fetch("https://api.brevo.com/v3/smtp/email", {
@@ -67,7 +67,7 @@ export async function handler(event) {
 
         const result = await response.json();
         if (response.ok) {
-          console.log(`📧 Email envoyé à ${to} via API Brevo : ${subject}`);
+          console.log(`📧 Email envoyé à ${to} via Brevo : ${subject}`);
         } else {
           console.error("❌ Erreur API Brevo :", result);
         }
@@ -78,26 +78,28 @@ export async function handler(event) {
 
     // 🔔 Gestion des événements Stripe
     switch (stripeEvent.type) {
-      // ✅ Paiement réussi
-      case "checkout.session.completed": {
+      // ✅ Paiement réussi (session ou facture)
+      case "checkout.session.completed":
+      case "invoice.payment_succeeded":
+      case "invoice_payment.paid": { // ✅ ajouté pour ton cas réel
         const session = stripeEvent.data.object;
-        const customerEmail = session.customer_email || session.customer_details?.email;
-
+        const customerEmail =
+          session.customer_email || session.customer_details?.email;
         if (customerEmail) {
           await sendEmail(
             customerEmail,
-            "🎉 Bienvenue sur Brainova Premium",
+            "🎉 Confirmation de votre abonnement Brainova Premium",
             `
               <div style="font-family:Arial,sans-serif;color:#333">
                 <h2>Merci pour votre abonnement à Brainova Premium !</h2>
-                <p>Votre compte est maintenant actif 🎮</p>
+                <p>Votre paiement a bien été reçu ✅</p>
                 <p>➡️ Cliquez ci-dessous pour accéder à la plateforme :</p>
                 <a href="https://brainovafirst.netlify.app"
                    style="display:inline-block;padding:12px 24px;background:#7b2ff7;color:#fff;border-radius:8px;text-decoration:none;">
                    Accéder à Brainova
                 </a>
                 <br><br>
-                <small>Votre abonnement est valable 1 an. Vous recevrez un rappel avant son expiration.</small>
+                <small>Votre abonnement est actif pour 1 an. Vous recevrez un rappel avant expiration.</small>
               </div>
             `
           );
@@ -108,8 +110,8 @@ export async function handler(event) {
       // ⚠️ Rappel d’expiration
       case "invoice.upcoming": {
         const invoice = stripeEvent.data.object;
-        const customerEmail = invoice.customer_email || invoice.customer_details?.email;
-
+        const customerEmail =
+          invoice.customer_email || invoice.customer_details?.email;
         if (customerEmail) {
           await sendEmail(
             customerEmail,
@@ -127,8 +129,8 @@ export async function handler(event) {
       // ❌ Paiement échoué
       case "invoice.payment_failed": {
         const failed = stripeEvent.data.object;
-        const customerEmail = failed.customer_email || failed.customer_details?.email;
-
+        const customerEmail =
+          failed.customer_email || failed.customer_details?.email;
         if (customerEmail) {
           await sendEmail(
             customerEmail,
