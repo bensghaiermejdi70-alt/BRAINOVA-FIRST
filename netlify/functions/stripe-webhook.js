@@ -1,15 +1,18 @@
 // ✅ Stripe Webhook - Brainova (via API Brevo, sans SMTP)
-// ✅ Version finale sécurisée et compatible Netlify (corrige "stream must be a stream")
+// ✅ Version finale sécurisée et compatible Netlify
+// ✅ Utilise la clé API REST (xkeysib) pour l'envoi Brevo
 
 import Stripe from "stripe";
 import fetch from "node-fetch";
 import { Buffer } from "node:buffer";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-const BREVO_API_KEY = process.env.BNV_API_KEY;
+
+// ✅ Clé API REST Brevo (et non SMTP)
+const BREVO_API_KEY = process.env.BREVO_API_KEY;
 const BREVO_SENDER = process.env.BNV_SENDER || "noreply@brainova.online";
 
-// ⚙️ Désactiver le parsing automatique du JSON par Netlify
+// ✅ Désactiver le parsing JSON automatique de Netlify
 export const config = {
   bodyParser: false,
 };
@@ -40,9 +43,8 @@ export async function handler(event) {
   let stripeEvent;
 
   try {
-    // ⚙️ Sur Netlify, event.body est une chaîne encodée (pas un flux)
+    // ⚙️ Netlify fournit event.body en string
     const bodyBuffer = Buffer.from(event.body, "utf8");
-
     stripeEvent = stripe.webhooks.constructEvent(bodyBuffer, sig, endpointSecret);
     console.log(`✅ Événement Stripe reçu : ${stripeEvent.type}`);
   } catch (err) {
@@ -54,7 +56,7 @@ export async function handler(event) {
     };
   }
 
-  // 📬 Fonction d’envoi d’e-mail via Brevo
+  // 📬 Fonction d’envoi d’e-mail via Brevo API REST
   const sendEmail = async (to, subject, html) => {
     try {
       const response = await fetch("https://api.brevo.com/v3/smtp/email", {
