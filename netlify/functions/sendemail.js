@@ -1,79 +1,52 @@
-// netlify/functions/sendemail.js
 import nodemailer from "nodemailer";
 
 export const handler = async (event) => {
   try {
-    const { to, subject, message } = JSON.parse(event.body || "{}");
+    const { to, subject, message } = JSON.parse(event.body);
 
+    // Vérification basique
     if (!to || !subject || !message) {
       return {
         statusCode: 400,
-        body: JSON.stringify({
-          success: false,
-          error: "Champs requis manquants (to, subject, message).",
-        }),
+        body: JSON.stringify({ success: false, error: "Champs requis manquants" }),
       };
     }
 
-    // Récupération sécurisée des variables d’environnement
-    const smtpHost = process.env.BNV_SMTP_HOST;
-    const smtpPort = process.env.BNV_SMTP_PORT;
-    const smtpUser = process.env.BNV_SENDER;
-    const smtpPass = process.env.BNV_API_KEY;
-
-    if (!smtpHost || !smtpPort || !smtpUser || !smtpPass) {
-      return {
-        statusCode: 500,
-        body: JSON.stringify({
-          success: false,
-          error: "Variables SMTP manquantes sur Netlify.",
-        }),
-      };
-    }
-
-    // Création du transporteur Nodemailer pour Brevo
+    // Transport SMTP Brevo
     const transporter = nodemailer.createTransport({
-      host: smtpHost,
-      port: parseInt(smtpPort, 10),
-      secure: false, // TLS STARTTLS
+      host: process.env.BNV_SMTP_HOST,
+      port: parseInt(process.env.BNV_SMTP_PORT || "587", 10),
+      secure: false, // STARTTLS
       auth: {
-        user: smtpUser,
-        pass: smtpPass,
-      },
-      tls: {
-        rejectUnauthorized: false,
+        user: process.env.BNV_SENDER,
+        pass: process.env.BNV_API_KEY,
       },
     });
 
-    // Envoi du mail
+    // Envoi de l’e-mail
     const info = await transporter.sendMail({
-      from: `"Brainova Team" <${smtpUser}>`,
+      from: `Brainova <${process.env.BNV_SENDER}>`,
       to,
       subject,
-      html: `<div style="font-family:sans-serif;line-height:1.5;">
-        <h2>📨 ${subject}</h2>
-        <p>${message}</p>
-        <hr>
-        <small>Envoyé automatiquement par Brainova via Netlify</small>
-      </div>`,
+      html: `<div style="font-family:Arial,sans-serif;">
+               <h2>${subject}</h2>
+               <p>${message}</p>
+               <br>
+               <small>© Brainova – Netlify Production</small>
+             </div>`,
     });
+
+    console.log("✅ Email envoyé :", info.messageId);
 
     return {
       statusCode: 200,
-      body: JSON.stringify({
-        success: true,
-        message: "Email envoyé avec succès ✅",
-        info: info.response || "OK",
-      }),
+      body: JSON.stringify({ success: true, message: "Email envoyé avec succès ✅" }),
     };
-  } catch (err) {
-    console.error("Erreur sendemail.js:", err);
+  } catch (error) {
+    console.error("❌ Erreur sendemail.js :", error);
     return {
       statusCode: 500,
-      body: JSON.stringify({
-        success: false,
-        error: err.message || "Erreur interne du serveur.",
-      }),
+      body: JSON.stringify({ success: false, error: error.message }),
     };
   }
 };
