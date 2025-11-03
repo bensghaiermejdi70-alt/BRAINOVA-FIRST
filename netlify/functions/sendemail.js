@@ -1,8 +1,9 @@
-import nodemailer from "nodemailer";
+// ✅ Envoi d'email via API Brevo (non SMTP)
+import fetch from "node-fetch";
 
 export const handler = async (event) => {
   try {
-    const { to, subject, message } = JSON.parse(event.body || "{}");
+    const { to, subject, message } = JSON.parse(event.body);
 
     if (!to || !subject || !message) {
       return {
@@ -11,47 +12,46 @@ export const handler = async (event) => {
       };
     }
 
-    console.log("📤 Tentative d’envoi d’email via Brevo TLS à :", to);
+    console.log("📤 Envoi via Brevo API à :", to);
 
-    const transporter = nodemailer.createTransport({
-      host: process.env.BNV_SMTP_HOST || "smtp-relay.brevo.com",
-      port: parseInt(process.env.BNV_SMTP_PORT || "465", 10),
-      secure: true, // TLS implicit (port 465)
-      auth: {
-        user: process.env.BNV_SMTP_USER || process.env.BNV_SENDER,
-        pass: process.env.BNV_API_KEY,
+    const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+      method: "POST",
+      headers: {
+        accept: "application/json",
+        "api-key": process.env.BREVO_API_KEY,
+        "content-type": "application/json",
       },
-      tls: {
-        rejectUnauthorized: false, // utile sur Netlify pour éviter certaines erreurs SSL
-      },
+      body: JSON.stringify({
+        sender: { name: "Brainova", email: "noreply@brainova.online" },
+        to: [{ email: to }],
+        subject,
+        htmlContent: `
+          <div style="font-family: Arial, sans-serif;">
+            <h2>${subject}</h2>
+            <p>${message}</p>
+            <br/>
+            <small>✅ Envoi réussi via l’API Brevo – Brainova</small>
+          </div>
+        `,
+      }),
     });
 
-    const info = await transporter.sendMail({
-      from: `Brainova <${process.env.BNV_SENDER || process.env.BNV_SMTP_USER}>`,
-      to,
-      subject,
-      html: `
-        <div style="font-family: Arial, sans-serif; color: #333;">
-          <h2>${subject}</h2>
-          <p>${message}</p>
-          <br>
-          <small>✅ Envoi depuis Netlify (Brevo SMTP)</small>
-        </div>
-      `,
-    });
+    const result = await response.json();
+    console.log("📩 Réponse Brevo :", result);
 
-    console.log("✅ Email envoyé :", info.messageId);
-
-    return {
-      statusCode: 200,
-      body: JSON.stringify({ success: true, message: "Email envoyé avec succès via TLS ✅", messageId: info.messageId }),
-    };
+    if (response.ok) {
+      return {
+        statusCode: 200,
+        body: JSON.stringify({ success: true, message: "Email envoyé avec succès ✅", result }),
+      };
+    } else {
+      throw new Error(result.message || "Erreur d’envoi API Brevo");
+    }
   } catch (error) {
     console.error("❌ Erreur sendemail.js :", error);
-    // Pour debug, renvoyer un message lisible (mais ne pas exposer de secrets)
     return {
       statusCode: 500,
-      body: JSON.stringify({ success: false, error: error && error.message ? error.message : String(error) }),
+      body: JSON.stringify({ success: false, error: error.message }),
     };
   }
 };
