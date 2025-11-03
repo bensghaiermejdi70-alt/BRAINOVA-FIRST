@@ -1,31 +1,29 @@
 // ✅ Stripe Webhook - Brainova (via API Brevo, sans SMTP)
-// ✅ Version finale sécurisée et compatible Netlify Production
-// ✅ Corrige l’erreur : “Signature Stripe invalide” (corps brut nécessaire)
+// ✅ Version finale sécurisée et compatible Netlify (corrige "stream must be a stream")
 
 import Stripe from "stripe";
 import fetch from "node-fetch";
-import getRawBody from "raw-body";
+import { Buffer } from "node:buffer";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-const BREVO_API_KEY = process.env.BNV_API_KEY; // xkeysib-xxxx
+const BREVO_API_KEY = process.env.BNV_API_KEY;
 const BREVO_SENDER = process.env.BNV_SENDER || "noreply@brainova.online";
 
-// ⛔️ Important : dire à Netlify de NE PAS parser le JSON (pour Stripe)
+// ⚙️ Désactiver le parsing automatique du JSON par Netlify
 export const config = {
   bodyParser: false,
 };
 
-export async function handler(event, context) {
+export async function handler(event) {
   const headers = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Headers": "Content-Type, Stripe-Signature",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Content-Type": "application/json",
   };
 
-  // Préflight CORS
+  // ✅ Préflight CORS
   if (event.httpMethod === "OPTIONS") {
-    return { statusCode: 200, headers, body: "" };
+    return { statusCode: 200, headers };
   }
 
   if (event.httpMethod !== "POST") {
@@ -36,14 +34,16 @@ export async function handler(event, context) {
     };
   }
 
-  // ⚙️ Lire le corps brut (obligatoire pour vérifier la signature)
+  // ✅ Vérification de la signature Stripe (fix Netlify)
+  const sig = event.headers["stripe-signature"];
+  const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
   let stripeEvent;
-  try {
-    const rawBody = await getRawBody(event.body ? event : { ...event, body: Buffer.from(event.body || "") });
-    const sig = event.headers["stripe-signature"];
-    const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
-    stripeEvent = stripe.webhooks.constructEvent(rawBody, sig, endpointSecret);
+  try {
+    // ⚙️ Sur Netlify, event.body est une chaîne encodée (pas un flux)
+    const bodyBuffer = Buffer.from(event.body, "utf8");
+
+    stripeEvent = stripe.webhooks.constructEvent(bodyBuffer, sig, endpointSecret);
     console.log(`✅ Événement Stripe reçu : ${stripeEvent.type}`);
   } catch (err) {
     console.error("❌ Signature Stripe invalide :", err.message);
@@ -54,7 +54,7 @@ export async function handler(event, context) {
     };
   }
 
-  // 📬 Fonction d’envoi d’email via Brevo API
+  // 📬 Fonction d’envoi d’e-mail via Brevo
   const sendEmail = async (to, subject, html) => {
     try {
       const response = await fetch("https://api.brevo.com/v3/smtp/email", {
@@ -75,24 +75,22 @@ export async function handler(event, context) {
       if (response.ok) {
         console.log(`📧 Email envoyé à ${to} via Brevo : ${subject}`);
       } else {
-        const errorData = await response.text();
-        console.error("❌ Erreur API Brevo :", errorData);
+        const errorText = await response.text();
+        console.error("❌ Erreur API Brevo :", errorText);
       }
     } catch (err) {
-      console.error("❌ Erreur réseau API Brevo :", err.message);
+      console.error("❌ Erreur réseau Brevo :", err.message);
     }
   };
 
   // 🔔 Gestion des événements Stripe
   try {
     switch (stripeEvent.type) {
-      // ✅ Paiement réussi (session ou facture)
       case "checkout.session.completed":
       case "invoice.payment_succeeded":
       case "invoice_payment.paid": {
         const session = stripeEvent.data.object;
         const customerEmail = session.customer_email || session.customer_details?.email;
-
         if (customerEmail) {
           await sendEmail(
             customerEmail,
@@ -101,7 +99,6 @@ export async function handler(event, context) {
               <div style="font-family:Arial,sans-serif;color:#333">
                 <h2>Merci pour votre abonnement à Brainova Premium !</h2>
                 <p>Votre paiement a bien été reçu ✅</p>
-                <p>➡️ Cliquez ci-dessous pour accéder à la plateforme :</p>
                 <a href="https://brainovafirst.netlify.app"
                    style="display:inline-block;padding:12px 24px;background:#7b2ff7;color:#fff;border-radius:8px;text-decoration:none;">
                    Accéder à Brainova
@@ -115,7 +112,6 @@ export async function handler(event, context) {
         break;
       }
 
-      // ⚠️ Avertissement expiration abonnement
       case "invoice.upcoming": {
         const invoice = stripeEvent.data.object;
         const customerEmail = invoice.customer_email || invoice.customer_details?.email;
@@ -133,7 +129,6 @@ export async function handler(event, context) {
         break;
       }
 
-      // ❌ Paiement échoué
       case "invoice.payment_failed": {
         const failed = stripeEvent.data.object;
         const customerEmail = failed.customer_email || failed.customer_details?.email;
@@ -144,7 +139,6 @@ export async function handler(event, context) {
             `
               <p>Bonjour,</p>
               <p>Votre abonnement a expiré ou le paiement a échoué.</p>
-              <p>Vous pouvez le réactiver ici :</p>
               <a href="https://brainovafirst.netlify.app"
                  style="display:inline-block;padding:10px 20px;background:#e63946;color:white;border-radius:6px;text-decoration:none;">
                  Réactiver mon abonnement
