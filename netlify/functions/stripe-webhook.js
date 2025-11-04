@@ -1,18 +1,16 @@
 // ✅ Stripe Webhook - Brainova (via API Brevo, sans SMTP)
-// ✅ Version finale sécurisée et compatible Netlify
-// ✅ Utilise la clé API REST (xkeysib) pour l'envoi Brevo
+// ✅ Version finale sécurisée et compatible Netlify Production
+// ✅ Corrige l’erreur “No signatures found…” en gérant le corps brut (UTF8 / Base64)
 
 import Stripe from "stripe";
 import fetch from "node-fetch";
 import { Buffer } from "node:buffer";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
-
-// ✅ Clé API REST Brevo (et non SMTP)
 const BREVO_API_KEY = process.env.BREVO_API_KEY;
 const BREVO_SENDER = process.env.BNV_SENDER || "noreply@brainova.online";
 
-// ✅ Désactiver le parsing JSON automatique de Netlify
+// 🚫 Désactiver le parsing JSON automatique
 export const config = {
   bodyParser: false,
 };
@@ -24,39 +22,34 @@ export async function handler(event) {
     "Access-Control-Allow-Methods": "POST, OPTIONS",
   };
 
-  // ✅ Préflight CORS
+  // ✅ Préflight
   if (event.httpMethod === "OPTIONS") {
     return { statusCode: 200, headers };
   }
 
   if (event.httpMethod !== "POST") {
-    return {
-      statusCode: 405,
-      headers,
-      body: JSON.stringify({ error: "Méthode non autorisée" }),
-    };
+    return { statusCode: 405, headers, body: "Méthode non autorisée" };
   }
 
-  // ✅ Vérification de la signature Stripe (fix Netlify)
+  // 🧾 Vérification de la signature Stripe
   const sig = event.headers["stripe-signature"];
   const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
   let stripeEvent;
 
   try {
-    // ⚙️ Netlify fournit event.body en string
-    const bodyBuffer = Buffer.from(event.body, "utf8");
+    // ✅ Corrigé : gérer les deux formats (utf8 ou base64)
+    const bodyBuffer = event.isBase64Encoded
+      ? Buffer.from(event.body, "base64")
+      : Buffer.from(event.body || "", "utf8");
+
     stripeEvent = stripe.webhooks.constructEvent(bodyBuffer, sig, endpointSecret);
     console.log(`✅ Événement Stripe reçu : ${stripeEvent.type}`);
   } catch (err) {
     console.error("❌ Signature Stripe invalide :", err.message);
-    return {
-      statusCode: 400,
-      headers,
-      body: JSON.stringify({ error: err.message }),
-    };
+    return { statusCode: 400, headers, body: JSON.stringify({ error: err.message }) };
   }
 
-  // 📬 Fonction d’envoi d’e-mail via Brevo API REST
+  // 📬 Envoi via Brevo API REST
   const sendEmail = async (to, subject, html) => {
     try {
       const response = await fetch("https://api.brevo.com/v3/smtp/email", {
@@ -155,17 +148,9 @@ export async function handler(event) {
         console.log(`ℹ️ Événement non géré : ${stripeEvent.type}`);
     }
 
-    return {
-      statusCode: 200,
-      headers,
-      body: JSON.stringify({ success: true, event: stripeEvent.type }),
-    };
-  } catch (error) {
-    console.error("❌ Erreur traitement webhook :", error);
-    return {
-      statusCode: 500,
-      headers,
-      body: JSON.stringify({ success: false, error: error.message }),
-    };
+    return { statusCode: 200, headers, body: JSON.stringify({ success: true }) };
+  } catch (err) {
+    console.error("❌ Erreur traitement webhook :", err.message);
+    return { statusCode: 500, headers, body: JSON.stringify({ error: err.message }) };
   }
 }
