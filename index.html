@@ -1442,6 +1442,53 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 });
 </script>
+
+<script>
+// ✅ Vérifie si l’utilisateur est Premium depuis la session Stripe (success.html)
+document.addEventListener("DOMContentLoaded", () => {
+  // Vérification du statut dans sessionStorage ou cookie
+  const isSessionPremium = sessionStorage.getItem('brainova_user_status') === 'premium';
+  const isCookiePremium = document.cookie.includes("brainova_user_status=premium");
+
+  if (isSessionPremium || isCookiePremium) {
+    console.log("🎯 Statut Premium détecté via session/cookie.");
+    // Sauvegarde permanente
+    localStorage.setItem('brainova_premium', 'true');
+    localStorage.setItem('brainova_premium_status', 'confirmed');
+  }
+
+  // Synchronisation du statut Premium
+  const userPremium = localStorage.getItem('brainova_premium') === 'true';
+  if (userPremium) {
+    console.log("✅ Brainova Premium actif - déverrouillage des jeux.");
+    document.querySelectorAll('.card.locked').forEach(card => {
+      card.classList.remove('locked');
+      card.style.opacity = '1';
+      const lockIcon = card.querySelector('div');
+      if (lockIcon && lockIcon.textContent === '🔒') lockIcon.remove();
+    });
+
+    // Masquer le bouton d'abonnement Premium
+    const premiumBtn = document.getElementById('premiumBtn');
+    if (premiumBtn) premiumBtn.style.display = 'none';
+
+    // Optionnel : afficher une bannière d’accès premium
+    const banner = document.createElement('div');
+    banner.style.cssText = `
+      position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+      background: linear-gradient(90deg,#00ff88,#00ccff);
+      color: #000; padding: 10px 20px; border-radius: 12px;
+      font-weight: bold; box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+      animation: fadeIn 1s ease;
+    `;
+    banner.textContent = "🎮 Mode Premium activé - Tous les jeux sont débloqués !";
+    document.body.appendChild(banner);
+    setTimeout(() => banner.remove(), 5000);
+  } else {
+    console.log("🟡 Mode gratuit - jeux Premium verrouillés.");
+  }
+});
+</script>
+
 </body>
 </html>
-
