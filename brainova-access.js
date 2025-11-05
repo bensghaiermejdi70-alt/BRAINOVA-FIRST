@@ -1,12 +1,26 @@
 /* ===========================================================
-   🌐 BRAINOVA ACCESS CONTROL SYSTEM – v2.0
+   🌐 BRAINOVA ACCESS CONTROL SYSTEM – v2.1 (Production)
    🔹 Gestion automatique des accès Jeux (Gratuits / Premium)
    🔹 Synchronisation automatique du statut utilisateur
+   🔹 Neutralisation auto des conflits "isPremium"
    🔹 Compatible Stripe + Netlify + Brevo
    🔹 Auteur : GPT-5 Assistant (Production Brainova)
    =========================================================== */
 
-console.log("🚀 Initialisation du module Brainova Access v2.0...");
+console.log("🚀 Initialisation du module Brainova Access v2.1...");
+
+// 🧩 Auto-neutralisation des variables locales "isPremium" dans les jeux
+try {
+  const scripts = document.querySelectorAll("script");
+  scripts.forEach(s => {
+    if (s.textContent.includes("let isPremium")) {
+      console.warn("⚙️ Suppression automatique d'une variable isPremium locale...");
+      s.textContent = s.textContent.replace(/let\s+isPremium\s*=\s*(true|false)\s*;?/g, "");
+    }
+  });
+} catch (err) {
+  console.error("❌ Erreur suppression isPremium :", err.message);
+}
 
 // ⚙️ Détection du statut Premium local
 let isPremiumUser =
@@ -18,15 +32,12 @@ let isPremiumUser =
 const SYNC_INTERVAL_HOURS = 2;
 const LAST_SYNC_KEY = "brainova_last_sync";
 
-// 🔁 Fonction de synchronisation (mock Stripe API / Webhook)
+// 🔁 Fonction de synchronisation (via Netlify Function)
 async function syncPremiumStatus() {
   console.log("🔄 Vérification du statut Premium via API...");
 
   try {
-    // Simulation API — ici on peut lier une vraie fonction Netlify (future update)
-    const response = await fetch("/.netlify/functions/verify-premium", {
-      method: "GET",
-    });
+    const response = await fetch("/.netlify/functions/verify-premium", { method: "GET" });
 
     if (response.ok) {
       const data = await response.json();
@@ -62,6 +73,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const lastSync = parseInt(localStorage.getItem(LAST_SYNC_KEY) || "0", 10);
   const hoursSinceLastSync = (now - lastSync) / (1000 * 60 * 60);
 
+  // ⏱ Synchronisation automatique si dernière vérification trop ancienne
   if (hoursSinceLastSync > SYNC_INTERVAL_HOURS) {
     await syncPremiumStatus();
   }
@@ -114,7 +126,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  // 🎛️ Gestion des boutons selon statut
+  // 🎛️ Gestion des boutons selon statut utilisateur
   const premiumBtn = document.getElementById("premiumBtn");
   const shareBtn = document.getElementById("shareBtn");
   const loginBtn = document.getElementById("loginBtn");
