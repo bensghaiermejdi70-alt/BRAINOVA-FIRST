@@ -1,38 +1,39 @@
 /* ===========================================================
-   🌐 BRAINOVA ACCESS CONTROL SYSTEM – v2.1 (Production)
+   🌐 BRAINOVA ACCESS CONTROL SYSTEM – v2.2 (Production Stable)
    🔹 Gestion automatique des accès Jeux (Gratuits / Premium)
    🔹 Synchronisation automatique du statut utilisateur
-   🔹 Neutralisation auto des conflits "isPremium"
+   🔹 Séquencement DOM → Statut → Déverrouillage
+   🔹 Empêche les incohérences de rendu (double sync / couleurs)
    🔹 Compatible Stripe + Netlify + Brevo
    🔹 Auteur : GPT-5 Assistant (Production Brainova)
    =========================================================== */
 
-console.log("🚀 Initialisation du module Brainova Access v2.1...");
+console.log("🚀 Initialisation du module Brainova Access v2.2...");
 
-// 🧩 Auto-neutralisation des variables locales "isPremium" dans les jeux
+// 🧩 Neutralisation automatique des variables locales "isPremium" dans les jeux
 try {
   const scripts = document.querySelectorAll("script");
   scripts.forEach(s => {
     if (s.textContent.includes("let isPremium")) {
-      console.warn("⚙️ Suppression automatique d'une variable isPremium locale...");
       s.textContent = s.textContent.replace(/let\s+isPremium\s*=\s*(true|false)\s*;?/g, "");
+      console.warn("⚙️ Neutralisation d'une variable isPremium locale (prévention de conflit).");
     }
   });
 } catch (err) {
   console.error("❌ Erreur suppression isPremium :", err.message);
 }
 
-// ⚙️ Détection du statut Premium local
+// ⚙️ Lecture du statut Premium local
 let isPremiumUser =
   localStorage.getItem("brainova_premium") === "true" ||
   sessionStorage.getItem("brainova_user_status") === "premium" ||
   document.cookie.includes("brainova_user_status=premium");
 
-// 🕒 Vérification / synchronisation automatique (toutes les 2h)
+// 🕒 Intervalle de resynchronisation (toutes les 2 heures)
 const SYNC_INTERVAL_HOURS = 2;
 const LAST_SYNC_KEY = "brainova_last_sync";
 
-// 🔁 Fonction de synchronisation (via Netlify Function)
+// 🔁 Synchronisation automatique avec API Netlify (mock / future réelle)
 async function syncPremiumStatus() {
   console.log("🔄 Vérification du statut Premium via API...");
 
@@ -58,7 +59,7 @@ async function syncPremiumStatus() {
 
       localStorage.setItem(LAST_SYNC_KEY, Date.now());
     } else {
-      console.warn("⚠️ Échec de la vérification du statut Premium.");
+      console.warn("⚠️ API Premium non atteinte (aucune mise à jour).");
     }
   } catch (err) {
     console.error("❌ Erreur lors de la synchronisation Premium :", err.message);
@@ -67,22 +68,25 @@ async function syncPremiumStatus() {
 
 // 🧭 Lancement à chaque chargement de page
 document.addEventListener("DOMContentLoaded", async () => {
-  console.log(isPremiumUser ? "🎮 Mode Premium actif" : "🟡 Mode Gratuit");
+  console.log(isPremiumUser ? "🎮 Mode Premium détecté" : "🟡 Mode Gratuit détecté");
 
-  const now = Date.now();
-  const lastSync = parseInt(localStorage.getItem(LAST_SYNC_KEY) || "0", 10);
-  const hoursSinceLastSync = (now - lastSync) / (1000 * 60 * 60);
-
-  // ⏱ Synchronisation automatique si dernière vérification trop ancienne
-  if (hoursSinceLastSync > SYNC_INTERVAL_HOURS) {
-    await syncPremiumStatus();
-  }
+  // 🕒 Attendre que le DOM (grille de jeux) soit prêt avant déverrouillage
+  await new Promise(r => setTimeout(r, 800));
 
   const cards = document.querySelectorAll(".card");
   if (!cards.length) {
     console.warn("⚠️ Aucune carte détectée dans la page.");
     return;
   }
+
+  // 🔁 Resynchronisation si dernière vérification trop ancienne
+  const now = Date.now();
+  const lastSync = parseInt(localStorage.getItem(LAST_SYNC_KEY) || "0", 10);
+  const hoursSinceLastSync = (now - lastSync) / (1000 * 60 * 60);
+  if (hoursSinceLastSync > SYNC_INTERVAL_HOURS) await syncPremiumStatus();
+
+  // 🧱 Définir le statut global JS
+  window.userPremiumStatus = isPremiumUser;
 
   // 🎮 Gestion des cartes (1–10 = gratuits / 11–36 = premium)
   cards.forEach((card, index) => {
@@ -126,7 +130,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  // 🎛️ Gestion des boutons selon statut utilisateur
+  // 🎛️ Gestion des boutons
   const premiumBtn = document.getElementById("premiumBtn");
   const shareBtn = document.getElementById("shareBtn");
   const loginBtn = document.getElementById("loginBtn");
@@ -134,7 +138,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   if (isPremiumUser) {
     if (premiumBtn) premiumBtn.style.display = "none";
-    if (shareBtn) shareBtn.style.display = "none";
+    if (shareBtn) {
+      shareBtn.style.display = "inline-block";
+      shareBtn.style.pointerEvents = "auto";
+      shareBtn.style.opacity = "1";
+    }
     [loginBtn, signupBtn].forEach((btn) => {
       if (btn) {
         btn.style.pointerEvents = "auto";
@@ -142,24 +150,32 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     });
 
-    const banner = document.createElement("div");
-    banner.textContent = "🎉 Mode Premium synchronisé — accès complet confirmé !";
-    banner.style.cssText = `
-      position:fixed;
-      bottom:20px;
-      left:50%;
-      transform:translateX(-50%);
-      background:linear-gradient(90deg,#00ff88,#00ccff);
-      color:#000;
-      padding:12px 30px;
-      border-radius:12px;
-      font-weight:bold;
-      box-shadow:0 4px 15px rgba(0,0,0,0.4);
-      z-index:9999;
-    `;
-    document.body.appendChild(banner);
-    setTimeout(() => banner.remove(), 4000);
+    // 🔔 Bannière (affichée une seule fois)
+    if (!document.querySelector("#premium-banner")) {
+      const banner = document.createElement("div");
+      banner.id = "premium-banner";
+      banner.textContent = "🎉 Mode Premium synchronisé — accès complet confirmé !";
+      banner.style.cssText = `
+        position:fixed;
+        bottom:20px;
+        left:50%;
+        transform:translateX(-50%);
+        background:linear-gradient(90deg,#00ff88,#00ccff);
+        color:#000;
+        padding:12px 30px;
+        border-radius:12px;
+        font-weight:bold;
+        box-shadow:0 4px 15px rgba(0,0,0,0.4);
+        z-index:9999;
+      `;
+      document.body.appendChild(banner);
+      setTimeout(() => banner.remove(), 5000);
+    }
   } else {
     console.log("🟠 Mode Gratuit : seuls les 10 premiers jeux sont disponibles.");
+    if (shareBtn) {
+      shareBtn.style.pointerEvents = "none";
+      shareBtn.style.opacity = "0.5";
+    }
   }
 });
