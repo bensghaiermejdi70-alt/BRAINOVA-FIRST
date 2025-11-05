@@ -1,6 +1,6 @@
 // ✅ Stripe Webhook - Brainova (via API Brevo, sans SMTP)
 // ✅ Version finale sécurisée et compatible Netlify Production
-// ✅ Corrige l’erreur “No signatures found…” en gérant le corps brut (UTF8 / Base64)
+// ✅ Corrige les doubles emails et gère le corps brut UTF8/Base64
 
 import Stripe from "stripe";
 import fetch from "node-fetch";
@@ -22,14 +22,8 @@ export async function handler(event) {
     "Access-Control-Allow-Methods": "POST, OPTIONS",
   };
 
-  // ✅ Préflight
-  if (event.httpMethod === "OPTIONS") {
-    return { statusCode: 200, headers };
-  }
-
-  if (event.httpMethod !== "POST") {
-    return { statusCode: 405, headers, body: "Méthode non autorisée" };
-  }
+  if (event.httpMethod === "OPTIONS") return { statusCode: 200, headers };
+  if (event.httpMethod !== "POST") return { statusCode: 405, headers, body: "Méthode non autorisée" };
 
   // 🧾 Vérification de la signature Stripe
   const sig = event.headers["stripe-signature"];
@@ -37,7 +31,6 @@ export async function handler(event) {
   let stripeEvent;
 
   try {
-    // ✅ Corrigé : gérer les deux formats (utf8 ou base64)
     const bodyBuffer = event.isBase64Encoded
       ? Buffer.from(event.body, "base64")
       : Buffer.from(event.body || "", "utf8");
@@ -49,7 +42,7 @@ export async function handler(event) {
     return { statusCode: 400, headers, body: JSON.stringify({ error: err.message }) };
   }
 
-  // 📬 Envoi via Brevo API REST
+  // 📬 Fonction d’envoi via Brevo API REST
   const sendEmail = async (to, subject, html) => {
     try {
       const response = await fetch("https://api.brevo.com/v3/smtp/email", {
@@ -78,14 +71,13 @@ export async function handler(event) {
     }
   };
 
-  // 🔔 Gestion des événements Stripe
+  // 🔔 Gestion des événements Stripe (1 seul email ici)
   try {
     switch (stripeEvent.type) {
-      case "checkout.session.completed":
-      case "invoice.payment_succeeded":
-      case "invoice_payment.paid": {
+      case "checkout.session.completed": {
         const session = stripeEvent.data.object;
         const customerEmail = session.customer_email || session.customer_details?.email;
+
         if (customerEmail) {
           await sendEmail(
             customerEmail,
