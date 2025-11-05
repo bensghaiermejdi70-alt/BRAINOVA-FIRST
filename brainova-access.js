@@ -1,48 +1,45 @@
 /* ===========================================================
-   🌐 BRAINOVA ACCESS CONTROL SYSTEM – v2.2 (Production Stable)
-   🔹 Gestion automatique des accès Jeux (Gratuits / Premium)
-   🔹 Synchronisation automatique du statut utilisateur
-   🔹 Séquencement DOM → Statut → Déverrouillage
-   🔹 Empêche les incohérences de rendu (double sync / couleurs)
+   🌐 BRAINOVA ACCESS CONTROL SYSTEM – v2.3 (Production Stable)
+   🔹 Ajout de gardes null-safe, idempotence, bordure jaune premium
+   🔹 Empêche les erreurs "Cannot read properties of null"
    🔹 Compatible Stripe + Netlify + Brevo
    🔹 Auteur : GPT-5 Assistant (Production Brainova)
    =========================================================== */
 
-console.log("🚀 Initialisation du module Brainova Access v2.2...");
+console.log("🚀 Initialisation du module Brainova Access v2.3...");
 
-// 🧩 Neutralisation automatique des variables locales "isPremium" dans les jeux
+// --------------------
+// Neutralisation isPremium (prévention conflit)
 try {
   const scripts = document.querySelectorAll("script");
   scripts.forEach(s => {
-    if (s.textContent.includes("let isPremium")) {
+    if (s && s.textContent && s.textContent.includes("let isPremium")) {
       s.textContent = s.textContent.replace(/let\s+isPremium\s*=\s*(true|false)\s*;?/g, "");
       console.warn("⚙️ Neutralisation d'une variable isPremium locale (prévention de conflit).");
     }
   });
 } catch (err) {
-  console.error("❌ Erreur suppression isPremium :", err.message);
+  console.error("❌ Erreur suppression isPremium :", err?.message || err);
 }
 
-// ⚙️ Lecture du statut Premium local
+// --------------------
+// Lecture du statut Premium local
 let isPremiumUser =
   localStorage.getItem("brainova_premium") === "true" ||
   sessionStorage.getItem("brainova_user_status") === "premium" ||
   document.cookie.includes("brainova_user_status=premium");
 
-// 🕒 Intervalle de resynchronisation (toutes les 2 heures)
+// Intervalle de resync
 const SYNC_INTERVAL_HOURS = 2;
 const LAST_SYNC_KEY = "brainova_last_sync";
 
-// 🔁 Synchronisation automatique avec API Netlify (mock / future réelle)
+// Fonction de synchronisation
 async function syncPremiumStatus() {
   console.log("🔄 Vérification du statut Premium via API...");
-
   try {
     const response = await fetch("/.netlify/functions/verify-premium", { method: "GET" });
-
-    if (response.ok) {
+    if (response && response.ok) {
       const data = await response.json();
-
       if (data.active) {
         console.log("✅ Synchronisation : abonnement Premium actif.");
         localStorage.setItem("brainova_premium", "true");
@@ -56,81 +53,121 @@ async function syncPremiumStatus() {
         document.cookie = "brainova_user_status=free; path=/; max-age=31536000";
         isPremiumUser = false;
       }
-
       localStorage.setItem(LAST_SYNC_KEY, Date.now());
     } else {
       console.warn("⚠️ API Premium non atteinte (aucune mise à jour).");
     }
   } catch (err) {
-    console.error("❌ Erreur lors de la synchronisation Premium :", err.message);
+    console.error("❌ Erreur lors de la synchronisation Premium :", err?.message || err);
   }
 }
 
-// 🧭 Lancement à chaque chargement de page
+// Fonction utilitaire : applique le style "bordure jaune premium" quand accès donné
+function applyPremiumBorder(card) {
+  if (!card) return;
+  // Eviter de ré-appliquer plusieurs fois
+  if (card.dataset.brainovaBorderApplied === "true") return;
+  // applique un contour/ombre jaune vif pour cartes premium accessibles
+  card.style.boxShadow = "0 0 0 3px rgba(255, 200, 55, 0.9), 0 6px 18px rgba(0,0,0,0.15)";
+  card.style.borderRadius = card.style.borderRadius || "12px";
+  card.dataset.brainovaBorderApplied = "true";
+}
+
+// Fonction utilitaire : verrouille une carte (mode non-premium)
+function lockCard(card) {
+  if (!card) return;
+  if (card.dataset.brainovaProcessed === "true") {
+    // déjà initialisée : mettre à jour visuel seulement
+    card.classList.add("locked");
+    card.style.opacity = "0.7";
+    return;
+  }
+  card.classList.add("locked");
+  card.style.opacity = "0.7";
+  card.style.position = "relative";
+  if (!card.querySelector(".lock-icon")) {
+    const lock = document.createElement("div");
+    lock.className = "lock-icon";
+    lock.textContent = "🔒";
+    lock.style.cssText = `
+      position:absolute;
+      top:10px;
+      right:10px;
+      font-size:20px;
+      color:#ff5252;
+      text-shadow:0 0 5px rgba(0,0,0,0.4);
+      z-index:10;
+    `;
+    card.appendChild(lock);
+  }
+  // Bloquer clic en ajoutant un handler idempotent
+  if (!card.dataset.brainovaClickBound) {
+    card.addEventListener("click", (e) => {
+      e.preventDefault();
+      alert("🔒 Ce jeu est réservé aux abonnés Premium.\nAbonnez-vous pour y accéder !");
+    });
+    card.dataset.brainovaClickBound = "true";
+  }
+  card.dataset.brainovaProcessed = "true";
+}
+
+// Fonction utilitaire : unlock card
+function unlockCard(card) {
+  if (!card) return;
+  card.classList.remove("locked");
+  card.style.opacity = "1";
+  const lock = card.querySelector(".lock-icon");
+  if (lock) lock.remove();
+  // applique bordure jaune premium (visuel)
+  applyPremiumBorder(card);
+  card.dataset.brainovaProcessed = "true";
+}
+
+// --------------------
+// Main
 document.addEventListener("DOMContentLoaded", async () => {
   console.log(isPremiumUser ? "🎮 Mode Premium détecté" : "🟡 Mode Gratuit détecté");
 
-  // 🕒 Attendre que le DOM (grille de jeux) soit prêt avant déverrouillage
-  await new Promise(r => setTimeout(r, 800));
+  // attendre rendu initial de la grille (sécurité contre renderGrid asynchrone)
+  await new Promise(r => setTimeout(r, 750));
 
   const cards = document.querySelectorAll(".card");
-  if (!cards.length) {
-    console.warn("⚠️ Aucune carte détectée dans la page.");
+  if (!cards || cards.length === 0) {
+    console.warn("⚠️ Aucune carte détectée dans la page (grid non rendue).");
     return;
   }
 
-  // 🔁 Resynchronisation si dernière vérification trop ancienne
+  // Resynchronisation si nécessaire
   const now = Date.now();
   const lastSync = parseInt(localStorage.getItem(LAST_SYNC_KEY) || "0", 10);
   const hoursSinceLastSync = (now - lastSync) / (1000 * 60 * 60);
-  if (hoursSinceLastSync > SYNC_INTERVAL_HOURS) await syncPremiumStatus();
+  if (hoursSinceLastSync > SYNC_INTERVAL_HOURS) {
+    await syncPremiumStatus();
+  }
 
-  // 🧱 Définir le statut global JS
+  // Mettre le statut global pour les autres scripts
   window.userPremiumStatus = isPremiumUser;
 
-  // 🎮 Gestion des cartes (1–10 = gratuits / 11–36 = premium)
+  // Parcours des cartes (1..N) — règles : 1-10 gratuit, 11-36 premium (adaptable)
   cards.forEach((card, index) => {
+    if (!card) return; // garde safe
     const num = index + 1;
     const isPremiumGame = num > 10;
 
-    if (isPremiumGame && !isPremiumUser) {
-      // 🔒 Verrouillage Premium
-      card.classList.add("locked");
-      card.style.opacity = "0.7";
-      card.style.position = "relative";
-
-      if (!card.querySelector(".lock-icon")) {
-        const lock = document.createElement("div");
-        lock.className = "lock-icon";
-        lock.textContent = "🔒";
-        lock.style.cssText = `
-          position:absolute;
-          top:10px;
-          right:10px;
-          font-size:22px;
-          color:#ff5252;
-          text-shadow:0 0 5px rgba(0,0,0,0.4);
-        `;
-        card.appendChild(lock);
+    try {
+      if (isPremiumGame && !isPremiumUser) {
+        lockCard(card);
+        console.log(`🟣 Carte ${num} — Premium verrouillée`);
+      } else {
+        unlockCard(card);
+        console.log(`🟢 Carte ${num} — ${isPremiumGame ? "Premium" : "Gratuit"} accessible`);
       }
-
-      card.addEventListener("click", (e) => {
-        e.preventDefault();
-        alert("🔒 Ce jeu est réservé aux abonnés Premium.\nAbonnez-vous pour y accéder !");
-      });
-
-      console.log(`🟣 Carte ${num} — Premium verrouillée`);
-    } else {
-      // ✅ Accès libre ou Premium actif
-      card.classList.remove("locked");
-      card.style.opacity = "1";
-      const lock = card.querySelector(".lock-icon");
-      if (lock) lock.remove();
-      console.log(`🟢 Carte ${num} — ${isPremiumGame ? "Premium" : "Gratuit"} accessible`);
+    } catch (err) {
+      console.error("❌ Erreur traitement carte:", err?.message || err);
     }
   });
 
-  // 🎛️ Gestion des boutons
+  // Gestion boutons (safe checks)
   const premiumBtn = document.getElementById("premiumBtn");
   const shareBtn = document.getElementById("shareBtn");
   const loginBtn = document.getElementById("loginBtn");
@@ -150,7 +187,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     });
 
-    // 🔔 Bannière (affichée une seule fois)
+    // Bannière unique (protection contre répétition)
     if (!document.querySelector("#premium-banner")) {
       const banner = document.createElement("div");
       banner.id = "premium-banner";
@@ -162,9 +199,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         transform:translateX(-50%);
         background:linear-gradient(90deg,#00ff88,#00ccff);
         color:#000;
-        padding:12px 30px;
+        padding:12px 24px;
         border-radius:12px;
-        font-weight:bold;
+        font-weight:700;
         box-shadow:0 4px 15px rgba(0,0,0,0.4);
         z-index:9999;
       `;
@@ -172,10 +209,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       setTimeout(() => banner.remove(), 5000);
     }
   } else {
+    // mode gratuit
     console.log("🟠 Mode Gratuit : seuls les 10 premiers jeux sont disponibles.");
     if (shareBtn) {
       shareBtn.style.pointerEvents = "none";
       shareBtn.style.opacity = "0.5";
     }
+    if (premiumBtn) premiumBtn.style.display = "inline-block";
   }
 });
