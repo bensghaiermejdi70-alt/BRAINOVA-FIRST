@@ -1,16 +1,73 @@
-<script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const status = sessionStorage.getItem('brainova_user_status') ||
-                   document.cookie.includes("brainova_user_status=premium");
-    
-    if (status) {
-      console.log("🎮 Accès Premium activé !");
-      document.querySelectorAll(".premium-game").forEach(el => {
-        el.classList.remove("locked");
-        el.querySelector(".subscribe-message")?.remove();
-      });
-    } else {
-      console.log("🔒 Mode gratuit – Premium verrouillé");
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>✅ Abonnement confirmé – Brainova Premium</title>
+  <link rel="icon" href="https://brainovafirst.netlify.app/favicon.ico" type="image/x-icon" />
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #1e293b, #0f172a);
+      color: #f8fafc;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      text-align: center;
+      margin: 0;
     }
-  });
-</script>
+    .container {
+      background: rgba(255,255,255,0.1);
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 0 30px rgba(0,0,0,0.4);
+      max-width: 500px;
+      width: 90%;
+    }
+    h1 { color: #22c55e; }
+    p { font-size: 18px; }
+    a.button {
+      display: inline-block;
+      margin-top: 25px;
+      padding: 12px 30px;
+      background: #22c55e;
+      color: #fff;
+      text-decoration: none;
+      border-radius: 8px;
+      transition: 0.3s;
+    }
+    a.button:hover { background: #16a34a; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎉 Merci pour votre abonnement à Brainova Premium !</h1>
+    <p>Votre paiement a été confirmé avec succès.</p>
+    <p>Vous pouvez dès maintenant profiter de tous les jeux Premium.</p>
+    <a href="https://brainovafirst.netlify.app" class="button" id="accessBtn">Accéder à Brainova</a>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      console.log("🔐 Statut Premium activé (success.html)");
+      sessionStorage.setItem('brainova_user_status', 'premium');
+      localStorage.setItem('brainova_premium', 'true');
+      localStorage.setItem('brainova_premium_status', 'confirmed');
+      document.cookie = "brainova_user_status=premium; path=/; max-age=31536000";
+
+      const msg = document.createElement('div');
+      msg.textContent = "✅ Statut Premium activé sur votre compte.";
+      msg.style.cssText = `
+        position: fixed; bottom: 15px; left: 50%; transform: translateX(-50%);
+        background: linear-gradient(90deg, #00ff88, #00ccff);
+        color: #000; padding: 10px 20px; border-radius: 12px;
+        font-weight: bold; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+      `;
+      document.body.appendChild(msg);
+      setTimeout(() => msg.remove(), 4000);
+    });
+  </script>
+</body>
+</html>
