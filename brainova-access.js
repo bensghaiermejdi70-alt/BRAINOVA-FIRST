@@ -1,95 +1,115 @@
-/**
- * 🧠 Brainova - Gestion Automatique des Accès & Cartes
- * Version 5.1 - Simplifiée (affiche uniquement "Carte N°x")
- * ✅ Aucun changement dans les fichiers de jeux
- * ✅ Compatible Netlify Production
- */
+/* ===========================================================
+   🌐 BRAINOVA ACCESS CONTROL SYSTEM – v1.0
+   🔹 Gestion automatique des accès Jeux (Gratuits / Premium)
+   🔹 Compatible Stripe + Netlify
+   🔹 Auteur : GPT-5 Assistant
+   =========================================================== */
 
-(function() {
-  console.log("🚀 Initialisation du module Brainova Access (mode cartes simples)...");
+console.log("🚀 Initialisation du module Brainova Access...");
 
-  // 🧭 Récupère le numéro du jeu depuis l’URL (ex: jeu12.html → 12)
-  const url = window.location.href;
-  const match = url.match(/jeu(\d+)\.html/i);
-  const gameNumber = match ? parseInt(match[1]) : null;
+// 🎯 Détection du statut Premium
+const isPremiumUser =
+  localStorage.getItem("brainova_premium") === "true" ||
+  sessionStorage.getItem("brainova_user_status") === "premium" ||
+  document.cookie.includes("brainova_user_status=premium");
 
-  // 🧮 Détermine la catégorie
-  const isPremiumGame = gameNumber && gameNumber >= 11 && gameNumber <= 36;
-  const category = isPremiumGame ? "Premium" : "Gratuit";
+document.addEventListener("DOMContentLoaded", () => {
+  console.log(isPremiumUser ? "🎮 Mode Premium actif" : "🟡 Mode Gratuit");
 
-  // 🧠 Vérifie le statut utilisateur
-  const userIsPremium =
-    localStorage.getItem("brainova_premium") === "true" ||
-    sessionStorage.getItem("brainova_user_status") === "premium" ||
-    document.cookie.includes("brainova_user_status=premium");
+  // Sélection de toutes les cartes de jeux
+  const cards = document.querySelectorAll(".card");
 
-  // 🏷️ Affiche le titre automatique “Carte N°x”
-  if (gameNumber) {
-    const title = document.createElement("div");
-    title.textContent = `🎮 Carte N°${gameNumber} — ${category}`;
-    title.style.cssText = `
-      position:fixed;top:15px;left:50%;transform:translateX(-50%);
-      background:rgba(255,255,255,0.08);
-      padding:8px 22px;border-radius:12px;color:#fff;
-      font-family:Poppins,Arial,sans-serif;font-weight:bold;
-      z-index:9999;backdrop-filter:blur(6px);
-      box-shadow:0 2px 10px rgba(0,0,0,0.4);
-    `;
-    document.body.appendChild(title);
-  }
-
-  // 🟢 Mode Premium
-  if (userIsPremium) {
-    console.log("🎮 Utilisateur Premium — accès total autorisé.");
-    showBanner("✅ Mode Premium activé", "#00ff88");
+  if (!cards.length) {
+    console.warn("⚠️ Aucune carte détectée dans la page.");
     return;
   }
 
-  // 🟡 Mode gratuit
-  console.log("🟡 Mode gratuit détecté.");
+  // 🔁 Boucle sur les cartes
+  cards.forEach((card, index) => {
+    const num = index + 1; // numéro de la carte (1 à 36)
 
-  // 🔒 Si le jeu est Premium → bloquer
-  if (isPremiumGame) {
-    console.warn("⛔ Accès refusé — jeu Premium détecté.");
+    // Définition automatique du type de jeu
+    const isPremiumGame = num > 10; // Jeux 1 à 10 = gratuit ; 11 à 36 = premium
 
-    const overlay = document.createElement("div");
-    overlay.innerHTML = `
-      <div style="
-        position:fixed;top:0;left:0;width:100%;height:100%;
-        background:rgba(0,0,0,0.9);
-        display:flex;flex-direction:column;justify-content:center;align-items:center;
-        color:#fff;text-align:center;z-index:9999;padding:20px;
-      ">
-        <h2 style="color:#00ccff;">🔒 Jeu réservé aux abonnés Brainova Premium</h2>
-        <p style="max-width:420px;">
-          Cette carte fait partie des 26 jeux Premium exclusifs Brainova.<br>
-          Abonnez-vous pour les débloquer dès maintenant !
-        </p>
-        <a href="https://brainovafirst.netlify.app" style="
-          margin-top:20px;padding:12px 24px;background:#00ccff;
-          color:#000;text-decoration:none;border-radius:10px;font-weight:bold;">
-          🔓 Devenir Premium
-        </a>
-      </div>
-    `;
-    document.body.appendChild(overlay);
-  } else {
-    console.log("🆓 Jeu gratuit — accès libre.");
-    showBanner("🆓 Jeu gratuit - profitez-en !");                      
-  }
+    if (isPremiumGame && !isPremiumUser) {
+      // 🔒 Verrouiller les jeux Premium
+      card.classList.add("locked");
+      card.style.opacity = "0.7";
+      card.style.position = "relative";
 
-  // 🎨 Fonction bannière en bas de page
-  function showBanner(msg, color = "#00ccff") {
+      // Ajouter l'icône de verrouillage si absente
+      if (!card.querySelector(".lock-icon")) {
+        const lock = document.createElement("div");
+        lock.className = "lock-icon";
+        lock.textContent = "🔒";
+        lock.style.cssText = `
+          position:absolute;
+          top:10px;
+          right:10px;
+          font-size:22px;
+          color:#ff5252;
+          text-shadow:0 0 5px rgba(0,0,0,0.4);
+        `;
+        card.appendChild(lock);
+      }
+
+      // Bloquer le clic
+      card.addEventListener("click", (e) => {
+        e.preventDefault();
+        alert("🔒 Ce jeu est réservé aux abonnés Premium.\nAbonnez-vous pour y accéder !");
+      });
+
+      console.log(`🟣 Carte ${num} — Premium verrouillée`);
+    } else {
+      // ✅ Débloquer les jeux gratuits ou Premium (si abonné)
+      card.classList.remove("locked");
+      card.style.opacity = "1";
+      const lock = card.querySelector(".lock-icon");
+      if (lock) lock.remove();
+
+      console.log(`🟢 Carte ${num} — ${isPremiumGame ? "Premium" : "Gratuit"} accessible`);
+    }
+  });
+
+  // 🎛️ Gestion des boutons selon le statut
+  const premiumBtn = document.getElementById("premiumBtn");
+  const shareBtn = document.getElementById("shareBtn");
+  const loginBtn = document.getElementById("loginBtn");
+  const signupBtn = document.getElementById("signupBtn");
+
+  if (isPremiumUser) {
+    // Cache les boutons inutiles pour Premium
+    if (premiumBtn) premiumBtn.style.display = "none";
+    if (shareBtn) shareBtn.style.display = "none";
+
+    // Rendre accessibles les boutons Connexion / Inscription
+    [loginBtn, signupBtn].forEach((btn) => {
+      if (btn) {
+        btn.style.pointerEvents = "auto";
+        btn.style.opacity = "1";
+      }
+    });
+
+    // Afficher une bannière de confirmation
     const banner = document.createElement("div");
-    banner.textContent = msg;
+    banner.textContent = "🎉 Mode Premium activé — tous les jeux sont débloqués !";
     banner.style.cssText = `
-      position:fixed;bottom:15px;right:15px;
-      background:${color};color:#000;
-      padding:10px 18px;border-radius:10px;
-      font-weight:bold;z-index:9999;
-      box-shadow:0 4px 12px rgba(0,0,0,0.3);
+      position:fixed;
+      bottom:20px;
+      left:50%;
+      transform:translateX(-50%);
+      background:linear-gradient(90deg,#00ff88,#00ccff);
+      color:#000;
+      padding:12px 30px;
+      border-radius:12px;
+      font-weight:bold;
+      box-shadow:0 4px 15px rgba(0,0,0,0.4);
+      z-index:9999;
+      animation:fadeIn 1s ease-in-out;
     `;
     document.body.appendChild(banner);
-    setTimeout(() => banner.remove(), 3000);
+    setTimeout(() => banner.remove(), 4000);
+  } else {
+    console.log("🟠 Mode Gratuit : seuls les 10 premiers jeux sont disponibles.");
   }
-})();
+});
