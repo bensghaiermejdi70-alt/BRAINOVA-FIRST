@@ -1488,6 +1488,18 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 <script src="/brainova-access.js"></script>
+<script>
+  if (localStorage.getItem('brainova_premium') === 'true') {
+    window.userPremiumStatus = true;
+  }
+</script>
+<script>
+  const premiumStatus = localStorage.getItem('brainova_premium');
+  if (premiumStatus === 'true') {
+    window.userPremiumStatus = true;
+    document.cookie = "brainova_user_status=premium; path=/; max-age=31536000";
+  }
+</script>
 
 </body>
 </html>
