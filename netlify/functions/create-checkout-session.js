@@ -1,5 +1,5 @@
+// /netlify/functions/create-checkout-session-test1eur.js
 import Stripe from "stripe";
-
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export async function handler(event) {
@@ -19,42 +19,31 @@ export async function handler(event) {
   }
 
   try {
-    const { priceId, successUrl, cancelUrl, customerEmail } = JSON.parse(event.body);
-
-    if (!priceId || !successUrl || !cancelUrl) {
-      return {
-        statusCode: 400,
-        headers,
-        body: JSON.stringify({ error: "Missing required parameters: priceId, successUrl, cancelUrl" })
-      };
-    }
-
-    // ✅ Crée la session Stripe Checkout
+    // ✅ Pas besoin d’envoyer priceId : il est fixe pour ce test
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
-      line_items: [{ price: priceId, quantity: 1 }],
-      mode: "subscription",
-      success_url: successUrl,
-      cancel_url: cancelUrl,
-      allow_promotion_codes: true,
-      billing_address_collection: "required",
-      customer_creation: "always",
+      line_items: [
+        {
+          // 🔸 Remplace ce price_id par celui associé à ton produit Test 1€
+          price: "price_TN9qVOM8KtbdOX_TEST", 
+          quantity: 1,
+        },
+      ],
+      mode: "payment", // Simple paiement, pas d’abonnement
+      success_url: "https://brainovafirst.netlify.app/success.html?premium=1",
+      cancel_url: "https://brainovafirst.netlify.app/cancel.html",
       metadata: {
-        product: "brainova-premium",
-        platform: "brainova-netlify",
-        user_email: customerEmail || "unknown"      
-
+        product: "brainova-premium-test",
+        source: "netlify-test"
       }
     });
 
-    return {                                                        
+    return {
       statusCode: 200,
       headers,
-      body: JSON.stringify({
-        url: session.url,                                
-        sessionId: session.id
-      })
+      body: JSON.stringify({ url: session.url, sessionId: session.id })
     };
+
   } catch (error) {
     console.error("❌ Stripe checkout error:", error);
     return {
