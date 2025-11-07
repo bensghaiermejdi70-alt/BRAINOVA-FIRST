@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Brainova – L'avenir de l'apprentissage est déjà là</title>
+  <link rel="icon" type="image/png" href="https://i.imgur.com/xMmsE7A.png">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: radial-gradient(circle at top left, #1a1a2e, #16213e);
+      color: white;
+      text-align: center;
+    }
+
+    header {
+      padding: 100px 20px 60px;
+      background: linear-gradient(135deg, #7b2ff7, #f107a3);
+      box-shadow: 0 0 30px rgba(0,0,0,0.4);
+    }
+
+    header h1 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+    }
+
+    header p {
+      font-size: 1.2rem;
+      margin-top: 0;
+      font-weight: 300;
+      color: #fff9;
+    }
+
+    .cta-button {
+      background: linear-gradient(90deg, #00ff88, #00c3ff);
+      color: #000;
+      font-weight: 700;
+      padding: 15px 35px;
+      border-radius: 50px;
+      text-decoration: none;
+      display: inline-block;
+      margin-top: 25px;
+      font-size: 1.2rem;
+      transition: all 0.3s ease;
+    }
+
+    .cta-button:hover {
+      transform: scale(1.05);
+      background: linear-gradient(90deg, #00c3ff, #00ff88);
+    }
+
+    section {
+      padding: 60px 20px;
+      max-width: 800px;
+      margin: auto;
+    }
+
+    section h2 {
+      font-size: 2rem;
+      margin-bottom: 20px;
+    }
+
+    form {
+      margin-top: 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    input[type="email"] {
+      padding: 12px 20px;
+      border: none;
+      border-radius: 25px;
+      width: 80%;
+      max-width: 400px;
+      font-size: 1rem;
+      outline: none;
+      margin-bottom: 15px;
+    }
+
+    button.subscribe {
+      background: linear-gradient(90deg, #ffe259, #ffa751);
+      color: #111;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 25px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    button.subscribe:hover {
+      transform: scale(1.05);
+      background: linear-gradient(90deg, #ffa751, #ffe259);
+    }
+
+    footer {
+      padding: 20px;
+      background: #111;
+      color: #999;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h1>Avec <strong>Brainova</strong>, l'avenir de l'apprentissage est déjà là</h1>
+    <p>Parce que le savoir du futur commence aujourd'hui.</p>
+
+    <!-- 🚀 Bouton vers la plateforme Brainova -->
+    <a href="https://brainovafirst.netlify.app" class="cta-button" target="_blank">
+      🚀 Découvrir Brainova
+    </a>
+
+    <p style="margin-top:20px; font-size:0.9rem; opacity:0.8;">
+      🖋️ Certifié par GPT-5 — Powered by Human Intelligence
+    </p>
+  </header>
+
+  <section>
+    <h2>💎 Rejoignez l’univers Brainova</h2>
+    <p>
+      Accédez à des jeux intelligents, des expériences créatives et une nouvelle façon
+      d’apprendre en s’amusant. Brainova, c’est la fusion entre le jeu et le savoir.
+    </p>
+    <p>
+      Notre offre de lancement vous donne accès à <strong>tous les jeux Premium</strong> pour seulement <strong>1€</strong> !
+    </p>
+
+    <!-- 📬 Formulaire de capture d'email -->
+    <form id="emailForm">
+      <input type="email" id="emailInput" placeholder="Votre adresse e-mail" required />
+      <button type="submit" class="subscribe">📩 Être informé des nouveautés</button>
+      <p id="message" style="margin-top:10px; font-size:0.9rem; color:#0f0; display:none;">
+        Merci ! Votre adresse a bien été enregistrée 💫
+      </p>
+    </form>
+  </section>
+
+  <footer>
+    © 2025 Brainova. Tous droits réservés.<br />
+    Offre valable pour une durée limitée.
+  </footer>
+
+  <script>
+    // Envoi vers Brevo (Sendinblue)
+    document.getElementById('emailForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const email = document.getElementById('emailInput').value.trim();
+      if (!email) return alert('Veuillez entrer une adresse e-mail valide.');
+
+      const payload = {
+        email: email,
+        listIds: [2],
+        updateEnabled: true,
+        attributes: { SOURCE: 'Brainova_Pub' }
+      };
+
+      try {
+        const response = await fetch('https://api.brevo.com/v3/contacts', {
+          method: 'POST',
+          headers: {
+            'accept': 'application/json',
+            'content-type': 'application/json',
+            'api-key': 'BREVO_API_KEY'
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (response.ok) {
+          document.getElementById('message').style.display = 'block';
+          document.getElementById('emailInput').value = '';
+        } else {
+          const data = await response.json();
+          console.error('Erreur Brevo:', data);
+          alert('Erreur lors de l’inscription.');
+        }
+      } catch (error) {
+        console.error('Erreur réseau:', error);
+        alert('Impossible de se connecter à Brevo.');
+      }
+    });
+  </script>
+</body>
+</html>
