@@ -1,17 +1,18 @@
 /* ===========================================================
-   🌐 BRAINOVA ACCESS CONTROL SYSTEM – v2.6.3-FIX (Final)
+   🌐 BRAINOVA ACCESS CONTROL SYSTEM – v2.6.4-FINAL
    ===========================================================
-   ✅ Bouton “Partager” actif quand les jeux Premium sont verrouillés.
-   ✅ Corrige l’erreur “Cannot read properties of null (reading 'addEventListener')”.
-   ✅ Compatible avec index.html / pricing.html / jeuxX.html.
+   ✅ Synchronisation complète avec index.html (aucun doublon).
+   ✅ Gestion unifiée du mode Premium (cookies, localStorage, session).
+   ✅ Ajout : Bannière automatique “💎 Session Premium restaurée”.
+   ✅ Compatible avec Stripe (abonnement), Netlify Functions et Firebase.
    =========================================================== */
 
 (function(window, document){
   'use strict';
-  console.log('🚀 Brainova Access v2.6.3-FIX initialisé');
+  console.log('🚀 Brainova Access v2.6.4-FINAL initialisé');
 
   // --------------------------
-  // Outils de cookies & logout
+  // Outils utilitaires
   // --------------------------
   function setCookie(name, value, days){
     let expires = '';
@@ -43,7 +44,7 @@
   }
 
   // --------------------------
-  // Détection Premium
+  // Détection & synchronisation Premium
   // --------------------------
   function detectPremium(){
     if (window.userIsPremium !== undefined) return !!window.userIsPremium;
@@ -78,18 +79,18 @@
   // --------------------------
   // Fonctions UI
   // --------------------------
-  function enableShareButton(shareBtn){
-    if (!shareBtn) return;
-    shareBtn.style.display = 'inline-block';
-    shareBtn.style.pointerEvents = 'auto';
-    shareBtn.style.opacity = '1';
+  function enableShareButton(btn){
+    if (!btn) return;
+    btn.style.display = 'inline-block';
+    btn.style.pointerEvents = 'auto';
+    btn.style.opacity = '1';
   }
 
-  function disableShareButton(shareBtn){
-    if (!shareBtn) return;
-    shareBtn.style.display = 'inline-block';
-    shareBtn.style.pointerEvents = 'none';
-    shareBtn.style.opacity = '0.5';
+  function disableShareButton(btn){
+    if (!btn) return;
+    btn.style.display = 'inline-block';
+    btn.style.pointerEvents = 'none';
+    btn.style.opacity = '0.5';
   }
 
   function lockCard(card){
@@ -128,7 +129,7 @@
   // Initialisation principale
   // --------------------------
   document.addEventListener('DOMContentLoaded', async ()=>{
-    console.log('Brainova v2.6.3-FIX DOM ready');
+    console.log('Brainova v2.6.4-FINAL DOM ready');
 
     const cards = document.querySelectorAll('.card');
     const premiumBtn = document.getElementById('premiumBtn');
@@ -139,7 +140,6 @@
 
     let isPremiumUser = detectPremium();
 
-    // Vérifie toutes les 2h
     const now = Date.now();
     const last = parseInt(localStorage.getItem('brainova_last_sync')||'0',10);
     const hoursSince = (now-last)/(1000*60*60);
@@ -151,7 +151,6 @@
 
     console.log('💎 isPremiumUser =', isPremiumUser);
 
-    // Jeux
     cards.forEach((card,i)=>{
       const num = i+1;
       const isPremiumGame = num > 10;
@@ -159,60 +158,58 @@
       else unlockCard(card,isPremiumGame);
     });
 
-    // --------------------------
-    // Logique des boutons
-    // --------------------------
+    // ✅ Bannière session Premium restaurée
+    if (isPremiumUser && !window.location.search.includes('premium=1')) {
+      const restoreBanner = document.createElement('div');
+      restoreBanner.textContent = '💎 Session Premium restaurée – tous vos jeux sont disponibles.';
+      restoreBanner.style.cssText = `position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+        background:linear-gradient(90deg,#ffe259,#ffa751);color:#111;font-weight:bold;
+        padding:12px 20px;border-radius:22px;box-shadow:0 0 15px rgba(255,215,0,0.5);z-index:9999;`;
+      document.body.appendChild(restoreBanner);
+      setTimeout(()=>restoreBanner.remove(),5000);
+    }
+
     if (isPremiumUser){
       if (premiumBtn) premiumBtn.style.display='none';
-      disableShareButton(shareBtn); // désactivé après abonnement
+      disableShareButton(shareBtn);
       if (loginBtn){ loginBtn.style.opacity='1'; loginBtn.style.pointerEvents='auto'; }
       if (signupBtn){ signupBtn.style.opacity='1'; signupBtn.style.pointerEvents='auto'; }
       if (logoutBtn){ logoutBtn.style.display='inline-block'; }
     } else {
       if (premiumBtn) premiumBtn.style.display='inline-block';
-      enableShareButton(shareBtn); // ✅ actif quand jeux verrouillés
+      enableShareButton(shareBtn);
       if (loginBtn){ loginBtn.style.opacity='0.5'; loginBtn.style.pointerEvents='none'; }
       if (signupBtn){ signupBtn.style.opacity='0.5'; signupBtn.style.pointerEvents='none'; }
       if (logoutBtn){ logoutBtn.style.display='none'; }
     }
 
-    // --------------------------
-    // Sécurisation des events
-    // --------------------------
-    if (shareBtn && typeof shareBtn.addEventListener === 'function'){
-      shareBtn.addEventListener('click', e=>{
-        if (shareBtn.style.pointerEvents === 'none') return;
+    if (shareBtn){
+      shareBtn.addEventListener('click',()=>{
+        if (shareBtn.style.pointerEvents==='none') return;
         try{
           if (navigator.share){
-            navigator.share({
-              title: document.title,
-              text: 'Découvrez Brainova',
-              url: window.location.href
-            });
+            navigator.share({title:document.title,text:'Découvrez Brainova',url:window.location.href});
           } else {
-            navigator.clipboard.writeText(window.location.href)
-              .then(()=>alert('Lien copié dans le presse-papiers ✅'));
+            navigator.clipboard.writeText(window.location.href).then(()=>alert('Lien copié ✅'));
           }
-        } catch(err){
-          console.warn('⚠️ Erreur partage :', err);
-        }
+        }catch(err){console.warn('⚠️ Erreur partage:',err);}
       });
     }
 
-    if (premiumBtn && typeof premiumBtn.addEventListener === 'function'){
+    if (premiumBtn){
       premiumBtn.addEventListener('click', e=>{
         e.preventDefault();
-        window.location.href = '/pricing.html';
+        if (typeof showSubscriptionMessage==='function') showSubscriptionMessage();
+        else window.location.href='/pricing.html';
       });
     }
 
-    if (logoutBtn && typeof logoutBtn.addEventListener === 'function'){
+    if (logoutBtn){
       logoutBtn.addEventListener('click', e=>{
         e.preventDefault();
         performLogout();
       });
     }
-
   });
 
   // --------------------------
