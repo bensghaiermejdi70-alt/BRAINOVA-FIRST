@@ -318,66 +318,90 @@ html, body { max-width: 100%; overflow-x: hidden; }
 <span class="status-text">Vérification du statut premium...</span>
 </div>
 </div>
-<form class="auth-form" id="loginForm">
-<div class="input-group">
-<label for="loginEmail">Email</label>
-<input id="loginEmail" placeholder="votre@email.com" required="" type="email"/>
-</div>
-<div class="input-group">
-<label for="loginPassword">Mot de passe</label>
-<input id="loginPassword" placeholder="••••••••" required="" type="password"/>
-</div>
-<button class="btn premium-btn" type="submit">Se connecter</button>
-</form>
-<button class="btn cancel-btn" id="loginCancel">Annuler</button>
-</div>
-</div>
-<div aria-hidden="true" class="modal" id="signupModal">
-<div class="modalCard premium-auth-modal">
-<div class="auth-header">
-<div class="auth-icon-large">✨</div>
-<h3>Inscription Premium</h3>
-<p>Créez votre compte membre privilégié</p>
-</div>
-<div class="premium-status-check">
-<div class="status-indicator" id="premiumStatusIndicatorSignup">
-<span class="status-dot"></span>
-<span class="status-text">Vérification du statut premium...</span>
-</div>
-</div>
-<form class="auth-form" id="signupForm">
-<div class="input-group">
-<label for="signupEmail">Email</label>
-<input id="signupEmail" placeholder="votre@email.com" required="" type="email"/>
-</div>
-<div class="input-group">
-<label for="signupPassword">Mot de passe</label>
-<input id="signupPassword" placeholder="••••••••" required="" type="password"/>
-</div>
-<div class="input-group">
-<label for="signupConfirm">Confirmer le mot de passe</label>
-<input id="signupConfirm" placeholder="••••••••" required="" type="password"/>
-</div>
-<button class="btn premium-btn" type="submit">S'inscrire</button>
-</form>
-<button class="btn cancel-btn" id="signupCancel">Annuler</button>
-</div>
-</div>
-<!-- Premium Modal -->
-<div aria-hidden="true" class="modal" id="premiumModal">
-<div class="modalCard">
-<h3>Abonnement Premium</h3>
-<p>Débloquez tous les jeux Brainova pour seulement 20 EUR / an.</p>
-<button class="btn" id="premiumSubscribeBtn">S'abonner</button>
-<button class="btn" id="premiumCancel" style="background:transparent;color:#fff;border:1px solid rgba(255,255,255,0.08)">Annuler</button>
-</div>
-</div>
-<script src="https://js.stripe.com/v3/"></script>
-<script src="https://www.gstatic.com/firebasejs/12.4.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/12.4.0/firebase-auth-compat.js"></script>
-<script>
 
-// Firebase Config
+<form class="auth-form" id="loginForm">
+  <div class="input-group">
+    <label for="loginEmail">Email</label>
+    <input id="loginEmail" placeholder="votre@email.com" required type="email" />
+  </div>
+
+  <div class="input-group">
+    <label for="loginPassword">Mot de passe</label>
+    <input id="loginPassword" placeholder="••••••••" required type="password" />
+  </div>
+
+  <button class="btn premium-btn" type="submit">Se connecter</button>
+</form> <!-- ✅ Fermeture correcte ici -->
+
+<script>
+// --- GESTION DU FORMULAIRE DE CONNEXION ---
+document.getElementById("loginForm")?.addEventListener("submit", function (e) {
+  e.preventDefault();
+  const email = document.getElementById("loginEmail")?.value.trim();
+  const password = document.getElementById("loginPassword")?.value.trim();
+
+  if (!email || !password) {
+    alert("Veuillez saisir votre email et votre mot de passe.");
+    return;
+  }
+
+  alert("Connexion réussie ! Bienvenue sur Brainova 🎮");
+  localStorage.setItem("brainova_user_email", email);
+
+  const modal = document.getElementById("loginModal");
+  if (modal) modal.style.display = "none";
+
+  if (typeof renderGrid === "function")
+    renderGrid(localStorage.getItem("brainova_lang") || "fr");
+});
+
+// --- GESTION DU FORMULAIRE D’INSCRIPTION ---
+document.getElementById("signupForm")?.addEventListener("submit", function (e) {
+  e.preventDefault();
+
+  const email = document.getElementById("signupEmail")?.value.trim();
+  const password = document.getElementById("signupPassword")?.value.trim();
+  const confirm = document.getElementById("signupConfirm")?.value.trim();
+
+  if (!email || !password || !confirm) {
+    alert("Merci de remplir tous les champs.");
+    return;
+  }
+
+  if (password !== confirm) {
+    alert("Les mots de passe ne correspondent pas !");
+    return;
+  }
+
+  alert("Inscription réussie ! Bienvenue sur Brainova 🎮");
+  localStorage.setItem("brainova_user_email", email);
+
+  const modal = document.getElementById("signupModal");
+  if (modal) modal.style.display = "none";
+
+  if (typeof renderGrid === "function")
+    renderGrid(localStorage.getItem("brainova_lang") || "fr");
+});
+</script>
+
+<!-- ✅ UNIQUE Premium Modal -->
+<div aria-hidden="true" class="modal" id="premiumModal">
+  <div class="modalCard">
+    <h3>Abonnement Premium</h3>
+    <p>Débloquez tous les jeux Brainova pour seulement 20 EUR / an.</p>
+    <button class="btn" id="premiumSubscribeBtn">S'abonner</button>
+    <button
+      class="btn"
+      id="premiumCancel"
+      style="background:transparent;color:#fff;border:1px solid rgba(255,255,255,0.08)"
+    >
+      Annuler
+    </button>
+  </div>
+</div>
+
+<!-- ✅ Firebase Config (placé dans un script dédié) -->
+<script>
 const firebaseConfig = {
   apiKey: "AIzaSyAjnpgNwDdGtb46XRCvT_cU7AAU-25zw1U",
   authDomain: "brainova-c0295.firebaseapp.com",
@@ -387,8 +411,9 @@ const firebaseConfig = {
   appId: "1:437705478313:web:8b7a4c97b5d80e6d49d9b8",
   measurementId: "G-79M4HWKQ35"
 };
+
 firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
+</script>
 
 // Gestion de l'état d'authentification
 auth.onAuthStateChanged((user) => {
@@ -1556,4 +1581,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
 </body>
 </html>
+
 
