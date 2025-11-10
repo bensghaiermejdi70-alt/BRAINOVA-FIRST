@@ -1553,6 +1553,36 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 </script>
+<script src="/brainova-access.js"></script>
+
+<!-- ========================== -->
+<!-- 🚀 Script Stripe (Fix Netlify) -->
+<!-- ========================== -->
+<script>
+  // Délégation d'événement globale : écoute les clics sur le bouton dynamique "S’abonner"
+  document.addEventListener('click', function (e) {
+    if (e.target && e.target.id === 'subscribeNowBtn') {
+      console.log('🟢 Clic détecté sur "S’abonner" — lancement session Stripe');
+      fetch("/.netlify/functions/create-checkout-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" }
+      })
+      .then(res => res.json())
+      .then(data => {
+        console.log('Stripe session response:', data);
+        if (data.url) {
+          window.location.href = data.url; // ✅ Redirection vers Stripe
+        } else {
+          alert("❌ Erreur lors de la création de la session Stripe.");
+        }
+      })
+      .catch(err => {
+        console.error("Erreur Stripe:", err);
+        alert("⚠️ Impossible de se connecter à Stripe (Netlify).");
+      });
+    }
+  });
+</script>
 
 </body>
 </html>
