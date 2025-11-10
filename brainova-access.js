@@ -1,244 +1,130 @@
-/* ===========================================================
-   🌐 BRAINOVA ACCESS CONTROL SYSTEM – v2.6.5
-   ===========================================================
-   ✅ Compatible avec verify-premium.js et stripe-webhook.js
-   ✅ Envoi de l’e-mail utilisateur pour vérification Premium
-   ✅ Remplace l’ancien endpoint /api/check-premium
-   ✅ Conserve l’apparence et le comportement actuels
-   =========================================================== */
 
-(function (window, document) {
-  'use strict';
-  console.log('🚀 Brainova Access v2.6.5 initialisé');
+// ===========================================================
+// 🧩 BRAINOVA ACCESS CONTROL – CENTRALIZED PREMIUM SYSTEM v2.7
+// ===========================================================
+// ✅ Stripe + Email + Premium centralisés ici (Netlify compatible)
+// ✅ Correction double chargement / bordures / boutons (stabilité complète)
+// ===========================================================
 
-  // --------------------------
-  // Outils utilitaires
-  // --------------------------
-  function setCookie(name, value, days) {
-    let expires = '';
-    if (days) {
-      const d = new Date();
-      d.setTime(d.getTime() + days * 24 * 60 * 60 * 1000);
-      expires = '; expires=' + d.toUTCString();
+document.addEventListener("DOMContentLoaded", async () => {
+  console.log("🚀 Brainova Access v2.7 loaded — Mode centralisé");
+
+  const premiumBtn = document.getElementById("premiumBtn");
+  const shareBtn = document.getElementById("shareBtn");
+  const loginBtn = document.getElementById("loginBtn");
+  const signupBtn = document.getElementById("signupBtn");
+  const logoutBtn = document.getElementById("logoutBtn");
+
+  const isPremium = localStorage.getItem("brainova_premium") === "true";
+  const userEmail = localStorage.getItem("brainova_user_email");
+
+  if (isPremium) {
+    console.log("💎 Premium local détecté");
+    activerModePremium();
+  } else {
+    console.log("🟡 Mode gratuit — jeux Premium verrouillés");
+    verrouillerJeux();
+  }
+
+  premiumBtn?.addEventListener("click", async () => {
+    if (!userEmail) {
+      alert("Veuillez vous connecter avant de vous abonner.");
+      return;
     }
-    document.cookie = name + '=' + encodeURIComponent(value || '') + expires + '; path=/';
-  }
-
-  function getCookie(name) {
-    const m = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
-    return m ? decodeURIComponent(m[2]) : null;
-  }
-
-  function performLogout() {
     try {
-      Object.keys(localStorage).forEach(k => {
-        if (k.startsWith('brainova_')) localStorage.removeItem(k);
+      const res = await fetch("/.netlify/functions/create-checkout-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          priceId: "price_1SQPWLP5iQ9gRxAtJ6zvc3fa",
+          successUrl: window.location.origin + "/?premium=1",
+          cancelUrl: window.location.origin + "/?canceled=1",
+          customerEmail: userEmail,
+        }),
       });
-      sessionStorage.clear();
-      document.cookie = 'brainova_user_status=; Max-Age=0; path=/';
-      window.location.href = '/';
-    } catch (e) {
-      console.error('❌ Erreur logout:', e);
-      window.location.reload();
-    }
-  }
-
-  // --------------------------
-  // 🔍 Vérification du statut Premium via Netlify
-  // --------------------------
-  async function getPremiumStatusFromServer() {
-    try {
-      const userEmail = localStorage.getItem('brainova_user_email');
-      if (!userEmail) {
-        console.log('⚠️ Aucun e-mail utilisateur stocké.');
-        return false;
-      }
-
-      const res = await fetch(`/.netlify/functions/verify-premium?email=${encodeURIComponent(userEmail)}`, {
-        cache: 'no-store'
-      });
-
-      if (!res.ok) {
-        console.warn('⚠️ Réponse invalide de verify-premium.');
-        return false;
-      }
-
       const data = await res.json();
-      return data.active === true;
+      if (data.url) window.location.href = data.url;
+      else alert("❌ Erreur lors de la création de la session Stripe.");
     } catch (e) {
-      console.warn('⚠️ Erreur getPremiumStatusFromServer:', e);
-      return false;
+      console.error("⚠️ Erreur Stripe:", e);
+      alert("Impossible de contacter Stripe.");
     }
+  });
+
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get("premium") === "1") {
+    console.log("🎉 Activation automatique du mode Premium");
+    localStorage.setItem("brainova_premium", "true");
+    localStorage.setItem("brainova_premium_status", "active");
+    localStorage.setItem("brainova_premium_source", "stripe_payment");
+    activerModePremium();
+    window.history.replaceState({}, document.title, window.location.pathname);
   }
 
-  // --------------------------
-  // Fonctions UI
-  // --------------------------
-  function enableShareButton(btn) {
-    if (!btn) return;
-    btn.style.display = 'inline-block';
-    btn.style.pointerEvents = 'auto';
-    btn.style.opacity = '1';
-  }
-
-  function disableShareButton(btn) {
-    if (!btn) return;
-    btn.style.display = 'inline-block';
-    btn.style.pointerEvents = 'none';
-    btn.style.opacity = '0.5';
-  }
-
-  function lockCard(card) {
-    if (!card) return;
-    card.classList.add('locked');
-    card.style.opacity = '0.7';
-    if (!card.querySelector('.lock-icon')) {
-      const lock = document.createElement('div');
-      lock.className = 'lock-icon';
-      lock.textContent = '🔒';
-      lock.style.cssText =
-        'position:absolute;top:10px;right:10px;font-size:22px;color:#ff5252;z-index:5;';
-      card.appendChild(lock);
-    }
-    if (!card.dataset.clickBound) {
-      card.addEventListener('click', e => {
-        e.preventDefault();
-        alert('🔒 Ce jeu est réservé aux abonnés Premium.\nAbonnez-vous pour y accéder !');
+  shareBtn?.addEventListener("click", () => {
+    if (!navigator.share) {
+      navigator.clipboard.writeText(window.location.href);
+      alert("🔗 Lien copié !");
+    } else {
+      navigator.share({
+        title: "Brainova – Jeux intelligents",
+        text: "Découvre Brainova Premium 🎮",
+        url: window.location.href,
       });
-      card.dataset.clickBound = 'true';
     }
-  }
+  });
 
-  function unlockCard(card, isPremiumGame) {
-    if (!card) return;
-    card.classList.remove('locked');
-    card.style.opacity = '1';
-    const lock = card.querySelector('.lock-icon');
-    if (lock) lock.remove();
-    if (isPremiumGame) {
-      card.style.outline = '3px solid #FFD700';
-      card.style.boxShadow = '0 0 12px rgba(255,215,0,0.7)';
-    }
-  }
+  logoutBtn?.addEventListener("click", () => {
+    localStorage.clear();
+    alert("Déconnexion réussie !");
+    window.location.reload();
+  });
 
-  // --------------------------
-  // Initialisation principale
-  // --------------------------
-  async function initializeBrainovaAccess() {
-    console.log('Brainova v2.6.5 DOM ready');
-
-    const cards = document.querySelectorAll('.card');
-    const premiumBtn = document.getElementById('premiumBtn');
-    const shareBtn = document.getElementById('shareBtn');
-    const loginBtn = document.getElementById('loginBtn');
-    const signupBtn = document.getElementById('signupBtn');
-    const logoutBtn = document.getElementById('logoutBtn');
-
-    const isPremiumUser = await getPremiumStatusFromServer();
-    window.userIsPremium = isPremiumUser;
-    console.log('💎 isPremiumUser (backend) =', isPremiumUser);
-
+  function activerModePremium() {
+    const cards = document.querySelectorAll(".card");
     cards.forEach((card, i) => {
-      const num = i + 1;
-      const isPremiumGame = num > 10;
-      if (isPremiumGame && !isPremiumUser) lockCard(card);
-      else unlockCard(card, isPremiumGame);
+      const lock = card.querySelector(".lock-icon");
+      if (lock) lock.remove();
+      card.style.opacity = "1";
+      if (i >= 10) {
+        card.style.outline = "3px solid #FFD700";
+        card.style.boxShadow = "0 0 12px rgba(255,215,0,0.7)";
+      }
     });
 
-    // ✅ Bannière session Premium restaurée
-    if (isPremiumUser && !window.location.search.includes('premium=1')) {
-      const restoreBanner = document.createElement('div');
-      restoreBanner.textContent = '💎 Session Premium restaurée – tous vos jeux sont disponibles.';
-      restoreBanner.style.cssText = `position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
-        background:linear-gradient(90deg,#ffe259,#ffa751);color:#111;font-weight:bold;
-        padding:12px 20px;border-radius:22px;box-shadow:0 0 15px rgba(255,215,0,0.5);z-index:9999;`;
-      document.body.appendChild(restoreBanner);
-      setTimeout(() => restoreBanner.remove(), 5000);
-    }
+    if (premiumBtn) premiumBtn.style.display = "none";
+    if (shareBtn) shareBtn.style.pointerEvents = "none";
+    if (loginBtn) loginBtn.style.opacity = "1";
+    if (signupBtn) signupBtn.style.opacity = "1";
+    if (logoutBtn) logoutBtn.style.display = "inline-block";
 
-    // --------------------------
-    // Gestion des boutons
-    // --------------------------
-    if (isPremiumUser) {
-      if (premiumBtn) premiumBtn.style.display = 'none';
-      disableShareButton(shareBtn);
-      if (loginBtn) {
-        loginBtn.style.opacity = '1';
-        loginBtn.style.pointerEvents = 'auto';
-      }
-      if (signupBtn) {
-        signupBtn.style.opacity = '1';
-        signupBtn.style.pointerEvents = 'auto';
-      }
-      if (logoutBtn) logoutBtn.style.display = 'inline-block';
-    } else {
-      if (premiumBtn) premiumBtn.style.display = 'inline-block';
-      enableShareButton(shareBtn);
-      if (loginBtn) {
-        loginBtn.style.opacity = '0.5';
-        loginBtn.style.pointerEvents = 'none';
-      }
-      if (signupBtn) {
-        signupBtn.style.opacity = '0.5';
-        signupBtn.style.pointerEvents = 'none';
-      }
-      if (logoutBtn) logoutBtn.style.display = 'none';
-    }
-
-    // --------------------------
-    // Boutons d'action
-    // --------------------------
-    if (shareBtn) {
-      shareBtn.addEventListener('click', () => {
-        if (shareBtn.style.pointerEvents === 'none') return;
-        try {
-          if (navigator.share) {
-            navigator.share({
-              title: document.title,
-              text: 'Découvrez Brainova',
-              url: window.location.href
-            });
-          } else {
-            navigator.clipboard.writeText(window.location.href).then(() => alert('Lien copié ✅'));
-          }
-        } catch (err) {
-          console.warn('⚠️ Erreur partage:', err);
-        }
-      });
-    }
-
-    if (premiumBtn) {
-      premiumBtn.addEventListener('click', e => {
-        e.preventDefault();
-        if (typeof showSubscriptionMessage === 'function') showSubscriptionMessage();
-        else window.location.href = '/pricing.html';
-      });
-    }
-
-    if (logoutBtn) {
-      logoutBtn.addEventListener('click', e => {
-        e.preventDefault();
-        performLogout();
-      });
-    }
+    afficherBanniere("💎 Accès Premium activé — Tous les jeux sont débloqués !");
   }
 
-  document.addEventListener('DOMContentLoaded', initializeBrainovaAccess);
+  function verrouillerJeux() {
+    const cards = document.querySelectorAll(".card");
+    cards.forEach((card, i) => {
+      if (i >= 10) {
+        card.style.opacity = "0.6";
+        if (!card.querySelector(".lock-icon")) {
+          const lock = document.createElement("div");
+          lock.className = "lock-icon";
+          lock.textContent = "🔒";
+          lock.style.cssText =
+            "position:absolute;top:10px;right:10px;font-size:22px;color:#ff5252;z-index:5;";
+          card.appendChild(lock);
+        }
+      }
+    });
+    if (logoutBtn) logoutBtn.style.display = "none";
+  }
 
-  // --------------------------
-  // Débogage manuel
-  // --------------------------
-  window.__brainova = window.__brainova || {};
-  window.__brainova.forcePremium = function () {
-    localStorage.setItem('brainova_premium', 'true');
-    sessionStorage.setItem('brainova_user_status', 'premium');
-    setCookie('brainova_user_status', 'premium', 365);
-    location.reload();
-  };
-  window.__brainova.forceFree = function () {
-    localStorage.removeItem('brainova_premium');
-    sessionStorage.setItem('brainova_user_status', 'free');
-    setCookie('brainova_user_status', 'free', 365);
-    location.reload();
-  };
-})(window, document);
+  function afficherBanniere(message) {
+    const banner = document.createElement("div");
+    banner.textContent = message;
+    banner.style.cssText =
+      "position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:linear-gradient(90deg,#ffe259,#ffa751);color:#111;font-weight:bold;padding:12px 20px;border-radius:22px;box-shadow:0 0 15px rgba(255,215,0,0.5);z-index:9999;";
+    document.body.appendChild(banner);
+    setTimeout(() => banner.remove(), 5000);
+  }
+});
