@@ -1734,6 +1734,63 @@ document.addEventListener("DOMContentLoaded", async () => {
   console.log(premiumOK ? "💎 Mode Premium activé" : "🟡 Mode gratuit - jeux verrouillés");
 });
 </script>
+<script>
+// --- Vérification du statut Premium Stripe (Netlify Function) ---
+async function verifyPremiumStatusFromServer() {
+  const email = localStorage.getItem("brainova_user_email");
+
+  if (!email) {
+    console.warn("⚠️ Aucun e-mail utilisateur enregistré.");
+    return false;
+  }
+
+  try {
+    // Vérifie les deux chemins possibles (verify et verify-premium)
+    const urls = [
+      "/.netlify/functions/verify?email=" + encodeURIComponent(email),
+      "/.netlify/functions/verify-premium?email=" + encodeURIComponent(email)
+    ];
+
+    let responseText = "";
+    let data = null;
+
+    for (const url of urls) {
+      const res = await fetch(url, { cache: "no-store" });
+      responseText = await res.text();
+      if (res.ok && responseText.trim().startsWith("{")) {
+        data = JSON.parse(responseText);
+        console.log("🔍 Réponse serveur verify:", data);
+        break;
+      } else {
+        console.warn(`⚠️ Réponse non JSON sur ${url}:`, responseText.slice(0, 60));
+      }
+    }
+
+    if (data && data.active) {
+      console.log("💎 Statut premium confirmé depuis le serveur.");
+      localStorage.setItem("brainova_premium", "true");
+      localStorage.setItem("brainova_premium_status", "confirmed");
+      return true;
+    } else {
+      console.log("🟡 Aucun abonnement actif pour cet utilisateur.");
+      localStorage.removeItem("brainova_premium");
+      return false;
+    }
+
+  } catch (err) {
+    console.error("❌ Erreur vérification premium:", err);
+    return false;
+  }
+}
+
+// --- Lancer la vérification automatiquement ---
+document.addEventListener("DOMContentLoaded", async () => {
+  const isPremium = await verifyPremiumStatusFromServer();
+  console.log(isPremium ? "✅ Premium actif" : "🟡 Mode gratuit - jeux verrouillés");
+  if (typeof renderGrid === "function")
+    renderGrid(localStorage.getItem("brainova_lang") || "fr");
+});
+</script>
 
 </body>
 </html>
