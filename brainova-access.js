@@ -172,13 +172,13 @@
     // 🎛️ Boutons
     if (isPremiumUser){
       if (premiumBtn) premiumBtn.style.display='none';
-      disableShareButton(shareBtn);
+      enableShareButton(shareBtn); // Partager accessible uniquement pour premium
       if (loginBtn){ loginBtn.style.opacity='1'; loginBtn.style.pointerEvents='auto'; }
       if (signupBtn){ signupBtn.style.opacity='1'; signupBtn.style.pointerEvents='auto'; }
       if (logoutBtn){ logoutBtn.style.display='inline-block'; }
     } else {
       if (premiumBtn) premiumBtn.style.display='inline-block';
-      enableShareButton(shareBtn);
+      disableShareButton(shareBtn); // Partager désactivé pour non-premium
       if (loginBtn){ loginBtn.style.opacity='0.5'; loginBtn.style.pointerEvents='none'; }
       if (signupBtn){ signupBtn.style.opacity='0.5'; signupBtn.style.pointerEvents='none'; }
       if (logoutBtn){ logoutBtn.style.display='none'; }
