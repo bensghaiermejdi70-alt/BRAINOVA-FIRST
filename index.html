@@ -1784,6 +1784,53 @@ function updateShareButtonState(isPremiumUser) {
   }
 }
 </script>
+<script>
+// ✅ Vérification automatique du statut Premium via Stripe (Netlify Function)
+async function verifyPremiumStatusFromServer() {
+  const email = localStorage.getItem("brainova_user_email");
+  if (!email) {
+    console.warn("⚠️ Aucun e-mail utilisateur enregistré.");
+    return false;
+  }
+
+  try {
+    const res = await fetch("/.netlify/functions/verify?email=" + encodeURIComponent(email));
+    if (!res.ok) return false;
+
+    const data = await res.json();
+    console.log("🔍 Réponse serveur verify:", data);
+
+    if (data.active) {
+      console.log("💎 Statut premium confirmé depuis le serveur.");
+      localStorage.setItem("brainova_premium", "true");
+      localStorage.setItem("brainova_premium_status", "confirmed");
+      localStorage.setItem("brainova_premium_source", "stripe_payment");
+      localStorage.setItem("brainova_premium_date", new Date().toISOString());
+      // ✅ Afficher une bannière de confirmation
+      const banner = document.createElement("div");
+      banner.textContent = "💎 Votre abonnement Premium est actif – tous les jeux sont débloqués !";
+      banner.style.cssText = "position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:linear-gradient(90deg,#00ff88,#00c3ff);color:#001;padding:12px 20px;border-radius:25px;font-weight:bold;z-index:9999;";
+      document.body.appendChild(banner);
+      setTimeout(() => banner.remove(), 6000);
+      return true;
+    } else {
+      console.log("🟡 Aucun abonnement actif pour cet utilisateur.");
+      localStorage.removeItem("brainova_premium");
+      localStorage.removeItem("brainova_premium_status");
+      return false;
+    }
+  } catch (err) {
+    console.error("❌ Erreur vérification premium:", err);
+    return false;
+  }
+}
+
+// 🚀 Lancer la vérification dès le chargement de la page
+document.addEventListener("DOMContentLoaded", async () => {
+  const status = await verifyPremiumStatusFromServer();
+  console.log(status ? "✅ Premium actif" : "🟡 Mode gratuit");
+});
+</script>
 
 </body>
 </html>
