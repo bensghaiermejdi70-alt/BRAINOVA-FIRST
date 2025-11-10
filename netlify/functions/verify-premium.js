@@ -1,17 +1,15 @@
-// ✅ Fonction Netlify : Vérification du statut Premium Stripe
+// ✅ Fonction Netlify : Vérification du statut Premium Stripe (version Brainova v3)
 // -----------------------------------------------------------
-// Cette fonction est appelée par brainova-access.js pour vérifier
-// si l’utilisateur a un abonnement actif sur Stripe.
+// Cette fonction vérifie si un utilisateur possède un abonnement actif
+// et permet aussi la mise à jour (depuis le webhook Stripe).
 
 import Stripe from "stripe";
-
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export async function handler(event) {
-  // Autoriser CORS
   const headers = {
     "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "GET, OPTIONS",
+    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type",
   };
 
@@ -20,30 +18,69 @@ export async function handler(event) {
   }
 
   try {
-    // ⚙️ Exemple simple : recherche d’un abonnement actif
-    // (dans un vrai système, tu utiliseras l’e-mail de l’utilisateur connecté)
-    const subscriptions = await stripe.subscriptions.list({
-      limit: 1,
-      status: "active",
-    });
+    // 🧩 Si c’est un POST (appelé par le webhook pour activer/désactiver Premium)
+    if (event.httpMethod === "POST") {
+      const body = event.body ? JSON.parse(event.body) : {};
+      const { email, premium } = body;
 
-    if (subscriptions.data.length > 0) {
-      console.log("✅ Abonnement Premium trouvé.");
+      if (!email) {
+        return {
+          statusCode: 400,
+          headers,
+          body: JSON.stringify({ error: "Missing email parameter" }),
+        };
+      }
+
+      // ⚙️ Ici tu pourrais stocker l’état premium dans une base (Firebase, etc.)
+      console.log(`💾 Synchronisation webhook → ${email} = ${premium ? "Premium" : "Free"}`);
+
       return {
         statusCode: 200,
         headers,
-        body: JSON.stringify({ active: true }),
-      };
-    } else {
-      console.log("🟡 Aucun abonnement actif trouvé.");
-      return {
-        statusCode: 200,
-        headers,
-        body: JSON.stringify({ active: false }),
+        body: JSON.stringify({ success: true }),
       };
     }
+
+    // 🧩 Si c’est un GET (appelé par le front via brainova-access.js)
+    if (event.httpMethod === "GET") {
+      const email = event.queryStringParameters?.email;
+
+      if (!email) {
+        return {
+          statusCode: 400,
+          headers,
+          body: JSON.stringify({ error: "Missing email parameter" }),
+        };
+      }
+
+      // 🔎 Recherche d’abonnement actif pour cet e-mail
+      const customers = await stripe.customers.list({ email, limit: 1 });
+      if (customers.data.length === 0) {
+        console.log(`🟡 Aucun client Stripe trouvé pour ${email}`);
+        return { statusCode: 200, headers, body: JSON.stringify({ active: false }) };
+      }
+
+      const customerId = customers.data[0].id;
+      const subscriptions = await stripe.subscriptions.list({
+        customer: customerId,
+        status: "active",
+        limit: 1,
+      });
+
+      if (subscriptions.data.length > 0) {
+        console.log(`✅ Abonnement actif trouvé pour ${email}`);
+        return { statusCode: 200, headers, body: JSON.stringify({ active: true }) };
+      } else {
+        console.log(`🟡 Aucun abonnement actif pour ${email}`);
+        return { statusCode: 200, headers, body: JSON.stringify({ active: false }) };
+      }
+    }
+
+    // ❌ Autre méthode non autorisée
+    return { statusCode: 405, headers, body: JSON.stringify({ error: "Method not allowed" }) };
+
   } catch (error) {
-    console.error("❌ Erreur Stripe :", error.message);
+    console.error("❌ Erreur verify-premium :", error.message);
     return {
       statusCode: 500,
       headers,
