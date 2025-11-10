@@ -1891,7 +1891,37 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 </script>
 
+<script>
+// =====================================================
+// 🔒 Blocage automatique des jeux Premium si non abonné
+// =====================================================
+document.addEventListener("DOMContentLoaded", () => {
+  const isPremiumUser = localStorage.getItem("brainova_premium") === "true";
+
+  // Sélectionne tous les liens vers les jeux
+  const gameLinks = document.querySelectorAll(".card a, a[href*='jeu'], a[href*='game']");
+
+  gameLinks.forEach(link => {
+    const href = link.getAttribute("href") || "";
+    const match = href.match(/jeux(\d+)\.html/i);
+    const gameNumber = match ? parseInt(match[1]) : null;
+
+    if (gameNumber && gameNumber >= 11 && gameNumber <= 36 && !isPremiumUser) {
+      link.addEventListener("click", (e) => {
+        e.preventDefault();
+        alert("🔒 Ce jeu est réservé aux abonnés Brainova Premium. Abonnez-vous pour y accéder !");
+      });
+      link.style.filter = "grayscale(70%)";
+      link.style.pointerEvents = "auto";
+      link.style.cursor = "not-allowed";
+    }
+  });
+});
+</script>
+
 </body>
 </html>
+
+
 
 
