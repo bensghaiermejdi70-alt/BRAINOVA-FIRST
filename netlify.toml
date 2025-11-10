@@ -20,6 +20,22 @@
   HIDE_ENV_VARS = "true"
 
 ######################################
+# 🚫 Désactivation des optimisations Netlify
+######################################
+
+[build.processing]
+  skip_processing = true
+
+[build.processing.css]
+  minify = false
+
+[build.processing.js]
+  minify = false
+
+[build.processing.html]
+  pretty_urls = false
+
+######################################
 # 🔄 Redirections API
 ######################################
 
@@ -40,6 +56,10 @@
 [[headers]]
   for = "/*"
   [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+    Pragma = "no-cache"
+    Expires = "0"
+
     X-XSS-Protection = "1; mode=block"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
@@ -102,4 +122,3 @@
 [dev]
   framework = "#static"
   targetPort = 8888
-
