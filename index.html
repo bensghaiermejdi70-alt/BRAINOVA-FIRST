@@ -277,47 +277,15 @@ html, body { max-width: 100%; overflow-x: hidden; }
 <span class="auth-icon">✨</span>
 <span class="auth-text">Inscription</span>
 </button>
-<!-- Bouton Premium -->
 <button id="premiumBtn" onclick="showSubscriptionMessage()">Premium</button>
 <button id="shareBtn" onclick="showShareOptions()">Partager</button>
 </div>
 </div>
 </header>
-
 <section class="intro">
-  <h2 id="introTitle">🎮 Découvrez nos 36 Jeux Intelligents</h2>
-  <p id="introDesc">
-    Entraînez votre cerveau avec notre collection complète de jeux adaptatifs alimentés par l'IA
-  </p>
+<h2 id="introTitle">🎮 Découvrez nos 36 Jeux Intelligents</h2>
+<p id="introDesc">Entraînez votre cerveau avec notre collection complète de jeux adaptatifs alimentés par l'IA</p>
 </section>
-
-<!-- ========================== -->
-<!-- 🚀 Script Stripe à placer tout en bas du <body> -->
-<!-- ========================== -->
-<script>
-document.addEventListener('click', function(e) {
-  if (e.target && e.target.id === 'subscribeNowBtn') {
-    // Quand on clique sur "S’abonner" dans la fenêtre modale
-    fetch("/.netlify/functions/create-checkout-session", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" }
-    })
-    .then(res => res.json())
-    .then(data => {
-      if (data.url) {
-        window.location.href = data.url; // ✅ Redirection vers Stripe
-      } else {
-        alert("❌ Erreur lors de la création de la session Stripe.");
-      }
-    })
-    .catch(err => {
-      console.error("Erreur Stripe:", err);
-      alert("⚠️ Impossible de se connecter à Stripe.");
-    });
-  }
-});
-</script>
-
 <p class="pc-note" style="font-size:0.95rem; margin-top:6px; color: #cfd8dc;">
 <span data-fr="">🖥️ Jeux conçus pour ordinateur (version PC)</span>
 <span data-en="" style="display:none">🖥️ Games designed for computer (PC version)</span>
@@ -1581,33 +1549,10 @@ document.addEventListener('DOMContentLoaded', () => {
       console.log("🟡 Mode gratuit - jeux Premium verrouillés.");
     }
   } catch (err) {
- ...
-</section>
-
-<!-- 🚀 Script Stripe -->
-<script>
-  document.addEventListener('click', function(e) {
-    if (e.target && e.target.id === 'subscribeNowBtn') {
-      fetch("/.netlify/functions/create-checkout-session", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" }
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (data.url) {
-          window.location.href = data.url;
-        } else {
-          alert("❌ Erreur lors de la création de la session Stripe.");
-        }
-      })
-      .catch(err => {
-        console.error("Erreur Stripe:", err);
-        alert("⚠️ Impossible de se connecter à Stripe.");
-      });
-    }
-  });
+    console.error('Erreur activation premium:', err);
+  }
+});
 </script>
 
 </body>
 </html>
-
