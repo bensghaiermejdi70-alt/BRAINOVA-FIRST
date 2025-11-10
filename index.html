@@ -642,7 +642,8 @@ function renderGrid(lang){
   
   // Bouton partager TOUJOURS visible
   if (shareBtn) {
-    shareBtn.style.display = 'inline-block';
+    if(userPremium || isPremium){ shareBtn.style.display = 'inline-block'; shareBtn.classList.remove('locked'); }
+    else { shareBtn.style.display = 'inline-block'; shareBtn.classList.add('locked'); shareBtn.disabled = true; shareBtn.title = 'Disponible après abonnement'; }
   }
   
   console.log('renderGrid completed - Cards added to grid:', grid.children.length);
@@ -828,6 +829,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     // Fermer le modal et mettre à jour l'interface
     loginModal.style.display = 'none';
     showAuthSuccess('Connexion réussie ! Bienvenue sur Brainova Premium.');
+    localStorage.setItem("brainova_user_email", email);
     
     // Réinitialiser le formulaire
     document.getElementById('loginForm').reset();
@@ -1698,6 +1700,25 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 });
 </script>
+
+<script>
+async function verifyPremiumStatusFromServer(email) {
+  try {
+    const res = await fetch("/.netlify/functions/verify?email=" + encodeURIComponent(email));
+    const data = await res.json();
+    if (data.active) {
+      localStorage.setItem("brainova_premium", "true");
+      localStorage.setItem("brainova_premium_status", "confirmed");
+      console.log("✅ Statut premium confirmé depuis le serveur.");
+    } else {
+      console.log("⚠️ Statut premium non actif.");
+    }
+  } catch (e) {
+    console.warn("⚠️ Impossible de vérifier le statut premium:", e);
+  }
+}
+</script>
+
 </body>
 </html>
 
