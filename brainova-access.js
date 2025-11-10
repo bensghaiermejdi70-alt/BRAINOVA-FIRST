@@ -46,32 +46,15 @@
   // --------------------------
   // Détection & synchronisation Premium
   // --------------------------
-  function detectPremium(){
-    if (window.userIsPremium !== undefined) return !!window.userIsPremium;
-    if (localStorage.getItem('brainova_premium')==='true') return true;
-    if (sessionStorage.getItem('brainova_user_status')==='premium') return true;
-    if (getCookie('brainova_user_status')==='premium') return true;
-    return false;
-  }
-
-  async function syncPremiumStatus(){
+  // Nouvelle détection premium : uniquement via backend
+  async function getPremiumStatusFromServer() {
     try {
-      const res = await fetch('/.netlify/functions/verify-premium',{cache:'no-store'});
+      const res = await fetch('/api/check-premium', { credentials: 'include', cache: 'no-store' });
       if (!res.ok) return false;
       const data = await res.json();
-      if (data.active){
-        localStorage.setItem('brainova_premium','true');
-        sessionStorage.setItem('brainova_user_status','premium');
-        setCookie('brainova_user_status','premium',365);
-        return true;
-      } else {
-        localStorage.removeItem('brainova_premium');
-        sessionStorage.setItem('brainova_user_status','free');
-        setCookie('brainova_user_status','free',365);
-        return false;
-      }
-    } catch(e){
-      console.warn('⚠️ Erreur syncPremiumStatus:', e);
+      return data.isPremium === true;
+    } catch (e) {
+      console.warn('⚠️ Erreur getPremiumStatusFromServer:', e);
       return false;
     }
   }
@@ -128,7 +111,8 @@
   // --------------------------
   // Initialisation principale
   // --------------------------
-  document.addEventListener('DOMContentLoaded', async ()=>{
+  // Initialisation principale : gestion premium centralisée
+  async function initializeBrainovaAccess() {
     console.log('Brainova v2.6.4-FINAL DOM ready');
 
     const cards = document.querySelectorAll('.card');
@@ -138,18 +122,9 @@
     const signupBtn = document.getElementById('signupBtn');
     const logoutBtn = document.getElementById('logoutBtn');
 
-    let isPremiumUser = detectPremium();
-
-    const now = Date.now();
-    const last = parseInt(localStorage.getItem('brainova_last_sync')||'0',10);
-    const hoursSince = (now-last)/(1000*60*60);
-    if (isNaN(hoursSince) || hoursSince > 2){
-      const ok = await syncPremiumStatus();
-      if (ok) isPremiumUser = true;
-      localStorage.setItem('brainova_last_sync', Date.now().toString());
-    }
-
-    console.log('💎 isPremiumUser =', isPremiumUser);
+    const isPremiumUser = await getPremiumStatusFromServer();
+    window.userIsPremium = isPremiumUser;
+    console.log('💎 isPremiumUser (backend) =', isPremiumUser);
 
     cards.forEach((card,i)=>{
       const num = i+1;
@@ -210,7 +185,9 @@
         performLogout();
       });
     }
-  });
+  }
+
+  document.addEventListener('DOMContentLoaded', initializeBrainovaAccess);
 
   // --------------------------
   // Débogage manuel
