@@ -1719,6 +1719,72 @@ async function verifyPremiumStatusFromServer(email) {
 }
 </script>
 
+
+<script>
+// --- Vérification du statut Premium Stripe (Netlify Function) ---
+async function verifyPremiumStatusFromServer() {
+  const email = localStorage.getItem("brainova_user_email");
+  if (!email) {
+    console.warn("⚠️ Aucun e-mail utilisateur enregistré.");
+    return false;
+  }
+
+  try {
+    const res = await fetch("/.netlify/functions/verify?email=" + encodeURIComponent(email));
+    if (!res.ok) return false;
+
+    const data = await res.json();
+    console.log("🔍 Réponse serveur verify:", data);
+
+    if (data.active) {
+      console.log("💎 Statut premium confirmé depuis le serveur.");
+      localStorage.setItem("brainova_premium", "true");
+      localStorage.setItem("brainova_premium_status", "confirmed");
+      return true;
+    } else {
+      console.log("🟡 Aucun abonnement actif pour cet utilisateur.");
+      localStorage.removeItem("brainova_premium");
+      return false;
+    }
+  } catch (err) {
+    console.error("❌ Erreur vérification premium:", err);
+    return false;
+  }
+}
+
+// --- Lancer la vérification automatiquement au chargement ---
+document.addEventListener("DOMContentLoaded", async () => {
+  const status = await verifyPremiumStatusFromServer();
+  console.log(status ? "✅ Premium actif" : "🟡 Mode gratuit");
+
+  // Appliquer le comportement du bouton PARTAGER
+  updateShareButtonState(status);
+
+  // Recharger la grille
+  renderGrid(localStorage.getItem("brainova_lang") || "fr");
+});
+
+// --- Gestion du bouton PARTAGER ---
+function updateShareButtonState(isPremiumUser) {
+  const shareBtn = document.getElementById("shareBtn");
+  if (!shareBtn) return;
+
+  if (isPremiumUser) {
+    // Abonné Premium → désactiver PARTAGER
+    shareBtn.disabled = true;
+    shareBtn.style.opacity = "0.5";
+    shareBtn.style.pointerEvents = "none";
+    shareBtn.title = "Fonction désactivée pour les membres Premium";
+  } else {
+    // Non Premium → PARTAGER accessible
+    shareBtn.disabled = false;
+    shareBtn.style.opacity = "1";
+    shareBtn.style.pointerEvents = "auto";
+    shareBtn.title = "Partagez Brainova avec vos amis !";
+  }
+}
+</script>
+
 </body>
 </html>
 
