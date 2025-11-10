@@ -1,6 +1,5 @@
-// ✅ Stripe Webhook - Brainova (via API Brevo, sans SMTP)
+// ✅ Stripe Webhook - Brainova (avec synchronisation Premium automatique)
 // ✅ Version finale sécurisée et compatible Netlify Production
-// ✅ Corrige les doubles emails et gère le corps brut UTF8/Base64
 
 import Stripe from "stripe";
 import fetch from "node-fetch";
@@ -11,9 +10,7 @@ const BREVO_API_KEY = process.env.BREVO_API_KEY;
 const BREVO_SENDER = process.env.BNV_SENDER || "noreply@brainova.online";
 
 // 🚫 Désactiver le parsing JSON automatique
-export const config = {
-  bodyParser: false,
-};
+export const config = { bodyParser: false };
 
 export async function handler(event) {
   const headers = {
@@ -25,7 +22,6 @@ export async function handler(event) {
   if (event.httpMethod === "OPTIONS") return { statusCode: 200, headers };
   if (event.httpMethod !== "POST") return { statusCode: 405, headers, body: "Méthode non autorisée" };
 
-  // 🧾 Vérification de la signature Stripe
   const sig = event.headers["stripe-signature"];
   const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
   let stripeEvent;
@@ -71,7 +67,21 @@ export async function handler(event) {
     }
   };
 
-  // 🔔 Gestion des événements Stripe (1 seul email ici)
+  // 🔄 Fonction de mise à jour du statut Premium
+  const updatePremiumStatus = async (email) => {
+    try {
+      const res = await fetch("https://brainovafirst.netlify.app/.netlify/functions/verify-premium", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, premium: true })
+      });
+      console.log(`💎 Statut Premium synchronisé pour ${email}`);
+    } catch (err) {
+      console.error("⚠️ Erreur de synchro Premium :", err.message);
+    }
+  };
+
+  // 🔔 Gestion des événements Stripe
   try {
     switch (stripeEvent.type) {
       case "checkout.session.completed": {
@@ -95,6 +105,9 @@ export async function handler(event) {
               </div>
             `
           );
+
+          // ✅ Active le statut Premium automatiquement
+          await updatePremiumStatus(customerEmail);
         }
         break;
       }
@@ -132,6 +145,8 @@ export async function handler(event) {
               </a>
             `
           );
+          // ❌ Retire le statut Premium
+          await updatePremiumStatus(customerEmail, false);
         }
         break;
       }
