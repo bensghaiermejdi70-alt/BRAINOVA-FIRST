@@ -1,15 +1,29 @@
-// ✅ Stripe Webhook - Brainova (avec synchronisation Premium automatique)
-// ✅ Version finale sécurisée et compatible Netlify Production
+// ✅ Stripe Webhook – Brainova v2.0
+// 🚀 Synchronisation Premium automatique avec Firebase + Brevo + Stripe
+// 🔒 Compatible Netlify (ES module / ESM)
 
 import Stripe from "stripe";
 import fetch from "node-fetch";
 import { Buffer } from "node:buffer";
+import admin from "firebase-admin";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 const BREVO_API_KEY = process.env.BREVO_API_KEY;
 const BREVO_SENDER = process.env.BNV_SENDER || "noreply@brainova.online";
 
-// 🚫 Désactiver le parsing JSON automatique
+// 🔥 Initialisation Firebase Admin (une seule fois)
+if (!admin.apps.length) {
+  admin.initializeApp({
+    credential: admin.credential.cert({
+      projectId: process.env.FIREBASE_PROJECT_ID,
+      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+      privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n"),
+    }),
+  });
+}
+const db = admin.firestore();
+
+// 🚫 Désactiver le parsing JSON automatique pour Stripe
 export const config = { bodyParser: false };
 
 export async function handler(event) {
@@ -20,7 +34,8 @@ export async function handler(event) {
   };
 
   if (event.httpMethod === "OPTIONS") return { statusCode: 200, headers };
-  if (event.httpMethod !== "POST") return { statusCode: 405, headers, body: "Méthode non autorisée" };
+  if (event.httpMethod !== "POST")
+    return { statusCode: 405, headers, body: "Méthode non autorisée" };
 
   const sig = event.headers["stripe-signature"];
   const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
@@ -38,10 +53,10 @@ export async function handler(event) {
     return { statusCode: 400, headers, body: JSON.stringify({ error: err.message }) };
   }
 
-  // 📬 Fonction d’envoi via Brevo API REST
+  // 📧 Envoi d’e-mail via Brevo
   const sendEmail = async (to, subject, html) => {
     try {
-      const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+      const res = await fetch("https://api.brevo.com/v3/smtp/email", {
         method: "POST",
         headers: {
           accept: "application/json",
@@ -55,109 +70,112 @@ export async function handler(event) {
           htmlContent: html,
         }),
       });
-
-      if (response.ok) {
-        console.log(`📧 Email envoyé à ${to} via Brevo : ${subject}`);
-      } else {
-        const errorText = await response.text();
-        console.error("❌ Erreur API Brevo :", errorText);
-      }
-    } catch (err) {
-      console.error("❌ Erreur réseau Brevo :", err.message);
+      if (res.ok) console.log(`📧 Email envoyé à ${to} : ${subject}`);
+      else console.error("❌ Erreur Brevo :", await res.text());
+    } catch (e) {
+      console.error("❌ Erreur réseau Brevo :", e.message);
     }
   };
 
-  // 🔄 Fonction de mise à jour du statut Premium
-  const updatePremiumStatus = async (email) => {
+  // 🔄 Synchroniser Firestore
+  const syncPremium = async (email, isPremium = true) => {
     try {
-      const res = await fetch("https://brainovafirst.netlify.app/.netlify/functions/verify-premium", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, premium: true })
-      });
-      console.log(`💎 Statut Premium synchronisé pour ${email}`);
+      if (!email) return;
+      const ref = db.collection("premium_users").doc(email);
+      await ref.set(
+        {
+          email,
+          premium: isPremium,
+          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+          source: "stripe",
+        },
+        { merge: true }
+      );
+      console.log(`💎 Statut Premium ${isPremium ? "activé" : "désactivé"} pour ${email}`);
     } catch (err) {
-      console.error("⚠️ Erreur de synchro Premium :", err.message);
+      console.error("⚠️ Erreur Firestore :", err.message);
     }
   };
 
-  // 🔔 Gestion des événements Stripe
   try {
     switch (stripeEvent.type) {
+      // ✅ Paiement réussi
       case "checkout.session.completed": {
         const session = stripeEvent.data.object;
-        const customerEmail = session.customer_email || session.customer_details?.email;
-
-        if (customerEmail) {
+        const email = session.customer_email || session.customer_details?.email;
+        if (email) {
           await sendEmail(
-            customerEmail,
+            email,
             "🎉 Confirmation de votre abonnement Brainova Premium",
             `
-              <div style="font-family:Arial,sans-serif;color:#333">
-                <h2>Merci pour votre abonnement à Brainova Premium !</h2>
-                <p>Votre paiement a bien été reçu ✅</p>
-                <a href="https://brainovafirst.netlify.app"
-                   style="display:inline-block;padding:12px 24px;background:#7b2ff7;color:#fff;border-radius:8px;text-decoration:none;">
-                   Accéder à Brainova
-                </a>
-                <br><br>
-                <small>Votre abonnement est actif. Vous recevrez un rappel avant expiration.</small>
-              </div>
+            <div style="font-family:'Segoe UI',sans-serif;color:#333">
+              <h2 style="color:#7b2ff7;">Merci pour votre abonnement Brainova Premium !</h2>
+              <p>Votre paiement a bien été reçu ✅</p>
+              <p>Vous pouvez dès maintenant accéder à tous les jeux Premium :</p>
+              <a href="https://brainovafirst.netlify.app/?premium=1&premium_email=${encodeURIComponent(email)}"
+                 style="display:inline-block;margin-top:10px;padding:14px 26px;background:#7b2ff7;color:#fff;font-weight:bold;border-radius:10px;text-decoration:none;">
+                 🚀 Accéder à Brainova
+              </a>
+              <br><br>
+              <small>Votre abonnement est actif. Profitez de toutes les fonctionnalités Premium.</small>
+            </div>
             `
           );
-
-          // ✅ Active le statut Premium automatiquement
-          await updatePremiumStatus(customerEmail);
+          await syncPremium(email, true);
         }
         break;
       }
 
-      case "invoice.upcoming": {
-        const invoice = stripeEvent.data.object;
-        const customerEmail = invoice.customer_email || invoice.customer_details?.email;
-        if (customerEmail) {
-          await sendEmail(
-            customerEmail,
-            "🕒 Votre abonnement Brainova expire bientôt",
-            `
-              <p>Bonjour,</p>
-              <p>Votre abonnement Brainova Premium expirera dans 15 jours.</p>
-              <p><a href="https://brainovafirst.netlify.app">Renouvelez maintenant</a> pour conserver vos avantages Premium 🎮</p>
-            `
-          );
-        }
-        break;
-      }
-
+      // ⚠️ Paiement échoué / abonnement expiré
       case "invoice.payment_failed": {
-        const failed = stripeEvent.data.object;
-        const customerEmail = failed.customer_email || failed.customer_details?.email;
-        if (customerEmail) {
+        const invoice = stripeEvent.data.object;
+        const email = invoice.customer_email || invoice.customer_details?.email;
+        if (email) {
           await sendEmail(
-            customerEmail,
+            email,
             "⚠️ Votre abonnement Brainova a expiré",
             `
               <p>Bonjour,</p>
-              <p>Votre abonnement a expiré ou le paiement a échoué.</p>
+              <p>Votre abonnement Brainova Premium a expiré ou le paiement a échoué.</p>
               <a href="https://brainovafirst.netlify.app"
                  style="display:inline-block;padding:10px 20px;background:#e63946;color:white;border-radius:6px;text-decoration:none;">
-                 Réactiver mon abonnement
+                 🔁 Réactiver mon abonnement
               </a>
             `
           );
-          // ❌ Retire le statut Premium
-          await updatePremiumStatus(customerEmail, false);
+          await syncPremium(email, false);
+        }
+        break;
+      }
+
+      // 🔔 Notification abonnement bientôt expiré
+      case "invoice.upcoming": {
+        const invoice = stripeEvent.data.object;
+        const email = invoice.customer_email || invoice.customer_details?.email;
+        if (email) {
+          await sendEmail(
+            email,
+            "🕒 Votre abonnement Brainova expirera bientôt",
+            `
+              <p>Bonjour,</p>
+              <p>Votre abonnement Brainova Premium expirera bientôt.</p>
+              <a href="https://brainovafirst.netlify.app"
+                 style="display:inline-block;padding:10px 20px;background:#7b2ff7;color:white;border-radius:6px;text-decoration:none;">
+                 Renouvelez votre abonnement
+              </a>
+            `
+          );
         }
         break;
       }
 
       default:
-        console.log(`ℹ️ Événement non géré : ${stripeEvent.type}`);
+        console.log(`ℹ️ Événement Stripe ignoré : ${stripeEvent.type}`);
     }
 
     return { statusCode: 200, headers, body: JSON.stringify({ success: true }) };
   } catch (err) {
-    console.error("❌ Erreur traitement webhook :", err.message);
+    console.error("❌ Erreur Webhook :", err.message);
     return { statusCode: 500, headers, body: JSON.stringify({ error: err.message }) };
   }
 }
