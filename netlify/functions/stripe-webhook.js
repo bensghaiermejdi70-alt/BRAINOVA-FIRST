@@ -1,4 +1,4 @@
-// ✅ Stripe Webhook – Brainova v2.0
+// ✅ Stripe Webhook – Brainova v2.1
 // 🚀 Synchronisation Premium automatique avec Firebase + Brevo + Stripe
 // 🔒 Compatible Netlify (ES module / ESM)
 
@@ -11,7 +11,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 const BREVO_API_KEY = process.env.BREVO_API_KEY;
 const BREVO_SENDER = process.env.BNV_SENDER || "noreply@brainova.online";
 
-// 🔥 Initialisation Firebase Admin (une seule fois)
+// 🔥 Initialisation Firebase Admin
 if (!admin.apps.length) {
   admin.initializeApp({
     credential: admin.credential.cert({
@@ -45,7 +45,6 @@ export async function handler(event) {
     const bodyBuffer = event.isBase64Encoded
       ? Buffer.from(event.body, "base64")
       : Buffer.from(event.body || "", "utf8");
-
     stripeEvent = stripe.webhooks.constructEvent(bodyBuffer, sig, endpointSecret);
     console.log(`✅ Événement Stripe reçu : ${stripeEvent.type}`);
   } catch (err) {
@@ -102,25 +101,36 @@ export async function handler(event) {
       // ✅ Paiement réussi
       case "checkout.session.completed": {
         const session = stripeEvent.data.object;
-        const email = session.customer_email || session.customer_details?.email;
+        let email = session.customer_email || session.customer_details?.email;
         if (email) {
+          email = email.trim().toLowerCase();
+
+          const link = `https://brainovafirst.netlify.app/?premium=1&premium_email=${encodeURIComponent(email)}`;
+
           await sendEmail(
             email,
             "🎉 Confirmation de votre abonnement Brainova Premium",
             `
-            <div style="font-family:'Segoe UI',sans-serif;color:#333">
-              <h2 style="color:#7b2ff7;">Merci pour votre abonnement Brainova Premium !</h2>
-              <p>Votre paiement a bien été reçu ✅</p>
-              <p>Vous pouvez dès maintenant accéder à tous les jeux Premium :</p>
-              <a href="https://brainovafirst.netlify.app/?premium=1&premium_email=${encodeURIComponent(email)}"
-                 style="display:inline-block;margin-top:10px;padding:14px 26px;background:#7b2ff7;color:#fff;font-weight:bold;border-radius:10px;text-decoration:none;">
-                 🚀 Accéder à Brainova
-              </a>
-              <br><br>
-              <small>Votre abonnement est actif. Profitez de toutes les fonctionnalités Premium.</small>
-            </div>
+              <div style="font-family:'Segoe UI',sans-serif;color:#333">
+                <h2 style="color:#7b2ff7;">Merci pour votre abonnement Brainova Premium !</h2>
+                <p>Votre paiement a bien été reçu ✅</p>
+                <p>Vous pouvez dès maintenant accéder à tous les jeux Premium :</p>
+
+                <a href="${link}"
+                   style="display:inline-block;margin-top:10px;padding:14px 26px;background:#7b2ff7;color:#fff;font-weight:bold;border-radius:10px;text-decoration:none;">
+                   🚀 Accéder à Brainova
+                </a>
+
+                <p style="margin-top:20px;font-size:13px;color:#666;">
+                  Si le bouton ne fonctionne pas, copiez ce lien dans votre navigateur :
+                  <br><span style="color:#7b2ff7;">${link}</span>
+                </p>
+
+                <br><small>Votre abonnement est actif. Profitez de toutes les fonctionnalités Premium.</small>
+              </div>
             `
           );
+
           await syncPremium(email, true);
         }
         break;
