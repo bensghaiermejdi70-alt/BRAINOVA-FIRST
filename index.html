@@ -709,44 +709,40 @@ document.getElementById('signupCancel').addEventListener('click', () => signupMo
 // Gestionnaire de soumission du formulaire de connexion premium
 document.getElementById('loginForm').addEventListener('submit', async (e) => {
   e.preventDefault();
-  
   // Vérifier à nouveau le statut premium
   if (!checkPremiumStatus()) {
     showPremiumRequiredMessage('connexion');
     return;
   }
-  
   const email = document.getElementById('loginEmail').value.trim();
   const password = document.getElementById('loginPassword').value;
-  
   if (!email || !password) {
     showAuthError('Veuillez remplir tous les champs');
     return;
   }
-  
   try {
     // Animation de chargement
     const submitBtn = e.target.querySelector('.premium-btn');
     const originalText = submitBtn.textContent;
     submitBtn.textContent = 'Connexion...';
     submitBtn.disabled = true;
-    
     // Connexion Firebase
     const userCredential = await auth.signInWithEmailAndPassword(email, password);
     console.log('Connexion réussie:', userCredential.user);
-    
+    // Synchronisation automatique de l'email utilisateur
+    if (userCredential.user && userCredential.user.email) {
+      localStorage.setItem("brainova_user_email", userCredential.user.email);
+    } else {
+      localStorage.setItem("brainova_user_email", email);
+    }
     // Fermer le modal et mettre à jour l'interface
     loginModal.style.display = 'none';
     showAuthSuccess('Connexion réussie ! Bienvenue sur Brainova Premium.');
-    localStorage.setItem("brainova_user_email", email);
-    
     // Réinitialiser le formulaire
     document.getElementById('loginForm').reset();
-    
   } catch (error) {
     console.error('Erreur de connexion:', error);
     let message = 'Erreur de connexion. Veuillez vérifier vos identifiants.';
-    
     switch (error.code) {
       case 'auth/user-not-found':
         message = 'Aucun compte trouvé avec cet email.';
@@ -761,7 +757,6 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
         message = 'Trop de tentatives. Réessayez plus tard.';
         break;
     }
-    
     showAuthError(message);
   } finally {
     // Restaurer le bouton
@@ -774,57 +769,51 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
 // Gestionnaire de soumission du formulaire d'inscription premium
 document.getElementById('signupForm').addEventListener('submit', async (e) => {
   e.preventDefault();
-  
   // Vérifier à nouveau le statut premium
   if (!checkPremiumStatus()) {
     showPremiumRequiredMessage('inscription');
     return;
   }
-  
   const email = document.getElementById('signupEmail').value.trim();
   const password = document.getElementById('signupPassword').value;
   const confirmPassword = document.getElementById('signupConfirm').value;
-  
   if (!email || !password || !confirmPassword) {
     showAuthError('Veuillez remplir tous les champs');
     return;
   }
-  
   if (password !== confirmPassword) {
     showAuthError('Les mots de passe ne correspondent pas');
     return;
   }
-  
   if (password.length < 6) {
     showAuthError('Le mot de passe doit contenir au moins 6 caractères');
     return;
   }
-  
   try {
     // Animation de chargement
     const submitBtn = e.target.querySelector('.premium-btn');
     const originalText = submitBtn.textContent;
     submitBtn.textContent = 'Inscription...';
     submitBtn.disabled = true;
-    
     // Inscription Firebase
     const userCredential = await auth.createUserWithEmailAndPassword(email, password);
     console.log('Inscription réussie:', userCredential.user);
-    
+    // Synchronisation automatique de l'email utilisateur
+    if (userCredential.user && userCredential.user.email) {
+      localStorage.setItem("brainova_user_email", userCredential.user.email);
+    } else {
+      localStorage.setItem("brainova_user_email", email);
+    }
     // Envoyer email de vérification
     await userCredential.user.sendEmailVerification();
-    
     // Fermer le modal et afficher le succès
     signupModal.style.display = 'none';
     showAuthSuccess('Inscription réussie ! Un email de vérification a été envoyé. Bienvenue sur Brainova Premium !');
-    
     // Réinitialiser le formulaire
     document.getElementById('signupForm').reset();
-    
   } catch (error) {
     console.error('Erreur d\'inscription:', error);
     let message = 'Erreur lors de l\'inscription.';
-    
     switch (error.code) {
       case 'auth/email-already-in-use':
         message = 'Cet email est déjà utilisé.';
@@ -836,7 +825,6 @@ document.getElementById('signupForm').addEventListener('submit', async (e) => {
         message = 'Le mot de passe est trop faible.';
         break;
     }
-    
     showAuthError(message);
   } finally {
     // Restaurer le bouton
@@ -1186,14 +1174,17 @@ if (isPremium) {
 // Fonction pour vérifier le retour de Stripe
 function checkStripeReturn() {
   const urlParams = new URLSearchParams(window.location.search);
-  
   // Si l'utilisateur revient de Stripe avec succès
   if (urlParams.get('success') === 'true' || urlParams.get('payment_intent_status') === 'succeeded') {
+    // Synchronisation automatique de l'email utilisateur si présent dans l'URL
+    const stripeEmail = urlParams.get('customer_email');
+    if (stripeEmail) {
+      localStorage.setItem('brainova_user_email', stripeEmail);
+    }
     unlockPremium();
     // Nettoyer l'URL
     window.history.replaceState({}, document.title, window.location.pathname);
   }
-  
   // Si l'utilisateur annule le paiement
   if (urlParams.get('canceled') === 'true') {
     alert('Paiement annulé. Vous pouvez réessayer à tout moment.');
