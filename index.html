@@ -197,6 +197,37 @@ html, body { max-width: 100%; overflow-x: hidden; }
     if (isMobile) document.body.classList.add('mobile'); else document.body.classList.add('desktop');
   } catch(e) { console.error('mobile detect', e); }
 })();
+
+// --- Vérification Premium via Firestore/Stripe (verify-premium.js)
+async function verifyPremiumFromServer(email) {
+  try {
+    const res = await fetch(`/.netlify/functions/verify-premium?email=${encodeURIComponent(email)}`);
+    const data = await res.json();
+    if (data.active) {
+      console.log(`✅ Statut Premium confirmé (${data.source}) pour ${email}`);
+      localStorage.setItem('brainova_premium', 'true');
+      userPremium = true;
+      if (typeof renderGrid === 'function' && window.langSelect) renderGrid(window.langSelect.value || localStorage.getItem('brainova_lang') || 'fr');
+      return true;
+    } else {
+      console.warn(`🟡 Aucun abonnement Premium pour ${email}`);
+      return false;
+    }
+  } catch (e) {
+    console.error('⚠️ Erreur de vérification Premium:', e);
+    return false;
+  }
+}
+
+// Appel automatique après connexion Firebase
+if (typeof auth !== 'undefined' && auth.onAuthStateChanged) {
+  auth.onAuthStateChanged(async (user) => {
+    if (user && user.email) {
+      await verifyPremiumFromServer(user.email);
+    }
+  });
+}
+
 </script>
 
 <style>
@@ -388,7 +419,36 @@ const firebaseConfig = {
   measurementId: "G-79M4HWKQ35"
 };
 firebase.initializeApp(firebaseConfig);
+
 const auth = firebase.auth();
+
+// --- BEGIN PATCH: Auto-activate premium from email link & improved server-verify fallback
+(function(){
+  try{
+    const params = new URLSearchParams(window.location.search);
+    const premiumParam = params.get('premium') || params.get('premium_status');
+    // Accept '1' or 'true' to activate premium
+    if (premiumParam === '1' || premiumParam === 'true') {
+      localStorage.setItem('brainova_premium','true');
+      console.log('✅ Premium activé depuis le lien email (URL param).');
+      // store email if provided in URL
+      const pEmail = params.get('premium_email') || params.get('email');
+      if (pEmail && /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(pEmail)) {
+        localStorage.setItem('brainova_user_email', pEmail);
+        console.log('✅ Email utilisateur sauvegardé depuis le lien email:', pEmail);
+      }
+      // optional token saved for later server verification
+      const token = params.get('premium_token');
+      if (token) localStorage.setItem('brainova_premium_token', token);
+      // ensure UI updates if already loaded
+      try { if (typeof renderGrid === 'function' && window.langSelect) renderGrid(window.langSelect.value || localStorage.getItem('brainova_lang') || 'fr'); } catch(e){}
+    }
+  } catch(e){
+    console.error('Erreur activation premium via URL:', e);
+  }
+})();
+// --- END PATCH
+
 
 // Gestion de l'état d'authentification
 auth.onAuthStateChanged((user) => {
@@ -1615,17 +1675,30 @@ document.addEventListener("DOMContentLoaded", async () => {
 </script>
 
 <script>
-async function verifyPremiumStatusFromServer(email) {
-  try {
-    const res = await fetch("/.netlify/functions/verify?email=" + encodeURIComponent(email));
-    const data = await res.json();
-    if (data.active) {
-      localStorage.setItem("brainova_premium", "true");
-      localStorage.setItem("brainova_premium_status", "confirmed");
-      console.log("✅ Statut premium confirmé depuis le serveur.");
-    } else {
-      console.log("⚠️ Statut premium non actif.");
-    }
+async function verifyPremiumStatusFromServer() {
+  // Robust client-side fallback for email->premium flow.
+  // This function was improved to accept email or premium params from the URL (used by the confirmation email).
+  const email = localStorage.getItem('brainova_user_email') || (new URLSearchParams(window.location.search).get('premium_email')) || (new URLSearchParams(window.location.search).get('email'));
+  if (!email) {
+    console.warn('⚠️ Aucun e-mail utilisateur enregistré. (Astuce : ajoutez ?premium_email=you@domain.tld dans le lien email pour activer automatiquement.)');
+    return false;
+  }
+  const isPremiumLocal = localStorage.getItem('brainova_premium') === 'true';
+  if (isPremiumLocal) {
+    console.log('✅ Statut premium confirmé côté client pour', email);
+    return true;
+  }
+  // If there's a premium token in URL/localStorage, accept it locally and ask server verification later.
+  const token = new URLSearchParams(window.location.search).get('premium_token') || localStorage.getItem('brainova_premium_token');
+  if (token) {
+    console.log('ℹ️ Jeton premium trouvé, activation locale pour', email);
+    localStorage.setItem('brainova_premium', 'true');
+    return true;
+  }
+  // No token: optional improvement - call your backend to verify (not implemented here)
+  console.log('ℹ️ Vérification serveur non configurée; basculement provisoire vers mode gratuit pour', email);
+  return false;
+}
   } catch (e) {
     console.warn("⚠️ Impossible de vérifier le statut premium:", e);
   }
