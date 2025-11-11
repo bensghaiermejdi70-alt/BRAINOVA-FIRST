@@ -457,6 +457,12 @@ function updateUIForGuestUser() {
 
 // ================= GRID & PREMIUM LOGIC
 // ================= TRANSLATIONS (6 langues)
+// --- Centralisation des variables globales ---
+let userPremium = false;
+// let isPremium = false; // Déclaration unique plus bas
+let langSelect;
+let grid;
+
 const TRANSLATIONS = {
   fr: {introTitle:"🎮 Découvrez nos 36 Jeux Intelligents",introDesc:"Entraînez votre cerveau avec notre collection complète de jeux adaptatifs alimentés par l'IA",overlayBack:"🔙 Retour",
     subscriptionTitle:"🌟 Abonnement Brainova",subscriptionPack:"Pack 36 jeux",subscriptionDesc:"Débloquez tous les jeux premium",subscriptionPrice:"Seulement 20 EUR / an",subscriptionBtn:"S'abonner",subscriptionCancel:"Annuler",
@@ -524,8 +530,6 @@ const GAME_NAMES = {
   ]
 };
 
-const grid=document.getElementById('gamesGrid');
-let userPremium=false;
 
 // Fonction de validation d'email
 function isValidEmail(email) {
@@ -533,75 +537,58 @@ function isValidEmail(email) {
   return emailRegex.test(email);
 }
 
-function renderGrid(lang){
-  console.log('renderGrid called with lang:', lang);
-  
-  const grid = document.getElementById('gamesGrid');
-  console.log('grid element found:', !!grid);
-  
-  if (!grid) {
-    console.error('Grid element not found!');
-    return;
-  }
-  
-  console.log('TRANSLATIONS available:', !!TRANSLATIONS);
-  
-  grid.innerHTML='';
-  const t=TRANSLATIONS[lang]||TRANSLATIONS['fr'];
-  const userPremium = checkPremiumStatus(); // Utiliser la fonction de vérification du statut premium
-  
-  console.log('User premium status:', userPremium);
-  console.log('Games available:', t.games ? t.games.length : 0);
-  
-  for(let i=1;i<=36;i++){
-    const card=document.createElement('div'); card.className='card';
-    
-    // Jeux 11 à 36 verrouillés sauf si premium (y compris le test QI)
+function renderGrid(lang) {
+  if (!grid) grid = document.getElementById('gamesGrid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  const t = TRANSLATIONS[lang] || TRANSLATIONS['fr'];
+  userPremium = checkPremiumStatus();
+  for (let i = 1; i <= 36; i++) {
+    const card = document.createElement('div');
+    card.className = 'card';
     const isLocked = (i >= 11 && !userPremium);
-    
-    // Appliquer les contours néon selon le groupe de jeux
-    if (i >= 1 && i <= 10) {
-      // Jeux 1-10 : contour vert (gratuits)
-      card.classList.add('free');
-    } else if (i >= 11 && i <= 36) {
-      // Jeux 11-36 : contour jaune (premium)
-      card.classList.add('locked');
-    }
-    
-    if(isLocked) {
+    if (i >= 1 && i <= 10) card.classList.add('free');
+    else if (i >= 11 && i <= 36) card.classList.add('locked');
+    if (isLocked) {
       card.classList.add('premium');
-      // Réduire légèrement l'opacité mais garder les contours visibles
       card.style.opacity = '0.8';
-      // Ajouter un cadenas
       const lockIcon = document.createElement('div');
       lockIcon.innerHTML = '🔒';
       lockIcon.style.cssText = 'position: absolute; top: 10px; right: 10px; font-size: 20px; z-index: 1; filter: none;';
       card.appendChild(lockIcon);
+      card.onclick = handleLockedGameClick;
     }
-    
-    if(i===35) card.classList.add('testqi');
-    
-    const num=document.createElement('div'); num.className='num'; num.textContent=i;
-    const title=document.createElement('div'); title.className='title'; title.textContent=t.games[i-1]||`Jeu ${i}`;
+    if (i === 35) card.classList.add('testqi');
+    const num = document.createElement('div'); num.className = 'num'; num.textContent = i;
+    const title = document.createElement('div'); title.className = 'title'; title.textContent = t.games[i - 1] || `Jeu ${i}`;
     card.appendChild(num); card.appendChild(title);
-    
-  localStorage.setItem('brainova_lang',lang);
-  const t=TRANSLATIONS[lang];
-  document.getElementById('introTitle').textContent=t.introTitle;
-  document.getElementById('introDesc').textContent=t.introDesc;
-  document.getElementById('overlayMenu').textContent=t.overlayBack;
-  
-  // Mettre à jour le bouton partager
-  const shareBtn = document.getElementById('shareBtn');
-  if (shareBtn) {
-    shareBtn.textContent = t.shareBtn;
+    grid.appendChild(card);
   }
-  
-  document.documentElement.dir=(lang==='ar')?'rtl':'ltr';
+  localStorage.setItem('brainova_lang', lang);
+  document.getElementById('introTitle').textContent = t.introTitle;
+  document.getElementById('introDesc').textContent = t.introDesc;
+  document.getElementById('overlayMenu').textContent = t.overlayBack;
+  const shareBtn = document.getElementById('shareBtn');
+  if (shareBtn) shareBtn.textContent = t.shareBtn;
+  document.documentElement.dir = (lang === 'ar') ? 'rtl' : 'ltr';
+}
+
+function applyLanguage(lang) {
   renderGrid(lang);
 }
-langSelect.addEventListener('change',()=>applyLanguage(langSelect.value));
-applyLanguage(localStorage.getItem('brainova_lang')||'fr');
+
+document.addEventListener('DOMContentLoaded', () => {
+  langSelect = document.getElementById('langSelect');
+  grid = document.getElementById('gamesGrid');
+  if (langSelect) {
+    langSelect.addEventListener('change', () => applyLanguage(langSelect.value));
+    applyLanguage(localStorage.getItem('brainova_lang') || langSelect.value || 'fr');
+  } else {
+    applyLanguage('fr');
+  }
+  // Initialisation des boutons d'authentification
+  if (typeof initializeAuthButtons === 'function') initializeAuthButtons();
+});
 
 // ================= NOUVEAU SYSTÈME D'AUTHENTIFICATION PREMIUM
 const loginModal = document.getElementById('loginModal');
@@ -909,7 +896,7 @@ function createToast(message, type) {
 
 // ================= PREMIUM & STRIPE
 // Vérifier l'état premium dans localStorage
-let isPremium = localStorage.getItem('brainova_premium') === 'true';
+isPremium = localStorage.getItem('brainova_premium') === 'true';
 
 // Fonction pour débloquer le premium
 function unlockPremium() {
