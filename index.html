@@ -95,29 +95,24 @@ header{display:flex;justify-content:space-between;align-items:center;padding:14p
 <meta content="Brainova Team" name="author"/>
 <!-- favicon link removed -->
 <style>
+
 /* Mobile optimization - aggressive minimization */
-body.mobile, @media only screen and (max-width: 768px) {
+body.mobile {
   font-size: 13px !important;
   line-height: 1.1 !important;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
-
-/* Reduce header spacing */
-body.mobile header, @media only screen and (max-width: 768px) header {
+body.mobile header {
   padding: 8px 10px !important;
 }
-
-/* Game grid adjustments: 2 columns in portrait, 3 in landscape max */
-body.mobile .game-grid, @media only screen and (max-width: 768px) .game-grid {
+body.mobile .game-grid {
   display: grid !important;
   grid-template-columns: repeat(2, 1fr) !important;
   gap: 8px !important;
   padding: 6px !important;
 }
-
-/* Card compact */
-body.mobile .game-card, @media only screen and (max-width: 768px) .game-card {
+body.mobile .game-card {
   width: 100% !important;
   margin: 0 auto !important;
   padding: 8px !important;
@@ -125,82 +120,144 @@ body.mobile .game-card, @media only screen and (max-width: 768px) .game-card {
   box-shadow: none !important;
   font-size: 0.85rem !important;
 }
-
-/* Title short */
-body.mobile .game-card-title, @media only screen and (max-width: 768px) .game-card-title {
+body.mobile .game-card-title {
   font-size: 0.9rem !important;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-
-/* Reduce images and icons */
-body.mobile img, @media only screen and (max-width: 768px) img {
+body.mobile img {
   max-width: 100% !important;
   height: auto !important;
 }
-
-/* Buttons adapt */
-body.mobile .btn, @media only screen and (max-width: 768px) .btn, body.mobile button, @media only screen and (max-width: 768px) button {
+body.mobile .btn,
+body.mobile button {
   padding: 8px 12px !important;
   font-size: 0.95rem !important;
   border-radius: 8px !important;
 }
-
-/* Hide heavy decorative elements */
-body.mobile .decorative, @media only screen and (max-width: 768px) .decorative {
+body.mobile .decorative {
   display: none !important;
 }
-
-/* Share button full width */
-body.mobile .share-btn, @media only screen and (max-width: 768px) .share-btn {
+body.mobile .share-btn {
   display: block !important;
   width: calc(100% - 20px) !important;
   margin: 8px auto !important;
 }
-
-/* Reduce modal padding */
-body.mobile .modal, @media only screen and (max-width: 768px) .modal {
+body.mobile .modal {
   padding: 12px !important;
   max-width: 92% !important;
 }
-
-/* Ensure header buttons wrap */
-body.mobile .header-buttons, @media only screen and (max-width: 768px) .header-buttons {
+body.mobile .header-buttons {
   display: flex !important;
   gap: 6px !important;
   flex-wrap: wrap !important;
   justify-content: center !important;
 }
-
-/* Make overlays fullscreen friendly */
-body.mobile .overlay, @media only screen and (max-width: 768px) .overlay {
+body.mobile .overlay {
   top: 0 !important;
   left: 0 !important;
   right: 0 !important;
   bottom: 0 !important;
   padding: 10px !important;
 }
-
-/* Specific: reduce font size for headers */
-body.mobile h1, @media only screen and (max-width: 768px) h1 {
+body.mobile h1 {
   font-size: 1.2rem !important;
 }
-
-/* Prevent horizontal overflow */
+@media only screen and (max-width: 768px) {
+  body {
+    font-size: 13px !important;
+    line-height: 1.1 !important;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  header {
+    padding: 8px 10px !important;
+  }
+  .game-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+    padding: 6px !important;
+  }
+  .game-card {
+    width: 100% !important;
+    margin: 0 auto !important;
+    padding: 8px !important;
+    border-radius: 8px !important;
+    box-shadow: none !important;
+    font-size: 0.85rem !important;
+  }
+  .game-card-title {
+    font-size: 0.9rem !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  img {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+  .btn,
+  button {
+    padding: 8px 12px !important;
+    font-size: 0.95rem !important;
+    border-radius: 8px !important;
+  }
+  .decorative {
+    display: none !important;
+  }
+  .share-btn {
+    display: block !important;
+    width: calc(100% - 20px) !important;
+    margin: 8px auto !important;
+  }
+  .modal {
+    padding: 12px !important;
+    max-width: 92% !important;
+  }
+  .header-buttons {
+    display: flex !important;
+    gap: 6px !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+  }
+  .overlay {
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    padding: 10px !important;
+  }
+  h1 {
+    font-size: 1.2rem !important;
+  }
+}
 html, body { max-width: 100%; overflow-x: hidden; }
 </style>
 <script>
 
-// ✅ Enregistrer immédiatement l'e-mail depuis l'URL dès le chargement
+
+// ✅ Patch : Enregistrer l'email et activer premium dès l'ouverture du lien
 (function() {
   const params = new URLSearchParams(window.location.search);
   const emailFromURL = params.get('premium_email') || params.get('email');
+  const premiumParam = params.get('premium');
   if (emailFromURL) {
     localStorage.setItem('brainova_user_email', emailFromURL);
     console.log('✅ Email utilisateur enregistré dès le chargement :', emailFromURL);
-  } else {
-    console.warn('⚠️ Aucun e-mail détecté dans l’URL au chargement.');
+  }
+  // Si le paramètre premium=1 est présent, activer premium
+  if (premiumParam === '1' || premiumParam === 'true') {
+    localStorage.setItem('brainova_premium', 'true');
+    localStorage.setItem('brainova_premium_status', 'active');
+    console.log('✅ Premium activé via URL.');
+    // Déverrouiller la grille immédiatement
+    document.addEventListener('DOMContentLoaded', function() {
+      if (typeof renderGrid === 'function') {
+        renderGrid(localStorage.getItem('brainova_lang') || 'fr');
+      }
+    });
   }
 })();
 
@@ -258,13 +315,12 @@ async function verifyPremiumFromServer(email) {
 }
 
 // Appel automatique après connexion Firebase
-
-  });
 if (typeof auth !== 'undefined' && auth.onAuthStateChanged) {
   auth.onAuthStateChanged(async (user) => {
     if (user && user.email) {
       await verifyPremiumFromServer(user.email);
     }
+  });
 
 // ✅ Vérification Premium sécurisée (connexion à Netlify Function)
 setTimeout(async () => {
@@ -2209,7 +2265,6 @@ setTimeout(async () => {
 
 <script>
 
-async function 
 // ✅ Auto-enregistrement de l'email utilisateur depuis l'URL
 (function(){
   const params = new URLSearchParams(window.location.search);
@@ -2220,7 +2275,7 @@ async function
   }
 })();
 
-verifyPremiumStatusFromServer() {
+function verifyPremiumStatusFromServer() {
   // Robust client-side fallback for email->premium flow.
   try {
     const email = localStorage.getItem('brainova_user_email') || (new URLSearchParams(window.location.search).get('premium_email')) || (new URLSearchParams(window.location.search).get('email'));
