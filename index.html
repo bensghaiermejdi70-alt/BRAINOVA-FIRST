@@ -586,7 +586,71 @@ document.addEventListener('DOMContentLoaded', () => {
   } else {
     applyLanguage('fr');
   }
-  // Initialisation des boutons d'authentification
+
+  // --- Logique d'accessibilité des boutons ---
+  const loginBtn = document.getElementById('loginBtn');
+  const signupBtn = document.getElementById('signupBtn');
+  const premiumBtn = document.getElementById('premiumBtn');
+  const shareBtn = document.getElementById('shareBtn');
+
+  // Statut premium
+  const isPremium = localStorage.getItem('brainova_premium') === 'true';
+
+  if (!isPremium) {
+    // Avant abonnement : Connexion/Inscription inaccessibles, Partager/Premium accessibles
+    if (loginBtn) {
+      loginBtn.style.opacity = '0.6';
+      loginBtn.style.pointerEvents = 'none';
+      loginBtn.disabled = true;
+      loginBtn.title = 'Connexion disponible après abonnement premium';
+    }
+    if (signupBtn) {
+      signupBtn.style.opacity = '0.6';
+      signupBtn.style.pointerEvents = 'none';
+      signupBtn.disabled = true;
+      signupBtn.title = 'Inscription disponible après abonnement premium';
+    }
+    if (premiumBtn) {
+      premiumBtn.style.opacity = '1';
+      premiumBtn.style.pointerEvents = 'auto';
+      premiumBtn.disabled = false;
+      premiumBtn.title = 'Abonnez-vous à Brainova Premium';
+    }
+    if (shareBtn) {
+      shareBtn.style.opacity = '1';
+      shareBtn.style.pointerEvents = 'auto';
+      shareBtn.disabled = false;
+      shareBtn.title = 'Partagez Brainova avec vos amis !';
+    }
+  } else {
+    // Après abonnement : Connexion/Inscription accessibles, Partager/Premium inaccessibles
+    if (loginBtn) {
+      loginBtn.style.opacity = '1';
+      loginBtn.style.pointerEvents = 'auto';
+      loginBtn.disabled = false;
+      loginBtn.title = 'Se connecter';
+    }
+    if (signupBtn) {
+      signupBtn.style.opacity = '1';
+      signupBtn.style.pointerEvents = 'auto';
+      signupBtn.disabled = false;
+      signupBtn.title = "S'inscrire";
+    }
+    if (premiumBtn) {
+      premiumBtn.style.opacity = '0.5';
+      premiumBtn.style.pointerEvents = 'none';
+      premiumBtn.disabled = true;
+      premiumBtn.title = 'Déjà abonné à Brainova Premium';
+    }
+    if (shareBtn) {
+      shareBtn.style.opacity = '0.5';
+      shareBtn.style.pointerEvents = 'none';
+      shareBtn.disabled = true;
+      shareBtn.title = 'Fonction désactivée pour les membres Premium';
+    }
+  }
+
+  // Initialisation des boutons d'authentification (pour la grille)
   if (typeof initializeAuthButtons === 'function') initializeAuthButtons();
 });
 
@@ -903,21 +967,18 @@ function showSubscriptionMessage() {
   // Récupérer la langue actuelle
   const currentLang = langSelect.value || 'fr';
   const t = TRANSLATIONS[currentLang] || TRANSLATIONS['fr'];
-  
   const customModal = document.createElement('div');
   customModal.style.cssText = `
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
     background: rgba(0,0,0,0.9); display: flex; align-items: center;
     justify-content: center; z-index: 10030;
   `;
-  
   const messageCard = document.createElement('div');
   messageCard.style.cssText = `
     background: linear-gradient(135deg, #1e3c72, #2a5298);
     padding: 40px; border-radius: 20px; text-align: center;
     color: white; max-width: 400px; box-shadow: 0 20px 40px rgba(0,0,0,0.5);
   `;
-  
   messageCard.innerHTML = `
     <h2 style="color: #ffd700; margin-bottom: 20px;">${t.subscriptionTitle}</h2>
     <h3 style="color: #00ffff; margin-bottom: 15px;">${t.subscriptionPack}</h3>
@@ -938,16 +999,12 @@ function showSubscriptionMessage() {
       font-size: 16px; cursor: pointer;
     ">${t.subscriptionCancel}</button>
   `;
-  
   customModal.appendChild(messageCard);
   document.body.appendChild(customModal);
-  
   // Gestion des boutons
   document.getElementById('subscribeNowBtn').addEventListener('click', () => {
-    // Redirection directe vers Stripe
     window.location.href = 'https://buy.stripe.com/cNi8wR7IC77o54icy49EI01';
   });
-  
   document.getElementById('cancelSubscribeBtn').addEventListener('click', () => {
     document.body.removeChild(customModal);
   });
@@ -965,7 +1022,6 @@ function showShareOptions() {
   // Récupérer la langue actuelle et les traductions
   const currentLang = langSelect.value || 'fr';
   const t = TRANSLATIONS[currentLang] || TRANSLATIONS['fr'];
-  
   // Créer le modal de partage
   const shareModal = document.createElement('div');
   shareModal.style.cssText = `
@@ -973,7 +1029,6 @@ function showShareOptions() {
     background: rgba(0,0,0,0.85); display: flex; align-items: center;
     justify-content: center; z-index: 10030; backdrop-filter: blur(5px);
   `;
-  
   const shareContainer = document.createElement('div');
   shareContainer.style.cssText = `
     background: linear-gradient(145deg, #2c3e50, #3498db);
@@ -982,12 +1037,9 @@ function showShareOptions() {
     box-shadow: 0 25px 50px rgba(0,0,0,0.3);
     border: 2px solid rgba(255,255,255,0.1);
   `;
-  
   // URL en ligne pour le partage (GitHub Pages)
-  const currentUrl = "https://brainovafirst.netlify.app";
-
+  const currentUrl = "https://bensghaiermejdi70-alt.github.io/BRAINOVA-FIRST/";
   const shareText = "🧠 Découvrez Brainova - 36 jeux pour booster votre intelligence ! Défiez votre cerveau maintenant ✨";
-  
   shareContainer.innerHTML = `
     <div style="margin-bottom: 25px;">
       🚀
@@ -996,10 +1048,8 @@ function showShareOptions() {
         ${t.shareDesc}
       </p>
     </div>
-    
     <!-- Boutons de partage social améliorés -->
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px;">
-      
       <button id="shareFacebookBtn" style="
         background: linear-gradient(135deg, #4267B2, #365899);
         border: none; padding: 15px 20px; border-radius: 15px;
@@ -1009,7 +1059,6 @@ function showShareOptions() {
       " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
         ${t.shareMode}
       </button>
-      
       <button id="shareWhatsAppBtn" style="
         background: linear-gradient(135deg, #25D366, #128C7E);
         border: none; padding: 15px 20px; border-radius: 15px;
@@ -1019,7 +1068,6 @@ function showShareOptions() {
       " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
         � WhatsApp
       </button>
-      
       <button id="copyLinkBtn" style="
         background: linear-gradient(135deg, #e74c3c, #c0392b);
         border: none; padding: 15px 20px; border-radius: 15px;
@@ -1029,23 +1077,19 @@ function showShareOptions() {
       " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
         🔗 Copier lien
       </button>
-      
     </div>
-    
     <!-- Information de partage -->
     <div style="background: rgba(52,152,219,0.1); padding: 12px; border-radius: 10px; margin-bottom: 15px; border-left: 4px solid #3498db;">
       <p style="margin: 0; color: #3498db; font-size: 12px; text-align: center;">
         🌐 <strong>Partage optimisé :</strong> Utilise l'URL GitHub Pages pour des liens cliquables partout !
       </p>
     </div>
-    
     <!-- Message motivationnel -->
     <div style="background: rgba(255,215,0,0.1); padding: 15px; border-radius: 10px; margin-bottom: 20px; border-left: 4px solid #ffd700;">
       <p style="margin: 0; color: #ffd700; font-size: 14px;">
         ${t.shareTip}
       </p>
     </div>
-    
     <button id="closeShareModal" style="
       background: transparent; border: 2px solid rgba(255,255,255,0.3);
       padding: 12px 30px; border-radius: 25px; color: white;
@@ -1054,38 +1098,29 @@ function showShareOptions() {
       ${t.shareClose}
     </button>
   `;
-  
   shareModal.appendChild(shareContainer);
   document.body.appendChild(shareModal);
-  
   // Gestion des événements de partage améliorés
-  
   // Facebook - Méthode améliorée avec fallback
   document.getElementById('shareFacebookBtn').addEventListener('click', () => {
     const url = currentUrl;
-    
-    // Essayer l'API native si disponible
     if (navigator.share) {
       navigator.share({
         title: 'Brainova - Jeux Intelligents',
         text: shareText,
         url: url
       }).catch(() => {
-        // Fallback vers Facebook
         window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank', 'width=600,height=500');
       });
     } else {
-      // Méthode Facebook directe
       window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank', 'width=600,height=500');
     }
   });
-  
   // WhatsApp - Message complet optimisé
   document.getElementById('shareWhatsAppBtn').addEventListener('click', () => {
     const message = encodeURIComponent(`🧠 *Brainova - Jeux Intelligents*\n\nDécouvrez 36 jeux pour booster votre intelligence !\n\n✨ Cliquez ici: ${currentUrl}`);
     window.open(`https://wa.me/?text=${message}`, '_blank');
   });
-  
   // Copier le lien avec conseils
   document.getElementById('copyLinkBtn').addEventListener('click', () => {
     navigator.clipboard.writeText(currentUrl).then(() => {
@@ -1093,12 +1128,9 @@ function showShareOptions() {
       const originalText = btn.innerHTML;
       btn.innerHTML = '✅ Copié !';
       btn.style.background = 'linear-gradient(135deg, #27ae60, #2ecc71)';
-      
-      // Confirmation de copie
       setTimeout(() => {
         alert('📎 Lien GitHub Pages copié !\n\n✅ Ce lien est cliquable partout :\n• Par email\n• Sur les réseaux sociaux\n• Dans les messages\n\n🚀 Prêt à partager !');
       }, 500);
-      
       setTimeout(() => {
         btn.innerHTML = originalText;
         btn.style.background = 'linear-gradient(135deg, #e74c3c, #c0392b)';
@@ -1107,16 +1139,18 @@ function showShareOptions() {
       alert('Erreur lors de la copie. Voici le lien : ' + currentUrl);
     });
   });
-  
   // Fermer le modal
   document.getElementById('closeShareModal').addEventListener('click', () => {
-    document.body.removeChild(shareModal);
+    if (document.body.contains(shareModal)) {
+      document.body.removeChild(shareModal);
+    }
   });
-  
   // Fermer en cliquant en dehors
   shareModal.addEventListener('click', (e) => {
     if (e.target === shareModal) {
-      document.body.removeChild(shareModal);
+      if (document.body.contains(shareModal)) {
+        document.body.removeChild(shareModal);
+      }
     }
   });
 }
@@ -1493,29 +1527,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     verrouillerJeux();
   }
 
-  premiumBtn?.addEventListener("click", async () => {
-    if (!userEmail) {
-      alert("Veuillez vous connecter avant de vous abonner.");
-      return;
-    }
-    try {
-      const res = await fetch("/.netlify/functions/create-checkout-session", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          priceId: "price_1SQPWLP5iQ9gRxAtJ6zvc3fa",
-          successUrl: window.location.origin + "/?premium=1",
-          cancelUrl: window.location.origin + "/?canceled=1",
-          customerEmail: userEmail,
-        }),
-      });
-      const data = await res.json();
-      if (data.url) window.location.href = data.url;
-      else alert("❌ Erreur lors de la création de la session Stripe.");
-    } catch (e) {
-      console.error("⚠️ Erreur Stripe:", e);
-      alert("Impossible de contacter Stripe.");
-    }
+  premiumBtn?.addEventListener("click", () => {
+    showSubscriptionMessage();
   });
 
   const urlParams = new URLSearchParams(window.location.search);
