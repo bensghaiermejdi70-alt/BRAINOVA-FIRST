@@ -319,17 +319,16 @@ html, body { max-width: 100%; overflow-x: hidden; }
 </div>
 </div>
 <form class="auth-form" id="loginForm">
-  <div class="input-group">
-    <label for="loginEmail">Email</label>
-    <input id="loginEmail" placeholder="votre@email.com" required type="email" />
-  </div>
-  <div class="input-group">
-    <label for="loginPassword">Mot de passe</label>
-    <input id="loginPassword" placeholder="••••••••" required type="password" />
-  </div>
-  <button class="btn premium-btn" type="submit">Se connecter</button>
+<div class="input-group">
+<label for="loginEmail">Email</label>
+<input id="loginEmail" placeholder="votre@email.com" required="" type="email"/>
+</div>
+<div class="input-group">
+<label for="loginPassword">Mot de passe</label>
+<input id="loginPassword" placeholder="••••••••" required="" type="password"/>
+</div>
+<button class="btn premium-btn" type="submit">Se connecter</button>
 </form>
-
 <button class="btn cancel-btn" id="loginCancel">Annuler</button>
 </div>
 </div>
@@ -1488,74 +1487,19 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 </script>
-
-<!-- Script d’accès principal -->
 <script src="/brainova-access.js"></script>
-
-<!-- Vérifie le statut premium -->
 <script>
-if (localStorage.getItem('brainova_premium') === 'true') {
-  window.userPremiumStatus = true;
-}
-</script>
-
-<!-- Synchronisation cookies -->
-<script>
-const premiumStatus = localStorage.getItem('brainova_premium');
-if (premiumStatus === 'true') {
-  window.userPremiumStatus = true;
-  document.cookie = "brainova_user_status=premium; path=/; max-age=31536000";
-}
-</script>
-
-<!-- ==================== AUTO-ACTIVATION PREMIUM APRÈS PAIEMENT ==================== -->
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-  try {
-    const urlParams = new URLSearchParams(window.location.search);
-    const premiumParam = urlParams.get('premium');
-
-    if (premiumParam === '1') {
-      // ✅ Activer le statut premium automatiquement
-      localStorage.setItem('brainova_premium', 'true');
-      localStorage.setItem('brainova_premium_status', 'active');
-      userPremium = true;
-      isPremium = true;
-
-      // ✅ Mettre à jour l'interface
-      renderGrid(localStorage.getItem('brainova_lang') || 'fr');
-
-      // ✅ Bannière de confirmation
-      const banner = document.createElement('div');
-      banner.textContent = "🎉 Félicitations ! Votre abonnement Brainova Premium est maintenant actif.";
-      banner.style.cssText = `
-        position: fixed;
-        top: 20px; left: 50%;
-        transform: translateX(-50%);
-        background: linear-gradient(90deg,#00ff88,#00c3ff);
-        color: #001;
-        font-weight: bold;
-        padding: 14px 24px;
-        border-radius: 25px;
-        box-shadow: 0 0 25px rgba(0,255,136,0.4);
-        z-index: 9999;
-      `;
-      document.body.appendChild(banner);
-      setTimeout(() => banner.remove(), 6000);
-
-      // ✅ Nettoyer l’URL
-      window.history.replaceState({}, document.title, window.location.pathname);
-      console.log("💎 Activation automatique du mode Premium réussie.");
-    } else {
-      console.log("🟡 Mode gratuit - jeux Premium verrouillés.");
-    }
-  } catch (err) {
-    console.error('Erreur activation premium:', err);
+  if (localStorage.getItem('brainova_premium') === 'true') {
+    window.userPremiumStatus = true;
   }
-});
+</script>
+<script>
+  const premiumStatus = localStorage.getItem('brainova_premium');
+  if (premiumStatus === 'true') {
+    window.userPremiumStatus = true;
+    document.cookie = "brainova_user_status=premium; path=/; max-age=31536000";
+  }
 </script>
 
 </body>
 </html>
-
-
