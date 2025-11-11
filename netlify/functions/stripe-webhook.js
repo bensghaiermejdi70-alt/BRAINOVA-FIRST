@@ -90,6 +90,9 @@ export async function handler(event) {
         },
         { merge: true }
       );
+      // PATCH LOG: Affiche le document Firestore après écriture
+      const doc = await ref.get();
+      console.log(`💎 Firestore doc après sync:`, doc.exists ? doc.data() : 'Document inexistant');
       console.log(`💎 Statut Premium ${isPremium ? "activé" : "désactivé"} pour ${email}`);
     } catch (err) {
       console.error("⚠️ Erreur Firestore :", err.message);
@@ -104,6 +107,7 @@ export async function handler(event) {
         let email = session.customer_email || session.customer_details?.email;
         if (email) {
           email = email.trim().toLowerCase();
+          console.log('PATCH LOG: Email reçu du checkout Stripe:', email);
 
           const link = `https://brainovafirst.netlify.app/?premium=1&premium_email=${encodeURIComponent(email)}`;
 
