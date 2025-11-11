@@ -265,6 +265,37 @@ if (typeof auth !== 'undefined' && auth.onAuthStateChanged) {
     if (user && user.email) {
       await verifyPremiumFromServer(user.email);
     }
+
+// ✅ Vérification Premium sécurisée (connexion à Netlify Function)
+setTimeout(async () => {
+  const email = localStorage.getItem('brainova_user_email');
+  if (!email) {
+    console.warn('⚠️ Aucun e-mail utilisateur enregistré - vérification annulée.');
+    return;
+  }
+
+  console.log('🔍 Vérification Premium pour', email);
+  try {
+    const res = await fetch('/.netlify/functions/verify-premium?email=' + encodeURIComponent(email));
+    const data = await res.json();
+
+    if (data.active === true) {
+      console.log('✅ Premium confirmé via serveur (' + data.source + ') pour', email);
+      localStorage.setItem('brainova_premium', 'true');
+      // Déverrouiller immédiatement les jeux Premium
+      document.querySelectorAll('.game-card.premium').forEach(card => {
+        card.classList.remove('locked');
+        card.querySelector('.lock-icon')?.remove();
+      });
+    } else {
+      console.warn('🟡 Abonnement inactif pour', email, '(source:', data.source + ')');
+      localStorage.setItem('brainova_premium', 'false');
+    }
+  } catch (err) {
+    console.error('❌ Erreur lors de la vérification Premium :', err);
+  }
+}, 1000);
+
 </script>
 
 <style>
@@ -440,9 +471,102 @@ if (typeof auth !== 'undefined' && auth.onAuthStateChanged) {
 <button class="btn" id="premiumCancel" style="background:transparent;color:#fff;border:1px solid rgba(255,255,255,0.08)">Annuler</button>
 </div>
 </div>
-<script src="https://js.stripe.com/v3/"></script>
-<script src="https://www.gstatic.com/firebasejs/12.4.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/12.4.0/firebase-auth-compat.js"></script>
+<script src="https://js.stripe.com/v3/">
+// ✅ Vérification Premium sécurisée (connexion à Netlify Function)
+setTimeout(async () => {
+  const email = localStorage.getItem('brainova_user_email');
+  if (!email) {
+    console.warn('⚠️ Aucun e-mail utilisateur enregistré - vérification annulée.');
+    return;
+  }
+
+  console.log('🔍 Vérification Premium pour', email);
+  try {
+    const res = await fetch('/.netlify/functions/verify-premium?email=' + encodeURIComponent(email));
+    const data = await res.json();
+
+    if (data.active === true) {
+      console.log('✅ Premium confirmé via serveur (' + data.source + ') pour', email);
+      localStorage.setItem('brainova_premium', 'true');
+      // Déverrouiller immédiatement les jeux Premium
+      document.querySelectorAll('.game-card.premium').forEach(card => {
+        card.classList.remove('locked');
+        card.querySelector('.lock-icon')?.remove();
+      });
+    } else {
+      console.warn('🟡 Abonnement inactif pour', email, '(source:', data.source + ')');
+      localStorage.setItem('brainova_premium', 'false');
+    }
+  } catch (err) {
+    console.error('❌ Erreur lors de la vérification Premium :', err);
+  }
+}, 1000);
+
+</script>
+<script src="https://www.gstatic.com/firebasejs/12.4.0/firebase-app-compat.js">
+// ✅ Vérification Premium sécurisée (connexion à Netlify Function)
+setTimeout(async () => {
+  const email = localStorage.getItem('brainova_user_email');
+  if (!email) {
+    console.warn('⚠️ Aucun e-mail utilisateur enregistré - vérification annulée.');
+    return;
+  }
+
+  console.log('🔍 Vérification Premium pour', email);
+  try {
+    const res = await fetch('/.netlify/functions/verify-premium?email=' + encodeURIComponent(email));
+    const data = await res.json();
+
+    if (data.active === true) {
+      console.log('✅ Premium confirmé via serveur (' + data.source + ') pour', email);
+      localStorage.setItem('brainova_premium', 'true');
+      // Déverrouiller immédiatement les jeux Premium
+      document.querySelectorAll('.game-card.premium').forEach(card => {
+        card.classList.remove('locked');
+        card.querySelector('.lock-icon')?.remove();
+      });
+    } else {
+      console.warn('🟡 Abonnement inactif pour', email, '(source:', data.source + ')');
+      localStorage.setItem('brainova_premium', 'false');
+    }
+  } catch (err) {
+    console.error('❌ Erreur lors de la vérification Premium :', err);
+  }
+}, 1000);
+
+</script>
+<script src="https://www.gstatic.com/firebasejs/12.4.0/firebase-auth-compat.js">
+// ✅ Vérification Premium sécurisée (connexion à Netlify Function)
+setTimeout(async () => {
+  const email = localStorage.getItem('brainova_user_email');
+  if (!email) {
+    console.warn('⚠️ Aucun e-mail utilisateur enregistré - vérification annulée.');
+    return;
+  }
+
+  console.log('🔍 Vérification Premium pour', email);
+  try {
+    const res = await fetch('/.netlify/functions/verify-premium?email=' + encodeURIComponent(email));
+    const data = await res.json();
+
+    if (data.active === true) {
+      console.log('✅ Premium confirmé via serveur (' + data.source + ') pour', email);
+      localStorage.setItem('brainova_premium', 'true');
+      // Déverrouiller immédiatement les jeux Premium
+      document.querySelectorAll('.game-card.premium').forEach(card => {
+        card.classList.remove('locked');
+        card.querySelector('.lock-icon')?.remove();
+      });
+    } else {
+      console.warn('🟡 Abonnement inactif pour', email, '(source:', data.source + ')');
+      localStorage.setItem('brainova_premium', 'false');
+    }
+  } catch (err) {
+    console.error('❌ Erreur lors de la vérification Premium :', err);
+  }
+}, 1000);
+
+</script>
 <script>
 
 // Firebase Config
@@ -1413,6 +1537,37 @@ document.addEventListener('click', function(e) {
 
 // Production ready - Système de paiement Stripe intégré
 
+
+// ✅ Vérification Premium sécurisée (connexion à Netlify Function)
+setTimeout(async () => {
+  const email = localStorage.getItem('brainova_user_email');
+  if (!email) {
+    console.warn('⚠️ Aucun e-mail utilisateur enregistré - vérification annulée.');
+    return;
+  }
+
+  console.log('🔍 Vérification Premium pour', email);
+  try {
+    const res = await fetch('/.netlify/functions/verify-premium?email=' + encodeURIComponent(email));
+    const data = await res.json();
+
+    if (data.active === true) {
+      console.log('✅ Premium confirmé via serveur (' + data.source + ') pour', email);
+      localStorage.setItem('brainova_premium', 'true');
+      // Déverrouiller immédiatement les jeux Premium
+      document.querySelectorAll('.game-card.premium').forEach(card => {
+        card.classList.remove('locked');
+        card.querySelector('.lock-icon')?.remove();
+      });
+    } else {
+      console.warn('🟡 Abonnement inactif pour', email, '(source:', data.source + ')');
+      localStorage.setItem('brainova_premium', 'false');
+    }
+  } catch (err) {
+    console.error('❌ Erreur lors de la vérification Premium :', err);
+  }
+}, 1000);
+
 </script>
 <div id="cookie-banner" style="position:fixed;bottom:0;left:0;width:100%;background:rgba(0,0,0,0.9);color:white;padding:15px;text-align:center;z-index:99999;font-size:14px;">
 Ce site utilise des cookies pour améliorer votre expérience. 
@@ -1426,6 +1581,37 @@ document.getElementById('acceptCookies').addEventListener('click',()=>{
 if(localStorage.getItem('cookiesAccepted')==='true'){
   document.getElementById('cookie-banner').style.display='none';
 }
+
+// ✅ Vérification Premium sécurisée (connexion à Netlify Function)
+setTimeout(async () => {
+  const email = localStorage.getItem('brainova_user_email');
+  if (!email) {
+    console.warn('⚠️ Aucun e-mail utilisateur enregistré - vérification annulée.');
+    return;
+  }
+
+  console.log('🔍 Vérification Premium pour', email);
+  try {
+    const res = await fetch('/.netlify/functions/verify-premium?email=' + encodeURIComponent(email));
+    const data = await res.json();
+
+    if (data.active === true) {
+      console.log('✅ Premium confirmé via serveur (' + data.source + ') pour', email);
+      localStorage.setItem('brainova_premium', 'true');
+      // Déverrouiller immédiatement les jeux Premium
+      document.querySelectorAll('.game-card.premium').forEach(card => {
+        card.classList.remove('locked');
+        card.querySelector('.lock-icon')?.remove();
+      });
+    } else {
+      console.warn('🟡 Abonnement inactif pour', email, '(source:', data.source + ')');
+      localStorage.setItem('brainova_premium', 'false');
+    }
+  } catch (err) {
+    console.error('❌ Erreur lors de la vérification Premium :', err);
+  }
+}, 1000);
+
 </script>
 <footer style="text-align:center;padding:20px;background:rgba(0,0,0,0.7);color:white;font-size:13px;">
 <a href="politique-confidentialite.html" style="color:#00ffff;margin:0 10px;">Politique de Confidentialité</a> |
@@ -1433,7 +1619,38 @@ if(localStorage.getItem('cookiesAccepted')==='true'){
   <a href="cookies.html" style="color:#00ffff;margin:0 10px;">Cookies</a>
 <p style="margin-top:8px;">© 2025 Brainova - Tous droits réservés</p>
 </footer>
-<script async="" defer="" src="https://www.google.com/recaptcha/api.js"></script>
+<script async="" defer="" src="https://www.google.com/recaptcha/api.js">
+// ✅ Vérification Premium sécurisée (connexion à Netlify Function)
+setTimeout(async () => {
+  const email = localStorage.getItem('brainova_user_email');
+  if (!email) {
+    console.warn('⚠️ Aucun e-mail utilisateur enregistré - vérification annulée.');
+    return;
+  }
+
+  console.log('🔍 Vérification Premium pour', email);
+  try {
+    const res = await fetch('/.netlify/functions/verify-premium?email=' + encodeURIComponent(email));
+    const data = await res.json();
+
+    if (data.active === true) {
+      console.log('✅ Premium confirmé via serveur (' + data.source + ') pour', email);
+      localStorage.setItem('brainova_premium', 'true');
+      // Déverrouiller immédiatement les jeux Premium
+      document.querySelectorAll('.game-card.premium').forEach(card => {
+        card.classList.remove('locked');
+        card.querySelector('.lock-icon')?.remove();
+      });
+    } else {
+      console.warn('🟡 Abonnement inactif pour', email, '(source:', data.source + ')');
+      localStorage.setItem('brainova_premium', 'false');
+    }
+  } catch (err) {
+    console.error('❌ Erreur lors de la vérification Premium :', err);
+  }
+}, 1000);
+
+</script>
 <script>
 function getExpiryDateFromStorage(){const v=localStorage.getItem('brainova_expiry');return v?new Date(v):null}
 function setExpiryDays(days){const d=new Date();d.setDate(d.getDate()+days);localStorage.setItem('brainova_expiry',d.toISOString())}
@@ -1443,6 +1660,37 @@ async function notifyServerSubscription(email,expiryISO){try{await fetch('/.netl
 window.unlockPremium=async function(userEmail){try{localStorage.setItem('brainova_premium','true');setExpiryDays(365);try{if(typeof renderGrid==='function')renderGrid(document.getElementById('langSelect')?.value||'fr')}catch(e){}try{if(typeof initializeAuthButtons==='function')initializeAuthButtons()}catch(e){}updateShareButtonState();const email=userEmail||localStorage.getItem('user_email')||null;const expiry=localStorage.getItem('brainova_expiry')||null;if(email)await notifyServerSubscription(email,expiry);alert('🎉 Abonnement activé ! Tous les jeux sont débloqués.')}catch(err){console.error('unlockPremium error',err)}};
 function checkStripeReturn(){try{const urlParams=new URLSearchParams(window.location.search);const success=urlParams.get('success');const status=urlParams.get('payment_intent_status');if(success==='true'||status==='succeeded'){const custEmail=urlParams.get('customer_email')||null;if(custEmail)localStorage.setItem('user_email',custEmail);window.unlockPremium(custEmail);if(history&&history.replaceState)history.replaceState({},document.title,window.location.pathname)}}catch(e){console.error('checkStripeReturn error',e)}}
 document.addEventListener('DOMContentLoaded',function(){updateShareButtonState();checkStripeReturn();const exp=getExpiryDateFromStorage();if(exp){const now=new Date();if(now>exp){localStorage.removeItem('brainova_premium');updateShareButtonState()}}});
+
+// ✅ Vérification Premium sécurisée (connexion à Netlify Function)
+setTimeout(async () => {
+  const email = localStorage.getItem('brainova_user_email');
+  if (!email) {
+    console.warn('⚠️ Aucun e-mail utilisateur enregistré - vérification annulée.');
+    return;
+  }
+
+  console.log('🔍 Vérification Premium pour', email);
+  try {
+    const res = await fetch('/.netlify/functions/verify-premium?email=' + encodeURIComponent(email));
+    const data = await res.json();
+
+    if (data.active === true) {
+      console.log('✅ Premium confirmé via serveur (' + data.source + ') pour', email);
+      localStorage.setItem('brainova_premium', 'true');
+      // Déverrouiller immédiatement les jeux Premium
+      document.querySelectorAll('.game-card.premium').forEach(card => {
+        card.classList.remove('locked');
+        card.querySelector('.lock-icon')?.remove();
+      });
+    } else {
+      console.warn('🟡 Abonnement inactif pour', email, '(source:', data.source + ')');
+      localStorage.setItem('brainova_premium', 'false');
+    }
+  } catch (err) {
+    console.error('❌ Erreur lors de la vérification Premium :', err);
+  }
+}, 1000);
+
 </script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -1460,6 +1708,37 @@ document.addEventListener('DOMContentLoaded', function() {
     setNoteLang('fr');
   }
 });
+
+// ✅ Vérification Premium sécurisée (connexion à Netlify Function)
+setTimeout(async () => {
+  const email = localStorage.getItem('brainova_user_email');
+  if (!email) {
+    console.warn('⚠️ Aucun e-mail utilisateur enregistré - vérification annulée.');
+    return;
+  }
+
+  console.log('🔍 Vérification Premium pour', email);
+  try {
+    const res = await fetch('/.netlify/functions/verify-premium?email=' + encodeURIComponent(email));
+    const data = await res.json();
+
+    if (data.active === true) {
+      console.log('✅ Premium confirmé via serveur (' + data.source + ') pour', email);
+      localStorage.setItem('brainova_premium', 'true');
+      // Déverrouiller immédiatement les jeux Premium
+      document.querySelectorAll('.game-card.premium').forEach(card => {
+        card.classList.remove('locked');
+        card.querySelector('.lock-icon')?.remove();
+      });
+    } else {
+      console.warn('🟡 Abonnement inactif pour', email, '(source:', data.source + ')');
+      localStorage.setItem('brainova_premium', 'false');
+    }
+  } catch (err) {
+    console.error('❌ Erreur lors de la vérification Premium :', err);
+  }
+}, 1000);
+
 </script>
 
 <script>
@@ -1474,6 +1753,37 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 2000);
   }
 });
+
+// ✅ Vérification Premium sécurisée (connexion à Netlify Function)
+setTimeout(async () => {
+  const email = localStorage.getItem('brainova_user_email');
+  if (!email) {
+    console.warn('⚠️ Aucun e-mail utilisateur enregistré - vérification annulée.');
+    return;
+  }
+
+  console.log('🔍 Vérification Premium pour', email);
+  try {
+    const res = await fetch('/.netlify/functions/verify-premium?email=' + encodeURIComponent(email));
+    const data = await res.json();
+
+    if (data.active === true) {
+      console.log('✅ Premium confirmé via serveur (' + data.source + ') pour', email);
+      localStorage.setItem('brainova_premium', 'true');
+      // Déverrouiller immédiatement les jeux Premium
+      document.querySelectorAll('.game-card.premium').forEach(card => {
+        card.classList.remove('locked');
+        card.querySelector('.lock-icon')?.remove();
+      });
+    } else {
+      console.warn('🟡 Abonnement inactif pour', email, '(source:', data.source + ')');
+      localStorage.setItem('brainova_premium', 'false');
+    }
+  } catch (err) {
+    console.error('❌ Erreur lors de la vérification Premium :', err);
+  }
+}, 1000);
+
 </script><script>
 // ✅ Vérifie si l’utilisateur est Premium depuis la session Stripe (success.html)
 document.addEventListener("DOMContentLoaded", () => {
@@ -1519,16 +1829,109 @@ document.addEventListener("DOMContentLoaded", () => {
     console.log("🟡 Mode gratuit - jeux Premium verrouillés.");
   }
 });
+
+// ✅ Vérification Premium sécurisée (connexion à Netlify Function)
+setTimeout(async () => {
+  const email = localStorage.getItem('brainova_user_email');
+  if (!email) {
+    console.warn('⚠️ Aucun e-mail utilisateur enregistré - vérification annulée.');
+    return;
+  }
+
+  console.log('🔍 Vérification Premium pour', email);
+  try {
+    const res = await fetch('/.netlify/functions/verify-premium?email=' + encodeURIComponent(email));
+    const data = await res.json();
+
+    if (data.active === true) {
+      console.log('✅ Premium confirmé via serveur (' + data.source + ') pour', email);
+      localStorage.setItem('brainova_premium', 'true');
+      // Déverrouiller immédiatement les jeux Premium
+      document.querySelectorAll('.game-card.premium').forEach(card => {
+        card.classList.remove('locked');
+        card.querySelector('.lock-icon')?.remove();
+      });
+    } else {
+      console.warn('🟡 Abonnement inactif pour', email, '(source:', data.source + ')');
+      localStorage.setItem('brainova_premium', 'false');
+    }
+  } catch (err) {
+    console.error('❌ Erreur lors de la vérification Premium :', err);
+  }
+}, 1000);
+
 </script>
 
 <!-- Script d’accès principal -->
-<script src="/brainova-access.js"></script>
+<script src="/brainova-access.js">
+// ✅ Vérification Premium sécurisée (connexion à Netlify Function)
+setTimeout(async () => {
+  const email = localStorage.getItem('brainova_user_email');
+  if (!email) {
+    console.warn('⚠️ Aucun e-mail utilisateur enregistré - vérification annulée.');
+    return;
+  }
+
+  console.log('🔍 Vérification Premium pour', email);
+  try {
+    const res = await fetch('/.netlify/functions/verify-premium?email=' + encodeURIComponent(email));
+    const data = await res.json();
+
+    if (data.active === true) {
+      console.log('✅ Premium confirmé via serveur (' + data.source + ') pour', email);
+      localStorage.setItem('brainova_premium', 'true');
+      // Déverrouiller immédiatement les jeux Premium
+      document.querySelectorAll('.game-card.premium').forEach(card => {
+        card.classList.remove('locked');
+        card.querySelector('.lock-icon')?.remove();
+      });
+    } else {
+      console.warn('🟡 Abonnement inactif pour', email, '(source:', data.source + ')');
+      localStorage.setItem('brainova_premium', 'false');
+    }
+  } catch (err) {
+    console.error('❌ Erreur lors de la vérification Premium :', err);
+  }
+}, 1000);
+
+</script>
 
 <!-- Vérifie le statut premium -->
 <script>
 if (localStorage.getItem('brainova_premium') === 'true') {
   window.userPremiumStatus = true;
 }
+
+// ✅ Vérification Premium sécurisée (connexion à Netlify Function)
+setTimeout(async () => {
+  const email = localStorage.getItem('brainova_user_email');
+  if (!email) {
+    console.warn('⚠️ Aucun e-mail utilisateur enregistré - vérification annulée.');
+    return;
+  }
+
+  console.log('🔍 Vérification Premium pour', email);
+  try {
+    const res = await fetch('/.netlify/functions/verify-premium?email=' + encodeURIComponent(email));
+    const data = await res.json();
+
+    if (data.active === true) {
+      console.log('✅ Premium confirmé via serveur (' + data.source + ') pour', email);
+      localStorage.setItem('brainova_premium', 'true');
+      // Déverrouiller immédiatement les jeux Premium
+      document.querySelectorAll('.game-card.premium').forEach(card => {
+        card.classList.remove('locked');
+        card.querySelector('.lock-icon')?.remove();
+      });
+    } else {
+      console.warn('🟡 Abonnement inactif pour', email, '(source:', data.source + ')');
+      localStorage.setItem('brainova_premium', 'false');
+    }
+  } catch (err) {
+    console.error('❌ Erreur lors de la vérification Premium :', err);
+  }
+}, 1000);
+
 </script>
 
 <!-- Synchronisation cookies -->
@@ -1538,6 +1941,37 @@ if (premiumStatus === 'true') {
   window.userPremiumStatus = true;
   document.cookie = "brainova_user_status=premium; path=/; max-age=31536000";
 }
+
+// ✅ Vérification Premium sécurisée (connexion à Netlify Function)
+setTimeout(async () => {
+  const email = localStorage.getItem('brainova_user_email');
+  if (!email) {
+    console.warn('⚠️ Aucun e-mail utilisateur enregistré - vérification annulée.');
+    return;
+  }
+
+  console.log('🔍 Vérification Premium pour', email);
+  try {
+    const res = await fetch('/.netlify/functions/verify-premium?email=' + encodeURIComponent(email));
+    const data = await res.json();
+
+    if (data.active === true) {
+      console.log('✅ Premium confirmé via serveur (' + data.source + ') pour', email);
+      localStorage.setItem('brainova_premium', 'true');
+      // Déverrouiller immédiatement les jeux Premium
+      document.querySelectorAll('.game-card.premium').forEach(card => {
+        card.classList.remove('locked');
+        card.querySelector('.lock-icon')?.remove();
+      });
+    } else {
+      console.warn('🟡 Abonnement inactif pour', email, '(source:', data.source + ')');
+      localStorage.setItem('brainova_premium', 'false');
+    }
+  } catch (err) {
+    console.error('❌ Erreur lors de la vérification Premium :', err);
+  }
+}, 1000);
+
 </script>
 
 <!-- ==================== AUTO-ACTIVATION PREMIUM APRÈS PAIEMENT ==================== -->
@@ -1585,6 +2019,37 @@ document.addEventListener('DOMContentLoaded', () => {
     console.error('Erreur activation premium:', err);
   }
 });
+
+// ✅ Vérification Premium sécurisée (connexion à Netlify Function)
+setTimeout(async () => {
+  const email = localStorage.getItem('brainova_user_email');
+  if (!email) {
+    console.warn('⚠️ Aucun e-mail utilisateur enregistré - vérification annulée.');
+    return;
+  }
+
+  console.log('🔍 Vérification Premium pour', email);
+  try {
+    const res = await fetch('/.netlify/functions/verify-premium?email=' + encodeURIComponent(email));
+    const data = await res.json();
+
+    if (data.active === true) {
+      console.log('✅ Premium confirmé via serveur (' + data.source + ') pour', email);
+      localStorage.setItem('brainova_premium', 'true');
+      // Déverrouiller immédiatement les jeux Premium
+      document.querySelectorAll('.game-card.premium').forEach(card => {
+        card.classList.remove('locked');
+        card.querySelector('.lock-icon')?.remove();
+      });
+    } else {
+      console.warn('🟡 Abonnement inactif pour', email, '(source:', data.source + ')');
+      localStorage.setItem('brainova_premium', 'false');
+    }
+  } catch (err) {
+    console.error('❌ Erreur lors de la vérification Premium :', err);
+  }
+}, 1000);
+
 </script>
 
 <script>
@@ -1709,6 +2174,37 @@ document.addEventListener("DOMContentLoaded", async () => {
     setTimeout(() => banner.remove(), 5000);
   }
 });
+
+// ✅ Vérification Premium sécurisée (connexion à Netlify Function)
+setTimeout(async () => {
+  const email = localStorage.getItem('brainova_user_email');
+  if (!email) {
+    console.warn('⚠️ Aucun e-mail utilisateur enregistré - vérification annulée.');
+    return;
+  }
+
+  console.log('🔍 Vérification Premium pour', email);
+  try {
+    const res = await fetch('/.netlify/functions/verify-premium?email=' + encodeURIComponent(email));
+    const data = await res.json();
+
+    if (data.active === true) {
+      console.log('✅ Premium confirmé via serveur (' + data.source + ') pour', email);
+      localStorage.setItem('brainova_premium', 'true');
+      // Déverrouiller immédiatement les jeux Premium
+      document.querySelectorAll('.game-card.premium').forEach(card => {
+        card.classList.remove('locked');
+        card.querySelector('.lock-icon')?.remove();
+      });
+    } else {
+      console.warn('🟡 Abonnement inactif pour', email, '(source:', data.source + ')');
+      localStorage.setItem('brainova_premium', 'false');
+    }
+  } catch (err) {
+    console.error('❌ Erreur lors de la vérification Premium :', err);
+  }
+}, 1000);
+
 </script>
 
 <script>
@@ -1750,6 +2246,37 @@ verifyPremiumStatusFromServer() {
     return false;
   }
 }
+
+// ✅ Vérification Premium sécurisée (connexion à Netlify Function)
+setTimeout(async () => {
+  const email = localStorage.getItem('brainova_user_email');
+  if (!email) {
+    console.warn('⚠️ Aucun e-mail utilisateur enregistré - vérification annulée.');
+    return;
+  }
+
+  console.log('🔍 Vérification Premium pour', email);
+  try {
+    const res = await fetch('/.netlify/functions/verify-premium?email=' + encodeURIComponent(email));
+    const data = await res.json();
+
+    if (data.active === true) {
+      console.log('✅ Premium confirmé via serveur (' + data.source + ') pour', email);
+      localStorage.setItem('brainova_premium', 'true');
+      // Déverrouiller immédiatement les jeux Premium
+      document.querySelectorAll('.game-card.premium').forEach(card => {
+        card.classList.remove('locked');
+        card.querySelector('.lock-icon')?.remove();
+      });
+    } else {
+      console.warn('🟡 Abonnement inactif pour', email, '(source:', data.source + ')');
+      localStorage.setItem('brainova_premium', 'false');
+    }
+  } catch (err) {
+    console.error('❌ Erreur lors de la vérification Premium :', err);
+  }
+}, 1000);
+
 </script>
 
 
@@ -1817,6 +2344,37 @@ function updateShareButtonState(isPremiumUser) {
     shareBtn.title = "Partagez Brainova avec vos amis !";
   }
 }
+
+// ✅ Vérification Premium sécurisée (connexion à Netlify Function)
+setTimeout(async () => {
+  const email = localStorage.getItem('brainova_user_email');
+  if (!email) {
+    console.warn('⚠️ Aucun e-mail utilisateur enregistré - vérification annulée.');
+    return;
+  }
+
+  console.log('🔍 Vérification Premium pour', email);
+  try {
+    const res = await fetch('/.netlify/functions/verify-premium?email=' + encodeURIComponent(email));
+    const data = await res.json();
+
+    if (data.active === true) {
+      console.log('✅ Premium confirmé via serveur (' + data.source + ') pour', email);
+      localStorage.setItem('brainova_premium', 'true');
+      // Déverrouiller immédiatement les jeux Premium
+      document.querySelectorAll('.game-card.premium').forEach(card => {
+        card.classList.remove('locked');
+        card.querySelector('.lock-icon')?.remove();
+      });
+    } else {
+      console.warn('🟡 Abonnement inactif pour', email, '(source:', data.source + ')');
+      localStorage.setItem('brainova_premium', 'false');
+    }
+  } catch (err) {
+    console.error('❌ Erreur lors de la vérification Premium :', err);
+  }
+}, 1000);
+
 </script>
 <script>
 // ✅ Vérification automatique du statut Premium via Stripe (Netlify Function)
@@ -1864,6 +2422,37 @@ document.addEventListener("DOMContentLoaded", async () => {
   const status = await verifyPremiumStatusFromServer();
   console.log(status ? "✅ Premium actif" : "🟡 Mode gratuit");
 });
+
+// ✅ Vérification Premium sécurisée (connexion à Netlify Function)
+setTimeout(async () => {
+  const email = localStorage.getItem('brainova_user_email');
+  if (!email) {
+    console.warn('⚠️ Aucun e-mail utilisateur enregistré - vérification annulée.');
+    return;
+  }
+
+  console.log('🔍 Vérification Premium pour', email);
+  try {
+    const res = await fetch('/.netlify/functions/verify-premium?email=' + encodeURIComponent(email));
+    const data = await res.json();
+
+    if (data.active === true) {
+      console.log('✅ Premium confirmé via serveur (' + data.source + ') pour', email);
+      localStorage.setItem('brainova_premium', 'true');
+      // Déverrouiller immédiatement les jeux Premium
+      document.querySelectorAll('.game-card.premium').forEach(card => {
+        card.classList.remove('locked');
+        card.querySelector('.lock-icon')?.remove();
+      });
+    } else {
+      console.warn('🟡 Abonnement inactif pour', email, '(source:', data.source + ')');
+      localStorage.setItem('brainova_premium', 'false');
+    }
+  } catch (err) {
+    console.error('❌ Erreur lors de la vérification Premium :', err);
+  }
+}, 1000);
+
 </script>
 
 
@@ -1923,6 +2512,37 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (typeof renderGrid === "function")
     renderGrid(localStorage.getItem("brainova_lang") || "fr");
 });
+
+// ✅ Vérification Premium sécurisée (connexion à Netlify Function)
+setTimeout(async () => {
+  const email = localStorage.getItem('brainova_user_email');
+  if (!email) {
+    console.warn('⚠️ Aucun e-mail utilisateur enregistré - vérification annulée.');
+    return;
+  }
+
+  console.log('🔍 Vérification Premium pour', email);
+  try {
+    const res = await fetch('/.netlify/functions/verify-premium?email=' + encodeURIComponent(email));
+    const data = await res.json();
+
+    if (data.active === true) {
+      console.log('✅ Premium confirmé via serveur (' + data.source + ') pour', email);
+      localStorage.setItem('brainova_premium', 'true');
+      // Déverrouiller immédiatement les jeux Premium
+      document.querySelectorAll('.game-card.premium').forEach(card => {
+        card.classList.remove('locked');
+        card.querySelector('.lock-icon')?.remove();
+      });
+    } else {
+      console.warn('🟡 Abonnement inactif pour', email, '(source:', data.source + ')');
+      localStorage.setItem('brainova_premium', 'false');
+    }
+  } catch (err) {
+    console.error('❌ Erreur lors de la vérification Premium :', err);
+  }
+}, 1000);
+
 </script>
 <script>
 // === Initialisation centralisée Brainova ===
@@ -1982,6 +2602,37 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 }
+
+// ✅ Vérification Premium sécurisée (connexion à Netlify Function)
+setTimeout(async () => {
+  const email = localStorage.getItem('brainova_user_email');
+  if (!email) {
+    console.warn('⚠️ Aucun e-mail utilisateur enregistré - vérification annulée.');
+    return;
+  }
+
+  console.log('🔍 Vérification Premium pour', email);
+  try {
+    const res = await fetch('/.netlify/functions/verify-premium?email=' + encodeURIComponent(email));
+    const data = await res.json();
+
+    if (data.active === true) {
+      console.log('✅ Premium confirmé via serveur (' + data.source + ') pour', email);
+      localStorage.setItem('brainova_premium', 'true');
+      // Déverrouiller immédiatement les jeux Premium
+      document.querySelectorAll('.game-card.premium').forEach(card => {
+        card.classList.remove('locked');
+        card.querySelector('.lock-icon')?.remove();
+      });
+    } else {
+      console.warn('🟡 Abonnement inactif pour', email, '(source:', data.source + ')');
+      localStorage.setItem('brainova_premium', 'false');
+    }
+  } catch (err) {
+    console.error('❌ Erreur lors de la vérification Premium :', err);
+  }
+}, 1000);
+
 </script>
 </body>
 </html>
