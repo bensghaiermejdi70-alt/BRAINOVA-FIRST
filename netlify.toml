@@ -1,6 +1,6 @@
 ######################################
 # 🧠 Brainova - Netlify Production Config
-# Version anti-scan & conforme sécurité
+# ✅ Compatible Chrome, Edge, Safari
 ######################################
 
 [build]
@@ -9,20 +9,13 @@
 
 [build.environment]
   NODE_VERSION = "18"
-
-  # 🚫 Désactivation propre du scan automatique
   SECRETS_SCAN_ENABLED = "false"
-
-  # 🧱 Ignore les chemins où le scanner voit des "faux positifs"
   SECRETS_SCAN_OMIT_PATHS = "netlify/functions, package.json, netlify.toml"
-
-  # 🚫 Empêche l’affichage de variables dans les logs
   HIDE_ENV_VARS = "true"
 
 ######################################
 # 🚫 Désactivation des optimisations Netlify
 ######################################
-
 [build.processing]
   skip_processing = true
 
@@ -38,7 +31,6 @@
 ######################################
 # 🔄 Redirections API
 ######################################
-
 [[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/:splat"
@@ -49,10 +41,16 @@
   to = "/.netlify/functions/sendemail"
   status = 200
 
+# HTTPS forcé
+[[redirects]]
+  from = "http://*"
+  to = "https://brainovafirst.netlify.app/:splat"
+  status = 301
+  force = true
+
 ######################################
 # 🧱 Headers de sécurité HTTP
 ######################################
-
 [[headers]]
   for = "/*"
   [headers.values]
@@ -64,6 +62,7 @@
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
 
+    # ✅ Autorise Stripe, Firebase, Google, ReCAPTCHA, Brevo
     Content-Security-Policy = """
       default-src 'self' data: blob:;
       script-src 'self' 'unsafe-inline' 'unsafe-eval'
@@ -103,10 +102,16 @@
         www.recaptcha.net;
     """
 
+    # ✅ Corrige instabilité Edge / iframes Stripe
+    X-Frame-Options = "SAMEORIGIN"
+
+    # ✅ Active HSTS & Permissions Policy modernes
+    Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+
 ######################################
 # ⚙️ Functions Netlify
 ######################################
-
 [functions]
   directory = "netlify/functions"
   node_bundler = "esbuild"
@@ -118,7 +123,6 @@
 ######################################
 # 🧪 Développement local
 ######################################
-
 [dev]
   framework = "#static"
   targetPort = 8888
