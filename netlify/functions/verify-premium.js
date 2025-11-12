@@ -1,44 +1,28 @@
-// ✅ Netlify Function — Vérification & Synchronisation Premium (Brainova v3.6 Base64 Fix)
-// 🔐 Compatible Stripe, Firestore, et Webhook automatique
+// ✅ Brainova – Vérification & Synchronisation Premium (clé scindée Base64)
+// Compatible Stripe, Firestore et Webhook automatique
 
 import Stripe from "stripe";
 import admin from "firebase-admin";
 
-// --- Vérification des variables d'environnement ---
-function checkEnv() {
-  const missing = [];
-  if (!process.env.STRIPE_SECRET_KEY) missing.push("STRIPE_SECRET_KEY");
-  if (!process.env.FIREBASE_PROJECT_ID) missing.push("FIREBASE_PROJECT_ID");
-  if (!process.env.FIREBASE_CLIENT_EMAIL) missing.push("FIREBASE_CLIENT_EMAIL");
-  if (!process.env.FIREBASE_PRIVATE_KEY) missing.push("FIREBASE_PRIVATE_KEY");
-  return missing;
-}
-
-const envMissing = checkEnv();
-if (envMissing.length) {
-  console.error("❌ Variables d'environnement manquantes :", envMissing.join(", "));
-}
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "");
-
-// --- Initialisation Firebase ---
-if (!admin.apps.length) {
-  try {
-    admin.initializeApp({
-      credential: admin.credential.cert({
-        projectId: process.env.FIREBASE_PROJECT_ID,
-        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-        // ✅ Correction : décodage Base64
-        privateKey: Buffer.from(process.env.FIREBASE_PRIVATE_KEY, "base64").toString("utf8"),
-      }),
-    });
-    console.log("🔥 Firebase initialisé avec succès (clé Base64)");
-  } catch (e) {
-    console.error("❌ Erreur initialisation Firebase :", e.message);
+function initFirebase() {
+  if (!admin.apps.length) {
+    try {
+      const fullKeyBase64 =
+        (process.env.FIREBASE_PRIVATE_KEY_PART1 || "") +
+        (process.env.FIREBASE_PRIVATE_KEY_PART2 || "");
+      const decodedKey = Buffer.from(fullKeyBase64, "base64").toString("utf8");
+      admin.initializeApp({
+        credential: admin.credential.cert(JSON.parse(decodedKey)),
+      });
+      console.log("✅ Firebase initialisé avec clé scindée");
+    } catch (e) {
+      console.error("❌ Erreur initialisation Firebase :", e);
+    }
   }
 }
-
+initFirebase();
 const db = admin.firestore();
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "");
 
 export async function handler(event) {
   const headers = {
@@ -50,7 +34,7 @@ export async function handler(event) {
   if (event.httpMethod === "OPTIONS") return { statusCode: 200, headers };
 
   try {
-    // --- Webhook Stripe (POST) ---
+    // 🔁 Webhook Stripe (POST)
     if (event.httpMethod === "POST") {
       const body = event.body ? JSON.parse(event.body) : {};
       const { email, premium } = body;
@@ -63,7 +47,6 @@ export async function handler(event) {
         };
       }
 
-      // --- Mise à jour Firestore ---
       await db.collection("premium_users").doc(email).set(
         {
           email,
@@ -79,68 +62,32 @@ export async function handler(event) {
       return { statusCode: 200, headers, body: JSON.stringify({ success: true }) };
     }
 
-    // --- Vérification Premium (GET) ---
+    // 🔍 Vérification Premium (GET)
     if (event.httpMethod === "GET") {
       const email = event.queryStringParameters?.email;
       if (!email)
         return { statusCode: 400, headers, body: JSON.stringify({ error: "Missing email" }) };
 
-      // --- Vérifier Firestore ---
-      let doc;
-      try {
-        doc = await db.collection("premium_users").doc(email).get();
-      } catch (e) {
-        console.error("❌ Erreur Firestore :", e);
-        return {
-          statusCode: 500,
-          headers,
-          body: JSON.stringify({ error: "Firestore error", details: e.message }),
-        };
-      }
+      const doc = await db.collection("premium_users").doc(email).get();
 
       if (doc.exists && doc.data().premium === true) {
         console.log(`✅ Premium confirmé via Firestore pour ${email}`);
         return { statusCode: 200, headers, body: JSON.stringify({ active: true, source: "firestore" }) };
       }
 
-      // --- Fallback Stripe ---
-      let customers;
-      try {
-        customers = await stripe.customers.list({ email, limit: 1 });
-      } catch (e) {
-        console.error("❌ Erreur Stripe (customers) :", e);
-        return {
-          statusCode: 500,
-          headers,
-          body: JSON.stringify({ error: "Stripe error", details: e.message }),
-        };
-      }
-
-      if (customers.data.length === 0) {
-        console.log(`🟡 Aucun client Stripe trouvé pour ${email}`);
+      const customers = await stripe.customers.list({ email, limit: 1 });
+      if (customers.data.length === 0)
         return { statusCode: 200, headers, body: JSON.stringify({ active: false, source: "none" }) };
-      }
 
       const customerId = customers.data[0].id;
-      let subscriptions;
-      try {
-        subscriptions = await stripe.subscriptions.list({
-          customer: customerId,
-          status: "active",
-          limit: 1,
-        });
-      } catch (e) {
-        console.error("❌ Erreur Stripe (subscriptions) :", e);
-        return {
-          statusCode: 500,
-          headers,
-          body: JSON.stringify({ error: "Stripe error", details: e.message }),
-        };
-      }
+      const subscriptions = await stripe.subscriptions.list({
+        customer: customerId,
+        status: "active",
+        limit: 1,
+      });
 
       if (subscriptions.data.length > 0) {
         console.log(`✅ Premium confirmé via Stripe pour ${email}`);
-        // --- Mettre à jour Firestore ---
         await db.collection("premium_users").doc(email).set(
           {
             email,
@@ -152,7 +99,6 @@ export async function handler(event) {
         );
         return { statusCode: 200, headers, body: JSON.stringify({ active: true, source: "stripe" }) };
       } else {
-        console.log(`🟡 Aucun abonnement actif pour ${email}`);
         return { statusCode: 200, headers, body: JSON.stringify({ active: false, source: "stripe" }) };
       }
     }
