@@ -1,31 +1,26 @@
-// ✅ Brainova v4.0 – Vérification Premium (Firebase local + Stripe)
-// 🔧 Migration vers firebase-key.json – Version stable production
+// ✅ Brainova v4.2 – Vérification Premium (Firebase depuis FIREBASE_KEY + Stripe Live)
 
-const Stripe = require("stripe");
-const admin = require("firebase-admin");
-const fs = require("fs");
-const path = require("path");
+import Stripe from "stripe";
+import admin from "firebase-admin";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "");
 
-// --- Initialisation Firebase depuis le fichier local sécurisé ---
-try {
-  const keyPath = path.join(process.cwd(), "netlify/functions/firebase-key.json");
-  const serviceAccount = JSON.parse(fs.readFileSync(keyPath, "utf8"));
-
-  if (!admin.apps.length) {
+// --- Initialisation Firebase depuis FIREBASE_KEY (JSON complet)
+if (!admin.apps.length) {
+  try {
+    const serviceAccount = JSON.parse(process.env.FIREBASE_KEY);
     admin.initializeApp({
       credential: admin.credential.cert(serviceAccount),
     });
-    console.log("🔥 Firebase initialisé depuis firebase-key.json");
+    console.log("🔥 Firebase initialisé via FIREBASE_KEY");
+  } catch (error) {
+    console.error("❌ Erreur d'initialisation Firebase :", error);
   }
-} catch (error) {
-  console.error("❌ Erreur d'initialisation Firebase :", error);
 }
 
 const db = admin.firestore();
 
-exports.handler = async (event) => {
+export async function handler(event) {
   const headers = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
@@ -37,9 +32,7 @@ exports.handler = async (event) => {
   try {
     if (event.httpMethod === "POST") {
       const { email, premium } = JSON.parse(event.body || "{}");
-      if (!email) {
-        return { statusCode: 400, headers, body: JSON.stringify({ error: "Missing email" }) };
-      }
+      if (!email) return { statusCode: 400, headers, body: JSON.stringify({ error: "Missing email" }) };
 
       await db.collection("premium_users").doc(email).set(
         {
@@ -56,13 +49,11 @@ exports.handler = async (event) => {
 
     if (event.httpMethod === "GET") {
       const email = event.queryStringParameters?.email;
-      if (!email)
-        return { statusCode: 400, headers, body: JSON.stringify({ error: "Missing email" }) };
+      if (!email) return { statusCode: 400, headers, body: JSON.stringify({ error: "Missing email" }) };
 
       const doc = await db.collection("premium_users").doc(email).get();
-      if (doc.exists && doc.data().premium === true) {
+      if (doc.exists && doc.data().premium === true)
         return { statusCode: 200, headers, body: JSON.stringify({ active: true, source: "firestore" }) };
-      }
 
       const customers = await stripe.customers.list({ email, limit: 1 });
       if (customers.data.length === 0)
@@ -96,4 +87,4 @@ exports.handler = async (event) => {
     console.error("❌ Erreur verify-premium :", err);
     return { statusCode: 500, headers, body: JSON.stringify({ error: err.message || String(err) }) };
   }
-};
+}
