@@ -1,5 +1,5 @@
 // ✅ Brainova Premium – Create Checkout Session (Stripe + Netlify)
-// Version stable 2025-11-12 – Production Firebase intégré
+// Version stable ESBuild 2025
 
 import Stripe from "stripe";
 
@@ -22,7 +22,7 @@ export async function handler(event) {
   }
 
   try {
-    const { priceId, successUrl, cancelUrl, customerEmail } = JSON.parse(event.body);
+    const { priceId, successUrl, cancelUrl, customerEmail } = JSON.parse(event.body || "{}");
 
     if (!priceId || !successUrl || !cancelUrl) {
       return { statusCode: 400, headers, body: JSON.stringify({ error: "Missing required parameters" }) };
@@ -44,9 +44,9 @@ export async function handler(event) {
       },
     });
 
-    return { statusCode: 200, headers, body: JSON.stringify({ url: session.url, sessionId: session.id }) };
+    return { statusCode: 200, headers, body: JSON.stringify({ url: session.url }) };
   } catch (error) {
     console.error("❌ Stripe checkout error:", error);
-    return { statusCode: 500, headers, body: JSON.stringify({ error: "Failed to create checkout session", details: error.message }) };
+    return { statusCode: 500, headers, body: JSON.stringify({ error: error.message }) };
   }
 }
