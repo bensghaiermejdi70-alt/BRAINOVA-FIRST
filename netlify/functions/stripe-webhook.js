@@ -1,31 +1,27 @@
-// ✅ Brainova Webhook Stripe – Version 3.5 (Firebase scindé + Brevo validé)
+// ✅ Brainova Webhook Stripe – v4.0 (Firebase via FIREBASE_KEY + Brevo + Stripe)
 
 import Stripe from "stripe";
 import fetch from "node-fetch";
-import { Buffer } from "node:buffer";
 import admin from "firebase-admin";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 const BREVO_API_KEY = process.env.BREVO_API_KEY;
 const BREVO_SENDER = process.env.BNV_SENDER || "noreply@brainova.online";
 
-// 🔥 Initialisation Firebase avec clé Base64 scindée
+// --- 🔥 Initialisation Firebase à partir de FIREBASE_KEY (JSON complet depuis Netlify)
 if (!admin.apps.length) {
   try {
-    const fullKeyBase64 =
-      (process.env.FIREBASE_PRIVATE_KEY_PART1 || "") +
-      (process.env.FIREBASE_PRIVATE_KEY_PART2 || "");
-    const decodedKey = Buffer.from(fullKeyBase64, "base64").toString("utf8");
+    const serviceAccount = JSON.parse(process.env.FIREBASE_KEY);
     admin.initializeApp({
-      credential: admin.credential.cert(JSON.parse(decodedKey)),
+      credential: admin.credential.cert(serviceAccount),
     });
-    console.log("✅ Firebase initialisé avec clé scindée");
+    console.log("✅ Firebase initialisé via FIREBASE_KEY");
   } catch (e) {
     console.error("❌ Erreur initialisation Firebase :", e);
   }
 }
-const db = admin.firestore();
 
+const db = admin.firestore();
 export const config = { bodyParser: false };
 
 export async function handler(event) {
@@ -47,26 +43,13 @@ export async function handler(event) {
     const bodyBuffer = event.isBase64Encoded
       ? Buffer.from(event.body, "base64")
       : Buffer.from(event.body || "", "utf8");
+
     stripeEvent = stripe.webhooks.constructEvent(bodyBuffer, sig, endpointSecret);
     console.log(`✅ Événement Stripe reçu : ${stripeEvent.type}`);
   } catch (err) {
     console.error("❌ Signature Stripe invalide :", err.message);
     return { statusCode: 400, headers, body: JSON.stringify({ error: err.message }) };
   }
-
-  // --- Fonction utilitaire : vérifie l’expéditeur Brevo ---
-  const verifyBrevoSender = async () => {
-    try {
-      const res = await fetch("https://api.brevo.com/v3/senders", {
-        headers: { accept: "application/json", "api-key": BREVO_API_KEY },
-      });
-      const data = await res.json();
-      const found = data.senders?.some((s) => s.email === BREVO_SENDER);
-      return !!found;
-    } catch {
-      return false;
-    }
-  };
 
   const sendEmail = async (to, subject, html) => {
     try {
@@ -112,15 +95,15 @@ export async function handler(event) {
         if (email) {
           email = email.trim().toLowerCase();
           const link = `https://brainovafirst.netlify.app/?premium=1&premium_email=${encodeURIComponent(email)}`;
-          const senderValid = await verifyBrevoSender();
-
-          if (senderValid)
-            await sendEmail(
-              email,
-              "🎉 Confirmation Brainova Premium",
-              `<div style="font-family:sans-serif;color:#333"><h2 style="color:#7b2ff7;">Merci pour votre abonnement Brainova Premium !</h2><p>Votre paiement est confirmé ✅</p><a href="${link}" style="display:inline-block;margin-top:10px;padding:14px 26px;background:#7b2ff7;color:#fff;border-radius:10px;text-decoration:none;">🚀 Accéder à Brainova</a></div>`
-            );
-
+          await sendEmail(
+            email,
+            "🎉 Confirmation Brainova Premium",
+            `<div style="font-family:sans-serif;color:#333">
+              <h2 style="color:#7b2ff7;">Merci pour votre abonnement Brainova Premium !</h2>
+              <p>Votre paiement est confirmé ✅</p>
+              <a href="${link}" style="display:inline-block;margin-top:10px;padding:14px 26px;background:#7b2ff7;color:#fff;border-radius:10px;text-decoration:none;">🚀 Accéder à Brainova</a>
+            </div>`
+          );
           await syncPremium(email, true);
         }
         break;
