@@ -1,31 +1,52 @@
+// ✅ Brainova – Health Check Firebase (Production via FIREBASE_KEY)
+
 import admin from "firebase-admin";
-import fs from "fs";
-import path from "path";
 
-export async function handler() {
+export const handler = async () => {
   try {
-    const keyPath = path.join(process.cwd(), "netlify/functions/firebase-key.json");
-    const key = JSON.parse(fs.readFileSync(keyPath, "utf8"));
-
-    if (!admin.apps.length) {
-      admin.initializeApp({ credential: admin.credential.cert(key) });
+    // 🔐 Récupère la clé depuis les variables d'environnement Netlify
+    if (!process.env.FIREBASE_KEY) {
+      return {
+        statusCode: 500,
+        body: JSON.stringify({
+          status: "❌ FIREBASE_KEY manquante",
+          message: "Variable d’environnement non définie sur Netlify.",
+        }),
+      };
     }
 
-    const app = admin.app();
+    const serviceAccount = JSON.parse(process.env.FIREBASE_KEY);
+
+    if (!admin.apps.length) {
+      admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount),
+      });
+    }
+
+    // 🔍 Test Firestore
+    const db = admin.firestore();
+    const testDoc = db.collection("health").doc("firebase");
+    await testDoc.set({
+      ok: true,
+      checkedAt: new Date().toISOString(),
+      project: serviceAccount.project_id || "unknown",
+    });
+
     return {
       statusCode: 200,
       body: JSON.stringify({
-        status: "✅ Firebase initialisé avec succès",
-        project: app.options.credential.projectId
-      })
+        status: "✅ Firebase connecté avec succès",
+        project: serviceAccount.project_id,
+        message: "Test Firestore réussi ✅",
+      }),
     };
   } catch (err) {
     return {
       statusCode: 500,
       body: JSON.stringify({
         status: "❌ Erreur Firebase",
-        message: err.message
-      })
+        message: err.message,
+      }),
     };
   }
-}
+};
