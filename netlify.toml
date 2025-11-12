@@ -1,11 +1,13 @@
 ######################################
 # 🧠 Brainova - Netlify Production Config
-# ✅ Stripe + Firebase + Brevo
+# ✅ Stripe + Firebase + Brevo + Firebase-key local copy
 ######################################
 
 [build]
   publish = "."
   functions = "netlify/functions"
+  # ✅ Copie le fichier firebase-key.json local pendant le build
+  command = "cp netlify/functions/firebase-key.json ./netlify/functions/firebase-key.json"
 
 [build.environment]
   NODE_VERSION = "18"
