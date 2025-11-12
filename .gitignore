@@ -36,6 +36,6 @@ BRAINOVA/
 *.log
 logs/
 
-# netlify/functions/firebase-key.json
+
 
 
