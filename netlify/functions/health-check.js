@@ -1,29 +1,44 @@
+// ✅ Brainova – Health Check Firebase (version 2.0 – via FIREBASE_KEY unique)
+
+import admin from "firebase-admin";
+
 export const handler = async () => {
   const checkedAt = new Date().toLocaleString("fr-FR", { timeZone: "Europe/Paris" });
 
   const services = {
     stripe: process.env.STRIPE_SECRET_KEY ? "configured ✅" : "not set ⚠️",
-    brevo: process.env.BNV_API_KEY ? "configured ✅" : "not set ⚠️",
-    firebase: "not set ⚠️",
+    brevo: process.env.BREVO_API_KEY ? "configured ✅" : "not set ⚠️",
+    firebase: "not connected ⚠️",
     netlify: "active ✅",
   };
 
-  let firebaseStatus = "not set ⚠️";
+  let firebaseStatus = "not connected ⚠️";
   let firebaseError = null;
 
   try {
-    const projectId = process.env.FIREBASE_PROJECT_ID;
-    const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
-    const privateKey = process.env.FIREBASE_PRIVATE_KEY;
-
-    if (projectId && clientEmail && privateKey) {
-      if (privateKey.includes("BEGIN PRIVATE KEY")) {
-        firebaseStatus = "variables valid format ✅";
-      } else {
-        firebaseStatus = "private key invalid format ⚠️";
-      }
+    // 🔐 Vérifie si la clé Firebase existe
+    if (!process.env.FIREBASE_KEY) {
+      firebaseStatus = "FIREBASE_KEY missing ❌";
     } else {
-      firebaseStatus = "missing variables ❌";
+      const serviceAccount = JSON.parse(process.env.FIREBASE_KEY);
+
+      if (!admin.apps.length) {
+        admin.initializeApp({
+          credential: admin.credential.cert(serviceAccount),
+        });
+      }
+
+      const db = admin.firestore();
+
+      // 🔍 Test Firestore : écriture simple
+      const ref = db.collection("health").doc("status");
+      await ref.set({
+        ok: true,
+        checkedAt,
+        project: serviceAccount.project_id || "unknown",
+      });
+
+      firebaseStatus = "connected ✅ Firestore write success";
     }
 
     services.firebase = firebaseStatus;
@@ -40,18 +55,16 @@ export const handler = async () => {
         status: "healthy ✅",
         checkedAt,
         environment: process.env.NODE_ENV || "production",
-        version: "1.0.4",
+        version: "1.0.5",
         platform: "Brainova Premium Gaming",
         services,
         firebase_check: {
-          FIREBASE_PROJECT_ID: process.env.FIREBASE_PROJECT_ID ? "✅ detected" : "❌ missing",
-          FIREBASE_CLIENT_EMAIL: process.env.FIREBASE_CLIENT_EMAIL ? "✅ detected" : "❌ missing",
-          FIREBASE_PRIVATE_KEY: process.env.FIREBASE_PRIVATE_KEY ? "✅ detected" : "❌ missing",
-          note: "Secrets hidden for security compliance ✅",
+          FIREBASE_KEY: process.env.FIREBASE_KEY ? "✅ detected" : "❌ missing",
+          note: "Firebase now verified via single FIREBASE_KEY variable",
           error: firebaseError,
         },
         logs: {
-          message: "All core functions are deployed and reachable.",
+          message: "Firebase test executed successfully.",
           domain: "brainova.online",
           frontend: "https://brainovafirst.netlify.app",
         },
