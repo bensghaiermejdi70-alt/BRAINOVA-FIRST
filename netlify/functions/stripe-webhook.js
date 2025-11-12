@@ -1,6 +1,4 @@
-// ✅ Stripe Webhook – Brainova v2.3 (Compatibilité Base64 Firebase + Stabilité Premium renforcée)
-// 🚀 Vérification e-mail expéditeur + cohérence email client Stripe/Brevo/Firebase
-// 🔒 Compatible Netlify (ES module / ESM)
+// ✅ Brainova Webhook Stripe – Version 3.5 (Firebase scindé + Brevo validé)
 
 import Stripe from "stripe";
 import fetch from "node-fetch";
@@ -11,26 +9,23 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 const BREVO_API_KEY = process.env.BREVO_API_KEY;
 const BREVO_SENDER = process.env.BNV_SENDER || "noreply@brainova.online";
 
-// 🔥 Initialisation Firebase Admin
+// 🔥 Initialisation Firebase avec clé Base64 scindée
 if (!admin.apps.length) {
   try {
+    const fullKeyBase64 =
+      (process.env.FIREBASE_PRIVATE_KEY_PART1 || "") +
+      (process.env.FIREBASE_PRIVATE_KEY_PART2 || "");
+    const decodedKey = Buffer.from(fullKeyBase64, "base64").toString("utf8");
     admin.initializeApp({
-      credential: admin.credential.cert({
-        projectId: process.env.FIREBASE_PROJECT_ID,
-        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-        // ✅ Nouvelle méthode : décode la clé Firebase en Base64
-        privateKey: Buffer.from(process.env.FIREBASE_PRIVATE_KEY, "base64").toString("utf8"),
-      }),
+      credential: admin.credential.cert(JSON.parse(decodedKey)),
     });
-    console.log("🔥 Firebase initialisé avec succès (clé Base64)");
+    console.log("✅ Firebase initialisé avec clé scindée");
   } catch (e) {
-    console.error("❌ Erreur initialisation Firebase :", e.message);
+    console.error("❌ Erreur initialisation Firebase :", e);
   }
 }
-
 const db = admin.firestore();
 
-// 🚫 Désactiver le parsing JSON automatique pour Stripe
 export const config = { bodyParser: false };
 
 export async function handler(event) {
@@ -59,29 +54,20 @@ export async function handler(event) {
     return { statusCode: 400, headers, body: JSON.stringify({ error: err.message }) };
   }
 
-  // 📨 Vérifie que l’expéditeur Brevo existe bien
+  // --- Fonction utilitaire : vérifie l’expéditeur Brevo ---
   const verifyBrevoSender = async () => {
     try {
       const res = await fetch("https://api.brevo.com/v3/senders", {
-        headers: {
-          accept: "application/json",
-          "api-key": BREVO_API_KEY,
-        },
+        headers: { accept: "application/json", "api-key": BREVO_API_KEY },
       });
       const data = await res.json();
       const found = data.senders?.some((s) => s.email === BREVO_SENDER);
-      if (!found) console.warn(`⚠️ Expéditeur Brevo non trouvé : ${BREVO_SENDER}`);
-      else console.log(`✅ Expéditeur Brevo valide : ${BREVO_SENDER}`);
-      return found;
-    } catch (e) {
-      console.error("⚠️ Impossible de vérifier l’expéditeur Brevo :", e.message);
+      return !!found;
+    } catch {
       return false;
     }
   };
 
-  const senderValid = await verifyBrevoSender();
-
-  // 📧 Envoi d’e-mail via Brevo
   const sendEmail = async (to, subject, html) => {
     try {
       const res = await fetch("https://api.brevo.com/v3/smtp/email", {
@@ -98,35 +84,24 @@ export async function handler(event) {
           htmlContent: html,
         }),
       });
-      if (res.ok) console.log(`📧 Email envoyé à ${to} : ${subject}`);
-      else console.error("❌ Erreur Brevo :", await res.text());
+      console.log(res.ok ? `📧 Email envoyé à ${to}` : `❌ Email non envoyé`);
     } catch (e) {
-      console.error("❌ Erreur réseau Brevo :", e.message);
+      console.error("❌ Erreur envoi Brevo :", e.message);
     }
   };
 
-  // 🔄 Synchroniser Firestore
   const syncPremium = async (email, isPremium = true) => {
-    try {
-      if (!email) return;
-      const ref = db.collection("premium_users").doc(email);
-      await ref.set(
-        {
-          email,
-          premium: isPremium,
-          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-          source: "stripe",
-        },
-        { merge: true }
-      );
-      const doc = await ref.get();
-      console.log(
-        `💾 Firestore enregistré pour ${email}:`,
-        doc.exists ? doc.data() : "❌ Document manquant"
-      );
-    } catch (err) {
-      console.error("⚠️ Erreur Firestore :", err.message);
-    }
+    if (!email) return;
+    const ref = db.collection("premium_users").doc(email);
+    await ref.set(
+      {
+        email,
+        premium: isPremium,
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+        source: "stripe",
+      },
+      { merge: true }
+    );
   };
 
   try {
@@ -136,31 +111,17 @@ export async function handler(event) {
         let email = session.customer_email || session.customer_details?.email;
         if (email) {
           email = email.trim().toLowerCase();
-          console.log("📨 Email client Stripe:", email);
-
           const link = `https://brainovafirst.netlify.app/?premium=1&premium_email=${encodeURIComponent(email)}`;
-          console.log("🔗 Lien envoyé:", link);
+          const senderValid = await verifyBrevoSender();
 
-          if (senderValid) {
+          if (senderValid)
             await sendEmail(
               email,
-              "🎉 Confirmation de votre abonnement Brainova Premium",
-              `
-                <div style="font-family:'Segoe UI',sans-serif;color:#333">
-                  <h2 style="color:#7b2ff7;">Merci pour votre abonnement Brainova Premium !</h2>
-                  <p>Votre paiement a bien été reçu ✅</p>
-                  <a href="${link}" style="display:inline-block;margin-top:10px;padding:14px 26px;background:#7b2ff7;color:#fff;font-weight:bold;border-radius:10px;text-decoration:none;">🚀 Accéder à Brainova</a>
-                  <p style="margin-top:20px;font-size:13px;color:#666;">Lien direct : ${link}</p>
-                </div>
-              `
+              "🎉 Confirmation Brainova Premium",
+              `<div style="font-family:sans-serif;color:#333"><h2 style="color:#7b2ff7;">Merci pour votre abonnement Brainova Premium !</h2><p>Votre paiement est confirmé ✅</p><a href="${link}" style="display:inline-block;margin-top:10px;padding:14px 26px;background:#7b2ff7;color:#fff;border-radius:10px;text-decoration:none;">🚀 Accéder à Brainova</a></div>`
             );
-          } else {
-            console.error("⚠️ Email expéditeur Brevo invalide, envoi annulé !");
-          }
 
           await syncPremium(email, true);
-        } else {
-          console.warn("⚠️ Aucun email trouvé dans session Stripe !");
         }
         break;
       }
