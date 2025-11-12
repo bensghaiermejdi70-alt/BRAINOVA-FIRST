@@ -1,3 +1,6 @@
+// ✅ Brainova Premium – Create Checkout Session (Stripe + Netlify)
+// Version stable corrigée 2025-11-12
+
 import Stripe from "stripe";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
@@ -7,25 +10,35 @@ export async function handler(event) {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Headers": "Content-Type",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Content-Type": "application/json"
+    "Content-Type": "application/json",
   };
 
+  // ✅ Gérer la pré-vérification (CORS)
   if (event.httpMethod === "OPTIONS") {
     return { statusCode: 200, headers, body: "" };
   }
 
+  // 🚫 Si autre méthode HTTP que POST
   if (event.httpMethod !== "POST") {
-    return { statusCode: 405, headers, body: JSON.stringify({ error: "Method not allowed" }) };
+    return {
+      statusCode: 405,
+      headers,
+      body: JSON.stringify({ error: "Method not allowed" }),
+    };
   }
 
   try {
+    // 📨 Récupération des données envoyées depuis le front
     const { priceId, successUrl, cancelUrl, customerEmail } = JSON.parse(event.body);
 
+    // 🚨 Vérifie que les paramètres essentiels sont bien présents
     if (!priceId || !successUrl || !cancelUrl) {
       return {
         statusCode: 400,
         headers,
-        body: JSON.stringify({ error: "Missing required parameters: priceId, successUrl, cancelUrl" })
+        body: JSON.stringify({
+          error: "Missing required parameters: priceId, successUrl, cancelUrl",
+        }),
       };
     }
 
@@ -42,25 +55,29 @@ export async function handler(event) {
       metadata: {
         product: "brainova-premium",
         platform: "brainova-netlify",
-        user_email: customerEmail || "unknown"      
-
-      }
+        user_email: customerEmail || "unknown",
+      },
     });
 
-    return {                                                        
-      statusCode: 200,                                               chek  
-      headers, 
+    // ✅ Réponse envoyée au frontend avec l'URL Stripe
+    return {
+      statusCode: 200,
+      headers,
       body: JSON.stringify({
-        url: session.url,                                
-        sessionId: session.id
-      })
+        url: session.url,
+        sessionId: session.id,
+      }),
     };
   } catch (error) {
+    // ❌ Gestion d’erreurs Stripe
     console.error("❌ Stripe checkout error:", error);
     return {
       statusCode: 500,
       headers,
-      body: JSON.stringify({ error: "Failed to create checkout session", details: error.message })
+      body: JSON.stringify({
+        error: "Failed to create checkout session",
+        details: error.message,
+      }),
     };
   }
 }
