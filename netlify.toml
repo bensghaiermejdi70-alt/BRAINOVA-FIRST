@@ -1,6 +1,6 @@
 ######################################
 # 🧠 Brainova - Netlify Production Config
-# ✅ Compatible Chrome, Edge, Safari
+# ✅ Stripe + Firebase + Brevo
 ######################################
 
 [build]
@@ -31,17 +31,38 @@
 ######################################
 # 🔄 Redirections API
 ######################################
+
+# ✅ Route principale pour les fonctions serverless
 [[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/:splat"
   status = 200
 
+# ✅ Alias direct pour ton webhook Stripe
+[[redirects]]
+  from = "/webhook"
+  to = "/.netlify/functions/stripe-webhook"
+  status = 200
+
+# ✅ Alias direct pour verify-premium
+[[redirects]]
+  from = "/verify"
+  to = "/.netlify/functions/verify-premium"
+  status = 200
+
+# ✅ Alias pour create-checkout-session
+[[redirects]]
+  from = "/checkout"
+  to = "/.netlify/functions/create-checkout-session"
+  status = 200
+
+# ✅ Envoi d'email
 [[redirects]]
   from = "/sendEmail"
   to = "/.netlify/functions/sendemail"
   status = 200
 
-# HTTPS forcé
+# ✅ HTTPS forcé
 [[redirects]]
   from = "http://*"
   to = "https://brainovafirst.netlify.app/:splat"
@@ -102,10 +123,7 @@
         www.recaptcha.net;
     """
 
-    # ✅ Corrige instabilité Edge / iframes Stripe
     X-Frame-Options = "SAMEORIGIN"
-
-    # ✅ Active HSTS & Permissions Policy modernes
     Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
     Permissions-Policy = "camera=(), microphone=(), geolocation=()"
 
@@ -115,10 +133,6 @@
 [functions]
   directory = "netlify/functions"
   node_bundler = "esbuild"
-
-[[edge_functions]]
-  function = "stripe-webhook"
-  path = "/api/stripe-webhook"
 
 ######################################
 # 🧪 Développement local
