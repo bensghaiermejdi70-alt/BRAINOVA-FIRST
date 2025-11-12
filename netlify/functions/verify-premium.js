@@ -1,4 +1,4 @@
-// ✅ Netlify Function — Vérification & Synchronisation Premium (Brainova v3.5+)
+// ✅ Netlify Function — Vérification & Synchronisation Premium (Brainova v3.6 Base64 Fix)
 // 🔐 Compatible Stripe, Firestore, et Webhook automatique
 
 import Stripe from "stripe";
@@ -21,19 +21,23 @@ if (envMissing.length) {
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "");
 
+// --- Initialisation Firebase ---
 if (!admin.apps.length) {
   try {
     admin.initializeApp({
       credential: admin.credential.cert({
         projectId: process.env.FIREBASE_PROJECT_ID,
         clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-        privateKey: (process.env.FIREBASE_PRIVATE_KEY || "").replace(/\\n/g, "\n"),
+        // ✅ Correction : décodage Base64
+        privateKey: Buffer.from(process.env.FIREBASE_PRIVATE_KEY, "base64").toString("utf8"),
       }),
     });
+    console.log("🔥 Firebase initialisé avec succès (clé Base64)");
   } catch (e) {
-    console.error("❌ Erreur initialisation Firebase :", e);
+    console.error("❌ Erreur initialisation Firebase :", e.message);
   }
 }
+
 const db = admin.firestore();
 
 export async function handler(event) {
@@ -87,7 +91,11 @@ export async function handler(event) {
         doc = await db.collection("premium_users").doc(email).get();
       } catch (e) {
         console.error("❌ Erreur Firestore :", e);
-        return { statusCode: 500, headers, body: JSON.stringify({ error: "Firestore error", details: e.message }) };
+        return {
+          statusCode: 500,
+          headers,
+          body: JSON.stringify({ error: "Firestore error", details: e.message }),
+        };
       }
 
       if (doc.exists && doc.data().premium === true) {
@@ -101,7 +109,11 @@ export async function handler(event) {
         customers = await stripe.customers.list({ email, limit: 1 });
       } catch (e) {
         console.error("❌ Erreur Stripe (customers) :", e);
-        return { statusCode: 500, headers, body: JSON.stringify({ error: "Stripe error", details: e.message }) };
+        return {
+          statusCode: 500,
+          headers,
+          body: JSON.stringify({ error: "Stripe error", details: e.message }),
+        };
       }
 
       if (customers.data.length === 0) {
@@ -119,7 +131,11 @@ export async function handler(event) {
         });
       } catch (e) {
         console.error("❌ Erreur Stripe (subscriptions) :", e);
-        return { statusCode: 500, headers, body: JSON.stringify({ error: "Stripe error", details: e.message }) };
+        return {
+          statusCode: 500,
+          headers,
+          body: JSON.stringify({ error: "Stripe error", details: e.message }),
+        };
       }
 
       if (subscriptions.data.length > 0) {
