@@ -1,5 +1,5 @@
 // ✅ Brainova Premium – Create Checkout Session (Stripe + Netlify)
-// Version stable corrigée 2025-11-12
+// Version stable 2025-11-12 (Firebase indépendant)
 
 import Stripe from "stripe";
 
@@ -13,12 +13,10 @@ export async function handler(event) {
     "Content-Type": "application/json",
   };
 
-  // ✅ Gérer la pré-vérification (CORS)
   if (event.httpMethod === "OPTIONS") {
     return { statusCode: 200, headers, body: "" };
   }
 
-  // 🚫 Si autre méthode HTTP que POST
   if (event.httpMethod !== "POST") {
     return {
       statusCode: 405,
@@ -28,10 +26,8 @@ export async function handler(event) {
   }
 
   try {
-    // 📨 Récupération des données envoyées depuis le front
     const { priceId, successUrl, cancelUrl, customerEmail } = JSON.parse(event.body);
 
-    // 🚨 Vérifie que les paramètres essentiels sont bien présents
     if (!priceId || !successUrl || !cancelUrl) {
       return {
         statusCode: 400,
@@ -42,7 +38,6 @@ export async function handler(event) {
       };
     }
 
-    // ✅ Crée la session Stripe Checkout
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       line_items: [{ price: priceId, quantity: 1 }],
@@ -59,7 +54,6 @@ export async function handler(event) {
       },
     });
 
-    // ✅ Réponse envoyée au frontend avec l'URL Stripe
     return {
       statusCode: 200,
       headers,
@@ -69,7 +63,6 @@ export async function handler(event) {
       }),
     };
   } catch (error) {
-    // ❌ Gestion d’erreurs Stripe
     console.error("❌ Stripe checkout error:", error);
     return {
       statusCode: 500,
