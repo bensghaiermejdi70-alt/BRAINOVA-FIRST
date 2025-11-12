@@ -1,13 +1,12 @@
 ######################################
 # 🧠 Brainova - Netlify Production Config
-# ✅ Stripe + Firebase + Brevo + Firebase-key local copy
+# ✅ Stripe + Firebase + Brevo (clé via variable d’environnement)
 ######################################
 
 [build]
   publish = "."
   functions = "netlify/functions"
-  # ✅ Copie le fichier firebase-key.json local pendant le build
-  command = "cp netlify/functions/firebase-key.json ./netlify/functions/firebase-key.json"
+  # ❌ Plus besoin de copie locale firebase-key.json
 
 [build.environment]
   NODE_VERSION = "18"
@@ -34,37 +33,31 @@
 # 🔄 Redirections API
 ######################################
 
-# ✅ Route principale pour les fonctions serverless
 [[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/:splat"
   status = 200
 
-# ✅ Alias direct pour ton webhook Stripe
 [[redirects]]
   from = "/webhook"
   to = "/.netlify/functions/stripe-webhook"
   status = 200
 
-# ✅ Alias direct pour verify-premium
 [[redirects]]
   from = "/verify"
   to = "/.netlify/functions/verify-premium"
   status = 200
 
-# ✅ Alias pour create-checkout-session
 [[redirects]]
   from = "/checkout"
   to = "/.netlify/functions/create-checkout-session"
   status = 200
 
-# ✅ Envoi d'email
 [[redirects]]
   from = "/sendEmail"
   to = "/.netlify/functions/sendemail"
   status = 200
 
-# ✅ HTTPS forcé
 [[redirects]]
   from = "http://*"
   to = "https://brainovafirst.netlify.app/:splat"
@@ -85,7 +78,6 @@
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
 
-    # ✅ Autorise Stripe, Firebase, Google, ReCAPTCHA, Brevo
     Content-Security-Policy = """
       default-src 'self' data: blob:;
       script-src 'self' 'unsafe-inline' 'unsafe-eval'
