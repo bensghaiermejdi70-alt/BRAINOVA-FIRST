@@ -1,4 +1,4 @@
-// ✅ Stripe Webhook – Brainova v2.2 (Stabilité Premium renforcée)
+// ✅ Stripe Webhook – Brainova v2.3 (Compatibilité Base64 Firebase + Stabilité Premium renforcée)
 // 🚀 Vérification e-mail expéditeur + cohérence email client Stripe/Brevo/Firebase
 // 🔒 Compatible Netlify (ES module / ESM)
 
@@ -13,14 +13,21 @@ const BREVO_SENDER = process.env.BNV_SENDER || "noreply@brainova.online";
 
 // 🔥 Initialisation Firebase Admin
 if (!admin.apps.length) {
-  admin.initializeApp({
-    credential: admin.credential.cert({
-      projectId: process.env.FIREBASE_PROJECT_ID,
-      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n"),
-    }),
-  });
+  try {
+    admin.initializeApp({
+      credential: admin.credential.cert({
+        projectId: process.env.FIREBASE_PROJECT_ID,
+        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+        // ✅ Nouvelle méthode : décode la clé Firebase en Base64
+        privateKey: Buffer.from(process.env.FIREBASE_PRIVATE_KEY, "base64").toString("utf8"),
+      }),
+    });
+    console.log("🔥 Firebase initialisé avec succès (clé Base64)");
+  } catch (e) {
+    console.error("❌ Erreur initialisation Firebase :", e.message);
+  }
 }
+
 const db = admin.firestore();
 
 // 🚫 Désactiver le parsing JSON automatique pour Stripe
