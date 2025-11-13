@@ -1,8 +1,11 @@
-// ✅ Brainova Webhook Stripe – Firebase via FIREBASE_KEY (Production)
+// ✅ netlify/functions/stripe-webhook.js
+// Brainova Webhook Stripe – Firebase via FIREBASE_KEY (Production)
+// Correction : enregistrement device PC à la 1ère activation + envoi lien d'activation vers brainova.online
 
 import Stripe from "stripe";
 import fetch from "node-fetch";
 import admin from "firebase-admin";
+import { v4 as uuidv4 } from "uuid";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 const BREVO_API_KEY = process.env.BREVO_API_KEY;
@@ -35,7 +38,7 @@ export async function handler(event) {
   if (event.httpMethod === "OPTIONS") return { statusCode: 200, headers };
   if (event.httpMethod !== "POST") return { statusCode: 405, headers, body: "Method Not Allowed" };
 
-  const sig = event.headers["stripe-signature"];
+  const sig = event.headers?.["stripe-signature"] || event.headers?.["Stripe-Signature"];
   const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
   let stripeEvent;
 
@@ -47,8 +50,8 @@ export async function handler(event) {
     stripeEvent = stripe.webhooks.constructEvent(bodyBuffer, sig, endpointSecret);
     console.log(`✅ Événement Stripe reçu : ${stripeEvent.type}`);
   } catch (err) {
-    console.error("❌ Signature Stripe invalide :", err.message);
-    return { statusCode: 400, headers, body: JSON.stringify({ error: err.message }) };
+    console.error("❌ Signature Stripe invalide :", err?.message || err);
+    return { statusCode: 400, headers, body: JSON.stringify({ error: err?.message || String(err) }) };
   }
 
   const sendEmail = async (to, subject, html) => {
@@ -67,9 +70,11 @@ export async function handler(event) {
           htmlContent: html,
         }),
       });
-      console.log(res.ok ? `📧 Email envoyé à ${to}` : `❌ Email non envoyé`);
+      console.log(res.ok ? `📧 Email envoyé à ${to}` : `❌ Email non envoyé (${res.status})`);
+      return res.ok;
     } catch (e) {
-      console.error("❌ Erreur envoi Brevo :", e.message);
+      console.error("❌ Erreur envoi Brevo :", e?.message || e);
+      return false;
     }
   };
 
@@ -92,21 +97,54 @@ export async function handler(event) {
       case "checkout.session.completed": {
         const session = stripeEvent.data.object;
         const email = session.customer_email || session.customer_details?.email;
+
         if (email) {
+          // Sync premium status
+          await syncPremium(email, true);
+
+          // Enregistrer le device PC seulement si aucun device enregistré auparavant
+          try {
+            const devicesRef = db.collection("premium_devices").doc(email);
+            const doc = await devicesRef.get();
+            const existing = doc.exists ? (doc.data().devices || []) : [];
+
+            if (!doc.exists || existing.length === 0) {
+              await devicesRef.set(
+                {
+                  email,
+                  devices: [
+                    {
+                      deviceId: uuidv4(),
+                      type: "pc",
+                      activatedAt: admin.firestore.FieldValue.serverTimestamp(),
+                    },
+                  ],
+                },
+                { merge: true }
+              );
+              console.log(`✅ Device PC enregistré pour ${email}`);
+            } else {
+              console.log(`ℹ️ Device(s) déjà présent(s) pour ${email}, aucun ajout PC automatique nécessaire.`);
+            }
+          } catch (e) {
+            console.error("❌ Erreur enregistrement device PC :", e?.message || e);
+          }
+
+          // Envoyer email d'activation vers domaine officiel (brainova.online)
           await sendEmail(
             email,
             "🎉 Confirmation Brainova Premium",
             `<div style="font-family:sans-serif;">
               <h2 style="color:#7b2ff7;">Merci pour votre abonnement Brainova Premium !</h2>
               <p>Votre paiement est confirmé ✅</p>
-              <a href="https://brainovafirst.netlify.app/?premium=1&premium_email=${encodeURIComponent(email)}"
+              <a href="https://brainova.online/activate?email=${encodeURIComponent(email)}"
                 style="display:inline-block;margin-top:10px;padding:14px 26px;background:#7b2ff7;color:#fff;border-radius:10px;text-decoration:none;">
-                🚀 Accéder à Brainova
+                🚀 Activer mon accès Premium
               </a>
             </div>`
           );
-          await syncPremium(email, true);
         }
+
         break;
       }
 
@@ -123,7 +161,7 @@ export async function handler(event) {
 
     return { statusCode: 200, headers, body: JSON.stringify({ success: true }) };
   } catch (err) {
-    console.error("❌ Erreur Webhook :", err);
-    return { statusCode: 500, headers, body: JSON.stringify({ error: err.message }) };
+    console.error("❌ Erreur Webhook :", err?.message || err);
+    return { statusCode: 500, headers, body: JSON.stringify({ error: err?.message || String(err) }) };   
   }
 }
