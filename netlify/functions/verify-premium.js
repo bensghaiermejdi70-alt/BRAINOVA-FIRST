@@ -1,9 +1,6 @@
-// ✅ Brainova Verify Premium – v4.2 (Firebase via FIREBASE_KEY + Stripe)
+// ✅ Brainova Verify Premium – Version Finale (PC + Mobile max)
 
-import Stripe from "stripe";
 import admin from "firebase-admin";
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "");
 
 // --- Initialisation Firebase ---
 if (!admin.apps.length) {
@@ -23,52 +20,61 @@ const db = admin.firestore();
 export async function handler(event) {
   const headers = {
     "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+    "Access-Control-Allow-Methods": "GET, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type",
   };
 
-  if (event.httpMethod === "OPTIONS") return { statusCode: 200, headers };
+  if (event.httpMethod === "OPTIONS") {
+    return { statusCode: 200, headers };
+  }
 
   try {
     if (event.httpMethod === "GET") {
       const email = event.queryStringParameters?.email;
-      if (!email)
-        return { statusCode: 400, headers, body: JSON.stringify({ error: "Missing email" }) };
+      const deviceId = event.queryStringParameters?.deviceId;
 
-      const doc = await db.collection("premium_users").doc(email).get();
-      if (doc.exists && doc.data().premium === true)
-        return { statusCode: 200, headers, body: JSON.stringify({ active: true, source: "firestore" }) };
-
-      const customers = await stripe.customers.list({ email, limit: 1 });
-      if (customers.data.length === 0)
-        return { statusCode: 200, headers, body: JSON.stringify({ active: false, source: "none" }) };
-
-      const customerId = customers.data[0].id;
-      const subscriptions = await stripe.subscriptions.list({
-        customer: customerId,
-        status: "active",
-        limit: 1,
-      });
-
-      if (subscriptions.data.length > 0) {
-        await db.collection("premium_users").doc(email).set(
-          {
-            email,
-            premium: true,
-            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-            source: "stripe",
-          },
-          { merge: true }
-        );
-        return { statusCode: 200, headers, body: JSON.stringify({ active: true, source: "stripe" }) };
+      if (!email || !deviceId) {
+        return {
+          statusCode: 400,
+          headers,
+          body: JSON.stringify({ error: "Missing parameters" }),
+        };
       }
 
-      return { statusCode: 200, headers, body: JSON.stringify({ active: false }) };
+      // Vérifier la liste des appareils autorisés
+      const ref = db.collection("premium_devices").doc(email);
+      const snap = await ref.get();
+
+      if (!snap.exists) {
+        return {
+          statusCode: 200,
+          headers,
+          body: JSON.stringify({ active: false }),
+        };
+      }
+
+      const devices = snap.data().devices || [];
+
+      const isAuthorized = devices.some((d) => d.deviceId === deviceId);
+
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify({ active: isAuthorized }),
+      };
     }
 
-    return { statusCode: 405, headers, body: JSON.stringify({ error: "Method not allowed" }) };
+    return {
+      statusCode: 405,
+      headers,
+      body: JSON.stringify({ error: "Method not allowed" }),
+    };
   } catch (err) {
     console.error("❌ Erreur verify-premium :", err);
-    return { statusCode: 500, headers, body: JSON.stringify({ error: err.message }) };
+    return {
+      statusCode: 500,
+      headers,
+      body: JSON.stringify({ error: err.message }),
+    };
   }
 }
