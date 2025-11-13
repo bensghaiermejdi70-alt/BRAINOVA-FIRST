@@ -3,7 +3,7 @@
 <html lang="fr">
 <head>
 <script>
-let isPremium = false; updateShareButton();
+let isPremium = false;
 </script>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1" name="viewport"/>
@@ -404,11 +404,10 @@ auth.onAuthStateChanged((user) => {
   } else {
     // Utilisateur déconnecté
     userPremium = false;
-    isPremium = false; updateShareButton();
+    isPremium = false;
     updateUIForGuestUser();
   }
   renderGrid(langSelect.value);
-        updateShareButton();
 });
 
 // Fonction pour mettre à jour l'UI utilisateur connecté
@@ -440,7 +439,7 @@ function updateUIForGuestUser() {
   
   // IMPORTANT: Réinitialiser le statut premium à la déconnexion
   userPremium = false;
-  isPremium = false; updateShareButton();
+  isPremium = false;
   localStorage.removeItem('brainova_premium');
   localStorage.removeItem('brainova_premium_status');
   
@@ -457,7 +456,6 @@ function updateUIForGuestUser() {
   
   // Recharger la grille pour appliquer les changements de statut
   renderGrid(langSelect.value);
-        updateShareButton();
 }
 
 // ================= GRID & PREMIUM LOGIC
@@ -680,7 +678,6 @@ function applyLanguage(lang){
   
   document.documentElement.dir=(lang==='ar')?'rtl':'ltr';
   renderGrid(lang);
-        updateShareButton();
 }
 langSelect.addEventListener('change',()=>applyLanguage(langSelect.value));
 applyLanguage(localStorage.getItem('brainova_lang')||'fr');
@@ -1009,11 +1006,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (data && data.active) {
         console.log("[AUTO-CHECK] Premium confirmé via serveur ✅");
         localStorage.setItem("brainova_premium", "true");
-        isPremium = true; updateShareButton();
+        isPremium = true;
       } else {
         console.warn("[AUTO-CHECK] Pas d’abonnement actif, mode gratuit.");
         localStorage.setItem("brainova_premium", "false");
-        isPremium = false; updateShareButton();
+        isPremium = false;
       }
     } catch (e) {
       console.error("[AUTO-CHECK] Erreur de connexion verify-premium:", e);
@@ -1031,11 +1028,10 @@ isPremium = localStorage.getItem('brainova_premium') === 'true';
 
 // Fonction pour débloquer le premium
 function unlockPremium() {
-  isPremium = true; updateShareButton();
+  isPremium = true;
   localStorage.setItem('brainova_premium', 'true');
   userPremium = true;
   renderGrid(langSelect.value);
-        updateShareButton();
   initializeAuthButtons(); // Mettre à jour les boutons d'authentification
   alert('Félicitations ! Tous les jeux sont maintenant débloqués !');
 }
@@ -1323,7 +1319,7 @@ function checkStripeReturn() {
     // Synchronisation premium après retour Stripe
     localStorage.setItem('brainova_premium', 'true');
     console.log('[SYNC] Premium activé après paiement Stripe');
-    isPremium = true; updateShareButton();
+    isPremium = true;
     // Rafraîchir l'UI et la grille
     if (typeof updatePremiumUI === 'function') updatePremiumUI();
     // Nettoyer l'URL
@@ -1341,7 +1337,7 @@ function checkStripeReturn() {
 document.addEventListener('DOMContentLoaded', () => {
   // Synchronisation premium au chargement
   if (localStorage.getItem('brainova_premium') === 'true') {
-    isPremium = true; updateShareButton();
+    isPremium = true;
     console.log('[SYNC] Premium détecté au chargement, jeux débloqués');
   }
   console.log('=== DOMContentLoaded START ===');
@@ -1375,13 +1371,11 @@ document.addEventListener('DOMContentLoaded', () => {
   if (langSelect && langSelect.value) {
     console.log('Calling renderGrid with:', langSelect.value);
     renderGrid(langSelect.value);
-        updateShareButton();
     console.log('Games grid initialized with language:', langSelect.value);
   } else {
     // Fallback si langSelect n'est pas encore prêt
     console.log('Calling renderGrid with fallback: fr');
     renderGrid('fr');
-        updateShareButton();
     console.log('Games grid initialized with default language: fr');
   }
   
@@ -1541,7 +1535,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 </script>
-<script src="/brainova-access.js"></script>
+
 <script>
   if (localStorage.getItem('brainova_premium') === 'true') {
     window.userPremiumStatus = true;
@@ -1555,18 +1549,58 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 </script>
 
+  <!-- === AUTO PREMIUM UNLOCK (FINAL STEP) === -->
+  <script>
+  document.addEventListener("DOMContentLoaded", async () => {
+    try {
+      let email = localStorage.getItem("brainova_premium_email");
+      const params = new URLSearchParams(window.location.search);
+      const urlEmail = params.get("premium_email");
 
-<script>
-function updateShareButton() {
-  const shareBtn = document.getElementById("share-button");
-  if (!shareBtn) return;
-  if (isPremium) {
-    shareBtn.style.display = "none";
-  } else {
-    shareBtn.style.display = "inline-flex";
-  }
-}
-</script>
+      if (urlEmail) {
+        email = urlEmail.trim().toLowerCase();
+        localStorage.setItem("brainova_premium_email", email);
+      }
+
+      if (!email) {
+        console.log("Aucun email premium trouvé - mode gratuit");
+        renderGrid(localStorage.getItem("brainova_lang") || "fr");
+        return;
+      }
+
+      const res = await fetch(`/.netlify/functions/verify-premium?email=${encodeURIComponent(email)}`, {
+        method: "GET",
+        headers: { "Accept": "application/json" },
+      });
+
+      if (!res.ok) {
+        console.warn("⚠️ Erreur HTTP:", res.status);
+        renderGrid(localStorage.getItem("brainova_lang") || "fr");
+        return;
+      }
+
+      const data = await res.json();
+
+      if (data && data.active) {
+        console.log("✅ Premium confirmé depuis Firestore");
+        localStorage.setItem("brainova_premium", "true");
+        document.cookie = "brainova_user_status=premium; path=/; max-age=31536000";
+        isPremium = true;
+        const hd = document.getElementById("premium-status");
+        if (hd) hd.innerHTML = "<span style='background:gold;color:black;padding:4px 8px;border-radius:8px;'>Premium ✅</span>";
+      } else {
+        console.warn("❌ Non premium - accès restreint");
+        localStorage.setItem("brainova_premium", "false");
+        isPremium = false;
+      }
+
+      renderGrid(localStorage.getItem("brainova_lang") || "fr");
+    } catch (err) {
+      console.error("Erreur lors de la vérification premium finale :", err);
+      renderGrid(localStorage.getItem("brainova_lang") || "fr");
+    }
+  });
+  </script>
 
 </body>
 </html>
