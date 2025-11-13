@@ -1602,5 +1602,26 @@ document.addEventListener("DOMContentLoaded", () => {
   });
   </script>
 
+
+<script>
+// === Share Button Control ===
+function updateShareButton() {
+  const shareBtn = document.getElementById("share-button");
+  if (!shareBtn) return;
+
+  if (isPremium) {
+    shareBtn.style.opacity = "0.4";
+    shareBtn.style.pointerEvents = "none";
+    shareBtn.style.filter = "grayscale(100%)";
+    shareBtn.title = "Fonction indisponible en mode Premium";
+  } else {
+    shareBtn.style.opacity = "1";
+    shareBtn.style.pointerEvents = "auto";
+    shareBtn.style.filter = "none";
+    shareBtn.title = "Partager Brainova";
+  }
+}
+</script>
+
 </body>
 </html>
