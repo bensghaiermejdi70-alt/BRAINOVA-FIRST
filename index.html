@@ -408,6 +408,7 @@ auth.onAuthStateChanged((user) => {
     updateUIForGuestUser();
   }
   renderGrid(langSelect.value);
+        updateShareButton();
 });
 
 // Fonction pour mettre à jour l'UI utilisateur connecté
@@ -456,6 +457,7 @@ function updateUIForGuestUser() {
   
   // Recharger la grille pour appliquer les changements de statut
   renderGrid(langSelect.value);
+        updateShareButton();
 }
 
 // ================= GRID & PREMIUM LOGIC
@@ -644,7 +646,7 @@ function renderGrid(lang){
   
   // Bouton partager TOUJOURS visible
   if (shareBtn) {
-    shareBtn.style.display = 'inline-block';
+    updateShareButton();
   }
   
   console.log('renderGrid completed - Cards added to grid:', grid.children.length);
@@ -678,6 +680,7 @@ function applyLanguage(lang){
   
   document.documentElement.dir=(lang==='ar')?'rtl':'ltr';
   renderGrid(lang);
+        updateShareButton();
 }
 langSelect.addEventListener('change',()=>applyLanguage(langSelect.value));
 applyLanguage(localStorage.getItem('brainova_lang')||'fr');
@@ -1020,6 +1023,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   renderGrid(localStorage.getItem("brainova_lang") || "fr");
+        updateShareButton();
 });
 
 // ================= PREMIUM & STRIPE
@@ -1032,6 +1036,7 @@ function unlockPremium() {
   localStorage.setItem('brainova_premium', 'true');
   userPremium = true;
   renderGrid(langSelect.value);
+        updateShareButton();
   initializeAuthButtons(); // Mettre à jour les boutons d'authentification
   alert('Félicitations ! Tous les jeux sont maintenant débloqués !');
 }
@@ -1371,11 +1376,13 @@ document.addEventListener('DOMContentLoaded', () => {
   if (langSelect && langSelect.value) {
     console.log('Calling renderGrid with:', langSelect.value);
     renderGrid(langSelect.value);
+        updateShareButton();
     console.log('Games grid initialized with language:', langSelect.value);
   } else {
     // Fallback si langSelect n'est pas encore prêt
     console.log('Calling renderGrid with fallback: fr');
     renderGrid('fr');
+        updateShareButton();
     console.log('Games grid initialized with default language: fr');
   }
   
@@ -1455,7 +1462,8 @@ function setExpiryDays(days){const d=new Date();d.setDate(d.getDate()+days);loca
 function isPremiumActive(){const p=localStorage.getItem('brainova_premium')==='true';const exp=getExpiryDateFromStorage();if(!p||!exp)return false;const now=new Date();if(now>exp){localStorage.removeItem('brainova_premium');return false}return true}
 function updateShareButtonState(){const btn=document.getElementById('shareBtn');if(!btn)return;if(isPremiumActive()){btn.disabled=true;btn.style.opacity='0.5';btn.style.cursor='not-allowed'}else{btn.disabled=false;btn.style.opacity='';btn.style.cursor=''}};
 async function notifyServerSubscription(email,expiryISO){try{await fetch('/.netlify/functions/notify-subscription',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:email,expiry:expiryISO})})}catch(err){console.error('Erreur notify server subscription:',err)}}
-window.unlockPremium=async function(userEmail){try{localStorage.setItem('brainova_premium','true');setExpiryDays(365);try{if(typeof renderGrid==='function')renderGrid(document.getElementById('langSelect')?.value||'fr')}catch(e){}try{if(typeof initializeAuthButtons==='function')initializeAuthButtons()}catch(e){}updateShareButtonState();const email=userEmail||localStorage.getItem('user_email')||null;const expiry=localStorage.getItem('brainova_expiry')||null;if(email)await notifyServerSubscription(email,expiry);alert('🎉 Abonnement activé ! Tous les jeux sont débloqués.')}catch(err){console.error('unlockPremium error',err)}};
+window.unlockPremium=async function(userEmail){try{localStorage.setItem('brainova_premium','true');setExpiryDays(365);try{if(typeof renderGrid==='function')renderGrid(document.getElementById('langSelect')?.value||'fr')}catch(e){}try{if(typeof initializeAuthButtons==='function')initializeAuthButtons()}catch(e){}updateShareButtonState();
+        updateShareButton();const email=userEmail||localStorage.getItem('user_email')||null;const expiry=localStorage.getItem('brainova_expiry')||null;if(email)await notifyServerSubscription(email,expiry);alert('🎉 Abonnement activé ! Tous les jeux sont débloqués.')}catch(err){console.error('unlockPremium error',err)}};
 function checkStripeReturn(){try{const urlParams=new URLSearchParams(window.location.search);const success=urlParams.get('success');const status=urlParams.get('payment_intent_status');if(success==='true'||status==='succeeded'){const custEmail=urlParams.get('customer_email')||null;if(custEmail)localStorage.setItem('user_email',custEmail);window.unlockPremium(custEmail);if(history&&history.replaceState)history.replaceState({},document.title,window.location.pathname)}}catch(e){console.error('checkStripeReturn error',e)}}
 document.addEventListener('DOMContentLoaded',function(){updateShareButtonState();checkStripeReturn();const exp=getExpiryDateFromStorage();if(exp){const now=new Date();if(now>exp){localStorage.removeItem('brainova_premium');updateShareButtonState()}}});
 </script>
@@ -1565,6 +1573,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!email) {
         console.log("Aucun email premium trouvé - mode gratuit");
         renderGrid(localStorage.getItem("brainova_lang") || "fr");
+        updateShareButton();
         return;
       }
 
@@ -1576,6 +1585,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!res.ok) {
         console.warn("⚠️ Erreur HTTP:", res.status);
         renderGrid(localStorage.getItem("brainova_lang") || "fr");
+        updateShareButton();
         return;
       }
 
@@ -1595,12 +1605,27 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       renderGrid(localStorage.getItem("brainova_lang") || "fr");
+        updateShareButton();
     } catch (err) {
       console.error("Erreur lors de la vérification premium finale :", err);
       renderGrid(localStorage.getItem("brainova_lang") || "fr");
+        updateShareButton();
     }
   });
   </script>
+
+
+<script>
+function updateShareButton() {
+  const shareBtn = document.getElementById("shareBtn");
+  if (!shareBtn) return;
+  if (isPremium === true) {
+    shareBtn.style.display = "none";
+  } else {
+    shareBtn.style.display = "inline-flex";
+  }
+}
+</script>
 
 </body>
 </html>
