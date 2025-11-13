@@ -1001,14 +1001,27 @@ document.addEventListener("DOMContentLoaded", async () => {
     email = urlEmail;
   }
 
-  if (email) {
+        if (email) {
     try {
       console.log("[AUTO-CHECK] Vérification Premium pour:", email);
-      const res = await fetch("/.netlify/functions/verify-premium?email=" + encodeURIComponent(email));
+      const deviceId = localStorage.getItem('brainova_device_id') || (function(){
+        const id = 'dev-' + Math.random().toString(36).slice(2,10) + '-' + Date.now().toString(36).slice(-6);
+        localStorage.setItem('brainova_device_id', id);
+        return id;
+      })();
+      const url = "/.netlify/functions/verify-premium?email=" + encodeURIComponent(email) + "&deviceId=" + encodeURIComponent(deviceId);
+      const res = await fetch(url, { method: "GET", headers: { "Accept": "application/json" } });
+      if (!res.ok) {
+        console.warn("[AUTO-CHECK] Server returned non-200:", res.status);
+        // Do not overwrite local premium state on server error; render UI based on local state
+        renderGrid(localStorage.getItem('brainova_lang') || 'fr');
+        return;
+      }
       const data = await res.json();
       if (data && data.active) {
         console.log("[AUTO-CHECK] Premium confirmé via serveur ✅");
         localStorage.setItem("brainova_premium", "true");
+        localStorage.setItem("brainova_premium_email", email);
         isPremium = true;
       } else {
         console.warn("[AUTO-CHECK] Pas d’abonnement actif, mode gratuit.");
@@ -1017,10 +1030,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
     } catch (e) {
       console.error("[AUTO-CHECK] Erreur de connexion verify-premium:", e);
+      // On erreur réseau, ne pas écraser l'état local
+      renderGrid(localStorage.getItem('brainova_lang') || 'fr');
+      return;
     }
-  } else {
-    console.log("[AUTO-CHECK] Aucun email premium enregistré.");
   }
+
 
   renderGrid(localStorage.getItem("brainova_lang") || "fr");
         updateShareButton();
