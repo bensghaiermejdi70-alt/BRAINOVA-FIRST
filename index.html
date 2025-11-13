@@ -197,7 +197,7 @@ html, body { max-width: 100%; overflow-x: hidden; }
 (function(){
   try {
     var isMobile = /Android|webOS|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    if (isMobile) document.body.classList.add('mobile'); else document.body.classList.add('desktop');
+    if (isMobile) document.if (body && body.classList) body.classList.add('mobile'); else document.if (body && body.classList) body.classList.add('desktop');
   } catch(e) { console.error('mobile detect', e); }
 })();
 </script>
@@ -487,7 +487,6 @@ const TRANSLATIONS = {
     games:["人类历史测验","量子记忆","神经谜题大师","量子国际象棋","跳棋","吃豆人","西蒙说","速度挑战","赛博检查","演示游乐场","脑能冲击","量子扑克","量子二十一点","融合接龙","神经合成探索者","谜题猎人","赛博竞速枢纽","量子战争","量子点","量子AI数独","赛博法老","量子管道","神经老虎机","神经骰子","量子气泡","网络防御AI","赛博台球","量子瓷砖","基因探索","神经问答","神经球体","Skyjo","星界枢纽","Dixit 3D","智商测试","水晶远征"]}
 };
 
-
 const GAME_NAMES = {
   fr: [
 "Quiz Histoire Humaine","Memory Quantique","Neural Puzzle Master","Quantum Chess","Jeux de Dames","Pac-Man","Simon Says","Speed Challenge","Cyber Checker","Demo Playground",
@@ -565,14 +564,14 @@ function renderGrid(lang){
     // Appliquer les contours néon selon le groupe de jeux
     if (i >= 1 && i <= 10) {
       // Jeux 1-10 : contour vert (gratuits)
-      card.classList.add('free');
+      if (card && card.classList) card.classList.add('free');
     } else if (i >= 11 && i <= 36) {
       // Jeux 11-36 : contour jaune (premium)
-      card.classList.add('locked');
+      if (card && card.classList) card.classList.add('locked');
     }
     
     if(isLocked) {
-      card.classList.add('premium');
+      if (card && card.classList) card.classList.add('premium');
       // Réduire légèrement l'opacité mais garder les contours visibles
       card.style.opacity = '0.8';
       // Ajouter un cadenas
@@ -582,7 +581,7 @@ function renderGrid(lang){
       card.appendChild(lockIcon);
     }
     
-    if(i===35) card.classList.add('testqi');
+    if(i===35) if (card && card.classList) card.classList.add('testqi');
     
     const num=document.createElement('div'); num.className='num'; num.textContent=i;
     const title=document.createElement('div'); title.className='title'; title.textContent=t.games[i-1]||`Jeu ${i}`;
@@ -616,13 +615,13 @@ function renderGrid(lang){
       loginBtn.style.opacity = '1';
       loginBtn.style.pointerEvents = 'auto';
       loginBtn.title = 'Se connecter';
-      loginBtn.classList.remove('premium-only');
+      if (loginBtn && loginBtn.classList) loginBtn.classList.remove('premium-only');
     }
     if(signupBtn) {
       signupBtn.style.opacity = '1';
       signupBtn.style.pointerEvents = 'auto';
       signupBtn.title = 'S\'inscrire';
-      signupBtn.classList.remove('premium-only');
+      if (signupBtn && signupBtn.classList) signupBtn.classList.remove('premium-only');
     }
   } else {
     // Utilisateur non premium : afficher le bouton premium
@@ -633,13 +632,13 @@ function renderGrid(lang){
       loginBtn.style.opacity = '1';
       loginBtn.style.pointerEvents = 'auto';
       loginBtn.title = 'Se connecter';
-      loginBtn.classList.remove('premium-only');
+      if (loginBtn && loginBtn.classList) loginBtn.classList.remove('premium-only');
     }
     if(signupBtn) {
       signupBtn.style.opacity = '1';
       signupBtn.style.pointerEvents = 'auto';
       signupBtn.title = 'S\'inscrire';
-      signupBtn.classList.remove('premium-only');
+      if (signupBtn && signupBtn.classList) signupBtn.classList.remove('premium-only');
     }
   }
   
@@ -988,8 +987,6 @@ function createToast(message, type) {
   return toast;
 }
 
-
-
 // === Vérification automatique du statut Premium au chargement ===
 document.addEventListener("DOMContentLoaded", async () => {
   let email = localStorage.getItem("brainova_premium_email");
@@ -1038,8 +1035,6 @@ function unlockPremium() {
   initializeAuthButtons(); // Mettre à jour les boutons d'authentification
   alert('Félicitations ! Tous les jeux sont maintenant débloqués !');
 }
-
-
 
 // Message d'abonnement personnalisé
 function showSubscriptionMessage() {
@@ -1513,7 +1508,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (userPremium) {
     console.log("✅ Brainova Premium actif - déverrouillage des jeux.");
     document.querySelectorAll('.card.locked').forEach(card => {
-      card.classList.remove('locked');
+      if (card && card.classList) card.classList.remove('locked');
       card.style.opacity = '1';
       const lockIcon = card.querySelector('div');
       if (lockIcon && lockIcon.textContent === '🔒') lockIcon.remove();
@@ -1553,6 +1548,59 @@ document.addEventListener("DOMContentLoaded", () => {
     document.cookie = "brainova_user_status=premium; path=/; max-age=31536000";
   }
 </script>
+
+  <!-- === AUTO PREMIUM UNLOCK (FINAL STEP) === -->
+  <script>
+  document.addEventListener("DOMContentLoaded", async () => {
+    try {
+      let email = localStorage.getItem("brainova_premium_email");
+      const params = new URLSearchParams(window.location.search);
+      const urlEmail = params.get("premium_email");
+
+      if (urlEmail) {
+        email = urlEmail.trim().toLowerCase();
+        localStorage.setItem("brainova_premium_email", email);
+      }
+
+      if (!email) {
+        console.log("Aucun email premium trouvé - mode gratuit");
+        renderGrid(localStorage.getItem("brainova_lang") || "fr");
+        return;
+      }
+
+      const res = await fetch(`/.netlify/functions/verify-premium?email=${encodeURIComponent(email)}`, {
+        method: "GET",
+        headers: { "Accept": "application/json" },
+      });
+
+      if (!res.ok) {
+        console.warn("⚠️ Erreur HTTP:", res.status);
+        renderGrid(localStorage.getItem("brainova_lang") || "fr");
+        return;
+      }
+
+      const data = await res.json();
+
+      if (data && data.active) {
+        console.log("✅ Premium confirmé depuis Firestore");
+        localStorage.setItem("brainova_premium", "true");
+        document.cookie = "brainova_user_status=premium; path=/; max-age=31536000";
+        isPremium = true;
+        const hd = document.getElementById("premium-status");
+        if (hd) hd.innerHTML = "<span style='background:gold;color:black;padding:4px 8px;border-radius:8px;'>Premium ✅</span>";
+      } else {
+        console.warn("❌ Non premium - accès restreint");
+        localStorage.setItem("brainova_premium", "false");
+        isPremium = false;
+      }
+
+      renderGrid(localStorage.getItem("brainova_lang") || "fr");
+    } catch (err) {
+      console.error("Erreur lors de la vérification premium finale :", err);
+      renderGrid(localStorage.getItem("brainova_lang") || "fr");
+    }
+  });
+  </script>
 
 </body>
 </html>
