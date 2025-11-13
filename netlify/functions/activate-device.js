@@ -1,6 +1,5 @@
 // ✅ netlify/functions/activate-device.js
-// Enregistre un appareil (PC ou Mobile) pour un compte premium
-// Limite : 2 appareils par email
+// Enregistre un appareil (PC ou Mobile) – Limite 2 appareils
 
 import admin from "firebase-admin";
 
@@ -25,72 +24,69 @@ export async function handler(event) {
   }
 
   try {
-    // Accept either GET (from activate page) or POST (optional)
+    // Accept GET or POST
     const params = event.httpMethod === "POST"
       ? JSON.parse(event.body || "{}")
       : event.queryStringParameters || {};
 
-    const emailRaw = params.email;
-    const deviceIdRaw = params.deviceId;
-    const deviceType = (params.type || "unknown").toString();
-
-    const email = typeof emailRaw === "string" ? emailRaw.trim().toLowerCase() : null;
-    const deviceId = typeof deviceIdRaw === "string" ? deviceIdRaw.trim() : null;
+    const email = params.email?.trim().toLowerCase();
+    const deviceId = params.deviceId?.trim();
+    const type = params.type || "unknown";
 
     if (!email || !deviceId) {
       return {
         statusCode: 400,
         headers,
-        body: JSON.stringify({ error: "Missing parameters (email & deviceId required)" }),
+        body: JSON.stringify({ error: "Missing parameters (email + deviceId)" }),
       };
     }
 
     const ref = db.collection("premium_devices").doc(email);
     const snap = await ref.get();
 
+    // 1️⃣ Si le document n'existe pas encore → créer un tableau vide
     if (!snap.exists) {
-      // create new document with first device
       await ref.set({
         email,
-        devices: [
-          {
-            deviceId,
-            type: deviceType,
-            activatedAt: admin.firestore.FieldValue.serverTimestamp(),
-          },
-        ],
+        devices: [],
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
-        source: "activation",
-      }, { merge: true });
+      });
+
+      // ajouter ensuite l'appareil sans timestamp
+      await ref.update({
+        devices: admin.firestore.FieldValue.arrayUnion({
+          deviceId,
+          type,
+        }),
+      });
 
       return { statusCode: 200, headers, body: "DEVICE_ADDED" };
     }
 
+    // 2️⃣ Document existe
     const data = snap.data();
     const devices = Array.isArray(data.devices) ? data.devices : [];
 
-    // If device already present -> OK
-    const exists = devices.some(d => d && d.deviceId === deviceId);
-    if (exists) {
+    // Déjà enregistré ?
+    if (devices.some(d => d.deviceId === deviceId)) {
       return { statusCode: 200, headers, body: "DEVICE_EXISTS" };
     }
 
-    // Limit check (2 devices max)
-    const MAX_DEVICES = 2;
-    if (devices.length >= MAX_DEVICES) {
+    // Limite : 2 appareils
+    if (devices.length >= 2) {
       return { statusCode: 403, headers, body: "LIMIT_REACHED" };
     }
 
-    // Add device
-    devices.push({
-      deviceId,
-      type: deviceType,
-      activatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    // 3️⃣ Ajouter l'appareil sans timestamp dans un object arrayUnion
+    await ref.update({
+      devices: admin.firestore.FieldValue.arrayUnion({
+        deviceId,
+        type,
+      }),
     });
 
-    await ref.update({ devices, updatedAt: admin.firestore.FieldValue.serverTimestamp() });
-
     return { statusCode: 200, headers, body: "DEVICE_ADDED" };
+
   } catch (err) {
     console.error("activate-device error:", err);
     return {
