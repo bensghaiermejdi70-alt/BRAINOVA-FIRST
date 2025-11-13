@@ -1592,10 +1592,15 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      const res = await fetch(`/.netlify/functions/verify-premium?email=${encodeURIComponent(email)}`, {
-        method: "GET",
-        headers: { "Accept": "application/json" },
-      });
+      const deviceId = localStorage.getItem('brainova_device_id') || (function(){
+  const id = 'dev-' + Math.random().toString(36).slice(2,10) + '-' + Date.now().toString(36).slice(-6);
+  localStorage.setItem('brainova_device_id', id);
+  return id;
+})();
+const res = await fetch(`/.netlify/functions/verify-premium?email=${encodeURIComponent(email)}&deviceId=${encodeURIComponent(deviceId)}`, {
+  method: "GET",
+  headers: { "Accept": "application/json" },
+});
 
       if (!res.ok) {
         console.warn("⚠️ Erreur HTTP:", res.status);
