@@ -1,23 +1,20 @@
-// verify-premium-v7.js
-// ✅ Version compatible avec webhook v7 (sans token)
-// - GET ?email=... → retourne active:true seulement si premium=true & activated=true
-// - webhook v7 met activated=true automatiquement après paiement
+// ✅ Brainova Verify Premium – v4.2 (Firebase via FIREBASE_KEY + Stripe)
 
 import Stripe from "stripe";
 import admin from "firebase-admin";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "");
 
-// === Init Firebase ===
+// --- Initialisation Firebase ---
 if (!admin.apps.length) {
   try {
     const serviceAccount = JSON.parse(process.env.FIREBASE_KEY);
     admin.initializeApp({
       credential: admin.credential.cert(serviceAccount),
     });
-    console.log("🔥 Firebase initialized (verify-premium)");
-  } catch (e) {
-    console.error("❌ Firebase init error:", e.message);
+    console.log("🔥 Firebase initialisé via FIREBASE_KEY");
+  } catch (error) {
+    console.error("❌ Erreur d'initialisation Firebase :", error);
   }
 }
 
@@ -26,88 +23,52 @@ const db = admin.firestore();
 export async function handler(event) {
   const headers = {
     "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Methods": "GET, OPTIONS",
+    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type",
   };
 
-  if (event.httpMethod === "OPTIONS")
-    return { statusCode: 200, headers };
-
-  if (event.httpMethod !== "GET")
-    return { statusCode: 405, headers, body: "Method not allowed" };
+  if (event.httpMethod === "OPTIONS") return { statusCode: 200, headers };
 
   try {
-    const email = (event.queryStringParameters?.email || "")
-      .toString()
-      .trim()
-      .toLowerCase();
+    if (event.httpMethod === "GET") {
+      const email = event.queryStringParameters?.email;
+      if (!email)
+        return { statusCode: 400, headers, body: JSON.stringify({ error: "Missing email" }) };
 
-    if (!email)
-      return { statusCode: 400, headers, body: JSON.stringify({ error: "Missing email" }) };
+      const doc = await db.collection("premium_users").doc(email).get();
+      if (doc.exists && doc.data().premium === true)
+        return { statusCode: 200, headers, body: JSON.stringify({ active: true, source: "firestore" }) };
 
-    // === Step 1: Check Firestore
-    const snap = await db.collection("premium_users").doc(email).get();
+      const customers = await stripe.customers.list({ email, limit: 1 });
+      if (customers.data.length === 0)
+        return { statusCode: 200, headers, body: JSON.stringify({ active: false, source: "none" }) };
 
-    if (snap.exists) {
-      const data = snap.data();
+      const customerId = customers.data[0].id;
+      const subscriptions = await stripe.subscriptions.list({
+        customer: customerId,
+        status: "active",
+        limit: 1,
+      });
 
-      // ACTIVE ONLY IF:
-      // premium === true AND activated === true
-      if (data.premium === true && data.activated === true) {
-        return {
-          statusCode: 200,
-          headers,
-          body: JSON.stringify({ active: true, source: "firestore" }),
-        };
-      } else {
-        return {
-          statusCode: 200,
-          headers,
-          body: JSON.stringify({ active: false, source: "firestore" }),
-        };
+      if (subscriptions.data.length > 0) {
+        await db.collection("premium_users").doc(email).set(
+          {
+            email,
+            premium: true,
+            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+            source: "stripe",
+          },
+          { merge: true }
+        );
+        return { statusCode: 200, headers, body: JSON.stringify({ active: true, source: "stripe" }) };
       }
+
+      return { statusCode: 200, headers, body: JSON.stringify({ active: false }) };
     }
 
-    // === Step 2: If user not found in Firestore → check Stripe (read only)
-    const customers = await stripe.customers.list({ email, limit: 1 });
-    if (customers.data.length === 0)
-      return { statusCode: 200, headers, body: JSON.stringify({ active: false, source: "none" }) };
-
-    const customerId = customers.data[0].id;
-    const subs = await stripe.subscriptions.list({
-      customer: customerId,
-      status: "active",
-      limit: 1,
-    });
-
-    if (subs.data.length > 0) {
-      // CREATE Firestore doc based on Stripe but require activation=true (already done in webhook)
-      await db.collection("premium_users").doc(email).set(
-        {
-          email,
-          premium: true,
-          activated: false, // stays false until webhook activates
-          updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-          source: "stripe-sync",
-        },
-        { merge: true }
-      );
-
-      return {
-        statusCode: 200,
-        headers,
-        body: JSON.stringify({ active: false, source: "stripe-sync" }),
-      };
-    }
-
-    return {
-      statusCode: 200,
-      headers,
-      body: JSON.stringify({ active: false, source: "stripe-none" }),
-    };
-
+    return { statusCode: 405, headers, body: JSON.stringify({ error: "Method not allowed" }) };
   } catch (err) {
-    console.error("❌ verify-premium error:", err.message);
+    console.error("❌ Erreur verify-premium :", err);
     return { statusCode: 500, headers, body: JSON.stringify({ error: err.message }) };
   }
 }
