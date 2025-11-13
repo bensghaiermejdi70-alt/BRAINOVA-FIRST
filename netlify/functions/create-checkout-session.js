@@ -1,5 +1,5 @@
-// ✅ Brainova Premium – Create Checkout Session (Stripe + Netlify)
-// Version stable ESBuild 2025
+// ✅ netlify/functions/create-checkout-session.js
+// Brainova Premium – Version Finale (Stripe + Netlify)
 
 import Stripe from "stripe";
 
@@ -18,25 +18,36 @@ export async function handler(event) {
   }
 
   if (event.httpMethod !== "POST") {
-    return { statusCode: 405, headers, body: JSON.stringify({ error: "Method not allowed" }) };
+    return {
+      statusCode: 405,
+      headers,
+      body: JSON.stringify({ error: "Method not allowed" }),
+    };
   }
 
   try {
     const { priceId, successUrl, cancelUrl, customerEmail } = JSON.parse(event.body || "{}");
 
     if (!priceId || !successUrl || !cancelUrl) {
-      return { statusCode: 400, headers, body: JSON.stringify({ error: "Missing required parameters" }) };
+      return {
+        statusCode: 400,
+        headers,
+        body: JSON.stringify({ error: "Missing required parameters" }),
+      };
     }
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       line_items: [{ price: priceId, quantity: 1 }],
       mode: "subscription",
+
       success_url: successUrl,
       cancel_url: cancelUrl,
+
       allow_promotion_codes: true,
       billing_address_collection: "required",
       customer_creation: "always",
+
       metadata: {
         product: "brainova-premium",
         platform: "brainova-netlify",
@@ -44,9 +55,17 @@ export async function handler(event) {
       },
     });
 
-    return { statusCode: 200, headers, body: JSON.stringify({ url: session.url }) };
+    return {
+      statusCode: 200,
+      headers,
+      body: JSON.stringify({ url: session.url }),
+    };
   } catch (error) {
     console.error("❌ Stripe checkout error:", error);
-    return { statusCode: 500, headers, body: JSON.stringify({ error: error.message }) };
+    return {
+      statusCode: 500,
+      headers,
+      body: JSON.stringify({ error: error.message }),
+    };
   }
 }
