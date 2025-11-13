@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Activation Brainova Premium</title>
+</head>
+
+<body style="font-family: Arial; text-align: center; padding-top: 40px;">
+  <h2>Activation de votre accès Brainova...</h2>
+
+  <script>
+    // 1. Récupérer email depuis URL
+    const url = new URL(window.location.href);
+    const email = url.searchParams.get("email");
+
+    if (!email) {
+      document.body.innerHTML = "<h2 style='color:red'>Erreur : email manquant</h2>";
+      throw new Error("Missing email");
+    }
+
+    // 2. Détecter PC ou mobile
+    const deviceType = /Mobi/i.test(navigator.userAgent) ? "mobile" : "pc";
+
+    // 3. Générer / stocker deviceId
+    let deviceId = localStorage.getItem("brainova_device_id");
+    if (!deviceId) {
+      deviceId = crypto.randomUUID();
+      localStorage.setItem("brainova_device_id", deviceId);
+    }
+
+    // 4. Stocker email
+    localStorage.setItem("brainova_email", email);
+
+    // 5. Appel à Netlify pour enregistrer l'appareil
+    const endpoint = `/.netlify/functions/activate-device?email=${encodeURIComponent(email)}&deviceId=${deviceId}&type=${deviceType}`;
+
+    fetch(endpoint)
+      .then(r => r.text())
+      .then(res => {
+        if (res === "DEVICE_ADDED") {
+          window.location.href = "https://brainovafirst.netlify.app";
+        }
+        if (res === "LIMIT_REACHED") {
+          document.body.innerHTML = "<h2 style='color:red'>Limite d'appareils atteinte</h2>";
+        }
+      })
+      .catch(() => {
+        document.body.innerHTML = "<h2 style='color:red'>Erreur interne</h2>";
+      });
+  </script>
+</body>
+</html>
