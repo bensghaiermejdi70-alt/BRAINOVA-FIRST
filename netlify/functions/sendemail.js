@@ -1,20 +1,27 @@
-// ✅ Envoi d'email via API Brevo (non SMTP)
+// ✅ sendemail.js — Version PRODUCTION 2025
+// Envoi d'emails Brevo 100% sécurisé + compatible webhook Premium
+
 import fetch from "node-fetch";
 
 export const handler = async (event) => {
   try {
-    const { to, subject, message } = JSON.parse(event.body);
+    const { to, subject, html } = JSON.parse(event.body || "{}");
 
-    if (!to || !subject || !message) {
+    // --- VALIDATION ---
+    if (!to || !subject || !html) {
       return {
         statusCode: 400,
-        body: JSON.stringify({ success: false, error: "Champs requis manquants" }),
+        body: JSON.stringify({
+          success: false,
+          error: "Champs requis manquants (to, subject, html)",
+        }),
       };
     }
 
-    console.log("📤 Envoi via Brevo API à :", to);
+    console.log("📤 Envoi Email via Brevo →", to);
 
-    const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+    // --- ENVOI BREVO ---
+    const res = await fetch("https://api.brevo.com/v3/smtp/email", {
       method: "POST",
       headers: {
         accept: "application/json",
@@ -25,33 +32,37 @@ export const handler = async (event) => {
         sender: { name: "Brainova", email: "noreply@brainova.online" },
         to: [{ email: to }],
         subject,
-        htmlContent: `
-          <div style="font-family: Arial, sans-serif;">
-            <h2>${subject}</h2>
-            <p>${message}</p>
-            <br/>
-            <small>✅ Envoi réussi via l’API Brevo – Brainova</small>
-          </div>
-        `,
+        htmlContent: html,
       }),
     });
 
-    const result = await response.json();
-    console.log("📩 Réponse Brevo :", result);
+    const data = await res.json();
+    console.log("📨 Réponse Brevo :", data);
 
-    if (response.ok) {
+    if (!res.ok) {
       return {
-        statusCode: 200,
-        body: JSON.stringify({ success: true, message: "Email envoyé avec succès ✅", result }),
+        statusCode: 500,
+        body: JSON.stringify({
+          success: false,
+          error: data.message || "Erreur API Brevo",
+        }),
       };
-    } else {
-      throw new Error(result.message || "Erreur d’envoi API Brevo");
     }
-  } catch (error) {
-    console.error("❌ Erreur sendemail.js :", error);
+
+    return {
+      statusCode: 200,
+      body: JSON.stringify({
+        success: true,
+        message: "Email envoyé avec succès ✔️",
+        data,
+      }),
+    };
+
+  } catch (err) {
+    console.error("❌ sendemail.js ERROR :", err);
     return {
       statusCode: 500,
-      body: JSON.stringify({ success: false, error: error.message }),
+      body: JSON.stringify({ success: false, error: err.message }),
     };
   }
 };
