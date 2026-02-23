@@ -194,12 +194,21 @@ body.mobile h1, @media only screen and (max-width: 768px) h1 {
 html, body { max-width: 100%; overflow-x: hidden; }
 </style>
 <script>
-(function(){
+(function () {
   try {
     var isMobile = /Android|webOS|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    if (isMobile) document.if (body && body.classList) body.classList.add('mobile'); else document.if (body && body.classList) body.classList.add('desktop');
-  } catch(e) { console.error('mobile detect', e); }
+    var body = document.body;
+    if (!body) return;
+    if (isMobile) {
+      body.classList.add('mobile');
+    } else {
+      body.classList.add('desktop');
+    }
+  } catch (e) {
+    console.error('mobile detect', e);
+  }
 })();
+
 </script>
 
 <style>
